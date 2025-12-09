@@ -1,0 +1,653 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Assignment {
+  id             String       @id @default(uuid())  
+  sessionId      String?      
+  title          String
+  description    String?
+  type           String       @default("TEXT")
+  attachmentUrls String?
+  multipleChoice String?
+  dueDate        DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now()) @updatedAt
+  Session        Session?     @relation(fields: [sessionId], references: [id])
+  Submission     Submission[]
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())  
+  action    String
+  userId    String?  
+  details   String?
+  createdAt DateTime @default(now())
+}
+
+model Chat {
+  id                         String   @id @default(uuid())  
+  fromUserId                 String   
+  toUserId                   String   
+  content                    String
+  attachments                String?
+  isSaved                    Boolean  @default(false)
+  createdAt                  DateTime @default(now())
+  User_Chat_fromUserIdToUser User     @relation("Chat_fromUserIdToUser", fields: [fromUserId], references: [id], onDelete: Cascade)
+  User_Chat_toUserIdToUser   User     @relation("Chat_toUserIdToUser", fields: [toUserId], references: [id], onDelete: Cascade)
+}
+
+model Package {
+  id            String         @id @default(uuid())  
+  title         String
+  titleAr       String
+  description   String?
+  descriptionAr String?
+  price         Float
+  lessonsCount  Int
+  durationDays  Int
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now()) @updatedAt
+  CartItem      CartItem[]
+  Subscription  Subscription[]
+}
+
+model Session {
+  id               String           @id @default(uuid())  
+  teacherId        String           
+  title            String
+  startTime        DateTime
+  endTime          DateTime
+  status           String           @default("SCHEDULED")
+  roomId           String?          @unique
+  recordingUrl     String?
+  sessionPassword  String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now()) @updatedAt
+  Assignment       Assignment[]
+  TeacherProfile   TeacherProfile   @relation(fields: [teacherId], references: [id])
+  SessionStudent   SessionStudent[]
+}
+
+model SessionStudent {
+  id        String   @id @default(uuid())  
+  sessionId String   
+  studentId String   
+  attended  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  Session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, studentId])
+}
+
+model StudentProfile {
+  id                      String   @id @default(uuid())  
+  userId                  String   @unique 
+  age                     Int?
+  levelInitial            String?
+  levelCurrent            String?
+  targetLevel             String?
+  goal                    String?
+  preferredTime           String?
+  placementTestScore      Int?
+  placementTestPercentage Int?
+  isVerified              Boolean  @default(false)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @default(now()) @updatedAt
+  User                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Submission {
+  id            String     @id @default(uuid())  
+  assignmentId  String     
+  studentId     String     
+  textAnswer    String?
+  selectedOption Int?
+  attachedFiles String?
+  grade         Float?
+  feedback      String?
+  grammarErrors String?
+  submittedAt   DateTime   @default(now())
+  updatedAt     DateTime   @default(now()) @updatedAt
+  Assignment    Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  User          User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id                String             @id @default(uuid())  
+  studentId         String             
+  packageId         String             
+  status            SubscriptionStatus @default(PENDING)
+  paid              Boolean            @default(false)
+  paymentMethod     PaymentMethod?
+  eWalletProvider   EWalletProvider?
+  paymentReference  String?
+  receiptUrl        String?
+  assignedTeacherId String?            
+  approvedAt        DateTime?
+  rejectedAt        DateTime?
+  adminNotes        String?
+  startDate         DateTime?
+  endDate           DateTime?
+  lessonsAvailable  Int                @default(0)
+  lessonsTaken      Int                @default(0)
+  preferredDays     String?
+  lessonsPerWeek    Int                @default(0)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @default(now()) @updatedAt
+  AssignedTeacher   TeacherProfile?    @relation("AssignedSubscriptions", fields: [assignedTeacherId], references: [id])
+  Package           Package            @relation(fields: [packageId], references: [id])
+  User              User               @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model TeacherProfile {
+  id                    String         @id @default(uuid())  
+  userId                String         @unique 
+  bio                   String?
+  subjects              String?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @default(now()) @updatedAt
+  FreeWriting           FreeWriting[]  @relation("FreeWritingGrader")
+  Session               Session[]
+  AssignedSubscriptions Subscription[] @relation("AssignedSubscriptions")
+  User                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  WritingTest           WritingTest[]
+}
+
+model User {
+  id                         String                    @id @default(uuid())  
+  email                      String                    @unique
+  name                       String
+  phone                      String?
+  passwordHash               String
+  role                       String                    @default("STUDENT")
+  profilePhoto               String?
+  isActive                   Boolean                   @default(false)
+  createdAt                  DateTime                  @default(now())
+  updatedAt                  DateTime                  @default(now()) @updatedAt
+  Cart                       Cart?
+  Chat_Chat_fromUserIdToUser Chat[]                    @relation("Chat_fromUserIdToUser")
+  Chat_Chat_toUserIdToUser   Chat[]                    @relation("Chat_toUserIdToUser")
+  FreeWriting                FreeWriting[]             @relation("FreeWritingStudent")
+  SessionStudent             SessionStudent[]
+  StudentProfile             StudentProfile?
+  Submission                 Submission[]
+  Subscription               Subscription[]
+  TeacherProfile             TeacherProfile?
+  Word                       Word[]
+  WritingTestSubmission      WritingTestSubmission[]
+  LessonProgress             LessonProgress[]
+  ExerciseAttempt            ExerciseAttempt[]
+  ConversationProgress       ConversationProgress[]
+  VoiceRecording             VoiceRecording[]
+  TextConversationAttempt    TextConversationAttempt[]
+  Gamification               UserGamification?
+}
+
+model Word {
+  id               String   @id @default(uuid())  
+  studentId        String   
+  englishWord      String
+  arabicMeaning    String
+  exampleSentence  String?
+  pronunciationUrl String?
+  imageUrl         String?
+  known            Boolean  @default(false)
+  reviewCount      Int      @default(0)
+  correctCount     Int      @default(0)
+  incorrectCount   Int      @default(0)
+  lastReviewedAt   DateTime?
+  nextReviewAt     DateTime?
+  easeFactor       Float    @default(2.5)
+  interval         Int      @default(1)
+  category         String?
+  level            String   @default("BEGINNER")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now()) @updatedAt
+  User             User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model DailyWord {
+  id              String   @id @default(uuid())  
+  englishWord     String
+  arabicMeaning   String
+  exampleSentence String?
+  pronunciationUrl String?
+  imageUrl        String?
+  category        String?
+  level           String   @default("BEGINNER")
+  dateShown       DateTime
+  order           Int      @default(0)
+  createdAt       DateTime @default(now())
+}
+
+model Cart {
+  id        String     @id @default(uuid())  
+  studentId String     @unique 
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now()) @updatedAt
+  User      User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  CartItem  CartItem[]
+}
+
+model CartItem {
+  id        String   @id @default(uuid())  
+  cartId    String   
+  packageId String   
+  createdAt DateTime @default(now())
+  Cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  Package   Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, packageId])
+}
+
+model WritingTest {
+  id                    String                  @id @default(uuid())  
+  teacherId             String                  
+  title                 String
+  titleAr               String?
+  instructions          String?
+  instructionsAr        String?
+  dueDate               DateTime?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @default(now()) @updatedAt
+  TeacherProfile        TeacherProfile          @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  WritingTestSubmission WritingTestSubmission[]
+}
+
+model WritingTestSubmission {
+  id            String      @id @default(uuid())  
+  testId        String      
+  studentId     String      
+  content       String
+  manuscriptUrl String?
+  grade         Float?
+  feedback      String?
+  grammarErrors String?
+  submittedAt   DateTime    @default(now())
+  gradedAt      DateTime?
+  updatedAt     DateTime    @default(now()) @updatedAt
+  User          User        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  WritingTest   WritingTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+}
+
+model FreeWriting {
+  id             String          @id @default(uuid())  
+  studentId      String          
+  title          String
+  content        String
+  grade          Float?
+  feedback       String?
+  grammarErrors  String?
+  submittedAt    DateTime        @default(now())
+  gradedAt       DateTime?
+  teacherId      String?         
+  updatedAt      DateTime        @default(now()) @updatedAt
+  User           User            @relation("FreeWritingStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  TeacherProfile TeacherProfile? @relation("FreeWritingGrader", fields: [teacherId], references: [id])
+}
+
+enum SubscriptionStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  E_WALLET
+}
+
+enum EWalletProvider {
+  INSTAPAY
+  ETISALAT_CASH
+}
+
+// نظام الدروس
+model Lesson {
+  id             String           @id @default(uuid())  
+  title          String
+  titleAr        String
+  description    String?
+  descriptionAr  String?
+  order          Int              @default(0)
+  level          String           @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
+  category       String?          // Grammar, Vocabulary, Conversation, etc.
+  categoryAr     String?
+  videoUrl       String?          // رابط الفيديو
+  videoDuration  Int?             // مدة الفيديو بالثواني
+  articleContent String?          // محتوى المقال بتنسيق HTML/Markdown
+  articleContentAr String?        // محتوى المقال بالعربي
+  thumbnailUrl   String?          // صورة مصغرة للدرس
+  isPublished    Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now()) @updatedAt
+  exercises      Exercise[]
+  LessonProgress LessonProgress[]
+}
+
+model Exercise {
+  id              String           @id @default(uuid())  
+  lessonId        String           
+  type            ExerciseType
+  order           Int              @default(0)
+  question        String           // السؤال
+  questionAr      String?          // السؤال بالعربي
+  options         String?          // الخيارات (JSON array للاختيار من متعدد)
+  correctAnswer   String           // الإجابة الصحيحة
+  explanation     String?          // شرح الإجابة
+  explanationAr   String?          // شرح الإجابة بالعربي
+  sentence        String?          // الجملة للقراءة
+  sentenceAr      String?          // ترجمة الجملة
+  audioUrl        String?          // رابط الصوت للنطق
+  imageUrl        String?          // صورة توضيحية
+  dragItems       String?          // عناصر السحب والإفلات (JSON)
+  dropZones       String?          // مناطق الإفلات (JSON)
+  blanks          String?          // الفراغات لملء الفراغ (JSON)
+  points          Int              @default(10)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now()) @updatedAt
+  Lesson          Lesson           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  ExerciseAttempt ExerciseAttempt[]
+}
+
+model LessonProgress {
+  id             String   @id @default(uuid())  
+  studentId      String   
+  lessonId       String   
+  completed      Boolean  @default(false)
+  videoWatched   Boolean  @default(false)
+  articleRead    Boolean  @default(false)
+  exercisesScore Float?   // نسبة النجاح في التمارين
+  completedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+  User           User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  Lesson         Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, lessonId])
+}
+
+model ExerciseAttempt {
+  id          String   @id @default(uuid())  
+  studentId   String   
+  exerciseId  String   
+  answer      String   // إجابة الطالب
+  isCorrect   Boolean
+  points      Int      @default(0)
+  attemptedAt DateTime @default(now())
+  User        User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  Exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+}
+
+enum ExerciseType {
+  MULTIPLE_CHOICE    // اختيار من متعدد
+  FILL_BLANK         // ملء الفراغ
+  DRAG_DROP          // سحب وإفلات
+  SENTENCE_READING   // قراءة جمل مع ترجمة
+  TRUE_FALSE         // صح أو خطأ
+}
+
+// نظام الاستماع - Listening System
+model ListeningContent {
+  id                String              @id @default(uuid())  
+  title             String              // عنوان المحتوى
+  titleAr           String              // العنوان بالعربي
+  description       String?             // وصف المحتوى
+  descriptionAr     String?             // الوصف بالعربي
+  mediaType         ListeningMediaType  // نوع الوسائط (AUDIO/VIDEO)
+  mediaUrl          String              // رابط الملف (MP3/MP4)
+  thumbnailUrl      String?             // صورة مصغرة
+  duration          Int?                // مدة المحتوى بالثواني
+  level             String              @default("BEGINNER") // مستوى الصعوبة
+  category          String?             // التصنيف (محادثة، أخبار، قصص، الخ)
+  categoryAr        String?             // التصنيف بالعربي
+  transcript        String?             // نص المحتوى للمتابعة
+  transcriptAr      String?             // النص بالعربي
+  order             Int                 @default(0)
+  isPublished       Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @default(now()) @updatedAt
+  exercises         ListeningExercise[]
+  progress          ListeningProgress[]
+}
+
+model ListeningExercise {
+  id                String                   @id @default(uuid())  
+  contentId         String                   
+  type              ListeningExerciseType
+  order             Int                      @default(0)
+  question          String                   // السؤال
+  questionAr        String?                  // السؤال بالعربي
+  options           String?                  // الخيارات (JSON array)
+  correctAnswer     String                   // الإجابة الصحيحة
+  explanation       String?                  // شرح الإجابة
+  explanationAr     String?                  // شرح الإجابة بالعربي
+  points            Int                      @default(10)
+  timestamp         Int?                     // وقت ظهور السؤال بالثواني (اختياري)
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @default(now()) @updatedAt
+  ListeningContent  ListeningContent         @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  attempts          ListeningExerciseAttempt[]
+}
+
+model ListeningProgress {
+  id               String           @id @default(uuid())  
+  contentId        String           
+  visitorId        String?          // معرف الزائر (للمستخدمين غير المسجلين)
+  completed        Boolean          @default(false)
+  listenedDuration Int              @default(0) // المدة التي استمع إليها بالثواني
+  exercisesScore   Float?           // نسبة النجاح في التمارين
+  completedAt      DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now()) @updatedAt
+  ListeningContent ListeningContent @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@unique([contentId, visitorId])
+}
+
+model ListeningExerciseAttempt {
+  id          String            @id @default(uuid())  
+  exerciseId  String            
+  visitorId   String?           // معرف الزائر
+  answer      String            // إجابة المستخدم
+  isCorrect   Boolean
+  points      Int               @default(0)
+  attemptedAt DateTime          @default(now())
+  Exercise    ListeningExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+}
+
+enum ListeningMediaType {
+  AUDIO  // MP3
+  VIDEO  // MP4
+}
+
+enum ListeningExerciseType {
+  MULTIPLE_CHOICE    // اختيار من متعدد
+  TRUE_FALSE         // صح أو خطأ
+  FILL_BLANK         // ملء الفراغ
+  WORD_ORDER         // ترتيب الكلمات
+}
+
+// نظام المحادثة التدريبية - Conversation Practice System
+model ConversationScenario {
+  id              String                    @id @default(uuid())  
+  title           String                    // عنوان السيناريو
+  titleAr         String                    // العنوان بالعربي
+  description     String?                   // وصف السيناريو
+  descriptionAr   String?                   // الوصف بالعربي
+  category        String                    // التصنيف (مطعم، مطار، تسوق، الخ)
+  categoryAr      String                    // التصنيف بالعربي
+  level           String                    @default("BEGINNER") // مستوى الصعوبة
+  imageUrl        String?                   // صورة توضيحية للموقف
+  dialogueSteps   String                    // خطوات الحوار (JSON array)
+  isPublished     Boolean                   @default(true)
+  order           Int                       @default(0)
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @default(now()) @updatedAt
+  progress        ConversationProgress[]
+}
+
+model ConversationProgress {
+  id              String               @id @default(uuid())  
+  studentId       String               
+  scenarioId      String               
+  completed       Boolean              @default(false)
+  currentStep     Int                  @default(0)
+  score           Int                  @default(0)
+  completedAt     DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @default(now()) @updatedAt
+  User            User                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  Scenario        ConversationScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, scenarioId])
+}
+
+// نظام تسجيل الصوت - Voice Recording System
+model VoiceRecording {
+  id              String   @id @default(uuid())  
+  studentId       String   
+  title           String                    // عنوان التسجيل
+  audioData       String                    // Base64 encoded audio data
+  duration        Int?                      // مدة التسجيل بالثواني
+  promptText      String?                   // النص المطلوب قراءته
+  promptTextAr    String?                   // النص بالعربي
+  category        String?                   // التصنيف
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
+  User            User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+// نظام المحادثة النصية - Text Conversation System
+model TextConversation {
+  id              String                     @id @default(uuid())  
+  title           String                     // عنوان المحادثة
+  titleAr         String                     // العنوان بالعربي
+  description     String?                    // وصف المحادثة
+  descriptionAr   String?                    // الوصف بالعربي
+  level           String                     @default("BEGINNER")
+  questions       String                     // الأسئلة (JSON array)
+  isPublished     Boolean                    @default(true)
+  order           Int                        @default(0)
+  createdAt       DateTime                   @default(now())
+  updatedAt       DateTime                   @default(now()) @updatedAt
+  attempts        TextConversationAttempt[]
+}
+
+model TextConversationAttempt {
+  id              String           @id @default(uuid())  
+  studentId       String           
+  conversationId  String           
+  answers         String           // إجابات الطالب (JSON array)
+  score           Int              @default(0)
+  totalQuestions  Int              @default(0)
+  completedAt     DateTime         @default(now())
+  User            User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  Conversation    TextConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+// =============================================
+// نظام Gamification - نظام الألعاب والمكافآت
+// =============================================
+
+// إحصائيات اللاعب - Player Stats
+model UserGamification {
+  id              String          @id @default(uuid())  
+  userId          String          @unique 
+  totalXP         Int             @default(0)         // إجمالي نقاط الخبرة
+  currentLevel    Int             @default(1)         // المستوى الحالي
+  currentLevelXP  Int             @default(0)         // XP في المستوى الحالي
+  xpToNextLevel   Int             @default(100)       // XP المطلوب للمستوى التالي
+  totalPoints     Int             @default(0)         // إجمالي النقاط
+  currentStreak   Int             @default(0)         // سلسلة الأيام الحالية
+  longestStreak   Int             @default(0)         // أطول سلسلة أيام
+  lastActiveDate  DateTime?                           // آخر يوم نشاط
+  wordsLearned    Int             @default(0)         // عدد الكلمات المتعلمة
+  lessonsCompleted Int            @default(0)         // عدد الدروس المكتملة
+  exercisesCompleted Int          @default(0)         // عدد التمارين المكتملة
+  writingsSubmitted Int           @default(0)         // عدد الكتابات المقدمة
+  perfectScores   Int             @default(0)         // عدد الدرجات الكاملة
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @default(now()) @updatedAt
+  User            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userBadges      UserBadge[]
+  dailyActivities DailyActivity[]
+}
+
+// تعريف الشارات - Badge Definitions
+model Badge {
+  id              String      @id @default(uuid())  
+  name            String      // اسم الشارة بالإنجليزية
+  nameAr          String      // اسم الشارة بالعربية
+  description     String      // وصف الشارة بالإنجليزية
+  descriptionAr   String      // وصف الشارة بالعربية
+  icon            String      // أيقونة الشارة (emoji أو رابط صورة)
+  category        BadgeCategory // تصنيف الشارة
+  requirement     String      // متطلبات الحصول على الشارة (JSON)
+  xpReward        Int         @default(0)  // مكافأة XP عند الحصول على الشارة
+  pointsReward    Int         @default(0)  // مكافأة النقاط
+  rarity          BadgeRarity @default(COMMON) // ندرة الشارة
+  isActive        Boolean     @default(true)
+  order           Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @default(now()) @updatedAt
+  userBadges      UserBadge[]
+}
+
+// شارات المستخدم - User Badges
+model UserBadge {
+  id              String           @id @default(uuid())  
+  gamificationId  String           
+  badgeId         String           
+  earnedAt        DateTime         @default(now())
+  UserGamification UserGamification @relation(fields: [gamificationId], references: [id], onDelete: Cascade)
+  Badge           Badge            @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([gamificationId, badgeId])
+}
+
+// النشاط اليومي - Daily Activity (للـ Streak)
+model DailyActivity {
+  id              String           @id @default(uuid())  
+  gamificationId  String           
+  date            DateTime         // تاريخ اليوم
+  xpEarned        Int              @default(0)  // XP المكتسب في هذا اليوم
+  pointsEarned    Int              @default(0)  // النقاط المكتسبة
+  activitiesCount Int              @default(0)  // عدد الأنشطة المنجزة
+  wordsLearned    Int              @default(0)  // الكلمات المتعلمة
+  lessonsCompleted Int             @default(0)  // الدروس المكتملة
+  exercisesDone   Int              @default(0)  // التمارين المنجزة
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now()) @updatedAt
+  UserGamification UserGamification @relation(fields: [gamificationId], references: [id], onDelete: Cascade)
+
+  @@unique([gamificationId, date])
+}
+
+// تصنيفات الشارات
+enum BadgeCategory {
+  STREAK       // شارات السلسلة اليومية
+  LEARNING     // شارات التعلم
+  ACHIEVEMENT  // شارات الإنجاز
+  SOCIAL       // شارات اجتماعية
+  SPECIAL      // شارات خاصة
+}
+
+// ندرة الشارات
+enum BadgeRarity {
+  COMMON       // شائعة
+  UNCOMMON     // غير شائعة
+  RARE         // نادرة
+  EPIC         // ملحمية
+  LEGENDARY    // أسطورية
+}
+
