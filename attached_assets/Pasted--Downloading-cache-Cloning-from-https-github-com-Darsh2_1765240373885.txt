@@ -1,0 +1,57 @@
+==> Downloading cache...
+==> Cloning from https://github.com/Darsh20009/youspeak
+==> Checking out commit 1d6777302846f3df98385b682dc09774729d57df in branch main
+==> Downloaded 605MB in 7s. Extraction took 11s.
+==> Using Node.js version 22.16.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Running build command 'npm install; npm run build'...
+> youspeak@0.1.0 postinstall
+> prisma generate
+Prisma schema loaded from prisma/schema.prisma
+✔ Generated Prisma Client (v6.19.0) to ./node_modules/@prisma/client in 1.21s
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+up to date, audited 510 packages in 5s
+165 packages are looking for funding
+  run `npm fund` for details
+6 vulnerabilities (3 low, 1 moderate, 1 high, 1 critical)
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
+Some issues need review, and may require choosing
+a different dependency.
+Run `npm audit` for details.
+> youspeak@0.1.0 build
+> next build
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   ▲ Next.js 16.0.1 (Turbopack)
+   - Experiments (use with caution):
+     · optimizePackageImports
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./app/dashboard/student/video-learning/page.tsx:24:1
+Module not found: Can't resolve '@/types/puter'
+  22 | import LoadingSpinner from '@/components/ui/LoadingSpinner'
+  23 | import Script from 'next/script'
+> 24 | import '@/types/puter'
+     | ^^^^^^^^^^^^^^^^^^^^^^
+  25 |
+  26 | interface VideoItem {
+  27 |   id: string
+Import map: aliased to relative './types/puter' inside of [project]/
+Import traces:
+  Client Component Browser:
+    ./app/dashboard/student/video-learning/page.tsx [Client Component Browser]
+    ./app/dashboard/student/video-learning/page.tsx [Server Component]
+  Client Component SSR:
+    ./app/dashboard/student/video-learning/page.tsx [Client Component SSR]
+    ./app/dashboard/student/video-learning/page.tsx [Server Component]
+https://nextjs.org/docs/messages/module-not-found
+    at <unknown> (./app/dashboard/student/video-learning/page.tsx:24:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+==> Build failed 😞
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
