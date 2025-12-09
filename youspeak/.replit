@@ -1,0 +1,106 @@
+modules = ["nodejs-20", "web"]
+[agent]
+expertMode = true
+integrations = ["javascript_openai:1.0.0"]
+
+[nix]
+channel = "stable-25_05"
+packages = ["postgresql", "imagemagick", "unzip"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "dev-server"
+
+[[workflows.workflow]]
+name = "dev-server"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 33105
+externalPort = 3001
+
+[[ports]]
+localPort = 36183
+externalPort = 4200
+
+[[ports]]
+localPort = 36499
+externalPort = 8000
+
+[[ports]]
+localPort = 36563
+externalPort = 8080
+
+[[ports]]
+localPort = 36681
+externalPort = 8008
+
+[[ports]]
+localPort = 37339
+externalPort = 6000
+
+[[ports]]
+localPort = 37951
+externalPort = 6800
+
+[[ports]]
+localPort = 38507
+externalPort = 8081
+
+[[ports]]
+localPort = 38707
+externalPort = 5173
+
+[[ports]]
+localPort = 40601
+externalPort = 3003
+
+[[ports]]
+localPort = 41231
+externalPort = 5000
+
+[[ports]]
+localPort = 41935
+externalPort = 3002
+
+[[ports]]
+localPort = 42523
+externalPort = 9000
+
+[[ports]]
+localPort = 42629
+externalPort = 3000
+
+[[ports]]
+localPort = 43103
+externalPort = 8099
+
+[userenv]
+
+[userenv.shared]
+NEXTAUTH_URL = "https://9ea6a450-28ee-4c56-b29e-5bd803f53ab5-00-2hirjbmjgxrt9.picard.replit.dev"
+NEXTAUTH_SECRET = "youspeak-nextauth-secret-key-2024"
+BBB_URL = "https://biggerbluebutton.com/bigbluebutton/youspeak/"
+BBB_SECRET = "8S8vbNbzBwSZYVzxloCWcXM8ehanUKthupAT88ys0Wa"
+ZEGO_APP_ID = "1956065726"
+ZEGO_SERVER_SECRET = "97135d867751ed8418e32ff4044c4a27"
