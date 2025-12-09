@@ -21,16 +21,24 @@ export const authOptions: NextAuthOptions = {
         }
 
         const isEmail = credentials.emailOrPhone.includes('@')
+        console.log('📧 Is email:', isEmail)
         
-        const user = await prisma.user.findFirst({
-          where: isEmail
-            ? { email: credentials.emailOrPhone }
-            : { phone: credentials.emailOrPhone },
-          include: {
-            StudentProfile: true,
-            TeacherProfile: true,
-          },
-        })
+        let user;
+        try {
+          user = await prisma.user.findFirst({
+            where: isEmail
+              ? { email: credentials.emailOrPhone }
+              : { phone: credentials.emailOrPhone },
+            include: {
+              StudentProfile: true,
+              TeacherProfile: true,
+            },
+          })
+          console.log('🔍 User query completed, found:', !!user)
+        } catch (dbError) {
+          console.error('❌ Database error:', dbError)
+          throw new Error('Invalid credentials')
+        }
 
         if (!user) {
           console.log('❌ User not found:', credentials.emailOrPhone)
