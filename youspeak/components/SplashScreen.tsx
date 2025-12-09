@@ -47,6 +47,7 @@ export default function SplashScreen() {
               src="/logo.png"
               alt="Youspeak Logo"
               fill
+              sizes="128px"
               className="relative z-10 object-contain p-2"
               style={{ 
                 mixBlendMode: 'multiply'

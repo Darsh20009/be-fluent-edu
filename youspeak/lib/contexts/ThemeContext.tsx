@@ -23,22 +23,26 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>('ar')
 
   useEffect(() => {
-    // Load from localStorage
+    setMounted(true)
+    
     const savedTheme = (localStorage.getItem('theme') as Theme) || 'light'
     const savedLanguage = (localStorage.getItem('language') as Language) || 'ar'
     
     setThemeState(savedTheme)
     setLanguageState(savedLanguage)
     
-    // Apply to document
-    const html = document.documentElement
-    html.classList.remove('light', 'dark')
-    html.classList.add(savedTheme)
-    html.style.colorScheme = savedTheme
-    html.setAttribute('dir', savedLanguage === 'ar' ? 'rtl' : 'ltr')
-    html.setAttribute('lang', savedLanguage)
+    if (savedTheme !== 'light') {
+      const html = document.documentElement
+      html.classList.remove('light', 'dark')
+      html.classList.add(savedTheme)
+      html.style.colorScheme = savedTheme
+    }
     
-    setMounted(true)
+    if (savedLanguage !== 'ar') {
+      const html = document.documentElement
+      html.setAttribute('dir', 'ltr')
+      html.setAttribute('lang', 'en')
+    }
   }, [])
 
   const setTheme = (newTheme: Theme) => {
