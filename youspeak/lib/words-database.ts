@@ -9,7 +9,7 @@ export interface WordItem {
   level: 'beginner' | 'intermediate' | 'advanced'
 }
 
-const getImageUrl = (keyword: string) => `https://source.unsplash.com/400x300/?${encodeURIComponent(keyword)}`
+const getImageUrl = (keyword: string) => `https://picsum.photos/seed/${encodeURIComponent(keyword.replace(/\s+/g, '-'))}/400/300`
 
 const BASE_WORDS: WordItem[] = [
   // ============ BEGINNER LEVEL ============

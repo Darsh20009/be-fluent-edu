@@ -1,6 +1,6 @@
 import type { WordItem } from './words-database'
 
-const getImageUrl = (keyword: string) => `https://source.unsplash.com/400x300/?${encodeURIComponent(keyword)}`
+const getImageUrl = (keyword: string) => `https://picsum.photos/seed/${encodeURIComponent(keyword.replace(/\s+/g, '-'))}/400/300`
 
 export const ADDITIONAL_BEGINNER_WORDS: WordItem[] = [
   // ============ MORE BEGINNER WORDS ============
