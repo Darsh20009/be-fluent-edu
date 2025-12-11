@@ -7,25 +7,33 @@ import { MessageCircle, Send, Mail, X, Clock } from 'lucide-react'
 export default function FloatingContactButtons() {
   const [isOpen, setIsOpen] = useState(false)
   const [message, setMessage] = useState('')
+  const [isAvailable, setIsAvailable] = useState(false)
   const pathname = usePathname()
+  
+  // Check working hours on client side only
+  useEffect(() => {
+    const checkWorkingHours = () => {
+      const now = new Date()
+      const currentHour = now.getHours()
+      const currentDay = now.getDay()
+      
+      // ساعات العمل: الأحد-الخميس 9 صباحًا - 9 مساءً
+      const isWeekday = currentDay >= 0 && currentDay <= 4
+      const isWorkingHour = currentHour >= 9 && currentHour < 21
+      
+      setIsAvailable(isWeekday && isWorkingHour)
+    }
+    
+    checkWorkingHours()
+    // Re-check every minute
+    const interval = setInterval(checkWorkingHours, 60000)
+    return () => clearInterval(interval)
+  }, [])
   
   // Hide on AI Assistant page
   const shouldHide = pathname?.includes('/ai-assistant')
   
   if (shouldHide) return null
-  
-  // تحديد ساعات العمل
-  const isWithinWorkingHours = () => {
-    const now = new Date()
-    const currentHour = now.getHours()
-    const currentDay = now.getDay()
-    
-    // ساعات العمل: الأحد-الخميس 9 صباحًا - 9 مساءً
-    const isWeekday = currentDay >= 0 && currentDay <= 4
-    const isWorkingHour = currentHour >= 9 && currentHour < 21
-    
-    return isWeekday && isWorkingHour
-  }
 
   const handleWhatsAppSend = () => {
     const phoneNumber = '201091515594' // +20 109 151 5594
@@ -39,8 +47,6 @@ export default function FloatingContactButtons() {
     const body = encodeURIComponent(message || 'مرحباً،\n\nأحتاج إلى المساعدة في...')
     window.location.href = `mailto:${email}?subject=${subject}&body=${body}`
   }
-
-  const isAvailable = isWithinWorkingHours()
 
   return (
     <>

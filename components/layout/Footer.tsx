@@ -1,4 +1,6 @@
-import React from 'react';
+'use client'
+
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface FooterProps {
@@ -7,6 +9,11 @@ export interface FooterProps {
 }
 
 const Footer: React.FC<FooterProps> = ({ children, className }) => {
+  const [year, setYear] = useState<number>(2025);
+  
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
   return (
     <footer
       className={cn(
@@ -99,7 +106,7 @@ const Footer: React.FC<FooterProps> = ({ children, className }) => {
             </div>
             <div className="mt-8 border-t border-neutral-200 dark:border-neutral-800 pt-8 text-center">
               <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                © {new Date().getFullYear()} Youspeak. All rights reserved.
+                © {year} Youspeak. All rights reserved.
               </p>
             </div>
           </div>
