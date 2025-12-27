@@ -4,14 +4,19 @@
 const { spawn } = require('child_process');
 
 // Check for DATABASE_URL (MongoDB)
-const databaseUrl = process.env.DATABASE_URL;
+// Support both DATABASE_URL and MONGODB_URI
+const databaseUrl = process.env.DATABASE_URL || process.env.MONGODB_URI;
 
 if (databaseUrl) {
-  console.log('✅ MongoDB database configured from DATABASE_URL');
+  // Set DATABASE_URL from MONGODB_URI if needed (for Render/other platforms)
+  if (!process.env.DATABASE_URL && process.env.MONGODB_URI) {
+    process.env.DATABASE_URL = process.env.MONGODB_URI;
+  }
+  console.log('✅ MongoDB database configured');
   console.log('');
 } else {
   console.error('❌ ERROR: No database configuration found!');
-  console.error('Please set DATABASE_URL environment variable');
+  console.error('Please set DATABASE_URL or MONGODB_URI environment variable');
   console.error('');
   process.exit(1);
 }
