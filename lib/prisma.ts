@@ -9,7 +9,8 @@ const databaseUrl = process.env.DATABASE_URL
 if (!databaseUrl) {
   console.error('❌ DATABASE_URL is not set!')
 } else {
-  console.log('✅ PostgreSQL database configured from DATABASE_URL')
+  const dbType = databaseUrl.includes('mongodb') ? 'MongoDB' : 'PostgreSQL'
+  console.log(`✅ ${dbType} database configured from DATABASE_URL`)
 }
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient()

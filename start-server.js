@@ -16,9 +16,13 @@ console.log(`MONGODB_URI: ${mongoUri ? '✓ Present' : '✗ Not found'}`);
 const finalDatabaseUrl = databaseUrl || mongoUri;
 
 if (finalDatabaseUrl) {
-  // Ensure DATABASE_URL is set for Prisma
-  if (!process.env.DATABASE_URL && mongoUri) {
+  // For MongoDB, set DATABASE_URL from MONGODB_URI if needed
+  if (!databaseUrl && mongoUri) {
     process.env.DATABASE_URL = mongoUri;
+  }
+  // If still no DATABASE_URL, set it now
+  if (!process.env.DATABASE_URL) {
+    process.env.DATABASE_URL = finalDatabaseUrl;
   }
   console.log('✅ MongoDB database configured successfully');
   console.log(`Connection: ${finalDatabaseUrl.substring(0, 50)}...`);

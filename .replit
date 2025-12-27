@@ -10,7 +10,8 @@ expertMode = true
 
 [userenv.shared]
 NEXTAUTH_URL = "https://7aed4be9-f97c-48e0-8383-c86347dd54c4-00-1rhlvzmt6vn9n.kirk.replit.dev"
-NEXTAUTH_SECRET = "youspeak-secret-key-2024-secure-random-string"
+NEXTAUTH_SECRET = "youspeak-secret-key-2025"
+MONGODB_URI = "mongodb+srv://Vercel-Admin-youspeak:TOTY20009a@youspeak.dsouarr.mongodb.net/?appName=youspeak"
 
 [workflows]
 runButton = "Project"
