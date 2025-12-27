@@ -3,11 +3,11 @@
 // Setup database connection before starting the server
 const { spawn } = require('child_process');
 
-// Check for DATABASE_URL (PostgreSQL)
+// Check for DATABASE_URL (MongoDB)
 const databaseUrl = process.env.DATABASE_URL;
 
 if (databaseUrl) {
-  console.log('✅ PostgreSQL database configured from DATABASE_URL');
+  console.log('✅ MongoDB database configured from DATABASE_URL');
   console.log('');
 } else {
   console.error('❌ ERROR: No database configuration found!');
