@@ -5,27 +5,16 @@ const { spawn } = require('child_process');
 
 // Debug: Show all environment variables (for troubleshooting)
 console.log('🔍 Checking environment variables...');
-const databaseUrl = process.env.DATABASE_URL;
 const mongoUri = process.env.MONGODB_URI;
 
-console.log(`DATABASE_URL: ${databaseUrl ? '✓ Present' : '✗ Not found'}`);
 console.log(`MONGODB_URI: ${mongoUri ? '✓ Present' : '✗ Not found'}`);
 
-// Check for DATABASE_URL (MongoDB)
-// Support both DATABASE_URL and MONGODB_URI
-const finalDatabaseUrl = databaseUrl || mongoUri;
-
-if (finalDatabaseUrl) {
-  // For MongoDB, set DATABASE_URL from MONGODB_URI if needed
-  if (!databaseUrl && mongoUri) {
-    process.env.DATABASE_URL = mongoUri;
-  }
-  // If still no DATABASE_URL, set it now
-  if (!process.env.DATABASE_URL) {
-    process.env.DATABASE_URL = finalDatabaseUrl;
-  }
+// IMPORTANT: For YouSpeak, always use MONGODB_URI
+if (mongoUri) {
+  // Override DATABASE_URL with MONGODB_URI for MongoDB
+  process.env.DATABASE_URL = mongoUri;
   console.log('✅ MongoDB database configured successfully');
-  console.log(`Connection: ${finalDatabaseUrl.substring(0, 50)}...`);
+  console.log(`Connection: ${mongoUri.substring(0, 50)}...`);
   console.log('');
 } else {
   console.error('');

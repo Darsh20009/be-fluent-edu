@@ -96,9 +96,16 @@ export async function POST(request: Request) {
       )
     }
 
-    console.error('Registration error:', error)
+    console.error('❌ Registration error:', error)
+    if (error instanceof Error) {
+      console.error('Error message:', error.message)
+      console.error('Stack:', error.stack)
+    }
     return NextResponse.json(
-      { error: 'Registration failed' },
+      { 
+        error: 'Registration failed',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
