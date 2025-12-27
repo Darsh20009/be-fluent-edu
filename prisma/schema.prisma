@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Assignment {
-  id             String       @id @default(uuid())  
+  id             String       @id @default(uuid()) @map("_id")
   sessionId      String?      
   title          String
   description    String?
@@ -23,7 +23,7 @@ model Assignment {
 }
 
 model AuditLog {
-  id        String   @id @default(uuid())  
+  id        String   @id @default(uuid()) @map("_id")
   action    String
   userId    String?  
   details   String?
@@ -31,7 +31,7 @@ model AuditLog {
 }
 
 model Chat {
-  id                         String   @id @default(uuid())  
+  id                         String   @id @default(uuid()) @map("_id")
   fromUserId                 String   
   toUserId                   String   
   content                    String
@@ -43,7 +43,7 @@ model Chat {
 }
 
 model Package {
-  id            String         @id @default(uuid())  
+  id            String         @id @default(uuid()) @map("_id")
   title         String
   titleAr       String
   description   String?
@@ -59,7 +59,7 @@ model Package {
 }
 
 model Session {
-  id               String           @id @default(uuid())  
+  id               String           @id @default(uuid()) @map("_id")
   teacherId        String           
   title            String
   startTime        DateTime
@@ -76,7 +76,7 @@ model Session {
 }
 
 model SessionStudent {
-  id        String   @id @default(uuid())  
+  id        String   @id @default(uuid()) @map("_id")
   sessionId String   
   studentId String   
   attended  Boolean  @default(false)
@@ -88,7 +88,7 @@ model SessionStudent {
 }
 
 model StudentProfile {
-  id                      String   @id @default(uuid())  
+  id                      String   @id @default(uuid()) @map("_id")
   userId                  String   @unique 
   age                     Int?
   levelInitial            String?
@@ -105,7 +105,7 @@ model StudentProfile {
 }
 
 model Submission {
-  id            String     @id @default(uuid())  
+  id            String     @id @default(uuid()) @map("_id")
   assignmentId  String     
   studentId     String     
   textAnswer    String?
@@ -121,7 +121,7 @@ model Submission {
 }
 
 model Subscription {
-  id                String             @id @default(uuid())  
+  id                String             @id @default(uuid()) @map("_id")
   studentId         String             
   packageId         String             
   status            SubscriptionStatus @default(PENDING)
@@ -148,7 +148,7 @@ model Subscription {
 }
 
 model TeacherProfile {
-  id                    String         @id @default(uuid())  
+  id                    String         @id @default(uuid()) @map("_id")
   userId                String         @unique 
   bio                   String?
   subjects              String?
@@ -162,7 +162,7 @@ model TeacherProfile {
 }
 
 model User {
-  id                         String                    @id @default(uuid())  
+  id                         String                    @id @default(uuid()) @map("_id")
   email                      String                    @unique
   name                       String
   phone                      String?
@@ -192,7 +192,7 @@ model User {
 }
 
 model Word {
-  id               String   @id @default(uuid())  
+  id               String   @id @default(uuid()) @map("_id")
   studentId        String   
   englishWord      String
   arabicMeaning    String
@@ -215,7 +215,7 @@ model Word {
 }
 
 model DailyWord {
-  id              String   @id @default(uuid())  
+  id              String   @id @default(uuid()) @map("_id")
   englishWord     String
   arabicMeaning   String
   exampleSentence String?
@@ -229,7 +229,7 @@ model DailyWord {
 }
 
 model Cart {
-  id        String     @id @default(uuid())  
+  id        String     @id @default(uuid()) @map("_id")
   studentId String     @unique 
   createdAt DateTime   @default(now())
   updatedAt DateTime   @default(now()) @updatedAt
@@ -238,7 +238,7 @@ model Cart {
 }
 
 model CartItem {
-  id        String   @id @default(uuid())  
+  id        String   @id @default(uuid()) @map("_id")
   cartId    String   
   packageId String   
   createdAt DateTime @default(now())
@@ -249,7 +249,7 @@ model CartItem {
 }
 
 model WritingTest {
-  id                    String                  @id @default(uuid())  
+  id                    String                  @id @default(uuid()) @map("_id")
   teacherId             String                  
   title                 String
   titleAr               String?
@@ -263,7 +263,7 @@ model WritingTest {
 }
 
 model WritingTestSubmission {
-  id            String      @id @default(uuid())  
+  id            String      @id @default(uuid()) @map("_id")
   testId        String      
   studentId     String      
   content       String
@@ -279,7 +279,7 @@ model WritingTestSubmission {
 }
 
 model FreeWriting {
-  id             String          @id @default(uuid())  
+  id             String          @id @default(uuid()) @map("_id")
   studentId      String          
   title          String
   content        String
@@ -313,7 +313,7 @@ enum EWalletProvider {
 
 // نظام الدروس
 model Lesson {
-  id             String           @id @default(uuid())  
+  id             String           @id @default(uuid()) @map("_id")
   title          String
   titleAr        String
   description    String?
@@ -335,7 +335,7 @@ model Lesson {
 }
 
 model Exercise {
-  id              String           @id @default(uuid())  
+  id              String           @id @default(uuid()) @map("_id")
   lessonId        String           
   type            ExerciseType
   order           Int              @default(0)
@@ -360,7 +360,7 @@ model Exercise {
 }
 
 model LessonProgress {
-  id             String   @id @default(uuid())  
+  id             String   @id @default(uuid()) @map("_id")
   studentId      String   
   lessonId       String   
   completed      Boolean  @default(false)
@@ -377,7 +377,7 @@ model LessonProgress {
 }
 
 model ExerciseAttempt {
-  id          String   @id @default(uuid())  
+  id          String   @id @default(uuid()) @map("_id")
   studentId   String   
   exerciseId  String   
   answer      String   // إجابة الطالب
@@ -398,7 +398,7 @@ enum ExerciseType {
 
 // نظام الاستماع - Listening System
 model ListeningContent {
-  id                String              @id @default(uuid())  
+  id                String              @id @default(uuid()) @map("_id")
   title             String              // عنوان المحتوى
   titleAr           String              // العنوان بالعربي
   description       String?             // وصف المحتوى
@@ -421,7 +421,7 @@ model ListeningContent {
 }
 
 model ListeningExercise {
-  id                String                   @id @default(uuid())  
+  id                String                   @id @default(uuid()) @map("_id")
   contentId         String                   
   type              ListeningExerciseType
   order             Int                      @default(0)
@@ -440,7 +440,7 @@ model ListeningExercise {
 }
 
 model ListeningProgress {
-  id               String           @id @default(uuid())  
+  id               String           @id @default(uuid()) @map("_id")
   contentId        String           
   visitorId        String?          // معرف الزائر (للمستخدمين غير المسجلين)
   completed        Boolean          @default(false)
@@ -455,7 +455,7 @@ model ListeningProgress {
 }
 
 model ListeningExerciseAttempt {
-  id          String            @id @default(uuid())  
+  id          String            @id @default(uuid()) @map("_id")
   exerciseId  String            
   visitorId   String?           // معرف الزائر
   answer      String            // إجابة المستخدم
@@ -479,7 +479,7 @@ enum ListeningExerciseType {
 
 // نظام المحادثة التدريبية - Conversation Practice System
 model ConversationScenario {
-  id              String                    @id @default(uuid())  
+  id              String                    @id @default(uuid()) @map("_id")
   title           String                    // عنوان السيناريو
   titleAr         String                    // العنوان بالعربي
   description     String?                   // وصف السيناريو
@@ -497,7 +497,7 @@ model ConversationScenario {
 }
 
 model ConversationProgress {
-  id              String               @id @default(uuid())  
+  id              String               @id @default(uuid()) @map("_id")
   studentId       String               
   scenarioId      String               
   completed       Boolean              @default(false)
@@ -514,7 +514,7 @@ model ConversationProgress {
 
 // نظام تسجيل الصوت - Voice Recording System
 model VoiceRecording {
-  id              String   @id @default(uuid())  
+  id              String   @id @default(uuid()) @map("_id")
   studentId       String   
   title           String                    // عنوان التسجيل
   audioData       String                    // Base64 encoded audio data
@@ -529,7 +529,7 @@ model VoiceRecording {
 
 // نظام المحادثة النصية - Text Conversation System
 model TextConversation {
-  id              String                     @id @default(uuid())  
+  id              String                     @id @default(uuid()) @map("_id")
   title           String                     // عنوان المحادثة
   titleAr         String                     // العنوان بالعربي
   description     String?                    // وصف المحادثة
@@ -544,7 +544,7 @@ model TextConversation {
 }
 
 model TextConversationAttempt {
-  id              String           @id @default(uuid())  
+  id              String           @id @default(uuid()) @map("_id")
   studentId       String           
   conversationId  String           
   answers         String           // إجابات الطالب (JSON array)
@@ -561,7 +561,7 @@ model TextConversationAttempt {
 
 // إحصائيات اللاعب - Player Stats
 model UserGamification {
-  id              String          @id @default(uuid())  
+  id              String          @id @default(uuid()) @map("_id")
   userId          String          @unique 
   totalXP         Int             @default(0)         // إجمالي نقاط الخبرة
   currentLevel    Int             @default(1)         // المستوى الحالي
@@ -585,7 +585,7 @@ model UserGamification {
 
 // تعريف الشارات - Badge Definitions
 model Badge {
-  id              String      @id @default(uuid())  
+  id              String      @id @default(uuid()) @map("_id")
   name            String      // اسم الشارة بالإنجليزية
   nameAr          String      // اسم الشارة بالعربية
   description     String      // وصف الشارة بالإنجليزية
@@ -605,7 +605,7 @@ model Badge {
 
 // شارات المستخدم - User Badges
 model UserBadge {
-  id              String           @id @default(uuid())  
+  id              String           @id @default(uuid()) @map("_id")
   gamificationId  String           
   badgeId         String           
   earnedAt        DateTime         @default(now())
@@ -617,7 +617,7 @@ model UserBadge {
 
 // النشاط اليومي - Daily Activity (للـ Streak)
 model DailyActivity {
-  id              String           @id @default(uuid())  
+  id              String           @id @default(uuid()) @map("_id")
   gamificationId  String           
   date            DateTime         // تاريخ اليوم
   xpEarned        Int              @default(0)  // XP المكتسب في هذا اليوم
