@@ -3,20 +3,36 @@
 // Setup database connection before starting the server
 const { spawn } = require('child_process');
 
+// Debug: Show all environment variables (for troubleshooting)
+console.log('🔍 Checking environment variables...');
+const databaseUrl = process.env.DATABASE_URL;
+const mongoUri = process.env.MONGODB_URI;
+
+console.log(`DATABASE_URL: ${databaseUrl ? '✓ Present' : '✗ Not found'}`);
+console.log(`MONGODB_URI: ${mongoUri ? '✓ Present' : '✗ Not found'}`);
+
 // Check for DATABASE_URL (MongoDB)
 // Support both DATABASE_URL and MONGODB_URI
-const databaseUrl = process.env.DATABASE_URL || process.env.MONGODB_URI;
+const finalDatabaseUrl = databaseUrl || mongoUri;
 
-if (databaseUrl) {
-  // Set DATABASE_URL from MONGODB_URI if needed (for Render/other platforms)
-  if (!process.env.DATABASE_URL && process.env.MONGODB_URI) {
-    process.env.DATABASE_URL = process.env.MONGODB_URI;
+if (finalDatabaseUrl) {
+  // Ensure DATABASE_URL is set for Prisma
+  if (!process.env.DATABASE_URL && mongoUri) {
+    process.env.DATABASE_URL = mongoUri;
   }
-  console.log('✅ MongoDB database configured');
+  console.log('✅ MongoDB database configured successfully');
+  console.log(`Connection: ${finalDatabaseUrl.substring(0, 50)}...`);
   console.log('');
 } else {
+  console.error('');
   console.error('❌ ERROR: No database configuration found!');
-  console.error('Please set DATABASE_URL or MONGODB_URI environment variable');
+  console.error('');
+  console.error('Please set ONE of these environment variables:');
+  console.error('  1. DATABASE_URL');
+  console.error('  2. MONGODB_URI');
+  console.error('');
+  console.error('Example:');
+  console.error('  DATABASE_URL=mongodb+srv://user:pass@host/dbname');
   console.error('');
   process.exit(1);
 }
