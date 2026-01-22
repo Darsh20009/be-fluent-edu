@@ -220,12 +220,11 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-12">
                 {[
-                  { name: "Single Level", price: "200", lessons: "8", duration: "2 months", gradient: "from-blue-500 to-blue-600", popular: false },
-                  { name: "Monthly", price: "360", lessons: "12", duration: "1 month", gradient: "from-orange-500 to-red-600", popular: true },
-                  { name: "Quarterly", price: "1000", lessons: "36", duration: "3 months", gradient: "from-purple-500 to-purple-600", popular: false },
-                  { name: "Premium", price: "1800", lessons: "48", duration: "6 months", gradient: "from-yellow-500 to-orange-600", popular: false }
+                  { name: "Monthly Group", price: "1500", lessons: "8", duration: "1 month", gradient: "from-blue-500 to-blue-600", popular: false },
+                  { name: "Monthly Private", price: "3000", lessons: "8", duration: "1 month", gradient: "from-orange-500 to-red-600", popular: true },
+                  { name: "Quarterly Group", price: "3500", lessons: "24", duration: "3 months", gradient: "from-purple-500 to-purple-600", popular: false },
                 ].map((pkg, index) => (
                   <div
                     key={index}
@@ -259,7 +258,7 @@ export default function Home() {
                           {pkg.price}
                         </span>
                         <span className={`text-2xl font-bold pb-1 ${pkg.popular ? 'text-white/80' : 'text-gray-600'}`}>
-                          SAR
+                          EGP
                         </span>
                       </div>
                     </div>
@@ -332,11 +331,11 @@ export default function Home() {
                   <ul className="text-gray-700 space-y-2 mb-6">
                     <li className="flex items-center gap-2">
                       <CheckCircle className="w-5 h-5 text-green-500" />
-                      <span>40 سؤال متنوع</span>
+                      <span>20 سؤال متنوع</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle className="w-5 h-5 text-green-500" />
-                      <span>استماع، قراءة، مفردات، قواعد</span>
+                      <span>قراءة، مفردات، قواعد</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle className="w-5 h-5 text-green-500" />
