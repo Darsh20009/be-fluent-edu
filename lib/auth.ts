@@ -17,7 +17,7 @@ export const authOptions: NextAuthOptions = {
         
         if (!credentials?.emailOrPhone || !credentials?.password) {
           console.log('❌ Missing credentials')
-          throw new Error('Invalid credentials')
+          throw new Error('الرجاء إدخال البريد الإلكتروني أو رقم الهاتف وكلمة المرور')
         }
 
         const isEmail = credentials.emailOrPhone.includes('@')
@@ -37,17 +37,22 @@ export const authOptions: NextAuthOptions = {
           console.log('🔍 User query completed, found:', !!user)
         } catch (dbError) {
           console.error('❌ Database error:', dbError)
-          throw new Error('Invalid credentials')
+          throw new Error('حدث خطأ في الاتصال بقاعدة البيانات')
         }
 
         if (!user) {
           console.log('❌ User not found:', credentials.emailOrPhone)
-          throw new Error('Invalid credentials')
+          throw new Error('البيانات المدخلة غير صحيحة')
+        }
+
+        if (!user.isActive) {
+          console.log('❌ User account is inactive:', user.email)
+          throw new Error('هذا الحساب غير مفعل حالياً. يرجى التواصل مع الإدارة.')
         }
 
         if (!user.passwordHash) {
           console.log('❌ No password hash for user:', credentials.emailOrPhone)
-          throw new Error('Invalid credentials')
+          throw new Error('البيانات المدخلة غير صحيحة')
         }
 
         console.log('✅ User found:', user.email, 'Role:', user.role, 'Active:', user.isActive)
@@ -59,7 +64,7 @@ export const authOptions: NextAuthOptions = {
 
         if (!isPasswordValid) {
           console.log('❌ Invalid password for:', credentials.emailOrPhone)
-          throw new Error('Invalid credentials')
+          throw new Error('البيانات المدخلة غير صحيحة')
         }
 
         console.log('✅ Password valid')

@@ -1,51 +1,37 @@
-#!/usr/bin/env node
+const { createServer } = require('http');
+const { parse } = require('url');
+const next = require('next');
+const { Server } = require('socket.io');
 
-// Setup database connection before starting the server
-const { spawn } = require('child_process');
+const dev = process.env.NODE_ENV !== 'production';
+const app = next({ dev });
+const handle = app.getRequestHandler();
 
-// Debug: Show all environment variables (for troubleshooting)
+// Validate environment variables
 console.log('🔍 Checking environment variables...');
-const mongoUri = process.env.MONGODB_URI;
-
-console.log(`MONGODB_URI: ${mongoUri ? '✓ Present' : '✗ Not found'}`);
-
-// IMPORTANT: For YouSpeak, always use MONGODB_URI
-if (mongoUri) {
-  // Override DATABASE_URL with MONGODB_URI for MongoDB
-  process.env.DATABASE_URL = mongoUri;
-  console.log('✅ MongoDB database configured successfully');
-  console.log(`Connection: ${mongoUri.substring(0, 50)}...`);
-  console.log('');
-} else {
-  console.error('');
-  console.error('❌ ERROR: No database configuration found!');
-  console.error('');
-  console.error('Please set ONE of these environment variables:');
-  console.error('  1. DATABASE_URL');
-  console.error('  2. MONGODB_URI');
-  console.error('');
-  console.error('Example:');
-  console.error('  DATABASE_URL=mongodb+srv://user:pass@host/dbname');
-  console.error('');
-  process.exit(1);
+if (process.env.MONGODB_URI) {
+  process.env.DATABASE_URL = process.env.MONGODB_URI;
+  console.log('✅ DATABASE_URL set from MONGODB_URI');
 }
 
-// Start the Next.js server
-const server = spawn('node', ['server.js'], {
-  stdio: 'inherit',
-  env: process.env
-});
+app.prepare().then(() => {
+  const server = createServer((req, res) => {
+    const parsedUrl = parse(req.url, true);
+    handle(req, res, parsedUrl);
+  });
 
-server.on('close', (code) => {
-  console.log(`Server process exited with code ${code}`);
-  process.exit(code);
-});
+  const io = new Server(server, {
+    path: '/api/socket/io',
+    addTrailingSlash: false,
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST']
+    }
+  });
 
-// Handle termination signals
-process.on('SIGTERM', () => {
-  server.kill('SIGTERM');
-});
-
-process.on('SIGINT', () => {
-  server.kill('SIGINT');
+  server.listen(5000, '0.0.0.0', (err) => {
+    if (err) throw err;
+    console.log('> Ready on http://0.0.0.0:5000');
+    console.log('> Socket.IO server running on path: /api/socket/io');
+  });
 });
