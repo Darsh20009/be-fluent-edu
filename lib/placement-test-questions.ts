@@ -1,127 +1,18 @@
 export interface PlacementQuestion {
   id: string
-  type: 'LISTENING' | 'READING' | 'VOCABULARY' | 'GRAMMAR'
+  type: 'READING' | 'VOCABULARY' | 'GRAMMAR'
   level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1'
   question: string
   questionAr: string
   options: string[]
   correctAnswer: string
-  audioUrl?: string
   passage?: string
   passageAr?: string
   points: number
 }
 
 export const PLACEMENT_TEST_QUESTIONS: PlacementQuestion[] = [
-  // ==================== LISTENING QUESTIONS (10) ====================
-  // A1 Level
-  {
-    id: 'L1',
-    type: 'LISTENING',
-    level: 'A1',
-    question: "You hear: 'Hello, my name is John.' What is the person's name?",
-    questionAr: "تسمع: 'Hello, my name is John.' ما اسم الشخص؟",
-    options: ['John', 'James', 'Jane', 'Jack'],
-    correctAnswer: 'John',
-    points: 1
-  },
-  {
-    id: 'L2',
-    type: 'LISTENING',
-    level: 'A1',
-    question: "You hear: 'The weather is sunny today.' What is the weather like?",
-    questionAr: "تسمع: 'The weather is sunny today.' كيف الطقس؟",
-    options: ['Rainy', 'Sunny', 'Cloudy', 'Snowy'],
-    correctAnswer: 'Sunny',
-    points: 1
-  },
-  // A2 Level
-  {
-    id: 'L3',
-    type: 'LISTENING',
-    level: 'A2',
-    question: "You hear: 'I usually wake up at 7 o'clock and have breakfast at 7:30.' When does the person have breakfast?",
-    questionAr: "تسمع: 'أستيقظ عادة في الساعة 7 وأتناول الفطور في 7:30.' متى يتناول الشخص الفطور؟",
-    options: ['7:00', '7:15', '7:30', '8:00'],
-    correctAnswer: '7:30',
-    points: 2
-  },
-  {
-    id: 'L4',
-    type: 'LISTENING',
-    level: 'A2',
-    question: "You hear: 'The train to London leaves from platform 5.' Which platform does the train leave from?",
-    questionAr: "تسمع: 'القطار إلى لندن يغادر من الرصيف 5.' من أي رصيف يغادر القطار؟",
-    options: ['Platform 3', 'Platform 4', 'Platform 5', 'Platform 6'],
-    correctAnswer: 'Platform 5',
-    points: 2
-  },
-  // B1 Level
-  {
-    id: 'L5',
-    type: 'LISTENING',
-    level: 'B1',
-    question: "You hear a conversation about a job interview. The interviewer asks about experience. What should you understand?",
-    questionAr: "تسمع محادثة عن مقابلة عمل. المحاور يسأل عن الخبرة. ماذا يجب أن تفهم؟",
-    options: ['Salary discussion', 'Work experience', 'Holiday plans', 'Education background'],
-    correctAnswer: 'Work experience',
-    points: 3
-  },
-  {
-    id: 'L6',
-    type: 'LISTENING',
-    level: 'B1',
-    question: "In a news report about traffic, the speaker mentions a delay. How long is the typical delay mentioned?",
-    questionAr: "في تقرير إخباري عن المرور، يذكر المتحدث تأخيراً. كم يبلغ التأخير المعتاد؟",
-    options: ['5 minutes', '15 minutes', '30 minutes', '1 hour'],
-    correctAnswer: '30 minutes',
-    points: 3
-  },
-  // B2 Level
-  {
-    id: 'L7',
-    type: 'LISTENING',
-    level: 'B2',
-    question: "In a lecture about climate change, the speaker discusses the main cause. What is emphasized?",
-    questionAr: "في محاضرة عن تغير المناخ، يناقش المتحدث السبب الرئيسي. ما الذي يتم التأكيد عليه؟",
-    options: ['Natural cycles', 'Human activity', 'Solar radiation', 'Volcanic eruptions'],
-    correctAnswer: 'Human activity',
-    points: 4
-  },
-  {
-    id: 'L8',
-    type: 'LISTENING',
-    level: 'B2',
-    question: "A documentary discusses renewable energy sources. Which is mentioned as the most rapidly growing?",
-    questionAr: "فيلم وثائقي يناقش مصادر الطاقة المتجددة. أيها مذكور كأسرع نمواً؟",
-    options: ['Hydroelectric', 'Nuclear', 'Solar', 'Wind'],
-    correctAnswer: 'Solar',
-    points: 4
-  },
-  // C1 Level
-  {
-    id: 'L9',
-    type: 'LISTENING',
-    level: 'C1',
-    question: "In an academic discussion about linguistics, what theory is being debated regarding language acquisition?",
-    questionAr: "في مناقشة أكاديمية عن اللغويات، ما النظرية التي يتم مناقشتها بخصوص اكتساب اللغة؟",
-    options: ['Behaviorist theory', 'Nativist theory', 'Interactionist theory', 'All of the above'],
-    correctAnswer: 'All of the above',
-    points: 5
-  },
-  {
-    id: 'L10',
-    type: 'LISTENING',
-    level: 'C1',
-    question: "In a complex business presentation, what implication does the speaker suggest about market trends?",
-    questionAr: "في عرض تجاري معقد، ما الاستنتاج الذي يقترحه المتحدث عن اتجاهات السوق؟",
-    options: ['Immediate growth', 'Long-term decline', 'Volatile but promising', 'Complete stagnation'],
-    correctAnswer: 'Volatile but promising',
-    points: 5
-  },
-
-  // ==================== READING QUESTIONS (10) ====================
-  // A1 Level
+  // A1 Level (4 questions)
   {
     id: 'R1',
     type: 'READING',
@@ -134,17 +25,36 @@ export const PLACEMENT_TEST_QUESTIONS: PlacementQuestion[] = [
     points: 1
   },
   {
-    id: 'R2',
-    type: 'READING',
+    id: 'G1',
+    type: 'GRAMMAR',
     level: 'A1',
-    question: "Read: 'My sister is 10 years old.' How old is the sister?",
-    questionAr: "اقرأ: 'أختي عمرها 10 سنوات.' كم عمر الأخت؟",
-    passage: "My sister is 10 years old.",
-    options: ['8 years old', '9 years old', '10 years old', '11 years old'],
-    correctAnswer: '10 years old',
+    question: "Choose the correct form: 'She _____ a teacher.'",
+    questionAr: "اختر الصيغة الصحيحة: 'هي _____ معلمة.'",
+    options: ['am', 'is', 'are', 'be'],
+    correctAnswer: 'is',
     points: 1
   },
-  // A2 Level
+  {
+    id: 'V1',
+    type: 'VOCABULARY',
+    level: 'A1',
+    question: "What is the meaning of 'happy'?",
+    questionAr: "ما معنى كلمة 'happy'؟",
+    options: ['حزين', 'سعيد', 'غاضب', 'متعب'],
+    correctAnswer: 'سعيد',
+    points: 1
+  },
+  {
+    id: 'G2',
+    type: 'GRAMMAR',
+    level: 'A1',
+    question: "Choose the correct form: 'I _____ coffee every morning.'",
+    questionAr: "اختر الصيغة الصحيحة: 'أنا _____ القهوة كل صباح.'",
+    options: ['drinks', 'drink', 'drinking', 'drank'],
+    correctAnswer: 'drink',
+    points: 1
+  },
+  // A2 Level (4 questions)
   {
     id: 'R3',
     type: 'READING',
@@ -154,6 +64,26 @@ export const PLACEMENT_TEST_QUESTIONS: PlacementQuestion[] = [
     passage: "Sarah wakes up at 6 AM every day. She goes for a run in the park near her house. After running, she takes a shower and has breakfast with her family.",
     options: ['She goes swimming', 'She goes for a run', 'She reads a book', 'She watches TV'],
     correctAnswer: 'She goes for a run',
+    points: 2
+  },
+  {
+    id: 'V3',
+    type: 'VOCABULARY',
+    level: 'A2',
+    question: "Choose the correct word: 'I need to _____ my homework before dinner.'",
+    questionAr: "اختر الكلمة الصحيحة: 'أحتاج أن _____ واجبي قبل العشاء.'",
+    options: ['make', 'do', 'create', 'build'],
+    correctAnswer: 'do',
+    points: 2
+  },
+  {
+    id: 'G3',
+    type: 'GRAMMAR',
+    level: 'A2',
+    question: "Choose the correct form: 'They _____ to the cinema yesterday.'",
+    questionAr: "اختر الصيغة الصحيحة: 'هم _____ إلى السينما أمس.'",
+    options: ['go', 'goes', 'went', 'going'],
+    correctAnswer: 'went',
     points: 2
   },
   {
@@ -167,7 +97,7 @@ export const PLACEMENT_TEST_QUESTIONS: PlacementQuestion[] = [
     correctAnswer: '4 PM',
     points: 2
   },
-  // B1 Level
+  // B1 Level (4 questions)
   {
     id: 'R5',
     type: 'READING',
@@ -177,6 +107,26 @@ export const PLACEMENT_TEST_QUESTIONS: PlacementQuestion[] = [
     passage: "Dear Mr. Johnson, I am writing to inquire about the marketing position advertised on your website. I have five years of experience in digital marketing and I am very interested in joining your team. Please find my CV attached. I look forward to hearing from you.",
     options: ['To complain about service', 'To apply for a job', 'To request a refund', 'To schedule a meeting'],
     correctAnswer: 'To apply for a job',
+    points: 3
+  },
+  {
+    id: 'V5',
+    type: 'VOCABULARY',
+    level: 'B1',
+    question: "Choose the synonym for 'intelligent':",
+    questionAr: "اختر المرادف لكلمة 'intelligent':",
+    options: ['Stupid', 'Smart', 'Slow', 'Lazy'],
+    correctAnswer: 'Smart',
+    points: 3
+  },
+  {
+    id: 'G5',
+    type: 'GRAMMAR',
+    level: 'B1',
+    question: "Choose the correct form: 'If I _____ rich, I would travel the world.'",
+    questionAr: "اختر الصيغة الصحيحة: 'لو كنت _____ غنياً، لسافرت حول العالم.'",
+    options: ['am', 'was', 'were', 'be'],
+    correctAnswer: 'were',
     points: 3
   },
   {
@@ -190,7 +140,7 @@ export const PLACEMENT_TEST_QUESTIONS: PlacementQuestion[] = [
     correctAnswer: 'It is popular',
     points: 3
   },
-  // B2 Level
+  // B2 Level (4 questions)
   {
     id: 'R7',
     type: 'READING',
@@ -200,6 +150,26 @@ export const PLACEMENT_TEST_QUESTIONS: PlacementQuestion[] = [
     passage: "While technology has revolutionized education, making information accessible to anyone with an internet connection, it cannot replace the value of face-to-face interaction with teachers. Studies show that students who engage directly with instructors develop stronger critical thinking skills and are better at collaborative problem-solving.",
     options: ['Technology is harmful to education', 'Online learning is superior', 'Direct interaction with teachers remains valuable', 'Schools should eliminate technology'],
     correctAnswer: 'Direct interaction with teachers remains valuable',
+    points: 4
+  },
+  {
+    id: 'V7',
+    type: 'VOCABULARY',
+    level: 'B2',
+    question: "Choose the correct word: 'The company's _____ has increased by 20% this year.'",
+    questionAr: "اختر الكلمة الصحيحة: 'ارتفعت _____ الشركة بنسبة 20٪ هذا العام.'",
+    options: ['revenue', 'revise', 'reveal', 'reverse'],
+    correctAnswer: 'revenue',
+    points: 4
+  },
+  {
+    id: 'G7',
+    type: 'GRAMMAR',
+    level: 'B2',
+    question: "Choose the correct form: 'By the time she arrives, we _____ the meeting.'",
+    questionAr: "اختر الصيغة الصحيحة: 'بحلول وقت وصولها، سنكون قد _____ الاجتماع.'",
+    options: ['finish', 'finished', 'will finish', 'will have finished'],
+    correctAnswer: 'will have finished',
     points: 4
   },
   {
@@ -213,7 +183,7 @@ export const PLACEMENT_TEST_QUESTIONS: PlacementQuestion[] = [
     correctAnswer: 'It has both advantages and disadvantages',
     points: 4
   },
-  // C1 Level
+  // C1 Level (4 questions)
   {
     id: 'R9',
     type: 'READING',
@@ -226,104 +196,6 @@ export const PLACEMENT_TEST_QUESTIONS: PlacementQuestion[] = [
     points: 5
   },
   {
-    id: 'R10',
-    type: 'READING',
-    level: 'C1',
-    question: "What is the rhetorical purpose of the metaphor used in this passage?",
-    questionAr: "ما الغرض البلاغي من الاستعارة المستخدمة في هذا المقطع؟",
-    passage: "The economy is not a machine with predictable outputs based on inputs. Rather, it is more akin to a living organism, constantly adapting to its environment, with interconnected systems that can exhibit unexpected behaviors when stressed. This organic view suggests that economic policies must be flexible and responsive.",
-    options: ['To simplify a complex concept', 'To criticize economic policies', 'To explain why economies are unpredictable', 'To argue for deregulation'],
-    correctAnswer: 'To explain why economies are unpredictable',
-    points: 5
-  },
-
-  // ==================== VOCABULARY QUESTIONS (10) ====================
-  // A1 Level
-  {
-    id: 'V1',
-    type: 'VOCABULARY',
-    level: 'A1',
-    question: "What is the meaning of 'happy'?",
-    questionAr: "ما معنى كلمة 'happy'؟",
-    options: ['حزين', 'سعيد', 'غاضب', 'متعب'],
-    correctAnswer: 'سعيد',
-    points: 1
-  },
-  {
-    id: 'V2',
-    type: 'VOCABULARY',
-    level: 'A1',
-    question: "Which word means 'big' in Arabic?",
-    questionAr: "أي كلمة تعني 'big' بالعربية؟",
-    options: ['صغير', 'كبير', 'طويل', 'قصير'],
-    correctAnswer: 'كبير',
-    points: 1
-  },
-  // A2 Level
-  {
-    id: 'V3',
-    type: 'VOCABULARY',
-    level: 'A2',
-    question: "Choose the correct word: 'I need to _____ my homework before dinner.'",
-    questionAr: "اختر الكلمة الصحيحة: 'أحتاج أن _____ واجبي قبل العشاء.'",
-    options: ['make', 'do', 'create', 'build'],
-    correctAnswer: 'do',
-    points: 2
-  },
-  {
-    id: 'V4',
-    type: 'VOCABULARY',
-    level: 'A2',
-    question: "What does 'delicious' mean?",
-    questionAr: "ما معنى كلمة 'delicious'؟",
-    options: ['Terrible tasting', 'Very tasty', 'Very cold', 'Very hot'],
-    correctAnswer: 'Very tasty',
-    points: 2
-  },
-  // B1 Level
-  {
-    id: 'V5',
-    type: 'VOCABULARY',
-    level: 'B1',
-    question: "Choose the synonym for 'intelligent':",
-    questionAr: "اختر المرادف لكلمة 'intelligent':",
-    options: ['Stupid', 'Smart', 'Slow', 'Lazy'],
-    correctAnswer: 'Smart',
-    points: 3
-  },
-  {
-    id: 'V6',
-    type: 'VOCABULARY',
-    level: 'B1',
-    question: "What does 'accomplish' mean?",
-    questionAr: "ما معنى كلمة 'accomplish'؟",
-    options: ['To fail', 'To achieve', 'To forget', 'To ignore'],
-    correctAnswer: 'To achieve',
-    points: 3
-  },
-  // B2 Level
-  {
-    id: 'V7',
-    type: 'VOCABULARY',
-    level: 'B2',
-    question: "Choose the correct word: 'The company's _____ has increased by 20% this year.'",
-    questionAr: "اختر الكلمة الصحيحة: 'ارتفعت _____ الشركة بنسبة 20٪ هذا العام.'",
-    options: ['revenue', 'revise', 'reveal', 'reverse'],
-    correctAnswer: 'revenue',
-    points: 4
-  },
-  {
-    id: 'V8',
-    type: 'VOCABULARY',
-    level: 'B2',
-    question: "What does 'ambiguous' mean?",
-    questionAr: "ما معنى كلمة 'ambiguous'؟",
-    options: ['Clear and precise', 'Open to multiple interpretations', 'Very exciting', 'Completely wrong'],
-    correctAnswer: 'Open to multiple interpretations',
-    points: 4
-  },
-  // C1 Level
-  {
     id: 'V9',
     type: 'VOCABULARY',
     level: 'C1',
@@ -333,103 +205,6 @@ export const PLACEMENT_TEST_QUESTIONS: PlacementQuestion[] = [
     correctAnswer: 'incendiary',
     points: 5
   },
-  {
-    id: 'V10',
-    type: 'VOCABULARY',
-    level: 'C1',
-    question: "What does 'ubiquitous' mean?",
-    questionAr: "ما معنى كلمة 'ubiquitous'؟",
-    options: ['Rare and valuable', 'Present everywhere', 'Extremely dangerous', 'Completely unknown'],
-    correctAnswer: 'Present everywhere',
-    points: 5
-  },
-
-  // ==================== GRAMMAR QUESTIONS (10) ====================
-  // A1 Level
-  {
-    id: 'G1',
-    type: 'GRAMMAR',
-    level: 'A1',
-    question: "Choose the correct form: 'She _____ a teacher.'",
-    questionAr: "اختر الصيغة الصحيحة: 'هي _____ معلمة.'",
-    options: ['am', 'is', 'are', 'be'],
-    correctAnswer: 'is',
-    points: 1
-  },
-  {
-    id: 'G2',
-    type: 'GRAMMAR',
-    level: 'A1',
-    question: "Choose the correct form: 'I _____ coffee every morning.'",
-    questionAr: "اختر الصيغة الصحيحة: 'أنا _____ القهوة كل صباح.'",
-    options: ['drinks', 'drink', 'drinking', 'drank'],
-    correctAnswer: 'drink',
-    points: 1
-  },
-  // A2 Level
-  {
-    id: 'G3',
-    type: 'GRAMMAR',
-    level: 'A2',
-    question: "Choose the correct form: 'They _____ to the cinema yesterday.'",
-    questionAr: "اختر الصيغة الصحيحة: 'هم _____ إلى السينما أمس.'",
-    options: ['go', 'goes', 'went', 'going'],
-    correctAnswer: 'went',
-    points: 2
-  },
-  {
-    id: 'G4',
-    type: 'GRAMMAR',
-    level: 'A2',
-    question: "Choose the correct form: 'I have _____ to Paris twice.'",
-    questionAr: "اختر الصيغة الصحيحة: 'لقد _____ إلى باريس مرتين.'",
-    options: ['be', 'being', 'been', 'was'],
-    correctAnswer: 'been',
-    points: 2
-  },
-  // B1 Level
-  {
-    id: 'G5',
-    type: 'GRAMMAR',
-    level: 'B1',
-    question: "Choose the correct form: 'If I _____ rich, I would travel the world.'",
-    questionAr: "اختر الصيغة الصحيحة: 'لو كنت _____ غنياً، لسافرت حول العالم.'",
-    options: ['am', 'was', 'were', 'be'],
-    correctAnswer: 'were',
-    points: 3
-  },
-  {
-    id: 'G6',
-    type: 'GRAMMAR',
-    level: 'B1',
-    question: "Choose the correct form: 'The book _____ by the author last year.'",
-    questionAr: "اختر الصيغة الصحيحة: 'الكتاب _____ من قبل المؤلف العام الماضي.'",
-    options: ['writes', 'wrote', 'was written', 'is written'],
-    correctAnswer: 'was written',
-    points: 3
-  },
-  // B2 Level
-  {
-    id: 'G7',
-    type: 'GRAMMAR',
-    level: 'B2',
-    question: "Choose the correct form: 'By the time she arrives, we _____ the meeting.'",
-    questionAr: "اختر الصيغة الصحيحة: 'بحلول وقت وصولها، سنكون قد _____ الاجتماع.'",
-    options: ['finish', 'finished', 'will finish', 'will have finished'],
-    correctAnswer: 'will have finished',
-    points: 4
-  },
-  {
-    id: 'G8',
-    type: 'GRAMMAR',
-    level: 'B2',
-    question: "Choose the correct form: 'She suggested that he _____ the report immediately.'",
-    questionAr: "اختر الصيغة الصحيحة: 'اقترحت أن _____ التقرير فوراً.'",
-    options: ['submits', 'submit', 'submitted', 'would submit'],
-    correctAnswer: 'submit',
-    points: 4
-  },
-  // C1 Level
   {
     id: 'G9',
     type: 'GRAMMAR',
@@ -441,23 +216,24 @@ export const PLACEMENT_TEST_QUESTIONS: PlacementQuestion[] = [
     points: 5
   },
   {
-    id: 'G10',
-    type: 'GRAMMAR',
+    id: 'R10',
+    type: 'READING',
     level: 'C1',
-    question: "Choose the correct form: 'Were it not for your help, I _____ failed.'",
-    questionAr: "اختر الصيغة الصحيحة: 'لولا مساعدتك، _____ فشلت.'",
-    options: ['will have', 'would have', 'had', 'have'],
-    correctAnswer: 'would have',
+    question: "What is the rhetorical purpose of the metaphor used in this passage?",
+    questionAr: "ما الغرض البلاغي من الاستعارة المستخدمة في هذا المقطع؟",
+    passage: "The economy is not a machine with predictable outputs based on inputs. Rather, it is more akin to a living organism, constantly adapting to its environment, with interconnected systems that can exhibit unexpected behaviors when stressed. This organic view suggests that economic policies must be flexible and responsive.",
+    options: ['To simplify a complex concept', 'To criticize economic policies', 'To explain why economies are unpredictable', 'To argue for deregulation'],
+    correctAnswer: 'To explain why economies are unpredictable',
     points: 5
   }
 ]
 
 export const LEVEL_THRESHOLDS = {
-  A1: { min: 0, max: 20 },
-  A2: { min: 21, max: 40 },
-  B1: { min: 41, max: 60 },
-  B2: { min: 61, max: 80 },
-  C1: { min: 81, max: 100 }
+  A1: { min: 0, max: 12 },
+  A2: { min: 13, max: 24 },
+  B1: { min: 25, max: 36 },
+  B2: { min: 37, max: 48 },
+  C1: { min: 49, max: 60 }
 }
 
 export function calculateLevel(score: number, totalPossible: number): string {
@@ -496,7 +272,7 @@ export function getLevelDescription(level: string): { en: string; ar: string } {
   return descriptions[level] || descriptions['A1']
 }
 
-export function getQuestionsByType(type: 'LISTENING' | 'READING' | 'VOCABULARY' | 'GRAMMAR'): PlacementQuestion[] {
+export function getQuestionsByType(type: 'READING' | 'VOCABULARY' | 'GRAMMAR'): PlacementQuestion[] {
   return PLACEMENT_TEST_QUESTIONS.filter(q => q.type === type)
 }
 

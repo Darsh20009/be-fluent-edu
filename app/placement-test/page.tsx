@@ -27,7 +27,7 @@ import Link from 'next/link'
 
 interface Question {
   id: string
-  type: 'LISTENING' | 'READING' | 'VOCABULARY' | 'GRAMMAR'
+  type: 'READING' | 'VOCABULARY' | 'GRAMMAR'
   level: string
   question: string
   questionAr: string
@@ -55,7 +55,6 @@ interface TestResult {
   level: string
   levelDescription: { en: string; ar: string }
   sectionScores: {
-    listening: SectionScore
     reading: SectionScore
     vocabulary: SectionScore
     grammar: SectionScore
@@ -63,27 +62,14 @@ interface TestResult {
 }
 
 const SECTION_INFO = {
-  LISTENING: {
-    icon: Headphones,
-    title: 'Listening',
-    titleAr: 'الاستماع',
-    color: 'from-blue-500 to-blue-600',
-    bgColor: 'bg-blue-500/10',
-    borderColor: 'border-blue-500/30',
-    textColor: 'text-blue-400',
-    recommendation: {
-      en: 'Practice with podcasts, audiobooks, and English media. Start with slower content and gradually increase speed.',
-      ar: 'تدرب مع البودكاست والكتب الصوتية والوسائط الإنجليزية. ابدأ بالمحتوى البطيء وزد السرعة تدريجياً.'
-    }
-  },
   READING: {
     icon: BookOpen,
     title: 'Reading',
     titleAr: 'القراءة',
-    color: 'from-green-500 to-green-600',
-    bgColor: 'bg-green-500/10',
-    borderColor: 'border-green-500/30',
-    textColor: 'text-green-400',
+    color: 'from-[#8B4513] to-[#5D4037]',
+    bgColor: 'bg-[#8B4513]/10',
+    borderColor: 'border-[#8B4513]/30',
+    textColor: 'text-[#8B4513]',
     recommendation: {
       en: 'Read graded readers at your level. Focus on understanding context before looking up words.',
       ar: 'اقرأ كتب القراءة المتدرجة بمستواك. ركز على فهم السياق قبل البحث عن الكلمات.'
@@ -93,10 +79,10 @@ const SECTION_INFO = {
     icon: Type,
     title: 'Vocabulary',
     titleAr: 'المفردات',
-    color: 'from-purple-500 to-purple-600',
-    bgColor: 'bg-purple-500/10',
-    borderColor: 'border-purple-500/30',
-    textColor: 'text-purple-400',
+    color: 'from-[#8B4513] to-[#5D4037]',
+    bgColor: 'bg-[#8B4513]/10',
+    borderColor: 'border-[#8B4513]/30',
+    textColor: 'text-[#8B4513]',
     recommendation: {
       en: 'Use flashcards and spaced repetition. Learn words in context, not isolation. Practice daily.',
       ar: 'استخدم البطاقات التعليمية والتكرار المتباعد. تعلم الكلمات في سياقها. تدرب يومياً.'
@@ -106,10 +92,10 @@ const SECTION_INFO = {
     icon: PenTool,
     title: 'Grammar',
     titleAr: 'القواعد',
-    color: 'from-orange-500 to-orange-600',
-    bgColor: 'bg-orange-500/10',
-    borderColor: 'border-orange-500/30',
-    textColor: 'text-orange-400',
+    color: 'from-[#8B4513] to-[#5D4037]',
+    bgColor: 'bg-[#8B4513]/10',
+    borderColor: 'border-[#8B4513]/30',
+    textColor: 'text-[#8B4513]',
     recommendation: {
       en: 'Study grammar rules with examples. Practice through writing and speaking. Focus on common patterns.',
       ar: 'ادرس قواعد اللغة مع الأمثلة. تدرب من خلال الكتابة والتحدث. ركز على الأنماط الشائعة.'
@@ -265,10 +251,18 @@ export default function PlacementTestPage() {
 
   useEffect(() => {
     let interval: NodeJS.Timeout
+    const TEST_DURATION_SECONDS = 10 * 60 // 10 minutes
+    
     if (started && !result) {
       interval = setInterval(() => {
         if (startTime) {
-          setElapsedTime(Math.floor((new Date().getTime() - startTime.getTime()) / 1000))
+          const elapsed = Math.floor((new Date().getTime() - startTime.getTime()) / 1000)
+          setElapsedTime(elapsed)
+          
+          if (elapsed >= TEST_DURATION_SECONDS) {
+            handleSubmit()
+            clearInterval(interval)
+          }
         }
       }, 1000)
     }
@@ -344,7 +338,7 @@ export default function PlacementTestPage() {
   }
 
   const currentQuestion = questions[currentIndex]
-  const currentSection = currentQuestion?.type
+  const currentSection = currentQuestion?.type as keyof typeof SECTION_INFO
   const sectionInfo = currentSection ? SECTION_INFO[currentSection] : null
 
   const getQuestionsBySection = (type: string) => questions.filter(q => q.type === type)
@@ -379,11 +373,11 @@ export default function PlacementTestPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5F5DC] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-white text-lg">جاري تحميل الاختبار...</p>
-          <p className="text-gray-400 text-sm mt-2">Loading placement test...</p>
+          <div className="w-16 h-16 border-4 border-[#8B4513] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-[#5D4037] text-lg font-medium">جاري تحميل الاختبار...</p>
+          <p className="text-[#8B4513]/60 text-sm mt-2">Loading placement test...</p>
         </div>
       </div>
     )
@@ -391,21 +385,21 @@ export default function PlacementTestPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
-        <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 text-white text-center max-w-md">
-          <XCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-4">حدث خطأ</h2>
-          <p className="text-gray-300 mb-6">{error}</p>
+      <div className="min-h-screen bg-[#F5F5DC] flex items-center justify-center px-4">
+        <div className="bg-white/80 backdrop-blur-md rounded-3xl p-8 shadow-xl border border-[#D2B48C] text-center max-w-md">
+          <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-4 text-[#5D4037]">حدث خطأ</h2>
+          <p className="text-[#8B4513] mb-6">{error}</p>
           <div className="flex gap-4 justify-center">
             <button
               onClick={fetchQuestions}
-              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all"
+              className="px-6 py-3 bg-[#8B4513] text-white rounded-xl font-semibold hover:bg-[#5D4037] transition-all shadow-md"
             >
               إعادة المحاولة
             </button>
             <Link
               href="/dashboard/student"
-              className="px-6 py-3 bg-white/10 rounded-xl font-semibold hover:bg-white/20 transition-all"
+              className="px-6 py-3 bg-[#D2B48C]/20 text-[#8B4513] rounded-xl font-semibold hover:bg-[#D2B48C]/40 transition-all border border-[#D2B48C]"
             >
               العودة للوحة التحكم
             </Link>
@@ -419,16 +413,16 @@ export default function PlacementTestPage() {
     const levelInfo = LEVEL_INFO[result.level] || LEVEL_INFO.A1
     const weakestSection = getWeakestSection()
     const strongestSection = getStrongestSection()
-    const weakSectionInfo = weakestSection ? SECTION_INFO[weakestSection] : null
-    const strongSectionInfo = strongestSection ? SECTION_INFO[strongestSection] : null
+    const weakSectionInfo = weakestSection ? (SECTION_INFO as any)[weakestSection] : null
+    const strongSectionInfo = strongestSection ? (SECTION_INFO as any)[strongestSection] : null
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8 px-4">
+      <div className="min-h-screen bg-[#F5F5DC] py-8 px-4 font-sans">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-white"
+            className="text-[#5D4037]"
           >
             <div className="text-center mb-8">
               <motion.div
@@ -436,20 +430,20 @@ export default function PlacementTestPage() {
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", delay: 0.2 }}
               >
-                <Trophy className="w-20 h-20 text-yellow-400 mx-auto mb-4" />
+                <Trophy className="w-20 h-20 text-[#8B4513] mx-auto mb-4" />
               </motion.div>
               <h1 className="text-3xl font-bold mb-2">نتائج اختبار تحديد المستوى</h1>
-              <p className="text-gray-300">Placement Test Results</p>
+              <p className="text-[#8B4513]/70">Placement Test Results</p>
             </div>
 
             <div className="flex justify-center mb-6">
-              <div className="bg-white/10 rounded-xl p-1 flex gap-1">
+              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-1 flex gap-1 shadow-sm border border-[#D2B48C]">
                 <button
                   onClick={() => setActiveResultTab('overview')}
                   className={`px-6 py-2 rounded-lg font-medium transition-all ${
                     activeResultTab === 'overview' 
-                      ? 'bg-purple-500 text-white' 
-                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                      ? 'bg-[#8B4513] text-white shadow-md' 
+                      : 'text-[#8B4513] hover:bg-[#D2B48C]/20'
                   }`}
                 >
                   النتيجة العامة
@@ -458,8 +452,8 @@ export default function PlacementTestPage() {
                   onClick={() => setActiveResultTab('details')}
                   className={`px-6 py-2 rounded-lg font-medium transition-all ${
                     activeResultTab === 'details' 
-                      ? 'bg-purple-500 text-white' 
-                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                      ? 'bg-[#8B4513] text-white shadow-md' 
+                      : 'text-[#8B4513] hover:bg-[#D2B48C]/20'
                   }`}
                 >
                   التفاصيل
@@ -468,8 +462,8 @@ export default function PlacementTestPage() {
                   onClick={() => setActiveResultTab('recommendations')}
                   className={`px-6 py-2 rounded-lg font-medium transition-all ${
                     activeResultTab === 'recommendations' 
-                      ? 'bg-purple-500 text-white' 
-                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                      ? 'bg-[#8B4513] text-white shadow-md' 
+                      : 'text-[#8B4513] hover:bg-[#D2B48C]/20'
                   }`}
                 >
                   التوصيات
@@ -538,7 +532,7 @@ export default function PlacementTestPage() {
                             </p>
                           </div>
                         </div>
-                        <p className="text-gray-300 text-sm">
+                        <p className="text-[#5D4037]/70 text-sm">
                           أحسنت! أنت متميز في هذا المجال. استمر في الممارسة للحفاظ على مستواك.
                         </p>
                       </div>
@@ -554,7 +548,7 @@ export default function PlacementTestPage() {
                             </p>
                           </div>
                         </div>
-                        <p className="text-gray-300 text-sm">
+                        <p className="text-[#5D4037]/70 text-sm">
                           {weakSectionInfo.recommendation.ar}
                         </p>
                       </div>
@@ -575,7 +569,8 @@ export default function PlacementTestPage() {
                   
                   <div className="space-y-6">
                     {Object.entries(SECTION_INFO).map(([type, info]) => {
-                      const score = result.sectionScores[type.toLowerCase() as keyof typeof result.sectionScores]
+                      const score = (result.sectionScores as any)[type.toLowerCase()]
+                      if (!score) return null
                       const Icon = info.icon
                       const performanceLabel = score.percentage >= 80 ? 'ممتاز' : 
                                                score.percentage >= 60 ? 'جيد' :

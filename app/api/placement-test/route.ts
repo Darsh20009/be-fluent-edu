@@ -20,7 +20,6 @@ export async function GET(request: NextRequest) {
       options: q.options,
       passage: q.passage,
       passageAr: q.passageAr,
-      audioUrl: q.audioUrl,
       points: q.points
     }))
 
@@ -76,7 +75,6 @@ export async function POST(request: NextRequest) {
 
     const correctAnswers = results.filter(r => r.correct).length
     const sectionScores = {
-      listening: calculateSectionScore(results, 'L'),
       reading: calculateSectionScore(results, 'R'),
       vocabulary: calculateSectionScore(results, 'V'),
       grammar: calculateSectionScore(results, 'G')
