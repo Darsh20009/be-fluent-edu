@@ -231,6 +231,17 @@ export default function Home() {
                 </div>
               </div>
 
+              <div className="flex justify-center mb-12">
+                <div className="bg-white p-1 rounded-2xl shadow-lg border border-gray-200 flex">
+                  <button className="px-8 py-3 rounded-xl font-bold transition-all bg-[#004E89] text-white shadow-md">
+                    اشتراك Basic (جروب)
+                  </button>
+                  <button className="px-8 py-3 rounded-xl font-bold transition-all text-gray-500 hover:bg-gray-100">
+                    اشتراك Gold (برايفت)
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-12">
                 {[
                   { name: "Month Basic", price: "1500", lessons: "8", duration: "1 Month", gradient: "from-blue-500 to-blue-600", popular: false },

@@ -1,14 +1,13 @@
 import { PrismaClient } from '@prisma/client'
+
 const prisma = new PrismaClient()
 
 async function main() {
+  console.log('Starting package update...')
+  
   // Clear existing packages
-  try {
-    await prisma.package.deleteMany({})
-    console.log('Cleared existing packages')
-  } catch (e) {
-    console.error('Error clearing packages:', e)
-  }
+  await prisma.package.deleteMany({})
+  console.log('Cleared existing packages')
 
   const packages = [
     // Basic (Group) - اشتراك Basic
@@ -78,7 +77,7 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error(e)
+    console.error('Error updating packages:', e)
     process.exit(1)
   })
   .finally(async () => {
