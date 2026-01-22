@@ -256,7 +256,7 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
                 </div>
 
                 <div className="text-3xl font-bold text-primary-600 mb-6">
-                  {pkg.price} ريال
+                  {pkg.price} جنيه
                 </div>
               </div>
 

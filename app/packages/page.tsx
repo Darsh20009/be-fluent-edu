@@ -75,7 +75,7 @@ export default async function PackagesPage() {
                   <div className="text-center mb-4 sm:mb-6">
                     <p className="text-3xl sm:text-4xl md:text-5xl font-bold text-black mb-2">
                       {pkg.price}
-                      <span className="text-xl sm:text-2xl text-black"> SAR</span>
+                      <span className="text-xl sm:text-2xl text-black"> EGP</span>
                     </p>
                     <p className="text-sm sm:text-base text-black">
                       {Math.ceil(pkg.durationDays / 30)} month(s) / شهر
