@@ -175,6 +175,13 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
     )
   }
 
+  const [tier, setTier] = useState<'BASIC' | 'GOLD'>('BASIC')
+  
+  const filteredPackages = packages.filter(pkg => {
+    if (tier === 'BASIC') return pkg.title.toLowerCase().includes('basic')
+    return pkg.title.toLowerCase().includes('gold')
+  }).sort((a, b) => a.price - b.price)
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -183,17 +190,30 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
     )
   }
 
-  if (!packages || packages.length === 0) {
-    return (
-      <Alert variant="info">
-        <p>لا توجد باقات متاحة حالياً</p>
-      </Alert>
-    )
-  }
-
   return (
-    <div className="space-y-6">
-      {/* Cart Summary */}
+    <div className="space-y-8">
+      {/* Tier Switcher */}
+      <div className="flex justify-center">
+        <div className="bg-gray-100 p-1 rounded-xl flex shadow-inner">
+          <button
+            onClick={() => setTier('BASIC')}
+            className={`px-6 py-2 rounded-lg font-bold transition-all ${
+              tier === 'BASIC' ? 'bg-white text-[#004E89] shadow-sm' : 'text-gray-500'
+            }`}
+          >
+            Basic (جروب)
+          </button>
+          <button
+            onClick={() => setTier('GOLD')}
+            className={`px-6 py-2 rounded-lg font-bold transition-all ${
+              tier === 'GOLD' ? 'bg-yellow-500 text-white shadow-sm' : 'text-gray-500'
+            }`}
+          >
+            Gold (برايفت)
+          </button>
+        </div>
+      </div>
+
       {cart && cart.items && cart.items.length > 0 && (
         <Alert variant="success">
           <div className="flex items-center justify-between">
@@ -211,33 +231,21 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
         </Alert>
       )}
 
-      {/* Packages Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {packages.map((pkg) => {
-          if (!pkg || !pkg.id) {
-            console.warn('Skipping invalid package in render:', pkg)
-            return null
-          }
-
+        {filteredPackages.map((pkg) => {
           const inCart = isInCart(pkg.id)
           const hasSubscription = hasActiveSubscription(pkg.id)
           const isLoading = actionLoading === pkg.id
 
           return (
-            <Card key={pkg.id} className="flex flex-col">
+            <Card key={pkg.id} className={`flex flex-col border-2 ${tier === 'GOLD' ? 'border-yellow-200' : 'border-blue-50'}`}>
               <div className="p-6 flex-1">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="text-xl font-bold text-gray-900 mb-1">
                       {pkg.titleAr || pkg.title}
                     </h3>
-                    <p className="text-sm text-gray-600">
-                      {pkg.descriptionAr || pkg.description}
-                    </p>
                   </div>
-                  {pkg.price === 0 && (
-                    <Badge variant="success">مجاني</Badge>
-                  )}
                 </div>
 
                 <div className="space-y-3 mb-6">
@@ -249,10 +257,6 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
                     <Calendar className="w-4 h-4" />
                     <span className="text-sm">صالحة لمدة {pkg.durationDays} يوم</span>
                   </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <BookOpen className="w-4 h-4" />
-                    <span className="text-sm">60 دقيقة لكل حصة</span>
-                  </div>
                 </div>
 
                 <div className="text-3xl font-bold text-primary-600 mb-6">
@@ -262,30 +266,17 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
 
               <div className="p-6 pt-0">
                 {hasSubscription ? (
-                  <Button
-                    fullWidth
-                    variant="success"
-                    disabled
-                  >
+                  <Button fullWidth variant="success" disabled>
                     <Check className="w-4 h-4 ml-2" />
                     مشترك بالفعل
                   </Button>
                 ) : inCart ? (
-                  <Button
-                    fullWidth
-                    variant="outline"
-                    onClick={() => removeFromCart(pkg.id)}
-                    loading={isLoading}
-                  >
+                  <Button fullWidth variant="outline" onClick={() => removeFromCart(pkg.id)} loading={isLoading}>
                     <X className="w-4 h-4 ml-2" />
-                    إزالة من السلة
+                    إزالة
                   </Button>
                 ) : (
-                  <Button
-                    fullWidth
-                    onClick={() => addToCart(pkg.id)}
-                    loading={isLoading}
-                  >
+                  <Button fullWidth onClick={() => addToCart(pkg.id)} loading={isLoading}>
                     <ShoppingCart className="w-4 h-4 ml-2" />
                     أضف للسلة
                   </Button>

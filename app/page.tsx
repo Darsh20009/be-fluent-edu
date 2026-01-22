@@ -220,11 +220,22 @@ export default function Home() {
                 </p>
               </div>
 
+              <div className="flex justify-center mb-12">
+                <div className="bg-white p-1 rounded-2xl shadow-lg border border-gray-200 flex">
+                  <button className="px-8 py-3 rounded-xl font-bold transition-all bg-[#004E89] text-white shadow-md">
+                    اشتراك Basic (جروب)
+                  </button>
+                  <button className="px-8 py-3 rounded-xl font-bold transition-all text-gray-500 hover:bg-gray-100">
+                    اشتراك Gold (برايفت)
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-12">
                 {[
-                  { name: "Monthly Group", price: "1500", lessons: "8", duration: "1 month", gradient: "from-blue-500 to-blue-600", popular: false },
-                  { name: "Monthly Private", price: "3000", lessons: "8", duration: "1 month", gradient: "from-orange-500 to-red-600", popular: true },
-                  { name: "Quarterly Group", price: "3500", lessons: "24", duration: "3 months", gradient: "from-purple-500 to-purple-600", popular: false },
+                  { name: "Month Basic", price: "1500", lessons: "8", duration: "1 Month", gradient: "from-blue-500 to-blue-600", popular: false },
+                  { name: "3 Months Basic", price: "3500", lessons: "24", duration: "3 Months", gradient: "from-purple-500 to-purple-600", popular: true },
+                  { name: "6 Months Basic", price: "6000", lessons: "48", duration: "6 Months", gradient: "from-gray-500 to-gray-600", popular: false },
                 ].map((pkg, index) => (
                   <div
                     key={index}
