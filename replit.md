@@ -1,10 +1,14 @@
-# Youspeak - English Learning Platform
+# Be Fluent - English Learning Platform
 
 ### Overview
-Youspeak is a bilingual (Arabic/English) online English learning platform designed to provide an interactive and comprehensive environment for learning English. It offers live classes, advanced vocabulary building tools, homework management, and a complete learning management system. The platform integrates AI for grammar checking, features interactive vocabulary discovery, and provides robust student, teacher, and admin dashboards. The project aims to deliver an effective and user-friendly learning experience to a broad market.
+Be Fluent is a bilingual (Arabic/English) online English learning platform designed to provide an interactive and comprehensive environment for learning English. It offers live classes, advanced vocabulary building tools, homework management, and a complete learning management system. The platform integrates AI for grammar checking, features interactive vocabulary discovery, and provides robust student, teacher, and admin dashboards.
 
 ### User Preferences
-I prefer simple language. I want iterative development. Ask before making major changes. I prefer detailed explanations. Do not make changes to the folder Z. Do not make changes to the file Y.
+- Name: Be Fluent
+- Colors: Primary Green (#10B981), Dark Gray (#1F2937), Off-white/Soft White (#F9FAFB)
+- Language: Full Arabic support with English options.
+- Features: Daily WhatsApp follow-up, 24/7 support.
+- Mobile: PWA/Download options.
 
 ### System Architecture
 The platform utilizes a modern web stack: **Next.js 16 (App Router)** with **React 19**, **TypeScript**, and **Tailwind CSS v4** for a mobile-responsive frontend with dark mode support. The backend uses **Next.js API Routes** and a custom **Node.js server** for real-time functionalities.

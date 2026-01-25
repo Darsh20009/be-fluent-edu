@@ -8,191 +8,108 @@ import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, 
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F1E8] via-[#E8DCC8] to-[#F5F1E8] text-black">
+    <div className="min-h-screen bg-[#F9FAFB] text-[#1F2937]">
       <AppHeader variant="marketing">
-        <nav className="hidden md:flex items-center gap-4 mr-4">
-          <Link
-            href="/placement-test"
-            className="px-4 py-2 text-sm font-semibold text-[#004E89] hover:bg-[#004E89]/10 rounded-lg transition-all duration-300 flex items-center gap-2"
-          >
-            <span>🎯</span>
-            <span>اختبار تحديد المستوى</span>
-          </Link>
-          <Link
-            href="/listening"
-            className="px-4 py-2 text-sm font-semibold text-[#004E89] hover:bg-[#004E89]/10 rounded-lg transition-all duration-300 flex items-center gap-2"
-          >
-            <span>🎧</span>
-            <span>الاستماع</span>
-          </Link>
-          <Link
-            href="/grammar"
-            className="px-4 py-2 text-sm font-semibold text-[#004E89] hover:bg-[#004E89]/10 rounded-lg transition-all duration-300 flex items-center gap-2"
-          >
-            <span>📚</span>
-            <span>القواعد</span>
-          </Link>
+        <div className="flex items-center gap-2">
+          <Image src="/logo.png" alt="Be Fluent" width={40} height={40} className="rounded-lg" />
+          <span className="text-xl font-bold text-[#1F2937]">Be Fluent</span>
+        </div>
+        <nav className="hidden md:flex items-center gap-6 mr-auto px-8">
+          <Link href="/" className="text-gray-600 hover:text-[#10B981] font-medium transition-colors">الرئيسية</Link>
+          <Link href="/packages" className="text-gray-600 hover:text-[#10B981] font-medium transition-colors">باقاتنا</Link>
+          <Link href="/placement-test" className="text-gray-600 hover:text-[#10B981] font-medium transition-colors">اختبار المستوى</Link>
         </nav>
-        <Link
-          href="/auth/login"
-          className="px-6 py-3 text-base rounded-xl bg-[#004E89] text-white hover:bg-[#003A6B] transition-all duration-300 shadow-lg hover:shadow-xl font-semibold"
-        >
-          Login
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/auth/login"
+            className="px-6 py-2 text-sm font-bold rounded-xl border-2 border-[#10B981] text-[#10B981] hover:bg-[#10B981] hover:text-white transition-all duration-300"
+          >
+            تسجيل الدخول
+          </Link>
+          <button className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-200 transition-all">
+            <span>📥</span>
+            تحميل التطبيق
+          </button>
+        </div>
       </AppHeader>
 
       <main className="w-full overflow-x-hidden">
-        {/* Hero Section - More Professional */}
-        <section className="relative w-full py-8 sm:py-12 md:py-16 lg:py-24 xl:py-32 overflow-hidden">
-
-          {/* Geometric Decorations */}
-          <div className="absolute top-32 right-20 w-20 h-20 border-4 border-[#004E89]/20 rounded-lg rotate-12 hidden lg:block"></div>
-          <div className="absolute bottom-40 left-16 w-16 h-16 border-4 border-[#FF6B35]/20 rounded-full hidden lg:block"></div>
-          <div className="absolute top-1/3 left-1/4 w-12 h-12 bg-gradient-to-br from-[#004E89]/10 to-transparent rounded-lg rotate-45 hidden lg:block"></div>
-
-          <div className="container mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-            <div className="text-center max-w-full lg:max-w-5xl mx-auto">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-white border border-[#004E89]/20 px-6 py-3 rounded-full mb-8 shadow-lg">
-                <Star className="w-5 h-5 text-[#FFD700] fill-[#FFD700]" />
-                <span className="text-sm font-bold text-[#004E89] tracking-wide">
-                  PROFESSIONAL ENGLISH LEARNING PLATFORM
-                </span>
-                <Star className="w-5 h-5 text-[#FFD700] fill-[#FFD700]" />
-              </div>
-
-              {/* Main Heading */}
-              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold mb-4 sm:mb-6 leading-tight px-4">
-                <span className="block text-[#1a1a1a] mb-2 sm:mb-3">
-                  Master English
-                </span>
-                <span className="block bg-gradient-to-r from-[#004E89] via-[#0066CC] to-[#004E89] bg-clip-text text-transparent">
-                  with Excellence
-                </span>
-              </h1>
-
-              {/* Subtitle */}
-              <div className="max-w-3xl mx-auto mb-8 sm:mb-12 space-y-4 px-4">
-                <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-700 font-medium leading-relaxed">
-                  Transform your future with interactive live classes led by expert instructors
+        {/* Hero Section */}
+        <section className="relative w-full py-12 sm:py-20 lg:py-32 bg-[#F9FAFB]">
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="flex flex-col lg:flex-row items-center gap-12">
+              <div className="lg:w-1/2 text-right lg:text-right" dir="rtl">
+                <div className="inline-flex items-center gap-2 bg-[#10B981]/10 px-4 py-2 rounded-full mb-6 border border-[#10B981]/20">
+                  <span className="w-2 h-2 bg-[#10B981] rounded-full animate-pulse"></span>
+                  <span className="text-sm font-bold text-[#047857]">مستقبلك يبدأ بطلاقة لسانك</span>
+                </div>
+                <h1 className="text-4xl sm:text-6xl font-black text-[#1F2937] mb-6 leading-tight">
+                  تعلم الإنجليزية <br />
+                  <span className="text-[#10B981]">بذكاء وواقعية</span>
+                </h1>
+                <p className="text-lg sm:text-xl text-gray-600 mb-10 leading-relaxed max-w-xl">
+                  منصة Be Fluent توفر لك تجربة تعليمية فريدة تجمع بين الحصص المباشرة والمتابعة اليومية عبر الواتساب لضمان وصولك للطلاقة.
                 </p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Link
+                    href="/auth/register"
+                    className="px-10 py-5 bg-[#10B981] text-white rounded-2xl text-lg font-bold shadow-lg hover:shadow-2xl hover:scale-105 transition-all text-center"
+                  >
+                    ابدأ رحلتك الآن
+                  </Link>
+                  <a
+                    href="https://wa.me/201091515594"
+                    className="px-10 py-5 bg-white border-2 border-[#10B981] text-[#10B981] rounded-2xl text-lg font-bold hover:bg-[#10B981]/5 transition-all text-center flex items-center justify-center gap-2"
+                  >
+                    <span>تواصل معنا</span>
+                  </a>
+                </div>
               </div>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center max-w-2xl mx-auto mb-12 sm:mb-16 px-4">
-                <Link
-                  href="/auth/register"
-                  className="group relative w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-[#004E89] to-[#0066CC] text-white rounded-2xl text-base sm:text-lg font-bold transition-all duration-300 shadow-2xl hover:shadow-3xl hover:scale-105 text-center overflow-hidden"
-                >
-                  <span className="relative z-10 flex items-center justify-center gap-3">
-                    <Zap className="w-6 h-6" />
-                    Start Your Journey
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                </Link>
-                <a
-                  href="https://wa.me/201091515594"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 bg-white border-2 border-[#25D366] text-[#25D366] rounded-2xl text-base sm:text-lg font-bold hover:bg-[#25D366] hover:text-white transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 text-center"
-                >
-                  <span className="flex items-center justify-center gap-3">
-                    <MessageCircle className="w-6 h-6" />
-                    Contact Us
-                  </span>
-                </a>
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 xs:gap-3 sm:gap-4 md:gap-6 max-w-full md:max-w-4xl mx-auto px-2 xs:px-3 sm:px-4">
-                {[
-                  { number: "500+", label: "Students" },
-                  { number: "50+", label: "Teachers" },
-                  { number: "1000+", label: "Classes" },
-                  { number: "98%", label: "Satisfaction" }
-                ].map((stat, index) => (
-                  <div key={index} className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg border border-[#004E89]/10">
-                    <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#004E89] mb-1 sm:mb-2">{stat.number}</div>
-                    <div className="text-xs sm:text-sm font-semibold text-gray-700">{stat.label}</div>
-                  </div>
-                ))}
+              <div className="lg:w-1/2 relative">
+                <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl border-8 border-white">
+                  <Image src="/logo.png" alt="Be Fluent" width={600} height={400} className="w-full h-auto object-cover" />
+                </div>
+                <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-[#10B981] rounded-full opacity-20 blur-2xl"></div>
+                <div className="absolute -top-6 -left-6 w-32 h-32 bg-[#1F2937] rounded-full opacity-10 blur-2xl"></div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Features Section - Premium Design */}
-        <section className="w-full py-8 sm:py-12 md:py-16 lg:py-20 bg-white">
-          <div className="container mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 w-full">
-            <div className="text-center mb-8 sm:mb-12 md:mb-16">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 sm:mb-4 px-4">
-                <span className="text-[#1a1a1a]">Why Choose </span>
-                <span className="text-[#004E89]">Youspeak</span>
-              </h2>
-              <div className="w-24 h-1.5 bg-gradient-to-r from-transparent via-[#004E89] to-transparent mx-auto"></div>
+        {/* Features Section */}
+        <section className="py-20 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-black text-[#1F2937] mb-4">ما الذي يميز Be Fluent؟</h2>
+              <div className="w-20 h-1 bg-[#10B981] mx-auto"></div>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {[
                 {
-                  icon: <Video className="w-8 h-8 sm:w-10 sm:h-10" />,
-                  gradient: "from-blue-500 to-blue-700",
-                  title: "Live Interactive Classes",
-                  description: "Engage in real-time 60-minute sessions with professional teachers"
+                  icon: "📱",
+                  title: "متابعة يومية عبر الواتساب",
+                  description: "لا نكتفي بالحصص فقط، بل نتابع تطورك يومياً عبر الواتساب لضمان استمرارية التعلم."
                 },
                 {
-                  icon: <Target className="w-10 h-10" />,
-                  gradient: "from-orange-500 to-red-600",
-                  title: "Personalized Assessment",
-                  description: "Free 20-minute placement test to identify your level"
+                  icon: "👥",
+                  title: "حصص مباشرة تفاعلية",
+                  description: "تعلم مع نخبة من المدرسين في بيئة تفاعلية حقيقية تركز على مهارات التحدث."
                 },
                 {
-                  icon: <BookOpen className="w-10 h-10" />,
-                  gradient: "from-green-500 to-emerald-700",
-                  title: "Smart Learning System",
-                  description: "AI-powered vocabulary tracking and progress monitoring"
+                  icon: "⚡",
+                  title: "نظام تعلم ذكي",
+                  description: "نستخدم تقنيات حديثة لتتبع مفرداتك وتقدمك الدراسي بشكل آلي ودقيق."
                 },
                 {
-                  icon: <Users className="w-10 h-10" />,
-                  gradient: "from-purple-500 to-purple-700",
-                  title: "Expert Instructors",
-                  description: "Certified professionals with years of teaching experience"
-                },
-                {
-                  icon: <MessageCircle className="w-10 h-10" />,
-                  gradient: "from-pink-500 to-rose-700",
-                  title: "24/7 Support",
-                  description: "Round-the-clock assistance for your learning journey"
-                },
-                {
-                  icon: <Award className="w-10 h-10" />,
-                  gradient: "from-yellow-500 to-orange-600",
-                  title: "Recognized Certificates",
-                  description: "Industry-recognized completion certificates"
+                  icon: "🛠️",
+                  title: "دعم فني 24/7",
+                  description: "فريق دعم فني متواجد دائماً لمساعدتك في أي وقت خلال رحلتك التعليمية."
                 }
-              ].map((feature, index) => (
-                <div
-                  key={index}
-                  className="group relative bg-white rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 border border-gray-100 overflow-hidden"
-                >
-                  {/* Gradient Background on Hover */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
-
-                  <div className="relative z-10">
-                    <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center text-white mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg`}>
-                      {feature.icon}
-                    </div>
-                    <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4">
-                      {feature.title}
-                    </h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </div>
-
-                  {/* Corner Accent */}
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#004E89]/5 to-transparent rounded-bl-3xl"></div>
+              ].map((f, i) => (
+                <div key={i} className="p-8 rounded-3xl bg-[#F9FAFB] hover:bg-white border-2 border-transparent hover:border-[#10B981]/20 transition-all text-center group">
+                  <div className="text-5xl mb-6 group-hover:scale-110 transition-transform">{f.icon}</div>
+                  <h3 className="text-xl font-bold text-[#1F2937] mb-4">{f.title}</h3>
+                  <p className="text-gray-600 leading-relaxed">{f.description}</p>
                 </div>
               ))}
             </div>

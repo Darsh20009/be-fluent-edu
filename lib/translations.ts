@@ -10,19 +10,21 @@ export const translations = {
     dashboard: 'لوحة التحكم',
     
     // Home Page
-    heroTitle: 'تعلم الإنجليزية مع مستر يوسف',
-    heroSubtitle: 'منصة تعليم اللغة الإنجليزية عبر الإنترنت مع دروس حية تفاعلية',
-    joinUs: 'انضم إلينا',
-    contactWhatsApp: 'واتساب',
+    heroTitle: 'تعلم الإنجليزية بطلاقة مع Be Fluent',
+    heroSubtitle: 'منصة تعليم اللغة الإنجليزية الأكثر تطوراً - طلاقتك تبدأ من هنا',
+    joinUs: 'ابدأ رحلتك الآن',
+    contactWhatsApp: 'واتساب المتابعة',
     
     // Features
-    liveClasses: 'حصص مباشرة',
-    levelAssessment: 'تقييم المستوى',
-    smartLearning: 'تعلم ذكي',
+    liveClasses: 'حصص مباشرة تفاعلية',
+    levelAssessment: 'تقييم مستوى دقيق',
+    smartLearning: 'نظام تعلم ذكي',
+    dailyFollowup: 'متابعة يومية شاملة',
+    whatsappSupport: 'دعم عبر الواتساب 24/7',
     
     // Packages
-    ourPackages: 'باقاتنا',
-    viewAllPackages: 'عرض جميع الباقات',
+    ourPackages: 'خطط الاشتراك',
+    viewAllPackages: 'عرض جميع الخطط',
     singleLevel: 'مستوى واحد',
     monthly: 'شهري',
     quarterly: 'ربع سنوي',
@@ -110,17 +112,17 @@ export const translations = {
     // Navigation
     home: 'Home',
     about: 'About',
-    packages: 'Packages',
+    packages: 'Plans',
     contact: 'Contact',
     login: 'Login',
     logout: 'Logout',
     dashboard: 'Dashboard',
     
     // Home Page
-    heroTitle: 'Learn English with Mister Youssef',
-    heroSubtitle: 'Professional online English learning platform with live interactive classes',
-    joinUs: 'Join Us',
-    contactWhatsApp: 'WhatsApp',
+    heroTitle: 'Speak English Fluently with Be Fluent',
+    heroSubtitle: 'The most advanced English learning platform - Your fluency starts here',
+    joinUs: 'Start Now',
+    contactWhatsApp: 'WhatsApp Support',
     
     // Features
     liveClasses: 'Live Classes',
