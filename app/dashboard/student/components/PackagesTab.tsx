@@ -198,7 +198,7 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
           <button
             onClick={() => setTier('BASIC')}
             className={`px-6 py-2 rounded-lg font-bold transition-all ${
-              tier === 'BASIC' ? 'bg-white text-[#004E89] shadow-sm' : 'text-gray-500'
+              tier === 'BASIC' ? 'bg-white text-[#10B981] shadow-sm' : 'text-gray-500'
             }`}
           >
             Basic (جروب)
@@ -206,7 +206,7 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
           <button
             onClick={() => setTier('GOLD')}
             className={`px-6 py-2 rounded-lg font-bold transition-all ${
-              tier === 'GOLD' ? 'bg-yellow-500 text-white shadow-sm' : 'text-gray-500'
+              tier === 'GOLD' ? 'bg-[#1F2937] text-white shadow-sm' : 'text-gray-500'
             }`}
           >
             Gold (برايفت)
@@ -238,7 +238,7 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
           const isLoading = actionLoading === pkg.id
 
           return (
-            <Card key={pkg.id} className={`flex flex-col border-2 ${tier === 'GOLD' ? 'border-yellow-200' : 'border-blue-50'}`}>
+            <Card key={pkg.id} className={`flex flex-col border-2 ${tier === 'GOLD' ? 'border-[#1F2937]/20' : 'border-[#10B981]/10'}`}>
               <div className="p-6 flex-1">
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -259,7 +259,7 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
                   </div>
                 </div>
 
-                <div className="text-3xl font-bold text-primary-600 mb-6">
+                <div className="text-3xl font-bold text-[#10B981] mb-6">
                   {pkg.price} جنيه
                 </div>
               </div>

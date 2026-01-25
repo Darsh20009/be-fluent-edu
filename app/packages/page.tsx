@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import { Check, ArrowLeft, Star, Users, User } from 'lucide-react'
+import Link from "next/link";
+import { Check, ArrowLeft, Star, Users } from 'lucide-react'
+import Image from "next/image";
 import FloatingContactButtons from '@/components/FloatingContactButtons'
 import AppHeader from '@/components/layout/AppHeader'
 
@@ -23,11 +24,19 @@ export default function PackagesPage() {
   const currentPackages = tier === 'BASIC' ? BASIC_PACKAGES : GOLD_PACKAGES
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8]">
+    <div className="min-h-screen bg-[#F9FAFB] text-[#1F2937]">
       <AppHeader variant="marketing">
+        <div className="flex items-center gap-2">
+          <Image src="/logo.png" alt="Be Fluent" width={40} height={40} className="rounded-lg" />
+          <span className="text-xl font-bold text-[#1F2937]">Be Fluent</span>
+        </div>
+        <nav className="hidden md:flex items-center gap-6 mr-auto px-8">
+          <Link href="/" className="text-gray-600 hover:text-[#10B981] font-medium transition-colors">الرئيسية</Link>
+          <Link href="/placement-test" className="text-gray-600 hover:text-[#10B981] font-medium transition-colors">اختبار المستوى</Link>
+        </nav>
         <Link
           href="/"
-          className="px-4 py-2 rounded-lg border-2 border-[#004E89] text-[#004E89] hover:bg-[#004E89] hover:text-white transition-colors flex items-center gap-2"
+          className="px-4 py-2 rounded-lg border-2 border-[#10B981] text-[#10B981] hover:bg-[#10B981] hover:text-white transition-colors flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>العودة للرئيسية</span>
@@ -46,7 +55,7 @@ export default function PackagesPage() {
                 onClick={() => setTier('BASIC')}
                 className={`px-8 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${
                   tier === 'BASIC' 
-                    ? 'bg-[#004E89] text-white shadow-md' 
+                    ? 'bg-[#10B981] text-white shadow-md' 
                     : 'text-gray-500 hover:bg-gray-100'
                 }`}
               >
@@ -57,7 +66,7 @@ export default function PackagesPage() {
                 onClick={() => setTier('GOLD')}
                 className={`px-8 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${
                   tier === 'GOLD' 
-                    ? 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-md' 
+                    ? 'bg-[#1F2937] text-white shadow-md' 
                     : 'text-gray-500 hover:bg-gray-100'
                 }`}
               >
@@ -73,12 +82,12 @@ export default function PackagesPage() {
             <div
               key={pkg.id}
               className={`bg-white rounded-3xl p-8 shadow-xl border-2 transition-all hover:scale-105 ${
-                tier === 'GOLD' ? 'border-amber-200' : 'border-blue-100'
+                tier === 'GOLD' ? 'border-[#1F2937]/20' : 'border-[#10B981]/10'
               }`}
             >
               <h3 className="text-2xl font-bold text-gray-900 mb-2">{pkg.titleAr}</h3>
               <div className="mb-6">
-                <span className="text-4xl font-black text-[#004E89]">{pkg.price}</span>
+                <span className="text-4xl font-black text-[#10B981]">{pkg.price}</span>
                 <span className="text-xl font-bold text-gray-600 ml-2">جنيه</span>
               </div>
 
@@ -101,8 +110,8 @@ export default function PackagesPage() {
                 href="/auth/register"
                 className={`block w-full py-4 rounded-xl text-center font-bold text-white transition-all ${
                   tier === 'GOLD' 
-                    ? 'bg-gradient-to-r from-yellow-500 to-amber-600 hover:shadow-lg' 
-                    : 'bg-[#004E89] hover:bg-[#003A6B]'
+                    ? 'bg-[#1F2937] hover:bg-black hover:shadow-lg' 
+                    : 'bg-[#10B981] hover:bg-[#059669]'
                 }`}
               >
                 ابدأ الآن

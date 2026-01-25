@@ -1,3 +1,4 @@
+import LoadingScreen from '@/components/LoadingScreen';
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
@@ -25,7 +26,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#004E89',
+  themeColor: '#10B981',
   colorScheme: 'light',
 };
 
@@ -41,13 +42,13 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Youspeak" />
+        <meta name="apple-mobile-web-app-title" content="Be Fluent" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#004E89" />
-        <meta name="msapplication-TileImage" content="/icons/icon-192x192.png" />
-        <link rel="apple-touch-startup-image" href="/icons/icon-512x512.png" />
+        <meta name="msapplication-TileColor" content="#10B981" />
+        <meta name="msapplication-TileImage" content="/logo.png" />
+        <link rel="apple-touch-startup-image" href="/logo.png" />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#F5F1E8]`} suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#F9FAFB]`} suppressHydrationWarning>
         <Script
           id="organization-jsonld"
           type="application/ld+json"
@@ -66,6 +67,7 @@ export default function RootLayout({
         <ServiceWorkerRegister />
         <SessionProvider>
           <ThemeProvider>
+            <LoadingScreen />
             <ClientSplashScreen />
             {children}
             <PWAInstallPrompt />
