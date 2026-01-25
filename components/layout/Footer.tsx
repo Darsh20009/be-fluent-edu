@@ -27,11 +27,11 @@ const Footer: React.FC<FooterProps> = ({ children, className }) => {
           <div className="py-8">
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4">
               <div>
-                <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-4 rtl:text-right">
-                  About Youspeak
+                <h3 className="text-sm font-semibold text-[#1F2937] mb-4 rtl:text-right">
+                  عن Be Fluent
                 </h3>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400 rtl:text-right">
-                  Professional online English learning platform with live interactive classes.
+                <p className="text-sm text-gray-600 rtl:text-right">
+                  منصة احترافية لتعلم اللغة الإنجليزية مع حصص تفاعلية مباشرة ومتابعة يومية.
                 </p>
               </div>
               <div>
@@ -70,11 +70,11 @@ const Footer: React.FC<FooterProps> = ({ children, className }) => {
                   Contact
                 </h3>
                 <ul className="space-y-2">
-                  <li className="text-sm text-neutral-600 dark:text-neutral-400 rtl:text-right">
-                    Email: info@youspeak.com
+                  <li className="text-sm text-gray-600 rtl:text-right">
+                    البريد الإلكتروني: info@befluent.com
                   </li>
-                  <li className="text-sm text-neutral-600 dark:text-neutral-400 rtl:text-right">
-                    Phone: +123 456 7890
+                  <li className="text-sm text-gray-600 rtl:text-right">
+                    الهاتف: +201234567890
                   </li>
                 </ul>
               </div>
@@ -104,9 +104,9 @@ const Footer: React.FC<FooterProps> = ({ children, className }) => {
                 </div>
               </div>
             </div>
-            <div className="mt-8 border-t border-neutral-200 dark:border-neutral-800 pt-8 text-center">
-              <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                © {year} Youspeak. All rights reserved.
+            <div className="mt-8 border-t border-gray-200 pt-8 text-center">
+              <p className="text-sm text-gray-600">
+                © {year} Be Fluent. All rights reserved.
               </p>
             </div>
           </div>

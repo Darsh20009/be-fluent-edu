@@ -27,13 +27,13 @@ export default function SplashScreen() {
   if (!mounted || !isVisible) return null;
 
   const steps = [
-    { text: 'Your', color: '#000000' },
-    { text: 'English', color: '#004E89' },
-    { text: 'Steps', color: '#000000' }
+    { text: 'Be', color: '#1F2937' },
+    { text: 'Fluent', color: '#10B981' },
+    { text: 'Now', color: '#1F2937' }
   ];
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden" style={{ backgroundColor: '#F5F1E8' }}>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden" style={{ backgroundColor: '#F9FAFB' }}>
       
       <div className="text-center relative z-10">
         <motion.div
@@ -42,16 +42,13 @@ export default function SplashScreen() {
           transition={{ duration: 0.7, ease: "easeOut" }}
           className="mb-12 flex justify-center"
         >
-          <div className="relative w-32 h-32 rounded-2xl overflow-hidden" style={{ backgroundColor: '#F5F1E8' }}>
+          <div className="relative w-32 h-32 rounded-2xl overflow-hidden" style={{ backgroundColor: '#F9FAFB' }}>
             <Image
               src="/logo.png"
-              alt="Youspeak Logo"
+              alt="Be Fluent Logo"
               fill
               sizes="128px"
               className="relative z-10 object-contain p-2"
-              style={{ 
-                mixBlendMode: 'multiply'
-              }}
               priority
             />
           </div>
@@ -61,9 +58,9 @@ export default function SplashScreen() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.6 }}
-          className="text-7xl font-extrabold mb-12 bg-gradient-to-r from-[#004E89] to-[#0066CC] bg-clip-text text-transparent"
+          className="text-7xl font-extrabold mb-12 bg-gradient-to-r from-[#10B981] to-[#059669] bg-clip-text text-transparent"
         >
-          Youspeak
+          Be Fluent
         </motion.h1>
 
         <div className="flex flex-col items-center justify-center gap-2 mb-12 min-h-[200px]">
@@ -106,7 +103,7 @@ export default function SplashScreen() {
               animate={{
                 width: currentStep >= i ? 60 : 12,
                 height: currentStep >= i ? 12 : 12,
-                backgroundColor: currentStep >= i ? '#004E89' : '#d1c4b0'
+                backgroundColor: currentStep >= i ? '#10B981' : '#e5e7eb'
               }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
               className="rounded-full shadow-lg"
@@ -167,8 +164,8 @@ export default function SplashScreen() {
       </motion.div>
       
       {/* Geometric Decorations */}
-      <div className="absolute top-32 right-32 w-20 h-20 border-4 border-[#004E89]/10 rounded-lg rotate-12"></div>
-      <div className="absolute bottom-40 left-20 w-16 h-16 border-4 border-[#004E89]/10 rounded-full"></div>
+      <div className="absolute top-32 right-32 w-20 h-20 border-4 border-[#10B981]/10 rounded-lg rotate-12"></div>
+      <div className="absolute bottom-40 left-20 w-16 h-16 border-4 border-[#10B981]/10 rounded-full"></div>
     </div>
   );
 }

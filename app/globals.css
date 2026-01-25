@@ -1,25 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F5F1E8;
-  --foreground: #000000;
+  --background: #F9FAFB;
+  --foreground: #1F2937;
 
-  --primary: #004E89;
+  --primary: #10B981;
   --primary-foreground: #ffffff;
 
-  --accent: #FFD700;
-  --accent-foreground: #000000;
+  --accent: #1F2937;
+  --accent-foreground: #ffffff;
 
-  --success: #22c55e;
+  --success: #10B981;
   --error: #ef4444;
   --warning: #f59e0b;
   --info: #3b82f6;
 
-  --border: #d4c9b8;
+  --border: #e5e7eb;
   --radius: 0.5rem;
 
-  --card-bg: #F5F1E8;
-  --sidebar-bg: #F5F1E8;
+  --card-bg: #ffffff;
+  --sidebar-bg: #ffffff;
 }
 
 @theme inline {
@@ -30,18 +30,18 @@
 }
 
 .dark {
-  --background: #F5F1E8;
-  --foreground: #000000;
-  --border: #d4c9b8;
-  --primary: #004E89;
+  --background: #F9FAFB;
+  --foreground: #1F2937;
+  --border: #e5e7eb;
+  --primary: #10B981;
   --primary-foreground: #ffffff;
-  --card-bg: #F5F1E8;
+  --card-bg: #ffffff;
   --input-bg: #ffffff;
-  --accent: #FFD700;
-  --success: #22c55e;
+  --accent: #1F2937;
+  --success: #10B981;
   --error: #ef4444;
   --warning: #f59e0b;
-  --info: #004E89;
+  --info: #10B981;
 }
 
 :root.dark {
@@ -50,21 +50,21 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #F5F1E8;
-    --foreground: #000000;
-    --border: #d4c9b8;
+    --background: #F9FAFB;
+    --foreground: #1F2937;
+    --border: #e5e7eb;
   }
 }
 
 html {
-  background: #F5F1E8 !important;
+  background: #F9FAFB !important;
   min-height: 100%;
   overflow-x: hidden;
 }
 
 body {
-  background: #F5F1E8 !important;
-  color: #000000 !important;
+  background: #F9FAFB !important;
+  color: #1F2937 !important;
   font-family: Arial, Helvetica, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
   min-height: 100vh;
@@ -74,7 +74,7 @@ body {
 }
 
 .text-auto-contrast {
-  color: #000000;
+  color: #1F2937;
 }
 
 .bg-auto-contrast {
@@ -82,7 +82,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6, p, span, label {
-  color: #000000;
+  color: #1F2937;
 }
 
 * {
@@ -103,8 +103,8 @@ h1, h2, h3, h4, h5, h6, p, span, label {
 .dark body,
 .dark main,
 .dark section {
-  background: #F5F1E8 !important;
-  color: #000000 !important;
+  background: #F9FAFB !important;
+  color: #1F2937 !important;
 }
 
 @supports (font-variation-settings: normal) {
@@ -179,12 +179,12 @@ h1, h2, h3, h4, h5, h6, p, span, label {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: #10B981;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #059669;
 }
 
 /* Hide floating contact button on specific pages */
@@ -193,20 +193,16 @@ h1, h2, h3, h4, h5, h6, p, span, label {
 }
 
 .dark ::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: #f1f1f1;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #475569;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: #10B981;
 }
 
 .solid-card {
-  background-color: #F5F1E8 !important;
-  border: 1px solid #d4c9b8 !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
 }
 
 .solid-white {
@@ -214,8 +210,8 @@ h1, h2, h3, h4, h5, h6, p, span, label {
 }
 
 .solid-sidebar {
-  background-color: #F5F1E8 !important;
-  border: 1px solid #d4c9b8 !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
 }
 
 .mobile-full-width {
@@ -248,21 +244,21 @@ h1, h2, h3, h4, h5, h6, p, span, label {
 
 input, textarea, select {
   background-color: #ffffff !important;
-  border: 1px solid #d4c9b8;
+  border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
 }
 
 input:focus, textarea:focus, select:focus {
   outline: none;
-  border-color: #004E89;
-  box-shadow: 0 0 0 2px rgba(0, 78, 137, 0.2);
+  border-color: #10B981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
 }
 
 .btn-primary {
-  background-color: #004E89 !important;
+  background-color: #10B981 !important;
   color: #ffffff !important;
 }
 
 .btn-primary:hover {
-  background-color: #003d6b !important;
+  background-color: #059669 !important;
 }

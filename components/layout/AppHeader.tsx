@@ -24,7 +24,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     <header
       className={cn(
         'shadow-lg',
-        isMarketing ? 'bg-[#F5F1E8]' : 'bg-[#004E89] text-white',
+        isMarketing ? 'bg-[#F9FAFB]' : 'bg-[#10B981] text-white',
         className
       )}
     >
@@ -33,7 +33,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
           className={cn(
             'flex items-center justify-between rounded-xl sm:rounded-2xl px-3 xs:px-4 sm:px-6 py-3 sm:py-4 shadow-lg',
             isMarketing
-              ? 'backdrop-blur-sm bg-white/30 border-2 border-[#d4c9b8]'
+              ? 'backdrop-blur-sm bg-white/30 border-2 border-gray-200'
               : 'bg-transparent'
           )}
         >
@@ -41,12 +41,9 @@ const AppHeader: React.FC<AppHeaderProps> = ({
             {showLogo && (
               <>
                 <div className="relative flex-shrink-0">
-                  {isMarketing && (
-                    <div className="absolute inset-0 bg-[#004E89] blur-xl opacity-20 rounded-full"></div>
-                  )}
                   <Image
                     src="/logo.png"
-                    alt="Youspeak Logo"
+                    alt="Be Fluent Logo"
                     width={50}
                     height={50}
                     priority
@@ -54,7 +51,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                       'relative',
                       isMarketing ? 'w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-14 md:h-14' : 'w-8 h-8 sm:w-10 sm:h-10 rounded-lg'
                     )}
-                    style={{ width: 'auto', height: 'auto', mixBlendMode: isMarketing ? 'multiply' : 'normal' }}
+                    style={{ width: 'auto', height: 'auto' }}
                   />
                 </div>
                 <div className="min-w-0">
@@ -62,14 +59,14 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                     <span
                       className={cn(
                         'text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold block truncate',
-                        isMarketing ? 'text-black' : 'text-white'
+                        isMarketing ? 'text-[#1F2937]' : 'text-white'
                       )}
                     >
-                      Youspeak
+                      Be Fluent
                     </span>
                   </Link>
                   {isMarketing && (
-                    <p className="text-[10px] xs:text-xs text-gray-700 truncate">Master English Today</p>
+                    <p className="text-[10px] xs:text-xs text-gray-600 truncate">Fluency Comes First</p>
                   )}
                 </div>
               </>

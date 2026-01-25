@@ -1,13 +1,13 @@
 {
-  "name": "Youspeak - تعلم الإنجليزية مع مستر يوسف",
-  "short_name": "Youspeak",
-  "description": "منصة احترافية لتعلم اللغة الإنجليزية مع حصص تفاعلية مباشرة",
+  "name": "Be Fluent - تعلم الإنجليزية بطلاقة",
+  "short_name": "Be Fluent",
+  "description": "منصة احترافية لتعلم اللغة الإنجليزية مع حصص تفاعلية مباشرة ومتابعة يومية",
   "start_url": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait-primary",
-  "background_color": "#F5F1E8",
-  "theme_color": "#004E89",
+  "background_color": "#F9FAFB",
+  "theme_color": "#10B981",
   "scope": "/",
   "lang": "ar",
   "dir": "rtl",
@@ -97,7 +97,7 @@
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Youspeak Home"
+      "label": "Be Fluent Home"
     }
   ],
   "related_applications": [],
