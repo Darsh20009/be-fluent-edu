@@ -13,13 +13,17 @@ Be Fluent is a bilingual (Arabic/English) online English learning platform desig
 ### System Architecture
 The platform utilizes a modern web stack: **Next.js 16 (App Router)** with **React 19**, **TypeScript**, and **Tailwind CSS v4** for a mobile-responsive frontend with dark mode support. The backend uses **Next.js API Routes** and a custom **Node.js server** for real-time functionalities.
 
-**UI/UX Decisions:**
-- Mobile-responsive design with Tailwind CSS v4 and dark mode.
-- Professional beige gradient background for the homepage and splash screen.
-- Redesigned hero section with gradient text effects and feature cards.
-- Elegant package section with "BEST VALUE" highlighting.
-- Modern logo container with gradient background, typewriter effect, and vertical text for splash screen.
-- Icon-only navigation for cart and settings with a black color scheme.
+**UI/UX Decisions (Updated January 2026):**
+- **New Creative Homepage Design:** Complete frontend redesign with modern, professional look inspired by Edugate style.
+- **Hero Image Carousel:** Automatic sliding carousel with 4 Be Fluent branded images, navigation arrows, touch swipe support for mobile, and dot indicators.
+- **No Loading/Splash Screen:** Removed loading screens for immediate content display.
+- **Gradient Effects:** Beautiful green gradient backgrounds and text effects using #10B981 to #059669.
+- **Animated Elements:** Floating decorative elements, pulse animations, and smooth hover transitions.
+- **100% Mobile Responsive:** Full mobile support with touch gestures, responsive text sizes, and adaptive layouts.
+- **Modern PWA Install Prompt:** Redesigned PWA installation dialog with Be Fluent branding, step-by-step iOS instructions, and gradient styling.
+- **Feature Icons Section:** Quick visual overview of platform features with hover effects.
+- **Path to Fluency Section:** Dark themed section showcasing the learning journey with numbered steps.
+- **Pricing Cards:** Modern package display with "Most Popular" highlighting and gradient number badges.
 - Solid white/gray backgrounds (no transparent backgrounds in sidebar, chat, messages, or support).
 - Consistent gray-300 borders.
 
