@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import FloatingContactButtons from "@/components/FloatingContactButtons";
 import AppHeader from "@/components/layout/AppHeader";
-import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, ArrowRight, CheckCircle, Star, Zap, Heart } from "lucide-react";
+import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, ArrowRight, CheckCircle, Star, Zap, Heart, Bot } from "lucide-react";
 
 export default function Home() {
   return (
