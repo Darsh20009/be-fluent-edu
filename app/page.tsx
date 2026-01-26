@@ -73,7 +73,7 @@ export default function Home() {
                 </h1>
                 
                 <p className="text-xl sm:text-2xl text-gray-400 mb-12 leading-relaxed max-w-2xl font-medium">
-                  ليست مجرد دروس، بل رحلة غامرة نحو الطلاقة. ندمج الذكاء الاصطناعي مع التفاعل البشري لنصنع منك متحدثاً واثقاً.
+                  رحلة غامرة نحو الطلاقة. ندمج الذكاء الاصطناعي مع التفاعل البشري لنصنع منك متحدثاً واثقاً.
                 </p>
                 
                 <div className="flex flex-col sm:flex-row gap-6 justify-start">
