@@ -263,12 +263,6 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
   )
 }
 
-      <FloatingContactButtons />
-    </div>
-  )
-}
-
-
 function ChatTab() {
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [showConversations, setShowConversations] = useState(true)
