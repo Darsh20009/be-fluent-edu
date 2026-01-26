@@ -18,7 +18,7 @@ const Navbar: React.FC<NavbarProps> = ({ logo, children, className, sticky = tru
   return (
     <nav
       className={cn(
-        'w-full border-b-2 border-[#d4c9b8] bg-[#F5F1E8] z-40',
+        'w-full bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100 z-50',
         sticky && 'sticky top-0',
         className
       )}

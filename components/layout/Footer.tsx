@@ -17,7 +17,7 @@ const Footer: React.FC<FooterProps> = ({ children, className }) => {
   return (
     <footer
       className={cn(
-        'w-full border-t border-neutral-200 bg-white dark:bg-neutral-900 dark:border-neutral-800',
+        'w-full border-t border-gray-100 bg-white py-12',
         className
       )}
       role="contentinfo"
