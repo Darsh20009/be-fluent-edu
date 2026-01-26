@@ -33,25 +33,25 @@ export default function Home() {
 
       <main className="w-full overflow-x-hidden">
         {/* Hero Section */}
-        <section className="relative w-full py-12 sm:py-20 lg:py-32 bg-[#F9FAFB]">
+        <section className="relative w-full py-12 sm:py-20 lg:py-28 bg-[#F9FAFB] overflow-hidden">
           <div className="container mx-auto px-4 relative z-10">
-            <div className="flex flex-col lg:flex-row items-center gap-12">
-              <div className="lg:w-1/2 text-right lg:text-right" dir="rtl">
-                <div className="inline-flex items-center gap-2 bg-[#10B981]/10 px-4 py-2 rounded-full mb-6 border border-[#10B981]/20">
+            <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+              <div className="lg:w-1/2 text-right lg:text-right order-2 lg:order-1" dir="rtl">
+                <div className="inline-flex items-center gap-2 bg-[#10B981]/10 px-4 py-2 rounded-full mb-6 border border-[#10B981]/20 transform transition-all hover:scale-105">
                   <span className="w-2 h-2 bg-[#10B981] rounded-full animate-pulse"></span>
                   <span className="text-sm font-bold text-[#047857]">مستقبلك يبدأ بطلاقة لسانك</span>
                 </div>
-                <h1 className="text-4xl sm:text-6xl font-black text-[#1F2937] mb-6 leading-tight">
+                <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-[#1F2937] mb-6 leading-tight">
                   تعلم الإنجليزية <br />
-                  <span className="text-[#10B981]">بطلاقة مع Be Fluent</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] to-[#059669]">بطلاقة مع Be Fluent</span>
                 </h1>
-                <p className="text-lg sm:text-xl text-gray-600 mb-10 leading-relaxed max-w-xl">
-                  منصة Be Fluent توفر لك تجربة تعليمية فريدة تجمع بين الحصص المباشرة والمتابعة اليومية عبر الواتساب لضمان وصولك للطلاقة.
+                <p className="text-lg sm:text-xl text-gray-600 mb-10 leading-relaxed max-w-xl font-medium">
+                  منصة Be Fluent توفر لك تجربة تعليمية فريدة تجمع بين الحصص المباشرة والمتابعة اليومية لضمان وصولك للطلاقة.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row gap-4 justify-start">
                   <Link
                     href="/auth/register"
-                    className="px-10 py-5 bg-[#10B981] text-white rounded-2xl text-lg font-bold shadow-lg hover:shadow-2xl hover:scale-105 transition-all text-center"
+                    className="px-10 py-5 bg-[#10B981] text-white rounded-2xl text-lg font-bold shadow-lg shadow-[#10B981]/30 hover:shadow-2xl hover:bg-[#059669] hover:-translate-y-1 transition-all duration-300 text-center"
                   >
                     ابدأ رحلتك الآن
                   </Link>
@@ -59,18 +59,64 @@ export default function Home() {
                     href="https://wa.me/201091515594"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-10 py-5 bg-white border-2 border-[#10B981] text-[#10B981] rounded-2xl text-lg font-bold hover:bg-[#10B981]/5 transition-all text-center flex items-center justify-center gap-2"
+                    className="px-10 py-5 bg-white border-2 border-[#10B981] text-[#10B981] rounded-2xl text-lg font-bold hover:bg-[#10B981] hover:text-white hover:-translate-y-1 transition-all duration-300 text-center flex items-center justify-center gap-2"
                   >
                     <span>تواصل معنا</span>
                   </a>
                 </div>
               </div>
-              <div className="lg:w-1/2 relative">
-                <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl border-8 border-white">
-                  <Image src="/logo.png" alt="Be Fluent" width={600} height={400} className="w-full h-auto object-cover" />
+              <div className="lg:w-1/2 relative order-1 lg:order-2">
+                <div className="relative z-10 rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(16,185,129,0.3)] transform lg:rotate-2 hover:rotate-0 transition-transform duration-500">
+                  <Image 
+                    src="/assets/hero-why-us.png" 
+                    alt="Why Be Fluent" 
+                    width={800} 
+                    height={600} 
+                    className="w-full h-auto object-cover scale-105 hover:scale-100 transition-transform duration-700"
+                    priority
+                  />
                 </div>
-                <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-[#10B981] rounded-full opacity-20 blur-2xl"></div>
-                <div className="absolute -top-6 -left-6 w-32 h-32 bg-[#1F2937] rounded-full opacity-10 blur-2xl"></div>
+                <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#10B981] rounded-full opacity-10 blur-3xl animate-pulse"></div>
+                <div className="absolute -top-10 -left-10 w-48 h-48 bg-[#10B981] rounded-full opacity-10 blur-3xl animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Path Section */}
+        <section className="py-20 bg-white overflow-hidden">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col lg:flex-row items-center gap-16">
+              <div className="lg:w-1/2">
+                <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-[#F9FAFB] transform lg:-rotate-2 hover:rotate-0 transition-transform duration-500">
+                  <Image 
+                    src="/assets/hero-path.png" 
+                    alt="Path to Fluency" 
+                    width={800} 
+                    height={600} 
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+              </div>
+              <div className="lg:w-1/2 text-right" dir="rtl">
+                <h2 className="text-3xl sm:text-5xl font-black text-[#1F2937] mb-8">طريقك نحو الطلاقة يبدأ من هنا</h2>
+                <div className="space-y-6">
+                  {[
+                    { title: "تعلم من أي مكان", desc: "حصص مباشرة تناسب جدولك الزمني" },
+                    { title: "محتوى تفاعلي", desc: "تمارين ذكية لتطوير مهاراتك الأربعة" },
+                    { title: "مجتمع Be Fluent", desc: "تواصل مع طلاب ومعلمين شغوفين" }
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-start gap-4 group">
+                      <div className="w-12 h-12 rounded-2xl bg-[#10B981]/10 flex items-center justify-center text-[#10B981] font-bold text-xl group-hover:bg-[#10B981] group-hover:text-white transition-colors">
+                        {i + 1}
+                      </div>
+                      <div>
+                        <h4 className="text-xl font-bold text-[#1F2937] mb-1">{item.title}</h4>
+                        <p className="text-gray-500 font-medium">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -80,36 +126,36 @@ export default function Home() {
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-black text-[#1F2937] mb-4">ما الذي يميز Be Fluent؟</h2>
-              <div className="w-20 h-1 bg-[#10B981] mx-auto"></div>
+              <h2 className="text-3xl sm:text-5xl font-black text-[#1F2937] mb-4">ما الذي يميز Be Fluent؟</h2>
+              <div className="w-24 h-1.5 bg-[#10B981] mx-auto rounded-full"></div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {[
                 {
-                  icon: "📱",
-                  title: "متابعة يومية عبر الواتساب",
+                  icon: "💬",
+                  title: "متابعة يومية",
                   description: "متابعة مستمرة يومياً عبر الواتساب للإجابة على تساؤلاتك وتدريبات إضافية لضمان استمرارية تعلمك."
                 },
                 {
-                  icon: "👥",
-                  title: "حصص مباشرة تفاعلية",
+                  icon: "🎥",
+                  title: "حصص مباشرة",
                   description: "حصص حية مع مدرسين محترفين تركز على المحادثة وكسر حاجز الخوف من التحدث."
                 },
                 {
-                  icon: "⚡",
-                  title: "نظام تعلم ذكي",
+                  icon: "🚀",
+                  title: "نظام ذكي",
                   description: "تتبع آلي لمفرداتك الجديدة وتقدمك في المستوى باستخدام أحدث تقنيات التعلم الذكي."
                 },
                 {
-                  icon: "🛠️",
-                  title: "دعم فني 24/7",
+                  icon: "🌟",
+                  title: "دعم متميز",
                   description: "فريق دعم متواجد على مدار الساعة لمساعدتك في أي عقبة تقنية أو تعليمية تواجهك."
                 }
               ].map((f, i) => (
-                <div key={i} className="p-8 rounded-3xl bg-[#F9FAFB] hover:bg-white border-2 border-transparent hover:border-[#10B981]/20 transition-all text-center group">
-                  <div className="text-5xl mb-6 group-hover:scale-110 transition-transform">{f.icon}</div>
-                  <h3 className="text-xl font-bold text-[#1F2937] mb-4">{f.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{f.description}</p>
+                <div key={i} className="p-10 rounded-[2.5rem] bg-[#F9FAFB] hover:bg-white hover:shadow-2xl hover:shadow-[#10B981]/10 border-2 border-transparent hover:border-[#10B981]/10 transition-all duration-500 text-center group">
+                  <div className="text-6xl mb-8 transform group-hover:scale-125 group-hover:rotate-6 transition-transform duration-500">{f.icon}</div>
+                  <h3 className="text-2xl font-black text-[#1F2937] mb-4">{f.title}</h3>
+                  <p className="text-gray-500 font-medium leading-relaxed">{f.description}</p>
                 </div>
               ))}
             </div>
