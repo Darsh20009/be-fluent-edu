@@ -80,252 +80,187 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
     router.push('/auth/login')
   }
 
-  const menuItems = [
-    // 🏠 الرئيسية والملف الشخصي
-    { id: 'home', label: 'Home / الرئيسية', icon: Home },
-    { id: 'level-progress', label: 'Level Progress / تقدم المستوى', icon: TrendingUp, isLink: '/dashboard/student/level-progress', badge: '📊' },
-    
-    // 🎯 الاختبارات والتقييم
-    { id: 'placement-test', label: 'Placement Test / اختبار تحديد المستوى', icon: Target, isLink: '/placement-test', badge: '🎯' },
-    { id: 'test', label: 'Test Yourself / اختبر نفسك', icon: Trophy, badge: 'جديد', disabled: false },
-    
-    // 📚 التعلم والدروس
-    { id: 'lessons', label: 'Lessons / الدروس', icon: BookOpen, isLink: '/dashboard/student/lessons', badge: 'جديد' },
-    { id: 'video-learning', label: 'Video Learning / تعلم بالفيديو', icon: Video, isLink: '/dashboard/student/video-learning', badge: '🎬' },
-    { id: 'grammar', label: 'Grammar Rules / قواعد اللغة', icon: Brain, isLink: '/grammar' },
-    
-    // 📖 المفردات والكلمات
-    { id: 'vocabulary', label: 'Vocabulary / المفردات', icon: Layers, isLink: '/dashboard/student/vocabulary', badge: 'NEW' },
-    { id: 'mylearn', label: 'MyLearn / كلماتي', icon: BookOpen },
-    { id: 'discover', label: 'Discover Words / اكتشف الكلمات', icon: Sparkles, badge: 'جديد', disabled: false },
-    
-    // 🎤 المهارات التفاعلية
-    { id: 'conversation', label: 'Conversation Practice / تدريب المحادثة', icon: Mic, isLink: '/dashboard/student/conversation-practice', badge: 'NEW' },
-    { id: 'writings', label: 'Writing Tests / اختبارات الكتابة', icon: FileText, disabled: !hasSubscription, premium: true },
-    { id: 'free-writing', label: 'Free Writing / كتابة حرة', icon: FileText, isLink: '/dashboard/student/free-writing', badge: 'NEW', disabled: !hasSubscription, premium: true },
-    
-    // 👨‍🏫 الحصص والواجبات (Premium)
-    { id: 'sessions', label: 'Sessions / الحصص', icon: Calendar, disabled: !hasSubscription, premium: true },
-    { id: 'homework', label: 'Homework / الواجبات', icon: Trophy, disabled: !hasSubscription, premium: true },
-    { id: 'chat', label: 'Chat / الدردشة', icon: MessageCircle, disabled: !hasSubscription, premium: true },
-    
-    // 🏆 الإنجازات والتحديات
-    { id: 'achievements', label: 'Achievements / الإنجازات', icon: Award, isLink: '/dashboard/student/achievements', badge: '🏆' },
-    { id: 'leaderboard', label: 'Leaderboard / المتصدرين', icon: Medal, isLink: '/dashboard/student/leaderboard', badge: '🔥' },
-    
-    // 💳 الباقات والطلبات
-    { id: 'packages', label: 'Packages / الباقات', icon: CreditCard },
-    { id: 'orders', label: 'My Orders / طلباتي', icon: Receipt, isLink: '/dashboard/student/my-orders' },
+  const primaryMenuItems = [
+    { id: 'home', label: 'الرئيسية', icon: Home },
+    { id: 'sessions', label: 'الحصص المباشرة', icon: Video, disabled: !hasSubscription, premium: true },
+    { id: 'lessons', label: 'الدروس التعليمية', icon: BookOpen, isLink: '/dashboard/student/lessons', badge: 'جديد' },
+    { id: 'homework', label: 'الواجبات اليومية', icon: Trophy, disabled: !hasSubscription, premium: true },
+  ]
+
+  const extraMenuItems = [
+    { id: 'level-progress', label: 'تقدم المستوى', icon: TrendingUp, isLink: '/dashboard/student/level-progress' },
+    { id: 'vocabulary', label: 'المفردات', icon: Layers, isLink: '/dashboard/student/vocabulary' },
+    { id: 'conversation', label: 'تدريب المحادثة', icon: Mic, isLink: '/dashboard/student/conversation-practice' },
+    { id: 'writings', label: 'اختبارات الكتابة', icon: FileText, disabled: !hasSubscription, premium: true },
+    { id: 'grammar', label: 'قواعد اللغة', icon: Brain, isLink: '/grammar' },
+    { id: 'achievements', label: 'الإنجازات', icon: Award, isLink: '/dashboard/student/achievements' },
+    { id: 'leaderboard', label: 'المتصدرين', icon: Medal, isLink: '/dashboard/student/leaderboard' },
+    { id: 'packages', label: 'الباقات', icon: CreditCard },
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F5F5DC] to-white">
+    <div className="min-h-screen bg-[#F9FAFB]">
       {/* Header */}
-      <header className="bg-[#004E89] text-white shadow-lg">
-        <div className="container mx-auto px-4 py-3 sm:py-4">
+      <header className="bg-[#1F2937] text-white shadow-md border-b border-[#10B981]/20">
+        <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-4">
               <button
                 className="lg:hidden p-2 hover:bg-white/10 rounded-lg"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+                <Menu className="w-6 h-6" />
               </button>
-              <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                <Image src="/logo.png" alt="Youspeak Logo" width={40} height={40} className="rounded-lg" style={{ mixBlendMode: 'multiply' }} />
-                <h1 className="text-xl sm:text-2xl font-bold">Youspeak</h1>
+              <Link href="/" className="flex items-center gap-2">
+                <Image src="/logo.png" alt="Be Fluent" width={35} height={35} className="rounded-lg" />
+                <h1 className="text-xl font-black tracking-tight">Be Fluent</h1>
               </Link>
-              <Badge variant={isActive ? 'success' : 'warning'} className="hidden sm:flex">
-                {isActive ? (
-                  <>
-                    <CheckCircle className="h-4 w-4 mr-1" />
-                    Active / نشط
-                  </>
-                ) : (
-                  <>
-                    <XCircle className="h-4 w-4 mr-1" />
-                    Pending / قيد التفعيل
-                  </>
-                )}
-              </Badge>
             </div>
-            <div className="flex items-center gap-2 sm:gap-4">
-              <span className="text-xs sm:text-sm hidden sm:block">{user.name}</span>
-              <Link href="/dashboard/student/cart">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-black border-black hover:bg-black hover:text-white text-xs sm:text-sm px-2 sm:px-2 relative"
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  {cartItemsCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                      {cartItemsCount}
-                    </span>
-                  )}
-                </Button>
-              </Link>
-              <Link href="/settings">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-black border-black hover:bg-black hover:text-white text-xs sm:text-sm px-2 sm:px-2"
-                >
-                  <Settings className="h-5 w-5" />
-                </Button>
+            <div className="flex items-center gap-3">
+              <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-[#10B981]/10 rounded-full border border-[#10B981]/20">
+                <span className="w-2 h-2 bg-[#10B981] rounded-full"></span>
+                <span className="text-xs font-bold text-[#10B981]">{user.isActive ? 'نشط' : 'قيد التفعيل'}</span>
+              </div>
+              <Link href="/dashboard/student/cart" className="relative p-2 text-gray-300 hover:text-[#10B981] transition-colors">
+                <ShoppingCart className="h-6 w-6" />
+                {cartItemsCount > 0 && (
+                  <span className="absolute top-0 right-0 bg-[#10B981] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                    {cartItemsCount}
+                  </span>
+                )}
               </Link>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleSignOut}
-                className="text-white border-white hover:bg-white hover:text-[#004E89] text-xs sm:text-sm px-2 sm:px-4"
+                className="text-white border-white/20 hover:bg-white/10 text-xs px-3"
               >
-                <LogOut className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Logout / خروج</span>
+                <LogOut className="h-4 w-4 ml-2" />
+                <span>خروج</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Warning for inactive accounts */}
-      {!isActive && (
-        <div className="container mx-auto px-4 py-4">
-          <Alert variant="warning">
-            <Bell className="h-5 w-5" />
-            <div>
-              <p className="font-semibold">Account Pending Activation / الحساب قيد التفعيل</p>
-              <p className="text-sm mt-1">
-                Your account is being reviewed. You will be contacted via WhatsApp at{' '}
-                <strong>+201091515594</strong> for payment confirmation and activation.
-              </p>
-              <p className="text-sm mt-1">
-                حسابك قيد المراجعة. سيتم التواصل معك عبر الواتساب على{' '}
-                <strong>+201091515594</strong> لتأكيد الدفع والتفعيل.
-              </p>
-            </div>
-          </Alert>
-        </div>
-      )}
-
-      <div className="container mx-auto px-4 py-4 sm:py-6">
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
-          {/* Mobile Sidebar Overlay */}
-          {sidebarOpen && (
-            <div 
-              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-              onClick={() => setSidebarOpen(false)}
-            />
-          )}
-          
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
-          <div className={`
-            fixed lg:static inset-y-0 left-0 z-50 lg:z-auto
-            w-64 lg:w-auto lg:flex-none
-            transform lg:transform-none transition-transform duration-300
-            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          <aside className={`
+            fixed lg:static inset-y-0 right-0 z-50 lg:z-auto
+            w-72 lg:w-64 transform transition-transform duration-300
+            bg-white border-l border-gray-100 shadow-xl lg:shadow-none lg:bg-transparent
+            ${sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
           `}>
-            <Card variant="elevated" padding="none" className="h-full lg:h-auto max-h-screen lg:max-h-[calc(100vh-120px)] overflow-y-auto bg-[#F5F1E8] border border-[#d4c9b8]">
-              <div className="p-4 border-b border-[#d4c9b8] sticky top-0 bg-[#F5F1E8] z-10">
-                <div className="flex items-center justify-between lg:justify-start gap-3">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#004E89] rounded-full flex items-center justify-center text-white text-lg sm:text-xl font-bold">
-                      {user.name?.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900 text-sm sm:text-base">{user.name}</p>
-                      <p className="text-xs sm:text-sm text-gray-600">Student / طالب</p>
-                    </div>
+            <div className="p-6 lg:p-0 space-y-8">
+              {/* Profile Card */}
+              <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-[#10B981] rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-[#10B981]/20">
+                    {user.name?.charAt(0).toUpperCase()}
                   </div>
-                  <button 
-                    className="lg:hidden p-2 hover:bg-gray-200 rounded-lg"
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+                  <div>
+                    <p className="font-bold text-gray-900 leading-tight">{user.name}</p>
+                    <p className="text-xs text-gray-500 font-medium">طالب متميز</p>
+                  </div>
                 </div>
               </div>
-              <nav className="p-2">
-                {menuItems.map((item: any, index: number) => {
-                  const Icon = item.icon
-                  const isDisabled = item.disabled
-                  const isLink = item.isLink
-                  
-                  // Add dividers between sections
-                  const showDivider = index === 2 || index === 4 || index === 7 || index === 10 || index === 13 || index === 15 || index === 17
-                  
-                  const menuElement = isLink ? (
-                    <Link
-                      key={item.id}
-                      href={isLink}
-                      onClick={() => setSidebarOpen(false)}
-                      className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors mb-1 ${
-                        isDisabled
-                          ? 'text-gray-400 cursor-not-allowed pointer-events-none'
-                          : 'text-[#004E89] hover:bg-gray-200'
-                      }`}
-                    >
-                      <Icon className="h-5 w-5 text-[#004E89]" />
-                      <span className="text-xs sm:text-sm font-medium flex-1">{item.label}</span>
-                      {item.badge && (
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          item.premium ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'
-                        }`}>
-                          {item.badge}
-                        </span>
-                      )}
-                    </Link>
-                  ) : (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        if (!isDisabled) {
-                          setActiveTab(item.id)
+
+              {/* Navigation Sections */}
+              <nav className="space-y-6">
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-2">الأساسية</p>
+                  <div className="space-y-1">
+                    {primaryMenuItems.map((item) => {
+                      const Icon = item.icon
+                      const isActiveTab = activeTab === item.id
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            if (!item.disabled) {
+                              if (item.isLink) router.push(item.isLink)
+                              else setActiveTab(item.id)
+                              setSidebarOpen(false)
+                            }
+                          }}
+                          disabled={item.disabled}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                            isActiveTab 
+                              ? 'bg-[#10B981] text-white shadow-lg shadow-[#10B981]/20 font-bold scale-[1.02]' 
+                              : item.disabled ? 'opacity-40 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-50 hover:text-[#10B981]'
+                          }`}
+                        >
+                          <Icon className={`h-5 w-5 ${isActiveTab ? 'text-white' : ''}`} />
+                          <span className="text-sm">{item.label}</span>
+                          {item.badge && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#10B981]/10 text-[#10B981] font-bold">
+                              {item.badge}
+                            </span>
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-2">إضافات أخرى</p>
+                  <div className="grid grid-cols-1 gap-1 px-1">
+                    <select 
+                      className="w-full p-3 bg-white border border-gray-100 rounded-xl text-sm text-gray-600 font-bold focus:ring-2 focus:ring-[#10B981]/20 outline-none appearance-none cursor-pointer hover:border-[#10B981]/30 transition-all"
+                      onChange={(e) => {
+                        const val = e.target.value
+                        if (val) {
+                          const item = extraMenuItems.find(m => m.id === val)
+                          if (item?.isLink) router.push(item.isLink)
+                          else setActiveTab(val)
                           setSidebarOpen(false)
                         }
                       }}
-                      disabled={isDisabled}
-                      className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors mb-1 ${
-                        activeTab === item.id
-                          ? 'bg-[#004E89] text-white font-bold'
-                          : isDisabled
-                          ? 'text-gray-400 cursor-not-allowed'
-                          : 'text-[#004E89] hover:bg-gray-200'
-                      }`}
+                      value={extraMenuItems.some(m => m.id === activeTab) ? activeTab : ""}
                     >
-                      <Icon className={`h-5 w-5 ${activeTab === item.id ? 'text-white' : 'text-[#004E89]'}`} />
-                      <span className="text-xs sm:text-sm font-medium">{item.label}</span>
-                    </button>
-                  )
-                  
-                  return (
-                    <div key={item.id}>
-                      {menuElement}
-                      {showDivider && <div className="h-px bg-gray-300 my-2 mx-2" />}
-                    </div>
-                  )
-                })}
+                      <option value="" disabled className="font-bold">اختر صفحة أخرى...</option>
+                      {extraMenuItems.map(item => (
+                        <option key={item.id} value={item.id} disabled={item.disabled} className="font-medium py-2">{item.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </nav>
-            </Card>
-          </div>
+            </div>
+          </aside>
 
           {/* Main Content */}
-          <div className="flex-1 min-w-0">
-            {activeTab === 'home' && <HomeTab isActive={isActive} />}
-            {activeTab === 'mylearn' && <MyLearnTab isActive={isActive} />}
-            {activeTab === 'discover' && <DiscoverWordsTab isActive={isActive} />}
-            {activeTab === 'test' && <TestWordsTab isActive={isActive} />}
-            {activeTab === 'sessions' && <SessionsTab isActive={isActive} />}
-            {activeTab === 'homework' && <HomeworkTab isActive={isActive} />}
-            {activeTab === 'packages' && <PackagesTab isActive={isActive} onCartUpdate={fetchCartCount} />}
-            {activeTab === 'chat' && isActive && <ChatTab />}
-          </div>
+          <main className="flex-1 min-w-0">
+            <div className="bg-white min-h-[600px] border border-gray-100 shadow-sm rounded-[2rem] p-6 sm:p-8">
+              {activeTab === 'home' && <HomeTab isActive={isActive} />}
+              {activeTab === 'sessions' && <SessionsTab isActive={isActive} />}
+              {activeTab === 'mylearn' && <MyLearnTab isActive={isActive} />}
+              {activeTab === 'discover' && <DiscoverWordsTab isActive={isActive} />}
+              {activeTab === 'test' && <TestWordsTab isActive={isActive} />}
+              {activeTab === 'homework' && <HomeworkTab isActive={isActive} />}
+              {activeTab === 'packages' && <PackagesTab isActive={isActive} onCartUpdate={fetchCartCount} />}
+              {activeTab === 'chat' && isActive && <ChatTab />}
+              {/* Fallback for other tabs */}
+              {!['home', 'sessions', 'mylearn', 'discover', 'test', 'homework', 'packages', 'chat'].includes(activeTab) && (
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                  <div className="w-24 h-24 bg-gray-50 rounded-3xl flex items-center justify-center mb-6 rotate-12 transition-transform hover:rotate-0">
+                    <Layers className="w-12 h-12 text-gray-300" />
+                  </div>
+                  <h3 className="text-2xl font-black text-gray-900 mb-2">قريباً جداً</h3>
+                  <p className="text-gray-500 max-w-xs font-medium">هذه الصفحة ستكون متاحة قريباً ضمن التحديثات الجديدة لـ Be Fluent.</p>
+                </div>
+              )}
+            </div>
+          </main>
         </div>
       </div>
+      <FloatingContactButtons />
+    </div>
+  )
+}
+
       <FloatingContactButtons />
     </div>
   )

@@ -43,7 +43,7 @@ export default function Home() {
                 </div>
                 <h1 className="text-4xl sm:text-6xl font-black text-[#1F2937] mb-6 leading-tight">
                   تعلم الإنجليزية <br />
-                  <span className="text-[#10B981]">بذكاء وواقعية</span>
+                  <span className="text-[#10B981]">بطلاقة مع Be Fluent</span>
                 </h1>
                 <p className="text-lg sm:text-xl text-gray-600 mb-10 leading-relaxed max-w-xl">
                   منصة Be Fluent توفر لك تجربة تعليمية فريدة تجمع بين الحصص المباشرة والمتابعة اليومية عبر الواتساب لضمان وصولك للطلاقة.
