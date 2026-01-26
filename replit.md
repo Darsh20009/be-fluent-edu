@@ -1,7 +1,7 @@
 # Be Fluent - English Learning Platform
 
 ### Overview
-Be Fluent is a bilingual (Arabic/English) online English learning platform designed to provide an interactive and comprehensive environment for learning English. It offers live classes, advanced vocabulary building tools, homework management, and a complete learning management system. The platform integrates AI for grammar checking, features interactive vocabulary discovery, and provides robust student, teacher, and admin dashboards.
+Be Fluent is a bilingual (Arabic/English) online English learning platform designed to provide an interactive and comprehensive environment for learning English. It offers live classes, advanced vocabulary building tools, homework management, and a complete learning management system. The platform features interactive vocabulary discovery, and provides robust student and admin dashboards (Admin has full teacher permissions).
 
 ### User Preferences
 - Name: Be Fluent
@@ -28,22 +28,16 @@ The platform utilizes a modern web stack: **Next.js 16 (App Router)** with **Rea
 - Consistent gray-300 borders.
 
 **Technical Implementations & Features:**
-- **Authentication:** NextAuth.js with JWT for Admin, Teacher, and Student roles.
+- **Authentication:** NextAuth.js with JWT for Admin and Student roles. Admin has full teacher permissions.
+- **Role Merge (Updated January 2026):** Admin role now includes all Teacher permissions - Admin can manage sessions, grade assignments, and access teacher dashboard.
+- **Placement Test:** Admin-only feature, removed from public navigation.
 - **State Management:** React hooks and Context API.
 - **Real-time Communication:** Socket.IO v4.8.1 for live chat.
 - **Live Classes:** BigBlueButton integration for video conferencing, recording, and attendance.
-- **AI Integration:** Puter AI (free, unlimited) for AI Assistant and Video Learning questions. No API key required.
-- **Advanced AI Assistant:** FREE AI chatbot with voice capabilities:
-  - Uses Puter.ai (GPT-4o-mini) for intelligent conversations - completely FREE
-  - Text-to-Speech using browser Web Speech API - AI can speak responses
-  - Speech-to-Text using browser Web Speech API - students can talk to AI
-  - Conversation history saved in localStorage
-  - Auto-speak feature for AI responses
-  - Bilingual support (Arabic/English) for teaching
 - **Vocabulary Learning:** "Discover Words" with swipe cards, animations, quizzes, and an advanced system including Daily Words, Flashcards (spaced repetition), Word Tests, and custom word additions.
 - **Internationalization:** Full bilingual support (Arabic/English).
 - **Database Schema:** Prisma ORM managing 13 core tables.
-- **Dashboards:** Dedicated dashboards for Students, Teachers, and Admins.
+- **Dashboards:** Dedicated dashboards for Students and Admin (Admin includes all teacher features).
 - **Payment System:** Subscription workflow with Egyptian payment methods, receipt upload, and admin approval.
 - **Writing Test System:** Teachers create/grade tests; students submit typed or handwritten (image/PDF) responses.
 - **Free Writing System:** Students write articles, receive grades/feedback with AI grammar highlighting.
@@ -70,7 +64,6 @@ The platform utilizes a modern web stack: **Next.js 16 (App Router)** with **Rea
 - **Authentication:** NextAuth.js
 - **Real-time Communication:** Socket.IO
 - **Video Conferencing:** BigBlueButton
-- **AI Services:** Puter AI (free, client-side, no API key required)
 - **Translation Services:** Google Translate API
 - **Communication:** WhatsApp API
 - **Current Database:** MongoDB (for gamification, lessons, listening, conversation models)
