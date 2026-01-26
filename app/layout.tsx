@@ -1,11 +1,9 @@
-import LoadingScreen from '@/components/LoadingScreen';
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/contexts/ThemeContext";
 import SessionProvider from "@/lib/providers/SessionProvider";
-import ClientSplashScreen from "@/components/ClientSplashScreen";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import { defaultMetadata, organizationJsonLd, courseJsonLd, faqJsonLd } from "@/lib/seo";
@@ -67,8 +65,6 @@ export default function RootLayout({
         <ServiceWorkerRegister />
         <SessionProvider>
           <ThemeProvider>
-            <LoadingScreen />
-            <ClientSplashScreen />
             {children}
             <PWAInstallPrompt />
           </ThemeProvider>

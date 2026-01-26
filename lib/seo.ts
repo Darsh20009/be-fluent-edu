@@ -1,30 +1,30 @@
 import { Metadata } from 'next';
 
-const siteUrl = process.env.NEXTAUTH_URL || 'https://youspeak.com';
+const siteUrl = process.env.NEXTAUTH_URL || 'https://befluent.com';
 
 export const defaultMetadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'Youspeak - تعلم الإنجليزية مع مستر يوسف',
-    template: '%s | Youspeak'
+    default: 'Be Fluent - تعلم الإنجليزية بطلاقة',
+    template: '%s | Be Fluent'
   },
-  description: 'منصة احترافية لتعلم اللغة الإنجليزية مع حصص تفاعلية مباشرة. تعلم مع مستر يوسف وحقق أهدافك في إتقان الإنجليزية.',
+  description: 'منصة احترافية لتعلم اللغة الإنجليزية مع حصص تفاعلية مباشرة ومتابعة يومية. ابدأ رحلتك نحو الطلاقة مع Be Fluent.',
   keywords: [
     'تعلم الإنجليزية',
     'كورس إنجليزي',
     'حصص إنجليزي أونلاين',
-    'مستر يوسف',
+    'Be Fluent',
     'تعلم اللغة الإنجليزية',
     'English learning',
     'online English courses',
     'live English classes',
-    'Youspeak',
     'learn English online',
-    'English teacher'
+    'English fluency',
+    'interactive English'
   ],
-  authors: [{ name: 'Youspeak Team' }],
-  creator: 'Youspeak',
-  publisher: 'Youspeak',
+  authors: [{ name: 'Be Fluent Team' }],
+  creator: 'Be Fluent',
+  publisher: 'Be Fluent',
   robots: {
     index: true,
     follow: true,
@@ -41,24 +41,24 @@ export const defaultMetadata: Metadata = {
     locale: 'ar_EG',
     alternateLocale: 'en_US',
     url: siteUrl,
-    siteName: 'Youspeak',
-    title: 'Youspeak - تعلم الإنجليزية مع مستر يوسف',
+    siteName: 'Be Fluent',
+    title: 'Be Fluent - تعلم الإنجليزية بطلاقة',
     description: 'منصة احترافية لتعلم اللغة الإنجليزية مع حصص تفاعلية مباشرة',
     images: [
       {
         url: '/icons/icon-512x512.png',
         width: 512,
         height: 512,
-        alt: 'Youspeak Logo',
+        alt: 'Be Fluent Logo',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Youspeak - تعلم الإنجليزية مع مستر يوسف',
+    title: 'Be Fluent - تعلم الإنجليزية بطلاقة',
     description: 'منصة احترافية لتعلم اللغة الإنجليزية مع حصص تفاعلية مباشرة',
     images: ['/icons/icon-512x512.png'],
-    creator: '@youspeak',
+    creator: '@befluent',
   },
   manifest: '/manifest.webmanifest',
   icons: {
@@ -76,7 +76,7 @@ export const defaultMetadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Youspeak',
+    title: 'Be Fluent',
   },
   formatDetection: {
     telephone: true,
@@ -90,22 +90,22 @@ export const defaultMetadata: Metadata = {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'default',
-    'apple-mobile-web-app-title': 'Youspeak',
-    'application-name': 'Youspeak',
-    'msapplication-TileColor': '#004E89',
+    'apple-mobile-web-app-title': 'Be Fluent',
+    'application-name': 'Be Fluent',
+    'msapplication-TileColor': '#10B981',
     'msapplication-TileImage': '/icons/icon-192x192.png',
-    'theme-color': '#004E89',
+    'theme-color': '#10B981',
   },
 };
 
 export const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'EducationalOrganization',
-  name: 'Youspeak',
-  alternateName: 'تعلم الإنجليزية مع مستر يوسف',
+  name: 'Be Fluent',
+  alternateName: 'تعلم الإنجليزية بطلاقة',
   url: siteUrl,
   logo: `${siteUrl}/icons/icon-512x512.png`,
-  description: 'منصة احترافية لتعلم اللغة الإنجليزية مع حصص تفاعلية مباشرة',
+  description: 'منصة احترافية لتعلم اللغة الإنجليزية مع حصص تفاعلية مباشرة ومتابعة يومية',
   sameAs: [],
   contactPoint: {
     '@type': 'ContactPoint',
@@ -117,11 +117,11 @@ export const organizationJsonLd = {
 export const courseJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Course',
-  name: 'تعلم الإنجليزية مع مستر يوسف',
-  description: 'كورس شامل لتعلم اللغة الإنجليزية من الصفر حتى الاحتراف',
+  name: 'تعلم الإنجليزية بطلاقة مع Be Fluent',
+  description: 'كورس شامل لتعلم اللغة الإنجليزية من الصفر حتى الاحتراف مع حصص تفاعلية مباشرة',
   provider: {
     '@type': 'EducationalOrganization',
-    name: 'Youspeak',
+    name: 'Be Fluent',
     url: siteUrl,
   },
   hasCourseInstance: {
@@ -129,7 +129,7 @@ export const courseJsonLd = {
     courseMode: 'online',
     instructor: {
       '@type': 'Person',
-      name: 'مستر يوسف',
+      name: 'Be Fluent Team',
     },
   },
   inLanguage: ['en', 'ar'],
@@ -142,7 +142,7 @@ export const faqJsonLd = {
   mainEntity: [
     {
       '@type': 'Question',
-      name: 'كيف يمكنني التسجيل في Youspeak؟',
+      name: 'كيف يمكنني التسجيل في Be Fluent؟',
       acceptedAnswer: {
         '@type': 'Answer',
         text: 'يمكنك التسجيل مجانًا من خلال صفحة التسجيل وإنشاء حساب جديد.',
