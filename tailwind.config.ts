@@ -128,6 +128,16 @@ const config: Config = {
         '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)',
         inner: 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
       },
+      animation: {
+        'bounce-slow': 'bounce-slow 3s infinite',
+        'ping-slow': 'ping 3s cubic-bezier(0, 0, 0.2, 1) infinite',
+      },
+      keyframes: {
+        'bounce-slow': {
+          '0%, 100%': { transform: 'translateY(-5%)' },
+          '50%': { transform: 'translateY(0)' },
+        }
+      },
       transitionDuration: {
         fast: '150ms',
         base: '300ms',
