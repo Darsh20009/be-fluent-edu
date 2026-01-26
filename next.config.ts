@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   },
-  allowedDevOrigins: ['*.replit.dev', '*.repl.co'],
+  allowedDevOrigins: ['*.replit.dev', '*.repl.co', '127.0.0.1', 'localhost'],
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
