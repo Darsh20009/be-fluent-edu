@@ -99,45 +99,33 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
   ]
 
   return (
-    <div className="min-h-screen bg-[#1F2937] text-white overflow-x-hidden">
-      {/* Dynamic Background */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-[#10B981]/10 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-[#10B981]/5 rounded-full blur-[100px]"></div>
-      </div>
-
+    <div className="min-h-screen bg-[#F9FAFB] text-[#1F2937]">
       {/* Header */}
-      <header className="relative z-10 bg-white/5 backdrop-blur-xl border-b border-white/10 shadow-2xl">
+      <header className="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
-                className="lg:hidden p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all"
+                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-all"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
               >
-                <Menu className="w-6 h-6 text-[#10B981]" />
+                <Menu className="w-6 h-6 text-[#1F2937]" />
               </button>
-              <Link href="/" className="flex items-center gap-3 group">
-                <div className="relative">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-[#10B981] to-[#34D399] rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000"></div>
-                  <Image src="/logo.png" alt="Be Fluent" width={38} height={38} className="relative rounded-lg shadow-lg" />
-                </div>
-                <h1 className="text-2xl font-[1000] tracking-tighter text-white">Be Fluent</h1>
+              <Link href="/" className="flex items-center gap-3">
+                <Image src="/logo.png" alt="Be Fluent" width={38} height={38} className="rounded-lg shadow-sm" />
+                <h1 className="text-2xl font-black tracking-tight text-[#1F2937]">Be Fluent</h1>
               </Link>
             </div>
             <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-[#10B981]/10 rounded-full border border-[#10B981]/20">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10B981] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10B981]"></span>
-                </span>
-                <span className="text-xs font-black text-[#10B981] uppercase tracking-widest">{user.isActive ? 'Active' : 'Pending'}</span>
+                <span className="w-2 h-2 bg-[#10B981] rounded-full"></span>
+                <span className="text-xs font-bold text-[#10B981] uppercase">{user.isActive ? 'Active' : 'Pending'}</span>
               </div>
               
-              <Link href="/dashboard/student/cart" className="group relative p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all">
-                <ShoppingCart className="h-6 w-6 text-gray-300 group-hover:text-[#10B981] transition-colors" />
+              <Link href="/dashboard/student/cart" className="relative p-2 hover:bg-gray-50 rounded-xl transition-all">
+                <ShoppingCart className="h-6 w-6 text-gray-600" />
                 {cartItemsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-gradient-to-br from-[#10B981] to-[#059669] text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-black shadow-lg border-2 border-[#1F2937]">
+                  <span className="absolute top-0 right-0 bg-[#10B981] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
                     {cartItemsCount}
                   </span>
                 )}
@@ -147,7 +135,7 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
                 variant="outline"
                 size="sm"
                 onClick={handleSignOut}
-                className="hidden sm:flex border-white/10 text-white hover:bg-white/5 hover:border-[#10B981]/50 rounded-xl font-bold px-5"
+                className="border-gray-200 text-[#1F2937] hover:bg-gray-50 rounded-xl font-bold px-5"
               >
                 <LogOut className="h-4 w-4 ml-2" />
                 <span>خروج</span>
@@ -157,40 +145,34 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 relative z-10">
+      <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <aside className={`
             fixed lg:static inset-y-0 right-0 z-50 lg:z-auto
-            w-80 lg:w-72 transform transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
-            bg-[#1F2937]/95 lg:bg-transparent backdrop-blur-2xl lg:backdrop-blur-none
-            ${sidebarOpen ? 'translate-x-0 opacity-100' : 'translate-x-full lg:translate-x-0 opacity-0 lg:opacity-100'}
+            w-72 lg:w-64 transform transition-transform duration-300
+            bg-white border-l border-gray-100 shadow-xl lg:shadow-none lg:bg-transparent
+            ${sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
           `}>
             <div className="p-6 lg:p-0 space-y-8">
               {/* Profile Card */}
-              <div className="relative group">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-[#10B981]/20 to-[#34D399]/20 rounded-3xl blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
-                <div className="relative bg-white/5 backdrop-blur-md p-5 rounded-3xl border border-white/10 shadow-2xl">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-gradient-to-br from-[#10B981] to-[#059669] rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-[#10B981]/20 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                      {user.name?.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="font-black text-white text-lg leading-tight tracking-tight">{user.name}</p>
-                      <p className="text-xs text-[#10B981] font-black uppercase tracking-widest mt-1">طالب متميز</p>
-                    </div>
+              <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-[#10B981] rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-[#10B981]/20">
+                    {user.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-black text-[#1F2937] leading-tight">{user.name}</p>
+                    <p className="text-xs text-gray-500 font-bold uppercase mt-1">طالب متميز</p>
                   </div>
                 </div>
               </div>
 
               {/* Navigation Sections */}
-              <nav className="space-y-8">
+              <nav className="space-y-6">
                 <div>
-                  <div className="flex items-center gap-2 mb-4 px-2">
-                    <div className="w-1.5 h-4 bg-[#10B981] rounded-full"></div>
-                    <p className="text-[11px] font-[1000] text-gray-400 uppercase tracking-[0.2em]">الأساسية</p>
-                  </div>
-                  <div className="space-y-2">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 px-2">الأساسية</p>
+                  <div className="space-y-1.5">
                     {primaryMenuItems.map((item) => {
                       const Icon = item.icon
                       const isActiveTab = activeTab === item.id
@@ -205,18 +187,16 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
                             }
                           }}
                           disabled={item.disabled}
-                          className={`w-full group flex items-center justify-between px-5 py-4 rounded-2xl transition-all duration-300 ${
+                          className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-xl transition-all duration-200 ${
                             isActiveTab 
-                              ? 'bg-gradient-to-r from-[#10B981] to-[#059669] text-white shadow-2xl shadow-[#10B981]/20 font-black' 
-                              : item.disabled ? 'opacity-30 cursor-not-allowed' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                              ? 'bg-[#10B981] text-white shadow-lg shadow-[#10B981]/20 font-bold' 
+                              : item.disabled ? 'opacity-40 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-50 hover:text-[#10B981]'
                           }`}
                         >
-                          <div className="flex items-center gap-4">
-                            <Icon className={`h-5 w-5 transition-transform duration-500 ${isActiveTab ? 'text-white' : 'group-hover:scale-110 group-hover:text-[#10B981]'}`} />
-                            <span className="text-sm tracking-tight">{item.label}</span>
-                          </div>
+                          <Icon className={`h-5 w-5 ${isActiveTab ? 'text-white' : ''}`} />
+                          <span className="text-sm font-bold">{item.label}</span>
                           {item.badge && (
-                            <span className="text-[9px] px-2 py-0.5 rounded-lg bg-white/10 text-white font-[1000] uppercase tracking-tighter">
+                            <span className="mr-auto text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-bold uppercase">
                               {item.badge}
                             </span>
                           )}
@@ -227,34 +207,26 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
                 </div>
 
                 <div>
-                  <div className="flex items-center gap-2 mb-4 px-2">
-                    <div className="w-1.5 h-4 bg-white/20 rounded-full"></div>
-                    <p className="text-[11px] font-[1000] text-gray-400 uppercase tracking-[0.2em]">إضافات أخرى</p>
-                  </div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 px-2">إضافات أخرى</p>
                   <div className="px-1">
-                    <div className="relative group">
-                      <select 
-                        className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-sm text-white font-black focus:ring-2 focus:ring-[#10B981]/40 outline-none appearance-none cursor-pointer hover:bg-white/10 transition-all shadow-inner"
-                        onChange={(e) => {
-                          const val = e.target.value
-                          if (val) {
-                            const item = extraMenuItems.find(m => m.id === val)
-                            if (item?.isLink) router.push(item.isLink)
-                            else setActiveTab(val)
-                            setSidebarOpen(false)
-                          }
-                        }}
-                        value={extraMenuItems.some(m => m.id === activeTab) ? activeTab : ""}
-                      >
-                        <option value="" disabled className="bg-[#1F2937] text-gray-400 font-bold">اختر صفحة أخرى...</option>
-                        {extraMenuItems.map(item => (
-                          <option key={item.id} value={item.id} disabled={item.disabled} className="bg-[#1F2937] text-white font-medium py-4">{item.label}</option>
-                        ))}
-                      </select>
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <ArrowRight className="w-4 h-4 text-gray-500 rotate-90" />
-                      </div>
-                    </div>
+                    <select 
+                      className="w-full p-4 bg-white border border-gray-200 rounded-xl text-sm text-[#1F2937] font-bold focus:ring-2 focus:ring-[#10B981]/20 outline-none appearance-none cursor-pointer hover:border-[#10B981]/30 transition-all"
+                      onChange={(e) => {
+                        const val = e.target.value
+                        if (val) {
+                          const item = extraMenuItems.find(m => m.id === val)
+                          if (item?.isLink) router.push(item.isLink)
+                          else setActiveTab(val)
+                          setSidebarOpen(false)
+                        }
+                      }}
+                      value={extraMenuItems.some(m => m.id === activeTab) ? activeTab : ""}
+                    >
+                      <option value="" disabled className="font-bold">اختر صفحة أخرى...</option>
+                      {extraMenuItems.map(item => (
+                        <option key={item.id} value={item.id} disabled={item.disabled} className="font-medium py-2">{item.label}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </nav>
@@ -263,37 +235,25 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
 
           {/* Main Content */}
           <main className="flex-1 min-w-0">
-            <div className="relative group h-full">
-              <div className="absolute -inset-1 bg-gradient-to-br from-[#10B981]/10 to-transparent rounded-[2.5rem] blur-xl opacity-50 group-hover:opacity-75 transition-all duration-1000"></div>
-              <div className="relative bg-white/5 backdrop-blur-2xl min-h-[700px] border border-white/10 shadow-2xl rounded-[2.5rem] p-6 sm:p-10 overflow-hidden">
-                {/* Content Fade Effect */}
-                <div className="relative z-10 animate-in fade-in zoom-in-95 duration-700 ease-out">
-                  {activeTab === 'home' && <HomeTab isActive={isActive} />}
-                  {activeTab === 'sessions' && <SessionsTab isActive={isActive} />}
-                  {activeTab === 'mylearn' && <MyLearnTab isActive={isActive} />}
-                  {activeTab === 'discover' && <DiscoverWordsTab isActive={isActive} />}
-                  {activeTab === 'test' && <TestWordsTab isActive={isActive} />}
-                  {activeTab === 'homework' && <HomeworkTab isActive={isActive} />}
-                  {activeTab === 'packages' && <PackagesTab isActive={isActive} onCartUpdate={fetchCartCount} />}
-                  {activeTab === 'chat' && isActive && <ChatTab />}
-                  
-                  {/* Modern Empty State */}
-                  {!['home', 'sessions', 'mylearn', 'discover', 'test', 'homework', 'packages', 'chat'].includes(activeTab) && (
-                    <div className="flex flex-col items-center justify-center py-32 text-center">
-                      <div className="relative group cursor-default">
-                        <div className="absolute -inset-4 bg-[#10B981]/20 rounded-full blur-2xl group-hover:bg-[#10B981]/40 transition-all duration-700 animate-pulse"></div>
-                        <div className="relative w-28 h-28 bg-white/5 backdrop-blur-xl rounded-[2.5rem] border border-white/10 flex items-center justify-center mb-8 rotate-12 group-hover:rotate-0 transition-all duration-700 group-hover:scale-110">
-                          <Layers className="w-14 h-14 text-[#10B981]" />
-                        </div>
-                      </div>
-                      <h3 className="text-3xl font-[1000] text-white mb-4 tracking-tight">قريباً في عالمنا</h3>
-                      <p className="text-gray-400 max-w-sm font-medium text-lg leading-relaxed">
-                        نحن نعمل على بناء هذه الميزة لتكون تجربة لا تُنسى في رحلتك مع Be Fluent.
-                      </p>
-                    </div>
-                  )}
+            <div className="bg-white min-h-[700px] border border-gray-100 shadow-sm rounded-[2rem] p-6 sm:p-10">
+              {activeTab === 'home' && <HomeTab isActive={isActive} />}
+              {activeTab === 'sessions' && <SessionsTab isActive={isActive} />}
+              {activeTab === 'mylearn' && <MyLearnTab isActive={isActive} />}
+              {activeTab === 'discover' && <DiscoverWordsTab isActive={isActive} />}
+              {activeTab === 'test' && <TestWordsTab isActive={isActive} />}
+              {activeTab === 'homework' && <HomeworkTab isActive={isActive} />}
+              {activeTab === 'packages' && <PackagesTab isActive={isActive} onCartUpdate={fetchCartCount} />}
+              {activeTab === 'chat' && isActive && <ChatTab />}
+              
+              {!['home', 'sessions', 'mylearn', 'discover', 'test', 'homework', 'packages', 'chat'].includes(activeTab) && (
+                <div className="flex flex-col items-center justify-center py-32 text-center">
+                  <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center mb-6">
+                    <Layers className="w-10 h-10 text-gray-300" />
+                  </div>
+                  <h3 className="text-2xl font-black text-[#1F2937] mb-2">قريباً جداً</h3>
+                  <p className="text-gray-500 max-w-xs font-medium">هذه الصفحة ستكون متاحة قريباً ضمن التحديثات الجديدة لـ Be Fluent.</p>
                 </div>
-              </div>
+              )}
             </div>
           </main>
         </div>

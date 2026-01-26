@@ -6,39 +6,35 @@ import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, 
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#1F2937] text-white">
+    <div className="min-h-screen bg-[#F9FAFB] text-[#1F2937]">
       <AppHeader variant="marketing">
         <div className="flex items-center gap-2 group cursor-pointer">
           <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-[#10B981] to-[#34D399] rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-            <Image src="/logo.png" alt="Be Fluent" width={40} height={40} className="relative rounded-lg shadow-lg" />
+            <Image src="/logo.png" alt="Be Fluent" width={40} height={40} className="rounded-lg shadow-sm" />
           </div>
-          <span className="text-2xl font-[1000] text-white tracking-tighter">Be Fluent</span>
+          <span className="text-2xl font-black text-[#1F2937] tracking-tight">Be Fluent</span>
         </div>
         <nav className="hidden md:flex items-center gap-8 mr-auto px-10">
-          <Link href="/" className="relative text-gray-400 hover:text-white font-bold transition-colors group">
+          <Link href="/" className="text-gray-600 hover:text-[#10B981] font-bold transition-colors">
             الرئيسية
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#10B981] transition-all group-hover:w-full"></span>
           </Link>
-          <Link href="/packages" className="relative text-gray-400 hover:text-white font-bold transition-colors group">
+          <Link href="/packages" className="text-gray-600 hover:text-[#10B981] font-bold transition-colors">
             باقاتنا
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#10B981] transition-all group-hover:w-full"></span>
           </Link>
-          <Link href="/placement-test" className="relative text-gray-400 hover:text-white font-bold transition-colors group">
+          <Link href="/placement-test" className="text-gray-600 hover:text-[#10B981] font-bold transition-colors">
             اختبار المستوى
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#10B981] transition-all group-hover:w-full"></span>
           </Link>
         </nav>
         <div className="flex items-center gap-6">
           <Link
             href="/auth/login"
-            className="text-sm font-black text-gray-400 hover:text-white transition-colors"
+            className="text-sm font-bold text-[#1F2937] hover:text-[#10B981] transition-colors"
           >
             تسجيل الدخول
           </Link>
           <Link
             href="/auth/register"
-            className="px-8 py-3.5 text-sm font-black rounded-2xl bg-[#10B981] text-white hover:bg-[#34D399] transition-all duration-300 shadow-xl shadow-[#10B981]/20 hover:-translate-y-0.5"
+            className="px-8 py-3 text-sm font-black rounded-xl bg-[#10B981] text-white hover:bg-[#059669] transition-all shadow-md"
           >
             انضم إلينا
           </Link>
@@ -54,125 +50,72 @@ export default function Home() {
         </div>
 
         {/* Hero Section */}
-        <section className="relative w-full pt-16 pb-24 lg:pt-32 lg:pb-40 overflow-hidden bg-[#1F2937] text-white">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_70%)]"></div>
+        <section className="relative w-full pt-20 pb-24 lg:pt-32 lg:pb-40 bg-white">
           <div className="container mx-auto px-4 relative z-10">
-            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-              <div className="lg:w-1/2 text-right lg:text-right order-2 lg:order-1" dir="rtl">
-                <div className="inline-flex items-center gap-3 bg-white/5 backdrop-blur-md px-5 py-2.5 rounded-2xl mb-8 border border-white/10 shadow-xl shadow-[#10B981]/5 transform transition-all hover:scale-105 hover:-rotate-1">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10B981] opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-[#10B981]"></span>
-                  </span>
-                  <span className="text-sm font-black text-[#10B981] uppercase tracking-wider">مستقبلك يبدأ بطلاقة لسانك</span>
+            <div className="flex flex-col lg:flex-row items-center gap-12">
+              <div className="lg:w-1/2 text-right" dir="rtl">
+                <div className="inline-block bg-[#10B981]/10 px-4 py-2 rounded-lg mb-6">
+                  <span className="text-sm font-bold text-[#10B981] uppercase tracking-wide">مستقبلك يبدأ هنا</span>
                 </div>
-                
-                <h1 className="text-5xl sm:text-7xl lg:text-8xl font-[1000] text-white mb-8 leading-[1.1] tracking-tight">
-                  أتقن <span className="text-transparent bg-clip-text bg-gradient-to-br from-[#10B981] via-[#34D399] to-[#059669]">الإنجليزية</span> <br />
-                  بلمسة إبداع
+                <h1 className="text-5xl lg:text-7xl font-black text-[#1F2937] mb-8 leading-tight">
+                  تعلم <span className="text-[#10B981]">الإنجليزية</span> بأسلوب احترافي
                 </h1>
-                
-                <p className="text-xl sm:text-2xl text-gray-400 mb-12 leading-relaxed max-w-2xl font-medium">
-                  رحلة غامرة نحو الطلاقة. ندمج الذكاء الاصطناعي مع التفاعل البشري لنصنع منك متحدثاً واثقاً.
+                <p className="text-xl text-gray-600 mb-10 leading-relaxed max-w-2xl font-medium">
+                  Be Fluent هي المنصة المتكاملة لتعلم اللغة الإنجليزية بأساليب حديثة ومبتكرة تناسب الجميع.
                 </p>
-                
-                <div className="flex flex-col sm:flex-row gap-6 justify-start">
+                <div className="flex flex-col sm:flex-row gap-4 justify-start">
                   <Link
                     href="/auth/register"
-                    className="group relative px-12 py-6 bg-[#10B981] text-white rounded-[2rem] text-xl font-black shadow-[0_20px_50px_rgba(16,185,129,0.3)] transition-all duration-500 hover:scale-105 hover:-translate-y-2 overflow-hidden"
+                    className="px-10 py-5 bg-[#10B981] text-white rounded-xl text-lg font-bold shadow-lg hover:bg-[#059669] transition-all"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#059669] to-[#10B981] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <span className="relative z-10 flex items-center gap-3">
-                      ابدأ رحلتك الآن
-                      <ArrowRight className="w-6 h-6 transform group-hover:translate-x-2 transition-transform" />
-                    </span>
+                    ابدأ الآن مجاناً
                   </Link>
                   <a
                     href="https://api.whatsapp.com/send/?phone=201091515594"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-12 py-6 bg-white/5 backdrop-blur-sm border-2 border-white/10 text-white rounded-[2rem] text-xl font-black hover:bg-white/10 hover:border-[#10B981] transition-all duration-500 text-center flex items-center justify-center gap-3"
+                    className="px-10 py-5 bg-white border-2 border-gray-100 text-[#1F2937] rounded-xl text-lg font-bold hover:bg-gray-50 transition-all text-center flex items-center justify-center gap-2"
                   >
-                    <MessageCircle className="w-6 h-6 text-[#10B981]" />
-                    <span>تواصل معنا</span>
+                    <MessageCircle className="w-5 h-5 text-[#10B981]" />
+                    تواصل معنا
                   </a>
                 </div>
               </div>
-              
-              <div className="lg:w-1/2 relative order-1 lg:order-2">
-                <div className="relative z-10">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-[#10B981]/20 to-transparent rounded-[3rem] blur-2xl -z-10 animate-pulse"></div>
-                  <div className="relative rounded-[3rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(16,185,129,0.3)] border-[12px] border-white/80 backdrop-blur-sm transform rotate-3 hover:rotate-0 transition-all duration-700 ease-out group">
-                    <Image 
-                      src="/assets/hero-why-us.png" 
-                      alt="Why Be Fluent" 
-                      width={800} 
-                      height={600} 
-                      className="w-full h-auto object-cover scale-110 group-hover:scale-100 transition-transform duration-1000"
-                      priority
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1F2937]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  </div>
-                  
-                  {/* Floating Stats Card */}
-                  <div className="absolute -bottom-10 -left-10 bg-white/90 backdrop-blur-xl p-6 rounded-3xl shadow-2xl border border-white z-20 animate-bounce-slow">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-[#10B981] rounded-2xl flex items-center justify-center text-white">
-                        <Users className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-black text-[#1F2937]">+5000</p>
-                        <p className="text-xs font-bold text-gray-500 uppercase">طالب ملتحق</p>
-                      </div>
-                    </div>
-                  </div>
+              <div className="lg:w-1/2">
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl border-8 border-gray-50">
+                  <Image src="/assets/hero-why-us.png" alt="Be Fluent" width={800} height={600} className="w-full h-auto" />
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Path Section - Immersive Design */}
-        <section className="py-32 bg-[#1F2937] relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none">
-            <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#10B981] rounded-full blur-[150px]"></div>
-          </div>
-          
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="flex flex-col lg:flex-row items-center gap-20">
-              <div className="lg:w-1/2 group">
-                <div className="relative p-4">
-                  <div className="absolute inset-0 bg-[#10B981]/20 rounded-[3.5rem] rotate-3 group-hover:rotate-0 transition-transform duration-500 blur-xl"></div>
-                  <div className="relative rounded-[3rem] overflow-hidden shadow-2xl transform -rotate-3 group-hover:rotate-0 transition-all duration-700 hover:scale-105 border border-white/10 backdrop-blur-sm">
-                    <Image 
-                      src="/assets/hero-path.png" 
-                      alt="Path to Fluency" 
-                      width={800} 
-                      height={600} 
-                      className="w-full h-auto object-cover"
-                    />
-                  </div>
+        {/* Path Section */}
+        <section className="py-24 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col lg:flex-row items-center gap-16">
+              <div className="lg:w-1/2">
+                <div className="relative rounded-3xl overflow-hidden shadow-xl border-4 border-white">
+                  <Image src="/assets/hero-path.png" alt="Path" width={800} height={600} className="w-full h-auto" />
                 </div>
               </div>
-              
               <div className="lg:w-1/2 text-right" dir="rtl">
-                <h2 className="text-4xl sm:text-6xl font-[1000] text-white mb-10 leading-tight">
-                  رحلة <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] to-[#34D399]">الاحتراف</span> <br />
-                  تبدأ بخطوة واثقة
+                <h2 className="text-4xl font-black text-[#1F2937] mb-8 leading-tight">
+                  طريقك نحو <span className="text-[#10B981]">الطلاقة</span> يبدأ بخطة مدروسة
                 </h2>
-                <div className="grid grid-cols-1 gap-8">
+                <div className="space-y-6">
                   {[
-                    { title: "بيئة غامرة", desc: "ندخلك في صلب اللغة من اليوم الأول بتمارين تحاكي الواقع", icon: <Globe className="w-6 h-6" /> },
-                    { title: "ذكاء اصطناعي مُسخّر", desc: "تقنياتنا تتعرف على نقاط ضعفك وتقويها بشكل آلي", icon: <Zap className="w-6 h-6" /> },
-                    { title: "دعم بشري حقيقي", desc: "نحن معك خطوة بخطوة، لسنا مجرد تطبيق جامد", icon: <Heart className="w-6 h-6" /> }
+                    { title: "أساليب حديثة", desc: "نستخدم أحدث التقنيات والأساليب التعليمية العالمية.", icon: <Sparkles className="w-6 h-6" /> },
+                    { title: "متابعة مستمرة", desc: "فريقنا معك دائماً لضمان تحقيق أهدافك التعليمية.", icon: <CheckCircle className="w-6 h-6" /> },
+                    { title: "مجتمع تفاعلي", desc: "انضم لآلاف الطلاب الذين غيروا حياتهم مع Be Fluent.", icon: <Users className="w-6 h-6" /> }
                   ].map((item, i) => (
-                    <div key={i} className="group flex items-start gap-6 p-8 rounded-[2.5rem] bg-white/5 border border-white/5 hover:bg-white/10 hover:border-[#10B981]/30 transition-all duration-500 hover:shadow-2xl hover:shadow-[#10B981]/10">
-                      <div className="w-16 h-16 shrink-0 rounded-2xl bg-gradient-to-br from-[#10B981] to-[#059669] text-white flex items-center justify-center text-2xl shadow-[0_10px_20px_rgba(16,185,129,0.3)] group-hover:scale-110 group-hover:rotate-6 transition-all">
+                    <div key={i} className="flex gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
+                      <div className="w-12 h-12 shrink-0 bg-[#10B981]/10 rounded-xl flex items-center justify-center text-[#10B981]">
                         {item.icon}
                       </div>
                       <div>
-                        <h4 className="text-2xl font-black text-white mb-2">{item.title}</h4>
-                        <p className="text-gray-400 text-lg font-medium leading-relaxed">{item.desc}</p>
+                        <h4 className="text-xl font-bold text-[#1F2937] mb-1">{item.title}</h4>
+                        <p className="text-gray-600 font-medium">{item.desc}</p>
                       </div>
                     </div>
                   ))}
@@ -182,34 +125,28 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Features - Grid Reinvented */}
-        <section className="py-32 bg-[#1F2937] relative">
+        {/* Features Grid */}
+        <section className="py-24 bg-white">
           <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto mb-20">
-              <h2 className="text-4xl sm:text-6xl font-[1000] text-white mb-6">ابتكار في كل تفصيلة</h2>
-              <p className="text-xl text-gray-400 font-medium leading-relaxed">
-                صممنا Be Fluent لتكون المنصة الأكثر تطوراً وإمتاعاً في الوطن العربي
-              </p>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-black text-[#1F2937] mb-4">لماذا Be Fluent؟</h2>
+              <p className="text-lg text-gray-600 font-medium">نحن نوفر لك كل ما تحتاجه للنجاح في رحلتك التعليمية</p>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
-                { icon: "🎨", title: "تصميم عصري", color: "bg-blue-500" },
-                { icon: "🤖", title: "مساعد ذكي", color: "bg-purple-500" },
-                { icon: "🎮", title: "تعلم باللعب", color: "bg-[#10B981]" },
-                { icon: "📊", title: "تقارير دقيقة", color: "bg-orange-500" },
-                { icon: "🔒", title: "خصوصية تامة", color: "bg-red-500" },
-                { icon: "🌍", title: "عالم بلا حدود", color: "bg-indigo-500" }
+                { title: "حصص مباشرة", desc: "تفاعل مباشر مع معلمين محترفين في بيئة تعليمية محفزة.", icon: <Video className="w-8 h-8" /> },
+                { title: "ذكاء اصطناعي", desc: "مساعد ذكي متاح 24/7 للإجابة على جميع استفساراتك.", icon: <Bot className="w-8 h-8" /> },
+                { title: "محتوى حصري", desc: "دروس وفيديوهات تعليمية مصممة خصيصاً لتسريع تعلمك.", icon: <BookOpen className="w-8 h-8" /> },
+                { title: "اختبارات دورية", desc: "تقييمات مستمرة لمستوى تقدمك مع تقارير مفصلة.", icon: <Target className="w-8 h-8" /> },
+                { title: "تعلم تفاعلي", desc: "نظام تعليمي يجمع بين المتعة والاحترافية.", icon: <Zap className="w-8 h-8" /> },
+                { title: "دعم فني", desc: "دعم فني متاح دائماً لمساعدتك في أي مشكلة.", icon: <MessageCircle className="w-8 h-8" /> }
               ].map((f, i) => (
-                <div key={i} className="relative group">
-                  <div className="absolute inset-0 bg-white/5 rounded-[3rem] transform rotate-2 group-hover:rotate-0 transition-transform duration-500"></div>
-                  <div className="relative p-10 bg-white/5 border border-white/10 rounded-[3rem] shadow-xl hover:shadow-2xl hover:bg-white/10 transition-all duration-500 group-hover:-translate-y-4">
-                    <div className={`w-20 h-20 ${f.color} rounded-2xl flex items-center justify-center text-4xl mb-8 shadow-lg transform group-hover:rotate-12 transition-transform`}>
-                      {f.icon}
-                    </div>
-                    <h3 className="text-2xl font-black text-white mb-4">{f.title}</h3>
-                    <p className="text-gray-400 font-medium">تجربة فريدة تدمج التكنولوجيا بالفن لتقديم أفضل رحلة تعليمية ممكنة.</p>
+                <div key={i} className="p-8 bg-gray-50 rounded-3xl border border-gray-100 hover:border-[#10B981] transition-all hover:shadow-xl group">
+                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-[#10B981] mb-6 shadow-sm group-hover:bg-[#10B981] group-hover:text-white transition-all">
+                    {f.icon}
                   </div>
+                  <h3 className="text-2xl font-bold text-[#1F2937] mb-4">{f.title}</h3>
+                  <p className="text-gray-600 font-medium leading-relaxed">{f.desc}</p>
                 </div>
               ))}
             </div>
@@ -318,9 +255,9 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Other sections can follow... */}
+        {/* Other sections follow */}
+        <FloatingContactButtons />
       </main>
-      <FloatingContactButtons />
     </div>
   )
 }
