@@ -4,8 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
 import FloatingContactButtons from "@/components/FloatingContactButtons";
-import AppHeader from "@/components/layout/AppHeader";
-import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, ArrowRight, CheckCircle, Star, Zap, Bot, ChevronLeft, ChevronRight, Play, Headphones, GraduationCap, Trophy } from "lucide-react";
+import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, ArrowRight, CheckCircle, Star, Zap, ChevronLeft, ChevronRight, Headphones, GraduationCap, Trophy, Menu, X } from "lucide-react";
 
 const heroImages = [
   { src: "/assets/hero-1.png", alt: "Why Us - Be Fluent" },
@@ -19,6 +18,7 @@ export default function Home() {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % heroImages.length);
@@ -59,44 +59,97 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-[#F0FDF9] to-white text-[#1F2937]">
-      <AppHeader variant="marketing">
-        <div className="flex items-center gap-3 group cursor-pointer">
-          <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow-lg border-2 border-[#10B981]/20 group-hover:border-[#10B981] transition-all duration-300">
-            <Image src="/logo.png" alt="Be Fluent" fill className="object-contain" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xl md:text-2xl font-black text-[#1F2937] tracking-tight leading-none">Be Fluent</span>
-            <span className="text-[10px] text-[#10B981] font-bold tracking-widest uppercase">Fluency Comes First</span>
-          </div>
-        </div>
-        <nav className="hidden lg:flex items-center gap-6 mr-auto px-8">
-          <Link href="/" className="text-gray-700 hover:text-[#10B981] font-bold transition-all hover:scale-105">
-            الرئيسية
-          </Link>
-          <Link href="/packages" className="text-gray-700 hover:text-[#10B981] font-bold transition-all hover:scale-105">
-            باقاتنا
-          </Link>
-          <Link href="/placement-test" className="text-gray-700 hover:text-[#10B981] font-bold transition-all hover:scale-105">
-            اختبار المستوى
-          </Link>
-        </nav>
-        <div className="flex items-center gap-4">
-          <Link
-            href="/auth/login"
-            className="hidden sm:block text-sm font-bold text-[#1F2937] hover:text-[#10B981] transition-all"
-          >
-            تسجيل الدخول
-          </Link>
-          <Link
-            href="/auth/register"
-            className="px-6 py-2.5 md:px-8 md:py-3 text-sm font-black rounded-xl bg-gradient-to-r from-[#10B981] to-[#059669] text-white hover:shadow-xl hover:scale-105 transition-all duration-300"
-          >
-            انضم إلينا
-          </Link>
-        </div>
-      </AppHeader>
+      {/* Modern Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16 md:h-20">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden shadow-md border-2 border-[#10B981]/20 group-hover:border-[#10B981] transition-all duration-300">
+                <Image src="/logo.png" alt="Be Fluent" fill className="object-contain" sizes="48px" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-lg md:text-xl font-black text-[#1F2937] tracking-tight leading-none">Be Fluent</span>
+                <span className="text-[9px] md:text-[10px] text-[#10B981] font-bold tracking-widest uppercase">Fluency Comes First</span>
+              </div>
+            </Link>
 
-      <main className="w-full overflow-x-hidden relative">
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-8">
+              <Link href="/" className="text-gray-700 hover:text-[#10B981] font-semibold transition-colors relative group">
+                الرئيسية
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#10B981] group-hover:w-full transition-all duration-300"></span>
+              </Link>
+              <Link href="/packages" className="text-gray-700 hover:text-[#10B981] font-semibold transition-colors relative group">
+                باقاتنا
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#10B981] group-hover:w-full transition-all duration-300"></span>
+              </Link>
+              <Link href="/grammar" className="text-gray-700 hover:text-[#10B981] font-semibold transition-colors relative group">
+                القواعد
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#10B981] group-hover:w-full transition-all duration-300"></span>
+              </Link>
+              <Link href="/listening" className="text-gray-700 hover:text-[#10B981] font-semibold transition-colors relative group">
+                الاستماع
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#10B981] group-hover:w-full transition-all duration-300"></span>
+              </Link>
+            </nav>
+
+            {/* Auth Buttons */}
+            <div className="hidden md:flex items-center gap-4">
+              <Link
+                href="/auth/login"
+                className="text-sm font-bold text-[#1F2937] hover:text-[#10B981] transition-colors"
+              >
+                تسجيل الدخول
+              </Link>
+              <Link
+                href="/auth/register"
+                className="px-6 py-2.5 text-sm font-bold rounded-xl bg-gradient-to-r from-[#10B981] to-[#059669] text-white hover:shadow-lg hover:scale-105 transition-all duration-300"
+              >
+                انضم إلينا
+              </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden py-4 border-t border-gray-100 animate-in slide-in-from-top duration-200">
+              <nav className="flex flex-col gap-2">
+                <Link href="/" className="px-4 py-3 text-gray-700 hover:bg-[#10B981]/10 rounded-lg font-semibold transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                  الرئيسية
+                </Link>
+                <Link href="/packages" className="px-4 py-3 text-gray-700 hover:bg-[#10B981]/10 rounded-lg font-semibold transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                  باقاتنا
+                </Link>
+                <Link href="/grammar" className="px-4 py-3 text-gray-700 hover:bg-[#10B981]/10 rounded-lg font-semibold transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                  القواعد
+                </Link>
+                <Link href="/listening" className="px-4 py-3 text-gray-700 hover:bg-[#10B981]/10 rounded-lg font-semibold transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                  الاستماع
+                </Link>
+                <div className="border-t border-gray-100 mt-2 pt-4 flex flex-col gap-2">
+                  <Link href="/auth/login" className="px-4 py-3 text-center text-[#1F2937] font-bold hover:bg-gray-100 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                    تسجيل الدخول
+                  </Link>
+                  <Link href="/auth/register" className="mx-4 py-3 text-center bg-gradient-to-r from-[#10B981] to-[#059669] text-white font-bold rounded-xl" onClick={() => setMobileMenuOpen(false)}>
+                    انضم إلينا
+                  </Link>
+                </div>
+              </nav>
+            </div>
+          )}
+        </div>
+      </header>
+
+      <main className="w-full overflow-x-hidden relative pt-16 md:pt-20">
         {/* Animated Background Elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
           <div className="absolute top-[-20%] right-[-15%] w-[600px] h-[600px] bg-gradient-to-br from-[#10B981]/10 to-[#059669]/5 rounded-full blur-[150px] animate-pulse"></div>
@@ -110,7 +163,7 @@ export default function Home() {
         </div>
 
         {/* Hero Section with Image Carousel */}
-        <section className="relative w-full pt-20 pb-16 lg:pt-28 lg:pb-24">
+        <section className="relative w-full pt-8 pb-16 lg:pt-16 lg:pb-24">
           <div className="container mx-auto px-4 relative z-10">
             <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
               {/* Text Content */}
@@ -186,6 +239,7 @@ export default function Home() {
                           fill
                           className="object-contain"
                           priority={index === 0}
+                          sizes="(max-width: 768px) 100vw, 50vw"
                         />
                       </div>
                     ))}
@@ -237,7 +291,7 @@ export default function Home() {
             <div className="flex flex-wrap justify-center gap-8 md:gap-16">
               {[
                 { icon: <Video className="w-8 h-8" />, label: "حصص مباشرة" },
-                { icon: <Bot className="w-8 h-8" />, label: "ذكاء اصطناعي" },
+                { icon: <BookOpen className="w-8 h-8" />, label: "دروس تفاعلية" },
                 { icon: <Headphones className="w-8 h-8" />, label: "تدريب استماع" },
                 { icon: <GraduationCap className="w-8 h-8" />, label: "شهادات معتمدة" },
                 { icon: <Trophy className="w-8 h-8" />, label: "تحديات ومكافآت" },
@@ -278,15 +332,15 @@ export default function Home() {
                   color: "from-green-500 to-emerald-600"
                 },
                 { 
-                  title: "مساعد ذكاء اصطناعي", 
-                  desc: "مساعد ذكي متاح على مدار الساعة للإجابة على استفساراتك وتصحيح أخطائك.",
-                  icon: <Bot className="w-7 h-7" />,
-                  color: "from-blue-500 to-cyan-600"
-                },
-                { 
                   title: "محتوى تعليمي حصري", 
                   desc: "دروس وفيديوهات ومقالات تعليمية مصممة خصيصاً لتسريع رحلة تعلمك.",
                   icon: <BookOpen className="w-7 h-7" />,
+                  color: "from-blue-500 to-cyan-600"
+                },
+                { 
+                  title: "تدريب على الاستماع", 
+                  desc: "تمارين استماع متنوعة لتحسين مهاراتك في فهم اللغة الإنجليزية.",
+                  icon: <Headphones className="w-7 h-7" />,
                   color: "from-purple-500 to-violet-600"
                 },
                 { 
@@ -346,8 +400,8 @@ export default function Home() {
                 
                 <div className="space-y-4">
                   {[
-                    { step: "1", title: "اختبار تحديد المستوى", desc: "اكتشف مستواك الحالي بدقة" },
-                    { step: "2", title: "خطة تعلم مخصصة", desc: "منهج مصمم خصيصاً لك" },
+                    { step: "1", title: "التسجيل والاشتراك", desc: "سجل حسابك واختر الباقة المناسبة" },
+                    { step: "2", title: "خطة تعلم مخصصة", desc: "منهج مصمم خصيصاً لمستواك" },
                     { step: "3", title: "حصص تفاعلية يومية", desc: "تعلم مع معلمين محترفين" },
                     { step: "4", title: "تقييم وتحسين مستمر", desc: "تتبع تقدمك وحسّن أداءك" },
                   ].map((item, i) => (
@@ -365,11 +419,11 @@ export default function Home() {
                 
                 <div className="mt-8">
                   <Link
-                    href="/placement-test"
+                    href="/auth/register"
                     className="inline-flex items-center gap-2 px-8 py-4 bg-[#10B981] text-white rounded-2xl text-lg font-bold hover:bg-[#059669] transition-all duration-300 shadow-xl hover:shadow-2xl"
                   >
-                    <Play className="w-5 h-5" />
-                    <span>ابدأ اختبار المستوى</span>
+                    <span>سجل الآن وابدأ التعلم</span>
+                    <ArrowRight className="w-5 h-5" />
                   </Link>
                 </div>
               </div>
@@ -504,10 +558,10 @@ export default function Home() {
                 سجل مجاناً الآن
               </Link>
               <Link
-                href="/placement-test"
+                href="/packages"
                 className="px-10 py-4 bg-white/20 border-2 border-white text-white rounded-2xl text-lg font-bold hover:bg-white hover:text-[#10B981] transition-all duration-300"
               >
-                اختبر مستواك
+                تصفح الباقات
               </Link>
             </div>
           </div>
@@ -528,7 +582,8 @@ export default function Home() {
               </div>
               <div className="flex items-center gap-6">
                 <Link href="/packages" className="text-gray-400 hover:text-white transition-colors">الباقات</Link>
-                <Link href="/placement-test" className="text-gray-400 hover:text-white transition-colors">اختبار المستوى</Link>
+                <Link href="/grammar" className="text-gray-400 hover:text-white transition-colors">القواعد</Link>
+                <Link href="/listening" className="text-gray-400 hover:text-white transition-colors">الاستماع</Link>
                 <Link href="/auth/login" className="text-gray-400 hover:text-white transition-colors">تسجيل الدخول</Link>
               </div>
               <p className="text-gray-500 text-sm">
