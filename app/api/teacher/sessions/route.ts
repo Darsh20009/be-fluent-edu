@@ -13,13 +13,24 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || session.user.role !== 'TEACHER') {
+    if (!session || (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const teacherProfile = await prisma.teacherProfile.findUnique({
+    let teacherProfile = await prisma.teacherProfile.findUnique({
       where: { userId: session.user.id }
     })
+
+    // Auto-create teacher profile for ADMIN if it doesn't exist
+    if (!teacherProfile && session.user.role === 'ADMIN') {
+      teacherProfile = await prisma.teacherProfile.create({
+        data: {
+          userId: session.user.id,
+          bio: 'Admin Teacher',
+          subjects: 'All Subjects'
+        }
+      })
+    }
 
     if (!teacherProfile) {
       return NextResponse.json({ error: 'Teacher profile not found' }, { status: 404 })
@@ -57,13 +68,24 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || session.user.role !== 'TEACHER') {
+    if (!session || (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const teacherProfile = await prisma.teacherProfile.findUnique({
+    let teacherProfile = await prisma.teacherProfile.findUnique({
       where: { userId: session.user.id }
     })
+
+    // Auto-create teacher profile for ADMIN if it doesn't exist
+    if (!teacherProfile && session.user.role === 'ADMIN') {
+      teacherProfile = await prisma.teacherProfile.create({
+        data: {
+          userId: session.user.id,
+          bio: 'Admin Teacher',
+          subjects: 'All Subjects'
+        }
+      })
+    }
 
     if (!teacherProfile) {
       return NextResponse.json({ error: 'Teacher profile not found' }, { status: 404 })

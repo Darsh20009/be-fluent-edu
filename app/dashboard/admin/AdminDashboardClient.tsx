@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { Home, Users, CreditCard, Activity, LogOut, Shield, BookOpen, Headphones } from 'lucide-react'
+import { Home, Users, CreditCard, Activity, LogOut, Shield, BookOpen, Headphones, GraduationCap, ClipboardList } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
@@ -15,6 +15,8 @@ import SystemTab from './components/SystemTab'
 import StudentsManagementTab from './components/StudentsManagementTab'
 import LessonsTab from '@/components/admin/LessonsTab'
 import ListeningTab from './components/ListeningTab'
+import PlacementTestTab from './components/PlacementTestTab'
+import Link from 'next/link'
 
 interface AdminDashboardClientProps {
   user: {
@@ -41,6 +43,8 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
     { id: 'students', label: 'Students / الطلاب', icon: BookOpen },
     { id: 'lessons', label: 'Lessons / الدروس', icon: BookOpen },
     { id: 'listening', label: 'Listening / الاستماع', icon: Headphones },
+    { id: 'placement-test', label: 'Placement Test / اختبار تحديد المستوى', icon: ClipboardList },
+    { id: 'teacher', label: 'Teacher Dashboard / لوحة المعلم', icon: GraduationCap, href: '/dashboard/teacher' },
     { id: 'system', label: 'System / النظام', icon: Activity },
   ]
 
@@ -59,7 +63,7 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
                 </svg>
               </button>
               <Shield className="h-6 w-6 sm:h-8 sm:w-8" />
-              <h1 className="text-xl sm:text-2xl font-bold">Youspeak</h1>
+              <h1 className="text-xl sm:text-2xl font-bold">Be Fluent</h1>
               <Badge variant="success" className="hidden sm:inline-flex">{user.role}</Badge>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
@@ -120,6 +124,18 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
               <nav className="p-2">
                 {menuItems.map((item) => {
                   const Icon = item.icon
+                  if ('href' in item && item.href) {
+                    return (
+                      <Link
+                        key={item.id}
+                        href={item.href}
+                        className="w-full flex items-center gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors mb-1 text-gray-700 hover:bg-gray-100"
+                      >
+                        <Icon className="h-5 w-5" />
+                        <span className="text-xs sm:text-sm font-medium">{item.label}</span>
+                      </Link>
+                    )
+                  }
                   return (
                     <button
                       key={item.id}
@@ -149,6 +165,7 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
             {activeTab === 'students' && <StudentsManagementTab />}
             {activeTab === 'lessons' && <LessonsTab isActive={activeTab === 'lessons'} />}
             {activeTab === 'listening' && <ListeningTab isActive={activeTab === 'listening'} />}
+            {activeTab === 'placement-test' && <PlacementTestTab />}
             {activeTab === 'system' && <SystemTab />}
           </div>
         </div>

@@ -13,7 +13,7 @@ export default async function TeacherDashboardPage() {
     redirect('/auth/login')
   }
 
-  if (session.user.role !== 'TEACHER') {
+  if (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN') {
     redirect('/dashboard')
   }
 

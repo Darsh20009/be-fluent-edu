@@ -43,15 +43,26 @@ export async function requireRole(allowedRoles: string[]): Promise<AuthSession |
 }
 
 export async function requireTeacher(): Promise<TeacherSession | NextResponse> {
-  const sessionResult = await requireRole(['TEACHER'])
+  const sessionResult = await requireRole(['TEACHER', 'ADMIN'])
   
   if (sessionResult instanceof NextResponse) {
     return sessionResult
   }
 
-  const teacherProfile = await prisma.teacherProfile.findUnique({
+  let teacherProfile = await prisma.teacherProfile.findUnique({
     where: { userId: sessionResult.userId }
   })
+
+  // Auto-create teacher profile for ADMIN if it doesn't exist
+  if (!teacherProfile && sessionResult.role === 'ADMIN') {
+    teacherProfile = await prisma.teacherProfile.create({
+      data: {
+        userId: sessionResult.userId,
+        bio: 'Admin Teacher',
+        subjects: 'All Subjects'
+      }
+    })
+  }
 
   if (!teacherProfile) {
     return NextResponse.json({ error: 'Teacher profile not found' }, { status: 404 })
