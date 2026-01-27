@@ -76,6 +76,7 @@ export async function POST(request: Request) {
             status: 'PENDING',
             receiptUrl: validatedData.receiptUrl || null,
             paymentMethod: 'E_WALLET',
+            paid: false,
           }
         }
       },

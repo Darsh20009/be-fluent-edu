@@ -41,6 +41,7 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
   const [hasSubscription, setHasSubscription] = useState(false)
 
   const [cartItemsCount, setCartItemsCount] = useState(0)
+  const [subscription, setSubscription] = useState<any>(null)
 
   useEffect(() => {
     if (activeTab === 'writings' && isActive) {
@@ -57,6 +58,7 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
       if (response.ok) {
         const data = await response.json()
         setHasSubscription(data.hasApprovedSubscription)
+        setSubscription(data.subscription)
       }
     } catch (error) {
       console.error('Error checking subscription:', error)
@@ -235,6 +237,28 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
 
           {/* Main Content */}
           <main className="flex-1 min-w-0">
+            {!isActive && subscription && subscription.status === 'PENDING' && (
+              <Alert variant="info" className="mb-6">
+                <div className="flex items-center gap-3">
+                  <Receipt className="h-5 w-5" />
+                  <div>
+                    <p className="font-bold">جاري مراجعة طلب اشتراكك</p>
+                    <p className="text-sm">لقد استلمنا إيصال الدفع الخاص بك وجاري مراجعته من قبل الإدارة. سيتم تفعيل حسابك قريباً.</p>
+                  </div>
+                </div>
+              </Alert>
+            )}
+            {!isActive && (!subscription || subscription.status !== 'PENDING') && (
+              <Alert variant="warning" className="mb-6">
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="h-5 w-5" />
+                  <div>
+                    <p className="font-bold">حسابك غير مفعل</p>
+                    <p className="text-sm">يرجى اختيار باقة ورفع إيصال الدفع لتفعيل الحساب.</p>
+                  </div>
+                </div>
+              </Alert>
+            )}
             <div className="bg-white min-h-[700px] border border-gray-100 shadow-sm rounded-[2rem] p-6 sm:p-10">
               {activeTab === 'home' && <HomeTab isActive={isActive} />}
               {activeTab === 'sessions' && <SessionsTab isActive={isActive} />}

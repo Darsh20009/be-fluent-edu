@@ -45,10 +45,12 @@ export const authOptions: NextAuthOptions = {
           throw new Error('البيانات المدخلة غير صحيحة')
         }
 
+        /* 
         if (!user.isActive) {
           console.log('❌ User account is inactive:', user.email)
           throw new Error('هذا الحساب غير مفعل حالياً. يرجى التواصل مع الإدارة.')
         }
+        */
 
         if (!user.passwordHash) {
           console.log('❌ No password hash for user:', credentials.emailOrPhone)

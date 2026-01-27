@@ -134,6 +134,12 @@ export async function PUT(
         }
       })
 
+      // Also activate the user
+      await prisma.user.update({
+        where: { id: updatedSubscription.User.id },
+        data: { isActive: true }
+      })
+
       return NextResponse.json(updatedSubscription)
     }
 
