@@ -34,9 +34,9 @@ export async function GET(request: NextRequest) {
           startTime: { gte: oneWeekAgo }
         }
       }),
-      prisma.subscription.count({ where: { paid: false } }),
+      prisma.subscription.count({ where: { status: 'PENDING' } }),
       prisma.subscription.findMany({
-        where: { paid: true },
+        where: { status: 'APPROVED' },
         include: { Package: true }
       })
     ])

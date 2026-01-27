@@ -95,7 +95,7 @@ export default function HomeTab() {
               <TrendingUp className="h-6 w-6 text-orange-600" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-1">Total Revenue</h3>
-            <p className="text-2xl font-bold text-[#10B981]">{stats?.totalRevenue || 0} SAR</p>
+            <p className="text-2xl font-bold text-[#10B981]">{stats?.totalRevenue || 0} EGP</p>
             <p className="text-sm text-gray-600">الإيرادات</p>
           </div>
         </Card>
