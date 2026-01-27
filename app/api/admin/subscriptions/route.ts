@@ -12,6 +12,14 @@ export async function GET(request: NextRequest) {
     }
 
     const subscriptions = await prisma.subscription.findMany({
+      where: {
+        OR: [
+          { status: 'PENDING' },
+          { status: 'UNDER_REVIEW' },
+          { status: 'APPROVED' },
+          { status: 'REJECTED' }
+        ]
+      },
       include: {
         User: {
           select: {

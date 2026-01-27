@@ -23,6 +23,7 @@ interface Subscription {
   approvedAt: string | null
   rejectedAt: string | null
   adminNotes: string | null
+  paid: boolean
   User: {
     id: string
     name: string
