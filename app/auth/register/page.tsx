@@ -542,15 +542,21 @@ export default function RegisterPage() {
                     if (!file) return
                     setUploading(true)
                     try {
-                      // Mock upload for now or implement real upload
-                      const reader = new FileReader()
-                      reader.onloadend = () => {
-                        setFormData({ ...formData, receiptUrl: reader.result as string })
-                        setUploading(false)
-                      }
-                      reader.readAsDataURL(file)
+                      const formDataUpload = new FormData()
+                      formDataUpload.append('file', file)
+                      
+                      const response = await fetch('/api/upload/receipt', {
+                        method: 'POST',
+                        body: formDataUpload,
+                      })
+                      
+                      if (!response.ok) throw new Error('Upload failed')
+                      
+                      const data = await response.json()
+                      setFormData({ ...formData, receiptUrl: data.url })
                     } catch (err) {
                       setError('فشل رفع الملف / Upload failed')
+                    } finally {
                       setUploading(false)
                     }
                   }}
