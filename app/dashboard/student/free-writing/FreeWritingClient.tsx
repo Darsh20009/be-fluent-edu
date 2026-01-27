@@ -128,13 +128,13 @@ export default function FreeWritingClient() {
               <FileText className="h-12 w-12 text-white" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-[#004E89] mb-3">Premium Feature</h2>
+          <h2 className="text-2xl font-bold text-[#10B981] mb-3">Premium Feature</h2>
           <p className="text-gray-700 mb-6">
             هذه الميزة متاحة فقط للمشتركين / This feature is only available for subscribers
           </p>
           <a
             href="/dashboard/student?tab=packages"
-            className="block w-full bg-gradient-to-r from-[#004E89] to-[#0066CC] text-white py-3 rounded-xl font-bold hover:shadow-lg transition-all"
+            className="block w-full bg-gradient-to-r from-[#10B981] to-[#059669] text-white py-3 rounded-xl font-bold hover:shadow-lg transition-all"
           >
             ✨ اشترك الآن / Subscribe Now ✨
           </a>
@@ -202,7 +202,7 @@ export default function FreeWritingClient() {
           </Link>
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-[#004E89] mb-2">
+              <h1 className="text-3xl sm:text-4xl font-bold text-[#10B981] mb-2">
                 Free Writing / الكتابة الحرة
               </h1>
               <p className="text-gray-600">
@@ -235,8 +235,8 @@ export default function FreeWritingClient() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <FileText className="h-5 w-5 text-[#004E89]" />
-                        <h3 className="text-lg font-bold text-[#004E89]">{writing.title}</h3>
+                        <FileText className="h-5 w-5 text-[#10B981]" />
+                        <h3 className="text-lg font-bold text-[#10B981]">{writing.title}</h3>
                         <Badge variant="warning">
                           <Clock className="h-3 w-3 mr-1" />
                           Under Review / قيد المراجعة
@@ -348,7 +348,7 @@ export default function FreeWritingClient() {
                     <button
                       key={index}
                       onClick={() => setTitle(topic.en)}
-                      className="text-left p-2 border border-gray-300 rounded-lg hover:border-[#004E89] hover:bg-blue-50 transition-colors text-sm"
+                      className="text-left p-2 border border-gray-300 rounded-lg hover:border-[#10B981] hover:bg-blue-50 transition-colors text-sm"
                     >
                       <p className="font-medium text-gray-900">{topic.en}</p>
                       <p className="text-xs text-gray-600">{topic.ar}</p>
@@ -366,7 +366,7 @@ export default function FreeWritingClient() {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   placeholder="Enter your own title... / أدخل عنوانك الخاص..."
                 />
               </div>
@@ -379,7 +379,7 @@ export default function FreeWritingClient() {
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   rows={15}
                   placeholder="Start writing here... Write at least 100 words for best feedback.\n\nابدأ الكتابة هنا... اكتب ما لا يقل عن 100 كلمة للحصول على أفضل ملاحظات."
                 />

@@ -384,7 +384,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold text-[#004E89]">
+        <h2 className="text-3xl font-bold text-[#10B981]">
           Sessions / الحصص
         </h2>
         <Button

@@ -52,7 +52,7 @@ export default function HomeTab({ teacherProfileId }: { teacherProfileId: string
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-[#004E89]">
+      <h2 className="text-3xl font-bold text-[#10B981]">
         Dashboard / لوحة التحكم
       </h2>
 
@@ -60,10 +60,10 @@ export default function HomeTab({ teacherProfileId }: { teacherProfileId: string
         <Card variant="elevated">
           <div className="text-center">
             <div className="w-12 h-12 bg-blue-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-              <Users className="h-6 w-6 text-[#004E89]" />
+              <Users className="h-6 w-6 text-[#10B981]" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-1">Total Students</h3>
-            <p className="text-2xl font-bold text-[#004E89]">{stats?.totalStudents || 0}</p>
+            <p className="text-2xl font-bold text-[#10B981]">{stats?.totalStudents || 0}</p>
             <p className="text-sm text-gray-600">إجمالي الطلاب</p>
           </div>
         </Card>
@@ -74,7 +74,7 @@ export default function HomeTab({ teacherProfileId }: { teacherProfileId: string
               <Calendar className="h-6 w-6 text-green-600" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-1">Total Sessions</h3>
-            <p className="text-2xl font-bold text-[#004E89]">{stats?.totalSessions || 0}</p>
+            <p className="text-2xl font-bold text-[#10B981]">{stats?.totalSessions || 0}</p>
             <p className="text-sm text-gray-600">إجمالي الحصص</p>
           </div>
         </Card>
@@ -85,7 +85,7 @@ export default function HomeTab({ teacherProfileId }: { teacherProfileId: string
               <Clock className="h-6 w-6 text-purple-600" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-1">Upcoming Sessions</h3>
-            <p className="text-2xl font-bold text-[#004E89]">{stats?.upcomingSessions || 0}</p>
+            <p className="text-2xl font-bold text-[#10B981]">{stats?.upcomingSessions || 0}</p>
             <p className="text-sm text-gray-600">حصص قادمة</p>
           </div>
         </Card>
@@ -96,7 +96,7 @@ export default function HomeTab({ teacherProfileId }: { teacherProfileId: string
               <BookOpen className="h-6 w-6 text-orange-600" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-1">Pending Grading</h3>
-            <p className="text-2xl font-bold text-[#004E89]">{stats?.pendingGrading || 0}</p>
+            <p className="text-2xl font-bold text-[#10B981]">{stats?.pendingGrading || 0}</p>
             <p className="text-sm text-gray-600">في انتظار التصحيح</p>
           </div>
         </Card>
@@ -106,7 +106,7 @@ export default function HomeTab({ teacherProfileId }: { teacherProfileId: string
         <Card variant="elevated">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <Calendar className="h-6 w-6 text-[#004E89]" />
+              <Calendar className="h-6 w-6 text-[#10B981]" />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900 flex items-center gap-2">
@@ -129,7 +129,7 @@ export default function HomeTab({ teacherProfileId }: { teacherProfileId: string
       )}
 
       <Card variant="elevated" className="bg-gradient-to-r from-blue-50 to-purple-50">
-        <h3 className="text-xl font-bold text-[#004E89] mb-4">
+        <h3 className="text-xl font-bold text-[#10B981] mb-4">
           Quick Actions / إجراءات سريعة
         </h3>
         <div className="grid md:grid-cols-2 gap-3">

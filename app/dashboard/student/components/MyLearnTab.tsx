@@ -221,7 +221,7 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
   if (!isActive) {
     return (
       <div>
-        <h2 className="text-3xl font-bold text-[#004E89] mb-6">
+        <h2 className="text-3xl font-bold text-[#10B981] mb-6">
           MyLearn - My Words / كلماتي
         </h2>
         <Alert variant="warning">

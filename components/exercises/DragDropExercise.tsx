@@ -161,7 +161,7 @@ export default function DragDropExercise({ exercise, onComplete, onNext }: Props
               onDragEnd={handleDragEnd}
               className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 ${
                 draggedItem === index
-                  ? 'border-[#004E89] bg-[#004E89]/10 scale-105 shadow-lg'
+                  ? 'border-[#10B981] bg-[#10B981]/10 scale-105 shadow-lg'
                   : isInCorrectPosition
                   ? 'border-green-500 bg-green-50'
                   : isInWrongPosition
@@ -243,14 +243,14 @@ export default function DragDropExercise({ exercise, onComplete, onNext }: Props
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="w-full py-3 bg-[#004E89] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 bg-[#10B981] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'جاري التحقق...' : 'تحقق من الإجابة'}
         </button>
       ) : (
         <button
           onClick={onNext}
-          className="w-full py-3 bg-[#004E89] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors"
+          className="w-full py-3 bg-[#10B981] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors"
         >
           التمرين التالي
         </button>

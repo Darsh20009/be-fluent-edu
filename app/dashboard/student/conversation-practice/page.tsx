@@ -385,10 +385,10 @@ export default function ConversationPracticePage() {
             onClick={() => router.push('/dashboard/student')}
             className="p-2 hover:bg-white rounded-lg transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 text-[#004E89]" />
+            <ChevronLeft className="w-5 h-5 text-[#10B981]" />
           </button>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-[#004E89]">
+            <h1 className="text-2xl md:text-3xl font-bold text-[#10B981]">
               تدريب المحادثة
             </h1>
             <p className="text-gray-600">
@@ -442,7 +442,7 @@ export default function ConversationPracticePage() {
                         <div className="p-4">
                           <div className="flex justify-between items-start mb-3">
                             <div>
-                              <h3 className="font-bold text-[#004E89]">{scenario.title}</h3>
+                              <h3 className="font-bold text-[#10B981]">{scenario.title}</h3>
                               <p className="text-sm text-gray-600">{scenario.titleAr}</p>
                             </div>
                             {scenario.progress?.completed && (
@@ -470,13 +470,13 @@ export default function ConversationPracticePage() {
                   <Card className="max-w-2xl mx-auto">
                     <div className="p-8 text-center">
                       <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-                      <h2 className="text-2xl font-bold text-[#004E89] mb-2">
+                      <h2 className="text-2xl font-bold text-[#10B981] mb-2">
                         أحسنت! / Well Done!
                       </h2>
                       <p className="text-gray-600 mb-4">
                         لقد أكملت المحادثة بنجاح / You completed the conversation successfully
                       </p>
-                      <div className="text-3xl font-bold text-[#004E89] mb-6">
+                      <div className="text-3xl font-bold text-[#10B981] mb-6">
                         {scenarioScore} نقطة / points
                       </div>
                       <div className="flex justify-center gap-4">
@@ -495,7 +495,7 @@ export default function ConversationPracticePage() {
                   <Card className="max-w-3xl mx-auto">
                     <div className="p-4 border-b flex justify-between items-center">
                       <div>
-                        <h2 className="font-bold text-[#004E89]">{selectedScenario.title}</h2>
+                        <h2 className="font-bold text-[#10B981]">{selectedScenario.title}</h2>
                         <p className="text-sm text-gray-600">{selectedScenario.titleAr}</p>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => setSelectedScenario(null)}>
@@ -510,7 +510,7 @@ export default function ConversationPracticePage() {
                           </span>
                           <div className="flex-1 h-2 bg-gray-200 rounded-full">
                             <div 
-                              className="h-2 bg-[#004E89] rounded-full transition-all"
+                              className="h-2 bg-[#10B981] rounded-full transition-all"
                               style={{ width: `${((currentStepIndex + 1) / selectedScenario.dialogueSteps.length) * 100}%` }}
                             />
                           </div>
@@ -528,7 +528,7 @@ export default function ConversationPracticePage() {
                             const step = selectedScenario.dialogueSteps[currentStepIndex]
                             return (
                               <div>
-                                <div className="bg-[#004E89] text-white p-4 rounded-lg mb-4">
+                                <div className="bg-[#10B981] text-white p-4 rounded-lg mb-4">
                                   <p className="text-lg">{step.message}</p>
                                   <p className="text-sm opacity-80 mt-2">{step.messageAr}</p>
                                 </div>
@@ -549,8 +549,8 @@ export default function ConversationPracticePage() {
                                                 ? 'border-red-500 bg-red-50'
                                                 : 'border-gray-200'
                                             : selectedOption === option.id
-                                              ? 'border-[#004E89] bg-blue-50'
-                                              : 'border-gray-200 hover:border-[#004E89]'
+                                              ? 'border-[#10B981] bg-blue-50'
+                                              : 'border-gray-200 hover:border-[#10B981]'
                                         }`}
                                       >
                                         <div className="flex items-start gap-3">
@@ -607,7 +607,7 @@ export default function ConversationPracticePage() {
               <div className="space-y-6">
                 <Card>
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-[#004E89] mb-4">
+                    <h3 className="text-xl font-bold text-[#10B981] mb-4">
                       تسجيل الصوت / Voice Recording
                     </h3>
                     <p className="text-gray-600 mb-6">
@@ -619,7 +619,7 @@ export default function ConversationPracticePage() {
                       <div className="grid md:grid-cols-2 gap-3">
                         {voicePrompts.map((category, catIndex) => (
                           <div key={catIndex}>
-                            <p className="text-sm font-medium text-[#004E89] mb-2">
+                            <p className="text-sm font-medium text-[#10B981] mb-2">
                               {category.category} / {category.categoryAr}
                             </p>
                             <div className="space-y-2">
@@ -629,8 +629,8 @@ export default function ConversationPracticePage() {
                                   onClick={() => setCurrentPrompt(prompt)}
                                   className={`w-full p-3 rounded-lg border text-left text-sm transition-all ${
                                     currentPrompt?.text === prompt.text
-                                      ? 'border-[#004E89] bg-blue-50'
-                                      : 'border-gray-200 hover:border-[#004E89]'
+                                      ? 'border-[#10B981] bg-blue-50'
+                                      : 'border-gray-200 hover:border-[#10B981]'
                                   }`}
                                 >
                                   <p className="font-medium">{prompt.text}</p>
@@ -644,7 +644,7 @@ export default function ConversationPracticePage() {
                     </div>
 
                     {currentPrompt && (
-                      <div className="bg-[#004E89] text-white p-4 rounded-lg mb-6">
+                      <div className="bg-[#10B981] text-white p-4 rounded-lg mb-6">
                         <p className="text-lg mb-1">{currentPrompt.text}</p>
                         <p className="text-sm opacity-80 mb-3">{currentPrompt.textAr}</p>
                         
@@ -728,7 +728,7 @@ export default function ConversationPracticePage() {
                 {recordings.length > 0 && (
                   <Card>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold text-[#004E89] mb-4">
+                      <h3 className="text-xl font-bold text-[#10B981] mb-4">
                         تسجيلاتي / My Recordings
                       </h3>
                       <div className="space-y-3">
@@ -736,7 +736,7 @@ export default function ConversationPracticePage() {
                           <div key={recording.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                             <button
                               onClick={() => playRecording(recording)}
-                              className={`p-3 rounded-full ${playingId === recording.id ? 'bg-[#004E89] text-white' : 'bg-white border'}`}
+                              className={`p-3 rounded-full ${playingId === recording.id ? 'bg-[#10B981] text-white' : 'bg-white border'}`}
                             >
                               {playingId === recording.id ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                             </button>
@@ -774,7 +774,7 @@ export default function ConversationPracticePage() {
                         setTextResults(null)
                       }}>
                         <div className="p-4">
-                          <h3 className="font-bold text-[#004E89] mb-1">{conv.title}</h3>
+                          <h3 className="font-bold text-[#10B981] mb-1">{conv.title}</h3>
                           <p className="text-sm text-gray-600 mb-3">{conv.titleAr}</p>
                           <p className="text-sm text-gray-700 mb-3">{conv.description}</p>
                           <div className="flex items-center justify-between">
@@ -790,10 +790,10 @@ export default function ConversationPracticePage() {
                     <div className="p-6">
                       <div className="text-center mb-6">
                         <Trophy className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
-                        <h2 className="text-2xl font-bold text-[#004E89]">
+                        <h2 className="text-2xl font-bold text-[#10B981]">
                           النتيجة / Result
                         </h2>
-                        <div className="text-4xl font-bold text-[#004E89] my-4">
+                        <div className="text-4xl font-bold text-[#10B981] my-4">
                           {textResults.percentage}%
                         </div>
                         <p className="text-gray-600">
@@ -845,7 +845,7 @@ export default function ConversationPracticePage() {
                   <Card className="max-w-2xl mx-auto">
                     <div className="p-4 border-b flex justify-between items-center">
                       <div>
-                        <h2 className="font-bold text-[#004E89]">{selectedConversation.title}</h2>
+                        <h2 className="font-bold text-[#10B981]">{selectedConversation.title}</h2>
                         <p className="text-sm text-gray-600">{selectedConversation.titleAr}</p>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => setSelectedConversation(null)}>
@@ -860,7 +860,7 @@ export default function ConversationPracticePage() {
                           </span>
                           <div className="flex-1 h-2 bg-gray-200 rounded-full">
                             <div 
-                              className="h-2 bg-[#004E89] rounded-full transition-all"
+                              className="h-2 bg-[#10B981] rounded-full transition-all"
                               style={{ width: `${((currentQuestionIndex + 1) / selectedConversation.questions.length) * 100}%` }}
                             />
                           </div>
@@ -872,7 +872,7 @@ export default function ConversationPracticePage() {
                           const question = selectedConversation.questions.find(q => q.id === answer.questionId)
                           return (
                             <div key={index} className="space-y-2">
-                              <div className="bg-[#004E89] text-white p-3 rounded-lg rounded-br-none max-w-[80%]">
+                              <div className="bg-[#10B981] text-white p-3 rounded-lg rounded-br-none max-w-[80%]">
                                 <p>{question?.question}</p>
                               </div>
                               <div className="bg-gray-100 p-3 rounded-lg rounded-bl-none max-w-[80%] mr-auto">
@@ -885,7 +885,7 @@ export default function ConversationPracticePage() {
 
                       {currentQuestionIndex < selectedConversation.questions.length && !textAnswers.find(a => a.questionId === selectedConversation.questions[currentQuestionIndex].id) && (
                         <div>
-                          <div className="bg-[#004E89] text-white p-4 rounded-lg mb-4">
+                          <div className="bg-[#10B981] text-white p-4 rounded-lg mb-4">
                             <p className="text-lg">{selectedConversation.questions[currentQuestionIndex].question}</p>
                             <p className="text-sm opacity-80 mt-2">{selectedConversation.questions[currentQuestionIndex].questionAr}</p>
                           </div>
@@ -897,7 +897,7 @@ export default function ConversationPracticePage() {
                               onChange={(e) => setCurrentTextAnswer(e.target.value)}
                               onKeyPress={(e) => e.key === 'Enter' && handleAddTextAnswer()}
                               placeholder="اكتب إجابتك هنا..."
-                              className="flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#004E89] focus:outline-none"
+                              className="flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#10B981] focus:outline-none"
                             />
                             <Button onClick={handleAddTextAnswer} disabled={!currentTextAnswer.trim()}>
                               <Send className="w-5 h-5" />

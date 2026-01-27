@@ -176,7 +176,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold text-[#004E89]">
+        <h2 className="text-3xl font-bold text-[#10B981]">
           Writing Tests / اختبارات الكتابة
         </h2>
         <Button variant="primary" onClick={() => setShowCreateForm(true)}>
@@ -298,7 +298,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
                 type="text"
                 value={newTest.title}
                 onChange={(e) => setNewTest(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 placeholder="Write about your favorite book"
               />
             </div>
@@ -311,7 +311,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
                 type="text"
                 value={newTest.titleAr}
                 onChange={(e) => setNewTest(prev => ({ ...prev, titleAr: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 placeholder="اكتب عن كتابك المفضل"
               />
             </div>
@@ -323,7 +323,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
               <textarea
                 value={newTest.instructions}
                 onChange={(e) => setNewTest(prev => ({ ...prev, instructions: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 rows={3}
                 placeholder="Write a paragraph about your favorite book and explain why you like it..."
               />
@@ -336,7 +336,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
               <textarea
                 value={newTest.instructionsAr}
                 onChange={(e) => setNewTest(prev => ({ ...prev, instructionsAr: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 rows={3}
                 placeholder="اكتب فقرة عن كتابك المفضل واشرح لماذا يعجبك..."
               />
@@ -350,7 +350,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
                 type="date"
                 value={newTest.dueDate}
                 onChange={(e) => setNewTest(prev => ({ ...prev, dueDate: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
               />
             </div>
 
@@ -407,7 +407,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
                       href={gradingSubmission.manuscriptUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#004E89] hover:underline font-medium"
+                      className="text-[#10B981] hover:underline font-medium"
                     >
                       📎 View Manuscript File
                     </a>
@@ -426,7 +426,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
                 max="100"
                 value={gradeData.grade}
                 onChange={(e) => setGradeData(prev => ({ ...prev, grade: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 placeholder="85"
               />
             </div>
@@ -438,7 +438,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
               <textarea
                 value={gradeData.feedback}
                 onChange={(e) => setGradeData(prev => ({ ...prev, feedback: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 rows={4}
                 placeholder="Great work! Your writing is clear and well-organized..."
               />

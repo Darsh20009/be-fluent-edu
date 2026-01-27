@@ -165,7 +165,7 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow-xl border-2 border-gray-300 overflow-hidden">
       {/* Header */}
-      <div className="bg-[#004E89] p-4 text-white">
+      <div className="bg-[#10B981] p-4 text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white dark:bg-neutral-200 rounded-full flex items-center justify-center text-primary-600 dark:text-primary-700 font-bold">
@@ -218,7 +218,7 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
                 <div
                   className={`max-w-[70%] rounded-2xl px-4 py-2 ${
                     isOwn
-                      ? 'bg-[#004E89] text-white rounded-br-sm'
+                      ? 'bg-[#10B981] text-white rounded-br-sm'
                       : 'bg-gray-100 text-black border-2 border-gray-300 rounded-bl-sm'
                   }`}
                 >
@@ -259,7 +259,7 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="اكتب رسالتك..."
-            className="flex-1 px-4 py-3 border-2 border-gray-300 bg-white text-black placeholder:text-gray-500 rounded-full focus:ring-2 focus:ring-[#004E89] focus:border-transparent text-right"
+            className="flex-1 px-4 py-3 border-2 border-gray-300 bg-white text-black placeholder:text-gray-500 rounded-full focus:ring-2 focus:ring-[#10B981] focus:border-transparent text-right"
             dir="rtl"
             disabled={sending}
           />

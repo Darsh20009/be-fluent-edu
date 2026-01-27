@@ -137,7 +137,7 @@ export default function FillBlankExercise({ exercise, onComplete, onNext }: Prop
                       ? answers[index]?.toLowerCase().trim() === blanks[index]?.toLowerCase().trim()
                         ? 'border-green-500 text-green-700'
                         : 'border-red-500 text-red-700'
-                      : 'border-[#004E89] focus:border-[#003A6A]'
+                      : 'border-[#10B981] focus:border-[#003A6A]'
                   }`}
                   placeholder="..."
                 />
@@ -170,7 +170,7 @@ export default function FillBlankExercise({ exercise, onComplete, onNext }: Prop
             {exercise.audioUrl && (
               <button
                 onClick={playAudio}
-                className="p-2 bg-[#004E89] text-white rounded-full hover:bg-[#003A6A] transition-colors"
+                className="p-2 bg-[#10B981] text-white rounded-full hover:bg-[#003A6A] transition-colors"
                 title="تشغيل الصوت المسجل"
               >
                 <Volume2 className="w-5 h-5" />
@@ -233,14 +233,14 @@ export default function FillBlankExercise({ exercise, onComplete, onNext }: Prop
         <button
           onClick={handleSubmit}
           disabled={answers.some(a => !a.trim()) || loading}
-          className="w-full py-3 bg-[#004E89] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 bg-[#10B981] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'جاري التحقق...' : 'تحقق من الإجابة'}
         </button>
       ) : (
         <button
           onClick={onNext}
-          className="w-full py-3 bg-[#004E89] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors"
+          className="w-full py-3 bg-[#10B981] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors"
         >
           التمرين التالي
         </button>

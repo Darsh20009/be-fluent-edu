@@ -134,7 +134,7 @@ export default function AchievementsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F5F1E8] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#004E89] border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#10B981] border-t-transparent"></div>
       </div>
     )
   }
@@ -145,7 +145,7 @@ export default function AchievementsPage() {
         <div className="text-center">
           <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h2 className="text-xl text-gray-600 mb-4">يرجى تسجيل الدخول لعرض إنجازاتك</h2>
-          <Link href="/auth/login" className="text-[#004E89] hover:underline">
+          <Link href="/auth/login" className="text-[#10B981] hover:underline">
             تسجيل الدخول
           </Link>
         </div>
@@ -161,12 +161,12 @@ export default function AchievementsPage() {
       <header className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <Trophy className="w-8 h-8 text-[#004E89]" />
-            <span className="text-xl font-bold text-[#004E89]">Youspeak</span>
+            <Trophy className="w-8 h-8 text-[#10B981]" />
+            <span className="text-xl font-bold text-[#10B981]">Youspeak</span>
           </Link>
           <Link 
             href="/dashboard/student" 
-            className="flex items-center gap-2 text-gray-600 hover:text-[#004E89]"
+            className="flex items-center gap-2 text-gray-600 hover:text-[#10B981]"
           >
             <span>لوحة التحكم</span>
             <ArrowRight className="w-5 h-5" />
@@ -175,7 +175,7 @@ export default function AchievementsPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-gradient-to-br from-[#004E89] to-[#0066B8] rounded-2xl p-6 md:p-8 mb-8 text-white">
+        <div className="bg-gradient-to-br from-[#10B981] to-[#0066B8] rounded-2xl p-6 md:p-8 mb-8 text-white">
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="relative">
               <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-white/20 flex items-center justify-center">
@@ -232,7 +232,7 @@ export default function AchievementsPage() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-[#004E89] text-white'
+                  ? 'bg-[#10B981] text-white'
                   : 'bg-white text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -303,7 +303,7 @@ export default function AchievementsPage() {
               </h3>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-4xl font-bold text-[#004E89]">{stats.currentStreak}</p>
+                  <p className="text-4xl font-bold text-[#10B981]">{stats.currentStreak}</p>
                   <p className="text-gray-500">يوم متتالي</p>
                 </div>
                 <div className="text-left">
@@ -436,7 +436,7 @@ export default function AchievementsPage() {
                   onClick={() => setLeaderboardType(type.id as any)}
                   className={`px-4 py-2 rounded-lg transition-colors ${
                     leaderboardType === type.id
-                      ? 'bg-[#004E89] text-white'
+                      ? 'bg-[#10B981] text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
@@ -446,13 +446,13 @@ export default function AchievementsPage() {
             </div>
 
             {userRank && (
-              <div className="p-4 bg-[#004E89]/5 border-b">
+              <div className="p-4 bg-[#10B981]/5 border-b">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#004E89] text-white flex items-center justify-center font-bold">
+                  <div className="w-10 h-10 rounded-full bg-[#10B981] text-white flex items-center justify-center font-bold">
                     {userRank}
                   </div>
                   <div>
-                    <p className="font-bold text-[#004E89]">ترتيبك الحالي</p>
+                    <p className="font-bold text-[#10B981]">ترتيبك الحالي</p>
                     <p className="text-sm text-gray-500">من بين جميع المتعلمين</p>
                   </div>
                 </div>
@@ -484,7 +484,7 @@ export default function AchievementsPage() {
                   </div>
                   <div className="text-left">
                     {leaderboardType === 'xp' && (
-                      <p className="font-bold text-[#004E89]">{entry.totalXP.toLocaleString()} XP</p>
+                      <p className="font-bold text-[#10B981]">{entry.totalXP.toLocaleString()} XP</p>
                     )}
                     {leaderboardType === 'streak' && (
                       <p className="font-bold text-orange-500 flex items-center gap-1">
@@ -493,7 +493,7 @@ export default function AchievementsPage() {
                       </p>
                     )}
                     {leaderboardType === 'level' && (
-                      <p className="font-bold text-[#004E89]">المستوى {entry.currentLevel}</p>
+                      <p className="font-bold text-[#10B981]">المستوى {entry.currentLevel}</p>
                     )}
                   </div>
                 </div>
@@ -510,7 +510,7 @@ export default function AchievementsPage() {
         )}
       </main>
 
-      <footer className="bg-[#004E89] text-white py-6 mt-12">
+      <footer className="bg-[#10B981] text-white py-6 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p>© 2024 Youspeak. جميع الحقوق محفوظة</p>
         </div>

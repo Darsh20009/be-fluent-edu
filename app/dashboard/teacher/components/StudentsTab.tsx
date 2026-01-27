@@ -71,7 +71,7 @@ export default function StudentsTab({ teacherProfileId }: { teacherProfileId: st
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-[#004E89]">
+      <h2 className="text-3xl font-bold text-[#10B981]">
         My Students / طلابي
       </h2>
 
@@ -89,7 +89,7 @@ export default function StudentsTab({ teacherProfileId }: { teacherProfileId: st
             {activeStudents.map((student) => (
               <Card key={student.id} variant="elevated" padding="lg" className="hover:shadow-xl transition-shadow">
                 <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#004E89] to-[#1A5F7A] rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg flex-shrink-0">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#10B981] to-[#059669] rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg flex-shrink-0">
                     {student.name?.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -129,7 +129,7 @@ export default function StudentsTab({ teacherProfileId }: { teacherProfileId: st
                     <div className="grid grid-cols-3 gap-2">
                       <div className="bg-gray-50 rounded-lg p-2 text-center">
                         <div className="text-xs text-gray-600 mb-1">المستوى</div>
-                        <div className="text-sm font-bold text-[#004E89]">
+                        <div className="text-sm font-bold text-[#10B981]">
                           {student.studentProfile?.levelCurrent || 'غير محدد'}
                         </div>
                       </div>

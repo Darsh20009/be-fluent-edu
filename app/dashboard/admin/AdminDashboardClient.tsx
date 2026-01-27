@@ -50,7 +50,7 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F5F5DC] to-white">
-      <header className="bg-[#004E89] text-white shadow-lg">
+      <header className="bg-[#10B981] text-white shadow-lg">
         <div className="container mx-auto px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-4">
@@ -72,7 +72,7 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
                 variant="outline"
                 size="sm"
                 onClick={handleSignOut}
-                className="text-white border-white hover:bg-white hover:text-[#004E89] text-xs sm:text-sm px-2 sm:px-4"
+                className="text-white border-white hover:bg-white hover:text-[#10B981] text-xs sm:text-sm px-2 sm:px-4"
               >
                 <LogOut className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Logout / خروج</span>
@@ -103,7 +103,7 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
               <div className="p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between lg:justify-start gap-3">
                   <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#004E89] rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#10B981] rounded-full flex items-center justify-center">
                       <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                     </div>
                     <div>
@@ -145,7 +145,7 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
                       }}
                       className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors mb-1 ${
                         activeTab === item.id
-                          ? 'bg-[#004E89] text-white'
+                          ? 'bg-[#10B981] text-white'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >

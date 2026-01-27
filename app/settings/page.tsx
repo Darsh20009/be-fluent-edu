@@ -81,7 +81,7 @@ export default function SettingsPage() {
           >
             <ArrowRight className="h-8 w-8 text-black" />
           </Button>
-          <div className="bg-[#004E89] p-3 rounded-xl">
+          <div className="bg-[#10B981] p-3 rounded-xl">
             <Settings className="h-8 w-8 text-white" />
           </div>
           <div>

@@ -100,7 +100,7 @@ export default function ForgotPasswordPage() {
       <AppHeader variant="marketing">
         <Link
           href="/auth/login"
-          className="px-4 py-2 sm:px-6 sm:py-2 rounded-lg border-2 border-[#004E89] text-[#004E89] hover:bg-[#004E89] hover:text-white transition-colors text-sm sm:text-base"
+          className="px-4 py-2 sm:px-6 sm:py-2 rounded-lg border-2 border-[#10B981] text-[#10B981] hover:bg-[#10B981] hover:text-white transition-colors text-sm sm:text-base"
         >
           تسجيل الدخول / Login
         </Link>
@@ -169,7 +169,7 @@ export default function ForgotPasswordPage() {
                 fullWidth
                 size="lg"
                 loading={loading}
-                className="font-semibold bg-[#004E89] hover:bg-[#003A6B] text-white"
+                className="font-semibold bg-[#10B981] hover:bg-[#003A6B] text-white"
               >
                 {loading ? 'جاري التحقق...' : 'التحقق / Verify'}
               </Button>
@@ -220,7 +220,7 @@ export default function ForgotPasswordPage() {
                   fullWidth
                   size="lg"
                   loading={loading}
-                  className="font-semibold bg-[#004E89] hover:bg-[#003A6B] text-white"
+                  className="font-semibold bg-[#10B981] hover:bg-[#003A6B] text-white"
                 >
                   {loading ? 'جاري التحديث...' : 'تحديث كلمة المرور / Update Password'}
                 </Button>
@@ -243,7 +243,7 @@ export default function ForgotPasswordPage() {
                 <Button
                   fullWidth
                   size="lg"
-                  className="font-semibold bg-[#004E89] hover:bg-[#003A6B] text-white"
+                  className="font-semibold bg-[#10B981] hover:bg-[#003A6B] text-white"
                 >
                   العودة لتسجيل الدخول / Back to Login
                 </Button>

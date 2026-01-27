@@ -130,7 +130,7 @@ export default function GrammarRulesPage() {
       <AppHeader variant="marketing">
         <Link
           href="/"
-          className="px-4 py-2 sm:px-6 sm:py-2 rounded-lg border-2 border-[#004E89] text-[#004E89] hover:bg-[#004E89] hover:text-white transition-colors flex items-center gap-2 text-sm sm:text-base"
+          className="px-4 py-2 sm:px-6 sm:py-2 rounded-lg border-2 border-[#10B981] text-[#10B981] hover:bg-[#10B981] hover:text-white transition-colors flex items-center gap-2 text-sm sm:text-base"
         >
           <ArrowLeft className="h-4 w-4" />
           <span className="hidden sm:inline">Back to Home / العودة للرئيسية</span>
@@ -138,7 +138,7 @@ export default function GrammarRulesPage() {
         </Link>
         <Link
           href="/auth/login"
-          className="px-4 py-2 sm:px-6 sm:py-2 rounded-lg bg-[#004E89] text-white hover:bg-[#003A6B] transition-colors text-sm sm:text-base"
+          className="px-4 py-2 sm:px-6 sm:py-2 rounded-lg bg-[#10B981] text-white hover:bg-[#003A6B] transition-colors text-sm sm:text-base"
         >
           Login / تسجيل الدخول
         </Link>
@@ -148,12 +148,12 @@ export default function GrammarRulesPage() {
         {/* Header */}
         <div className="text-center mb-8 sm:mb-10 md:mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 text-[#004E89]" />
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#004E89]">
+            <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 text-[#10B981]" />
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#10B981]">
               English Grammar Rules
             </h1>
           </div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#004E89] mb-3" dir="rtl">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#10B981] mb-3" dir="rtl">
             قواعد اللغة الإنجليزية
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-gray-700 max-w-3xl mx-auto px-4">
@@ -169,11 +169,11 @@ export default function GrammarRulesPage() {
           {grammarRules.map((section) => (
             <div
               key={section.id}
-              className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-[#004E89]/20"
+              className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-[#10B981]/20"
             >
-              <div className="bg-gradient-to-r from-[#004E89] to-[#1A5F7A] p-4 sm:p-6">
+              <div className="bg-gradient-to-r from-[#10B981] to-[#059669] p-4 sm:p-6">
                 <h3 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-                  <span className="bg-white text-[#004E89] w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
+                  <span className="bg-white text-[#10B981] w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
                     {section.id}
                   </span>
                   {section.title}
@@ -190,7 +190,7 @@ export default function GrammarRulesPage() {
                       <div className="flex items-start gap-3">
                         <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-1" />
                         <div className="flex-1">
-                          <h4 className="font-bold text-[#004E89] mb-2 text-base sm:text-lg">
+                          <h4 className="font-bold text-[#10B981] mb-2 text-base sm:text-lg">
                             {rule.name}
                           </h4>
                           <div className="space-y-1 text-sm sm:text-base">
@@ -213,8 +213,8 @@ export default function GrammarRulesPage() {
 
         {/* Call to Action */}
         <div className="mt-12 text-center">
-          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-2xl mx-auto border-2 border-[#004E89]/20">
-            <h3 className="text-2xl sm:text-3xl font-bold text-[#004E89] mb-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-2xl mx-auto border-2 border-[#10B981]/20">
+            <h3 className="text-2xl sm:text-3xl font-bold text-[#10B981] mb-4">
               Ready to Practice?
             </h3>
             <p className="text-lg text-gray-700 mb-2" dir="rtl">
@@ -226,13 +226,13 @@ export default function GrammarRulesPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/packages"
-                className="px-6 py-3 rounded-lg bg-[#004E89] text-white hover:bg-[#003A6B] transition-colors font-semibold"
+                className="px-6 py-3 rounded-lg bg-[#10B981] text-white hover:bg-[#003A6B] transition-colors font-semibold"
               >
                 View Packages / الباقات
               </Link>
               <Link
                 href="/auth/register"
-                className="px-6 py-3 rounded-lg border-2 border-[#004E89] text-[#004E89] hover:bg-[#004E89] hover:text-white transition-colors font-semibold"
+                className="px-6 py-3 rounded-lg border-2 border-[#10B981] text-[#10B981] hover:bg-[#10B981] hover:text-white transition-colors font-semibold"
               >
                 Register Now / سجل الآن
               </Link>

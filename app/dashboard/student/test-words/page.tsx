@@ -144,13 +144,13 @@ export default function TestWordsPage() {
               <Trophy className="h-12 w-12 text-white" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-[#004E89] mb-3">Premium Feature</h2>
+          <h2 className="text-2xl font-bold text-[#10B981] mb-3">Premium Feature</h2>
           <p className="text-gray-700 mb-6">
             هذه الميزة متاحة فقط للمشتركين / This feature is only available for subscribers
           </p>
           <button
             onClick={() => window.location.href = '/dashboard/student?tab=packages'}
-            className="w-full bg-gradient-to-r from-[#004E89] to-[#0066CC] text-white py-3 rounded-xl font-bold hover:shadow-lg transition-all"
+            className="w-full bg-gradient-to-r from-[#10B981] to-[#059669] text-white py-3 rounded-xl font-bold hover:shadow-lg transition-all"
           >
             ✨ اشترك الآن / Subscribe Now ✨
           </button>

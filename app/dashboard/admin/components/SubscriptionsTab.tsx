@@ -184,7 +184,7 @@ export default function SubscriptionsTab() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-[#004E89]">
+      <h2 className="text-3xl font-bold text-[#10B981]">
         Subscription Management / إدارة الاشتراكات
       </h2>
 
@@ -235,7 +235,7 @@ export default function SubscriptionsTab() {
               <select
                 value={selectedTeacher}
                 onChange={(e) => setSelectedTeacher(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89]"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981]"
               >
                 <option value="">Select a teacher...</option>
                 {teachers.map((teacher) => (
@@ -252,7 +252,7 @@ export default function SubscriptionsTab() {
               <textarea
                 value={adminNotes}
                 onChange={(e) => setAdminNotes(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89]"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981]"
                 rows={3}
                 placeholder="Add any notes..."
               />

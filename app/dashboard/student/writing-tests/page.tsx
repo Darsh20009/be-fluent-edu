@@ -153,13 +153,13 @@ export default function WritingTestsPage() {
               <FileText className="h-12 w-12 text-white" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-[#004E89] mb-3">Premium Feature</h2>
+          <h2 className="text-2xl font-bold text-[#10B981] mb-3">Premium Feature</h2>
           <p className="text-gray-700 mb-6">
             هذه الميزة متاحة فقط للمشتركين / This feature is only available for subscribers
           </p>
           <a
             href="/dashboard/student?tab=packages"
-            className="block w-full bg-gradient-to-r from-[#004E89] to-[#0066CC] text-white py-3 rounded-xl font-bold hover:shadow-lg transition-all"
+            className="block w-full bg-gradient-to-r from-[#10B981] to-[#059669] text-white py-3 rounded-xl font-bold hover:shadow-lg transition-all"
           >
             ✨ اشترك الآن / Subscribe Now ✨
           </a>
@@ -171,7 +171,7 @@ export default function WritingTestsPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl bg-[#F5F5DC] min-h-screen">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#004E89] mb-2">
+        <h1 className="text-3xl font-bold text-[#10B981] mb-2">
           Writing Tests / اختبارات الكتابة
         </h1>
         <p className="text-gray-600">Complete your writing tests and view feedback</p>
@@ -328,7 +328,7 @@ export default function WritingTestsPage() {
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 rows={12}
                 placeholder="Start writing here... ابدأ الكتابة هنا..."
               />
@@ -439,7 +439,7 @@ export default function WritingTestsPage() {
                     href={viewingSubmission.manuscriptUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#004E89] hover:underline"
+                    className="text-[#10B981] hover:underline"
                   >
                     📎 View Manuscript
                   </a>
@@ -451,7 +451,7 @@ export default function WritingTestsPage() {
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">Grade / الدرجة:</h3>
                 <div className="flex items-center gap-2">
-                  <div className="text-3xl font-bold text-[#004E89]">
+                  <div className="text-3xl font-bold text-[#10B981]">
                     {viewingSubmission.grade}/100
                   </div>
                 </div>

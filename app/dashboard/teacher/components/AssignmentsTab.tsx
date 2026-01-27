@@ -184,7 +184,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold text-[#004E89]">
+        <h2 className="text-3xl font-bold text-[#10B981]">
           Assignments / الواجبات
         </h2>
         <Button
@@ -223,8 +223,8 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
             <Card key={assignment.id} variant="elevated">
               <div className="mb-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <FileText className="h-5 w-5 text-[#004E89]" />
-                  <h3 className="text-lg font-bold text-[#004E89]">{assignment.title}</h3>
+                  <FileText className="h-5 w-5 text-[#10B981]" />
+                  <h3 className="text-lg font-bold text-[#10B981]">{assignment.title}</h3>
                   {assignment.Submission.length > 0 && (
                     <Badge variant="info">
                       {assignment.Submission.length} submission(s)
@@ -317,7 +317,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                 Assignment Type / نوع الواجب
               </label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004E89]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10B981]"
                 value={newAssignment.type}
                 onChange={(e) => setNewAssignment({ ...newAssignment, type: e.target.value, multipleChoice: { question: '', options: [], correctAnswer: 0 }, attachmentUrls: [] })}
               >
@@ -334,7 +334,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                 Description / الوصف
               </label>
               <textarea
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004E89]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10B981]"
                 value={newAssignment.description}
                 onChange={(e) => setNewAssignment({ ...newAssignment, description: e.target.value })}
                 placeholder="Assignment instructions..."
@@ -431,7 +431,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                 Linked Session (Optional) / الحصة المرتبطة (اختياري)
               </label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004E89]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10B981]"
                 value={newAssignment.sessionId}
                 onChange={(e) => setNewAssignment({ ...newAssignment, sessionId: e.target.value })}
               >
@@ -530,7 +530,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                 General Feedback (Optional) / التعليق العام (اختياري)
               </label>
               <textarea
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004E89] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10B981] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 value={gradeData.feedback}
                 onChange={(e) => setGradeData({ ...gradeData, feedback: e.target.value })}
                 placeholder="Provide general feedback to the student..."

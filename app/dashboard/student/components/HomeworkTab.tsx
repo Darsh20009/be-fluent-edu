@@ -101,7 +101,7 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
   if (!isActive) {
     return (
       <div>
-        <h2 className="text-3xl font-bold text-[#004E89] mb-6">
+        <h2 className="text-3xl font-bold text-[#10B981] mb-6">
           My Homework / واجباتي
         </h2>
         <Alert variant="warning">
@@ -121,7 +121,7 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-[#004E89]">
+      <h2 className="text-3xl font-bold text-[#10B981]">
         My Homework / واجباتي
       </h2>
 
@@ -142,8 +142,8 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <FileText className="h-5 w-5 text-[#004E89]" />
-                      <h3 className="text-lg font-bold text-[#004E89]">{assignment.title}</h3>
+                      <FileText className="h-5 w-5 text-[#10B981]" />
+                      <h3 className="text-lg font-bold text-[#10B981]">{assignment.title}</h3>
                       <Badge variant="warning">Pending / معلق</Badge>
                     </div>
                     {assignment.description && (
@@ -173,7 +173,7 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
                       href={assignment.attachmentUrls || '#'}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-block px-4 py-2 bg-[#004E89] text-white rounded-lg hover:bg-[#003d6b] text-sm font-medium"
+                      className="inline-block px-4 py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#003d6b] text-sm font-medium"
                     >
                       View / عرض
                     </a>
@@ -281,7 +281,7 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
                 Your Answer / إجابتك:
               </label>
               <textarea
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004E89] min-h-[200px]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10B981] min-h-[200px]"
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
                 placeholder="Type your answer here... / اكتب إجابتك هنا..."

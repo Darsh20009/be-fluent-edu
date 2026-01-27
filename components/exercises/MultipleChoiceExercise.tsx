@@ -130,7 +130,7 @@ export default function MultipleChoiceExercise({ exercise, onComplete, onNext }:
             {exercise.audioUrl && (
               <button
                 onClick={playAudio}
-                className="p-2 bg-[#004E89] text-white rounded-full hover:bg-[#003A6A] transition-colors"
+                className="p-2 bg-[#10B981] text-white rounded-full hover:bg-[#003A6A] transition-colors"
                 title="تشغيل الصوت المسجل"
               >
                 <Volume2 className="w-5 h-5" />
@@ -164,7 +164,7 @@ export default function MultipleChoiceExercise({ exercise, onComplete, onNext }:
           const isSelected = selectedOption === option
           const isCorrectOption = option === exercise.correctAnswer
           
-          let optionClass = 'border-gray-200 hover:border-[#004E89] hover:bg-[#004E89]/5'
+          let optionClass = 'border-gray-200 hover:border-[#10B981] hover:bg-[#10B981]/5'
           
           if (submitted) {
             if (isCorrectOption) {
@@ -173,7 +173,7 @@ export default function MultipleChoiceExercise({ exercise, onComplete, onNext }:
               optionClass = 'border-red-500 bg-red-50'
             }
           } else if (isSelected) {
-            optionClass = 'border-[#004E89] bg-[#004E89]/10'
+            optionClass = 'border-[#10B981] bg-[#10B981]/10'
           }
 
           return (
@@ -202,7 +202,7 @@ export default function MultipleChoiceExercise({ exercise, onComplete, onNext }:
                       : submitted && isSelected && !isCorrect
                       ? 'bg-red-500 text-white'
                       : isSelected
-                      ? 'bg-[#004E89] text-white'
+                      ? 'bg-[#10B981] text-white'
                       : 'bg-gray-100 text-gray-600'
                   }`}>
                     {submitted && isCorrectOption ? (
@@ -238,14 +238,14 @@ export default function MultipleChoiceExercise({ exercise, onComplete, onNext }:
         <button
           onClick={handleSubmit}
           disabled={!selectedOption || loading}
-          className="w-full py-3 bg-[#004E89] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 bg-[#10B981] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'جاري التحقق...' : 'تحقق من الإجابة'}
         </button>
       ) : (
         <button
           onClick={onNext}
-          className="w-full py-3 bg-[#004E89] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors"
+          className="w-full py-3 bg-[#10B981] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors"
         >
           التمرين التالي
         </button>

@@ -55,7 +55,7 @@ export default function PlacementTestTab() {
     return (
       <Card variant="elevated" className="p-8">
         <div className="flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#004E89]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#10B981]"></div>
           <span className="mr-3 text-gray-600">جاري التحميل...</span>
         </div>
       </Card>
@@ -66,7 +66,7 @@ export default function PlacementTestTab() {
     <div className="space-y-6">
       <Card variant="elevated" className="p-6">
         <div className="flex items-center gap-3 mb-6">
-          <ClipboardList className="h-6 w-6 text-[#004E89]" />
+          <ClipboardList className="h-6 w-6 text-[#10B981]" />
           <h2 className="text-xl font-bold text-gray-900">اختبارات تحديد المستوى</h2>
         </div>
 

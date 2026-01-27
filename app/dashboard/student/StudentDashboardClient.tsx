@@ -305,17 +305,17 @@ function ChatTab() {
 
   return (
     <div>
-      <h2 className="text-2xl sm:text-3xl font-bold text-[#004E89] mb-4 sm:mb-6">
+      <h2 className="text-2xl sm:text-3xl font-bold text-[#10B981] mb-4 sm:mb-6">
         Chat / الدردشة
       </h2>
       <div className="flex flex-col lg:flex-row gap-4 h-[calc(100vh-250px)] sm:h-[calc(100vh-300px)]">
         <div className={`lg:flex-none lg:w-1/3 ${selectedUser && !showConversations ? 'hidden lg:block' : 'block'}`}>
           <Card variant="elevated" padding="none" className="h-full overflow-hidden">
-            <div className="bg-gradient-to-r from-[#004E89] to-[#1A5F7A] p-4 text-white flex justify-between items-center">
+            <div className="bg-gradient-to-r from-[#10B981] to-[#059669] p-4 text-white flex justify-between items-center">
               <h3 className="font-bold text-lg">المحادثات</h3>
               <button
                 onClick={handleNewChat}
-                className="bg-white text-[#004E89] px-3 py-1 rounded-lg text-sm font-bold hover:bg-gray-100 transition-colors"
+                className="bg-white text-[#10B981] px-3 py-1 rounded-lg text-sm font-bold hover:bg-gray-100 transition-colors"
               >
                 + محادثة جديدة
               </button>
@@ -341,7 +341,7 @@ function ChatTab() {
               <p className="text-sm mt-2">حدد محادثة من القائمة لبدء الدردشة</p>
               <button
                 onClick={handleNewChat}
-                className="mt-4 bg-[#004E89] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#003d6e] transition-colors"
+                className="mt-4 bg-[#10B981] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#003d6e] transition-colors"
               >
                 + ابدأ محادثة جديدة
               </button>
@@ -353,7 +353,7 @@ function ChatTab() {
       {showNewChatModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden">
-            <div className="bg-[#004E89] text-white p-4 flex justify-between items-center">
+            <div className="bg-[#10B981] text-white p-4 flex justify-between items-center">
               <h3 className="font-bold text-lg">اختر جهة الاتصال</h3>
               <button
                 onClick={() => setShowNewChatModal(false)}
@@ -365,7 +365,7 @@ function ChatTab() {
             <div className="p-4 overflow-y-auto max-h-[60vh]">
               {loadingContacts ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin w-8 h-8 border-4 border-[#004E89] border-t-transparent rounded-full"></div>
+                  <div className="animate-spin w-8 h-8 border-4 border-[#10B981] border-t-transparent rounded-full"></div>
                 </div>
               ) : availableContacts.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
@@ -383,7 +383,7 @@ function ChatTab() {
                         onClick={() => handleSelectContact(contact)}
                         className="w-full p-4 rounded-lg hover:bg-gray-100 transition-colors text-right border border-gray-200 flex items-center gap-3"
                       >
-                        <div className="w-12 h-12 bg-gradient-to-br from-[#004E89] to-[#1A5F7A] rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+                        <div className="w-12 h-12 bg-gradient-to-br from-[#10B981] to-[#059669] rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
                           {contact.profilePhoto ? (
                             <img src={contact.profilePhoto} alt={contact.name} className="w-full h-full rounded-full object-cover" />
                           ) : (

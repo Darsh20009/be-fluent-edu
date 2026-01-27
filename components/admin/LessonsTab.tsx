@@ -331,7 +331,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#004E89]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#10B981]"></div>
       </div>
     )
   }
@@ -345,7 +345,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#004E89] text-white rounded-lg hover:bg-[#003A6A] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#003A6A] transition-colors"
         >
           <Plus className="w-5 h-5" />
           إضافة درس جديد
@@ -367,7 +367,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   required
                 />
               </div>
@@ -379,7 +379,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                   type="text"
                   value={formData.titleAr}
                   onChange={(e) => setFormData({ ...formData, titleAr: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   dir="rtl"
                   required
                 />
@@ -394,7 +394,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                 <select
                   value={formData.level}
                   onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 >
                   <option value="BEGINNER">مبتدئ</option>
                   <option value="INTERMEDIATE">متوسط</option>
@@ -409,7 +409,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                   type="text"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   placeholder="Grammar, Vocabulary..."
                 />
               </div>
@@ -421,7 +421,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                   type="text"
                   value={formData.categoryAr}
                   onChange={(e) => setFormData({ ...formData, categoryAr: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   dir="rtl"
                   placeholder="قواعد، مفردات..."
                 />
@@ -437,7 +437,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                   type="url"
                   value={formData.videoUrl}
                   onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   placeholder="https://..."
                 />
               </div>
@@ -449,7 +449,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                   type="number"
                   value={formData.videoDuration}
                   onChange={(e) => setFormData({ ...formData, videoDuration: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   placeholder="300"
                 />
               </div>
@@ -462,7 +462,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
               <textarea
                 value={formData.articleContentAr}
                 onChange={(e) => setFormData({ ...formData, articleContentAr: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 rows={4}
                 dir="rtl"
                 placeholder="يمكنك استخدام HTML..."
@@ -476,7 +476,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
               <textarea
                 value={formData.articleContent}
                 onChange={(e) => setFormData({ ...formData, articleContent: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 rows={4}
                 placeholder="You can use HTML..."
               />
@@ -488,7 +488,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                 id="isPublished"
                 checked={formData.isPublished}
                 onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
-                className="w-4 h-4 text-[#004E89] border-gray-300 rounded focus:ring-[#004E89]"
+                className="w-4 h-4 text-[#10B981] border-gray-300 rounded focus:ring-[#10B981]"
               />
               <label htmlFor="isPublished" className="text-sm font-medium text-gray-700">
                 نشر الدرس (مرئي للطلاب)
@@ -498,7 +498,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="px-4 py-2 bg-[#004E89] text-white rounded-lg hover:bg-[#003A6A] transition-colors"
+                className="px-4 py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#003A6A] transition-colors"
               >
                 {editingLesson ? 'حفظ التعديلات' : 'إضافة الدرس'}
               </button>
@@ -600,7 +600,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                     <h4 className="font-bold text-gray-700">التمارين</h4>
                     <button
                       onClick={() => setShowExerciseForm(true)}
-                      className="flex items-center gap-1 px-3 py-1.5 text-sm bg-[#004E89] text-white rounded-lg hover:bg-[#003A6A] transition-colors"
+                      className="flex items-center gap-1 px-3 py-1.5 text-sm bg-[#10B981] text-white rounded-lg hover:bg-[#003A6A] transition-colors"
                     >
                       <Plus className="w-4 h-4" />
                       إضافة تمرين
@@ -618,7 +618,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                             <select
                               value={exerciseForm.type}
                               onChange={(e) => setExerciseForm({ ...exerciseForm, type: e.target.value })}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                             >
                               <option value="MULTIPLE_CHOICE">اختيار من متعدد</option>
                               <option value="FILL_BLANK">ملء الفراغ</option>
@@ -635,7 +635,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                               type="number"
                               value={exerciseForm.points}
                               onChange={(e) => setExerciseForm({ ...exerciseForm, points: parseInt(e.target.value) })}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                             />
                           </div>
                         </div>
@@ -648,7 +648,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                             type="text"
                             value={exerciseForm.question}
                             onChange={(e) => setExerciseForm({ ...exerciseForm, question: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                             required
                           />
                         </div>
@@ -661,7 +661,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                             type="text"
                             value={exerciseForm.questionAr}
                             onChange={(e) => setExerciseForm({ ...exerciseForm, questionAr: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                             dir="rtl"
                           />
                         </div>
@@ -682,7 +682,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                                     newOptions[index] = e.target.value
                                     setExerciseForm({ ...exerciseForm, options: newOptions })
                                   }}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent mb-2"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent mb-2"
                                   placeholder={`الخيار ${index + 1}`}
                                 />
                               ))}
@@ -695,7 +695,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                                 type="text"
                                 value={exerciseForm.correctAnswer}
                                 onChange={(e) => setExerciseForm({ ...exerciseForm, correctAnswer: e.target.value })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                                 required
                               />
                             </div>
@@ -712,7 +712,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                                 type="text"
                                 value={exerciseForm.sentence}
                                 onChange={(e) => setExerciseForm({ ...exerciseForm, sentence: e.target.value })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                                 placeholder="I ___ to school every day."
                               />
                             </div>
@@ -730,7 +730,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                                       newBlanks[index] = e.target.value
                                       setExerciseForm({ ...exerciseForm, blanks: newBlanks })
                                     }}
-                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                                     placeholder={`الفراغ ${index + 1}`}
                                   />
                                   {index === exerciseForm.blanks.length - 1 && (
@@ -763,7 +763,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                                     newItems[index] = e.target.value
                                     setExerciseForm({ ...exerciseForm, dragItems: newItems })
                                   }}
-                                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                                   placeholder={`العنصر ${index + 1}`}
                                 />
                                 {index === exerciseForm.dragItems.length - 1 && (
@@ -790,7 +790,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                                 type="text"
                                 value={exerciseForm.sentence}
                                 onChange={(e) => setExerciseForm({ ...exerciseForm, sentence: e.target.value })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                               />
                             </div>
                             <div>
@@ -801,7 +801,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                                 type="text"
                                 value={exerciseForm.sentenceAr}
                                 onChange={(e) => setExerciseForm({ ...exerciseForm, sentenceAr: e.target.value })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                                 dir="rtl"
                               />
                             </div>
@@ -815,7 +815,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                           <textarea
                             value={exerciseForm.explanationAr}
                             onChange={(e) => setExerciseForm({ ...exerciseForm, explanationAr: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                             rows={2}
                             dir="rtl"
                           />
@@ -824,7 +824,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                         <div className="flex gap-3">
                           <button
                             type="submit"
-                            className="px-4 py-2 bg-[#004E89] text-white rounded-lg hover:bg-[#003A6A] transition-colors"
+                            className="px-4 py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#003A6A] transition-colors"
                           >
                             {editingExercise ? 'حفظ' : 'إضافة'}
                           </button>
@@ -853,7 +853,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
                             <p className="font-medium text-gray-800">{exercise.questionAr || exercise.question}</p>
                             <p className="text-sm text-gray-500">{getExerciseTypeLabel(exercise.type)}</p>
                           </div>
-                          <span className="text-sm text-[#004E89] font-medium">{exercise.points} نقطة</span>
+                          <span className="text-sm text-[#10B981] font-medium">{exercise.points} نقطة</span>
                           <button
                             onClick={() => handleDeleteExercise(exercise.id)}
                             className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"

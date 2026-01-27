@@ -89,7 +89,7 @@ export default function LoginContent() {
   if (!mounted) {
     return (
       <div className="min-h-screen bg-[#F5F1E8] flex flex-col items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#004E89]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#10B981]"></div>
       </div>
     )
   }
@@ -99,7 +99,7 @@ export default function LoginContent() {
       <AppHeader variant="marketing">
         <Link
           href="/auth/register"
-          className="px-4 py-2 sm:px-6 sm:py-2 rounded-lg border-2 border-[#004E89] text-[#004E89] hover:bg-[#004E89] hover:text-white transition-colors text-sm sm:text-base"
+          className="px-4 py-2 sm:px-6 sm:py-2 rounded-lg border-2 border-[#10B981] text-[#10B981] hover:bg-[#10B981] hover:text-white transition-colors text-sm sm:text-base"
         >
           {t('register')}
         </Link>
@@ -120,7 +120,7 @@ export default function LoginContent() {
             <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
               <img
                 src="/logo.png"
-                alt="Youspeak Logo"
+                alt="Be Fluent Logo"
                 width={80}
                 height={80}
                 className="w-14 sm:w-20 h-14 sm:h-20"
@@ -129,7 +129,7 @@ export default function LoginContent() {
             </div>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-2 sm:mb-3 bg-gradient-to-r from-[#004E89] to-[#0066CC] bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-2 sm:mb-3 bg-gradient-to-r from-[#10B981] to-[#059669] bg-clip-text text-transparent">
             {t('welcomeBack')}
           </h1>
           <p className="text-center text-gray-600 mb-6 sm:mb-8 text-sm sm:text-base">
@@ -178,7 +178,7 @@ export default function LoginContent() {
                 id="rememberMe"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-5 h-5 rounded cursor-pointer accent-[#004E89]"
+                className="w-5 h-5 rounded cursor-pointer accent-[#10B981]"
                 disabled={loading}
               />
               <label htmlFor="rememberMe" className="text-sm text-gray-700 cursor-pointer">
@@ -192,20 +192,20 @@ export default function LoginContent() {
               size="lg"
               loading={loading}
               disabled={loading}
-              className="font-semibold bg-[#004E89] hover:bg-[#003A6B] text-white text-base sm:text-lg py-3 sm:py-4"
+              className="font-semibold bg-[#10B981] hover:bg-[#003A6B] text-white text-base sm:text-lg py-3 sm:py-4"
             >
               {loading ? t('loading') : t('login')}
             </Button>
 
             <p className="text-center text-gray-600 mt-4 text-xs sm:text-sm">
               Don't have an account?{' '}
-              <Link href="/auth/register" className="text-[#004E89] hover:text-[#003A6A] font-semibold">
+              <Link href="/auth/register" className="text-[#10B981] hover:text-[#003A6A] font-semibold">
                 {t('register')}
               </Link>
             </p>
 
             <p className="text-center text-gray-600 mt-2 text-xs sm:text-sm">
-              <Link href="/auth/forgot-password" className="text-[#004E89] hover:text-[#003A6A] font-semibold">
+              <Link href="/auth/forgot-password" className="text-[#10B981] hover:text-[#003A6A] font-semibold">
                 نسيت كلمة المرور / Forgot Password?
               </Link>
             </p>

@@ -136,7 +136,7 @@ function CheckoutContent() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#004E89] mb-2">Checkout / الدفع</h1>
+        <h1 className="text-3xl font-bold text-[#10B981] mb-2">Checkout / الدفع</h1>
         <p className="text-gray-600">Complete your subscription purchase</p>
       </div>
 
@@ -154,20 +154,20 @@ function CheckoutContent() {
                     onClick={() => setPaymentMethod('BANK_TRANSFER')}
                     className={`w-full p-4 border-2 rounded-lg text-right transition-all ${
                       paymentMethod === 'BANK_TRANSFER'
-                        ? 'border-[#004E89] bg-blue-50'
+                        ? 'border-[#10B981] bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <CreditCard className={`h-6 w-6 ${
-                        paymentMethod === 'BANK_TRANSFER' ? 'text-[#004E89]' : 'text-gray-600'
+                        paymentMethod === 'BANK_TRANSFER' ? 'text-[#10B981]' : 'text-gray-600'
                       }`} />
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900">Bank Transfer / تحويل بنكي</h3>
                         <p className="text-sm text-gray-600">Transfer to our bank account</p>
                       </div>
                       {paymentMethod === 'BANK_TRANSFER' && (
-                        <CheckCircle className="h-5 w-5 text-[#004E89]" />
+                        <CheckCircle className="h-5 w-5 text-[#10B981]" />
                       )}
                     </div>
                   </button>
@@ -176,20 +176,20 @@ function CheckoutContent() {
                     onClick={() => setPaymentMethod('E_WALLET')}
                     className={`w-full p-4 border-2 rounded-lg text-right transition-all ${
                       paymentMethod === 'E_WALLET'
-                        ? 'border-[#004E89] bg-blue-50'
+                        ? 'border-[#10B981] bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <Wallet className={`h-6 w-6 ${
-                        paymentMethod === 'E_WALLET' ? 'text-[#004E89]' : 'text-gray-600'
+                        paymentMethod === 'E_WALLET' ? 'text-[#10B981]' : 'text-gray-600'
                       }`} />
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900">E-Wallet / محفظة إلكترونية</h3>
                         <p className="text-sm text-gray-600">Pay via InstaPay or Etisalat Cash</p>
                       </div>
                       {paymentMethod === 'E_WALLET' && (
-                        <CheckCircle className="h-5 w-5 text-[#004E89]" />
+                        <CheckCircle className="h-5 w-5 text-[#10B981]" />
                       )}
                     </div>
                   </button>
@@ -200,14 +200,14 @@ function CheckoutContent() {
                         onClick={() => setEWalletProvider('INSTAPAY')}
                         className={`w-full p-3 border-2 rounded-lg text-right transition-all ${
                           eWalletProvider === 'INSTAPAY'
-                            ? 'border-[#004E89] bg-blue-50'
+                            ? 'border-[#10B981] bg-blue-50'
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-semibold">InstaPay</span>
                           {eWalletProvider === 'INSTAPAY' && (
-                            <CheckCircle className="h-4 w-4 text-[#004E89]" />
+                            <CheckCircle className="h-4 w-4 text-[#10B981]" />
                           )}
                         </div>
                       </button>
@@ -215,14 +215,14 @@ function CheckoutContent() {
                         onClick={() => setEWalletProvider('ETISALAT_CASH')}
                         className={`w-full p-3 border-2 rounded-lg text-right transition-all ${
                           eWalletProvider === 'ETISALAT_CASH'
-                            ? 'border-[#004E89] bg-blue-50'
+                            ? 'border-[#10B981] bg-blue-50'
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-semibold">Etisalat Cash</span>
                           {eWalletProvider === 'ETISALAT_CASH' && (
-                            <CheckCircle className="h-4 w-4 text-[#004E89]" />
+                            <CheckCircle className="h-4 w-4 text-[#10B981]" />
                           )}
                         </div>
                       </button>
@@ -309,7 +309,7 @@ function CheckoutContent() {
                       type="file"
                       accept="image/*"
                       onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                     />
                     {receiptFile && (
                       <p className="text-sm text-green-600 mt-2">
@@ -385,7 +385,7 @@ function CheckoutContent() {
             <div className="border-t pt-4">
               <div className="flex items-center justify-between">
                 <span className="text-lg font-bold text-gray-900">Total / الإجمالي</span>
-                <span className="text-2xl font-bold text-[#004E89]">{pkg.price} SAR</span>
+                <span className="text-2xl font-bold text-[#10B981]">{pkg.price} SAR</span>
               </div>
             </div>
 

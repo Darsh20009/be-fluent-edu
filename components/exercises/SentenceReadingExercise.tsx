@@ -75,7 +75,7 @@ export default function SentenceReadingExercise({ exercise, onComplete, onNext }
   return (
     <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
       <div className="flex items-center gap-3 mb-6">
-        <BookOpen className="w-6 h-6 text-[#004E89]" />
+        <BookOpen className="w-6 h-6 text-[#10B981]" />
         <div>
           <h3 className="text-lg font-bold text-gray-800">اقرأ الجملة</h3>
           <p className="text-sm text-gray-500">Read the sentence aloud</p>
@@ -90,11 +90,11 @@ export default function SentenceReadingExercise({ exercise, onComplete, onNext }
         />
       )}
 
-      <div className="bg-gradient-to-br from-[#004E89]/5 to-[#004E89]/10 rounded-xl p-6 mb-6">
+      <div className="bg-gradient-to-br from-[#10B981]/5 to-[#10B981]/10 rounded-xl p-6 mb-6">
         <div className="flex items-start gap-4">
           <button
             onClick={playAudio}
-            className="p-3 bg-[#004E89] text-white rounded-full hover:bg-[#003A6A] transition-colors flex-shrink-0 shadow-lg"
+            className="p-3 bg-[#10B981] text-white rounded-full hover:bg-[#003A6A] transition-colors flex-shrink-0 shadow-lg"
             title="استمع للنطق"
           >
             <Volume2 className="w-6 h-6" />
@@ -107,7 +107,7 @@ export default function SentenceReadingExercise({ exercise, onComplete, onNext }
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowTranslation(!showTranslation)}
-                className="flex items-center gap-2 text-sm text-[#004E89] hover:underline"
+                className="flex items-center gap-2 text-sm text-[#10B981] hover:underline"
               >
                 {showTranslation ? (
                   <>
@@ -124,7 +124,7 @@ export default function SentenceReadingExercise({ exercise, onComplete, onNext }
             </div>
 
             {showTranslation && translation && (
-              <div className="mt-4 pt-4 border-t border-[#004E89]/20">
+              <div className="mt-4 pt-4 border-t border-[#10B981]/20">
                 <p className="text-lg text-gray-600" dir="rtl">
                   {translation}
                 </p>
@@ -156,7 +156,7 @@ export default function SentenceReadingExercise({ exercise, onComplete, onNext }
         <button
           onClick={handleComplete}
           disabled={loading}
-          className="w-full py-3 bg-[#004E89] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full py-3 bg-[#10B981] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {loading ? (
             'جاري الحفظ...'
@@ -175,7 +175,7 @@ export default function SentenceReadingExercise({ exercise, onComplete, onNext }
           </div>
           <button
             onClick={onNext}
-            className="w-full py-3 bg-[#004E89] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors"
+            className="w-full py-3 bg-[#10B981] text-white rounded-lg font-medium hover:bg-[#003A6A] transition-colors"
           >
             التمرين التالي
           </button>

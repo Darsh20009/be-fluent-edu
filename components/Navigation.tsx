@@ -21,7 +21,7 @@ export default function Navigation({ isAuthenticated = false, userRole }: Naviga
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center">
-              <h1 className="text-xl sm:text-2xl font-bold text-[#004E89] dark:text-blue-400">
+              <h1 className="text-xl sm:text-2xl font-bold text-[#10B981] dark:text-blue-400">
                 Youspeak
               </h1>
             </Link>
@@ -30,19 +30,19 @@ export default function Navigation({ isAuthenticated = false, userRole }: Naviga
               <div className="hidden md:flex items-center gap-6">
                 <Link 
                   href="/" 
-                  className={`text-sm font-medium hover:text-[#004E89] dark:hover:text-blue-400 transition-colors ${pathname === '/' ? 'text-[#004E89] dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
+                  className={`text-sm font-medium hover:text-[#10B981] dark:hover:text-blue-400 transition-colors ${pathname === '/' ? 'text-[#10B981] dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
                 >
                   {t('home')}
                 </Link>
                 <Link 
                   href="/packages" 
-                  className={`text-sm font-medium hover:text-[#004E89] dark:hover:text-blue-400 transition-colors ${pathname === '/packages' ? 'text-[#004E89] dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
+                  className={`text-sm font-medium hover:text-[#10B981] dark:hover:text-blue-400 transition-colors ${pathname === '/packages' ? 'text-[#10B981] dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
                 >
                   {t('packages')}
                 </Link>
                 <Link 
                   href="/grammar" 
-                  className={`text-sm font-medium hover:text-[#004E89] dark:hover:text-blue-400 transition-colors ${pathname === '/grammar' ? 'text-[#004E89] dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
+                  className={`text-sm font-medium hover:text-[#10B981] dark:hover:text-blue-400 transition-colors ${pathname === '/grammar' ? 'text-[#10B981] dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
                 >
                   Grammar / القواعد
                 </Link>
@@ -57,14 +57,14 @@ export default function Navigation({ isAuthenticated = false, userRole }: Naviga
             {isAuthenticated ? (
               <Link
                 href="/dashboard"
-                className="px-4 py-2 bg-[#004E89] dark:bg-blue-600 text-white rounded-lg hover:bg-[#003A6A] dark:hover:bg-blue-700 transition-colors text-sm font-medium"
+                className="px-4 py-2 bg-[#10B981] dark:bg-blue-600 text-white rounded-lg hover:bg-[#003A6A] dark:hover:bg-blue-700 transition-colors text-sm font-medium"
               >
                 {t('dashboard')}
               </Link>
             ) : (
               <Link
                 href="/auth/login"
-                className="px-4 py-2 bg-[#004E89] dark:bg-blue-600 text-white rounded-lg hover:bg-[#003A6A] dark:hover:bg-blue-700 transition-colors text-sm font-medium"
+                className="px-4 py-2 bg-[#10B981] dark:bg-blue-600 text-white rounded-lg hover:bg-[#003A6A] dark:hover:bg-blue-700 transition-colors text-sm font-medium"
               >
                 {t('login')}
               </Link>

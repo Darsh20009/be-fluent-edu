@@ -66,7 +66,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         variant="outline"
         size="sm"
         onClick={onLogout}
-        className="text-white border-white hover:bg-white hover:text-[#004E89] text-xs sm:text-sm px-2 sm:px-4"
+        className="text-white border-white hover:bg-white hover:text-[#10B981] text-xs sm:text-sm px-2 sm:px-4"
       >
         <LogOut className="h-4 w-4 sm:mr-2" />
         <span className="hidden sm:inline">Logout / خروج</span>

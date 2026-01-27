@@ -89,8 +89,8 @@ export default function CartPage() {
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <ShoppingCart className="h-8 w-8 text-[#004E89]" />
-          <h1 className="text-3xl font-bold text-[#004E89]">Shopping Cart / سلة الشراء</h1>
+          <ShoppingCart className="h-8 w-8 text-[#10B981]" />
+          <h1 className="text-3xl font-bold text-[#10B981]">Shopping Cart / سلة الشراء</h1>
         </div>
         <p className="text-gray-600">Review your selected packages and proceed to checkout</p>
       </div>
@@ -115,7 +115,7 @@ export default function CartPage() {
               <Card key={item.id} variant="elevated">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-[#004E89] mb-2">
+                    <h3 className="text-xl font-bold text-[#10B981] mb-2">
                       {item.Package.title} / {item.Package.titleAr}
                     </h3>
                     <div className="text-gray-700 space-y-1">
@@ -124,7 +124,7 @@ export default function CartPage() {
                     </div>
                   </div>
                   <div className="text-right space-y-3">
-                    <p className="text-2xl font-bold text-[#004E89]">
+                    <p className="text-2xl font-bold text-[#10B981]">
                       {item.Package.price} SAR
                     </p>
                     <div className="flex gap-2">
@@ -154,7 +154,7 @@ export default function CartPage() {
           <Card variant="elevated" className="bg-blue-50 border-blue-200">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-bold text-gray-900">Total / الإجمالي</h3>
-              <p className="text-3xl font-bold text-[#004E89]">{totalAmount} SAR</p>
+              <p className="text-3xl font-bold text-[#10B981]">{totalAmount} SAR</p>
             </div>
           </Card>
 

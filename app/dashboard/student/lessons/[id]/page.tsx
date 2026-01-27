@@ -158,7 +158,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F5F1E8] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#004E89]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#10B981]"></div>
       </div>
     )
   }
@@ -178,16 +178,16 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
               onClick={() => router.push('/dashboard/student/lessons')}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <ChevronLeft className="w-5 h-5 text-[#004E89]" />
+              <ChevronLeft className="w-5 h-5 text-[#10B981]" />
             </button>
             <div className="flex-1">
-              <h1 className="text-lg sm:text-xl font-bold text-[#004E89]">{lesson.titleAr}</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-[#10B981]">{lesson.titleAr}</h1>
               <p className="text-sm text-gray-500">{lesson.title}</p>
             </div>
             {exercisesScore !== null && (
-              <div className="flex items-center gap-2 bg-[#004E89]/10 px-3 py-2 rounded-lg">
-                <Trophy className="w-5 h-5 text-[#004E89]" />
-                <span className="font-bold text-[#004E89]">{Math.round(exercisesScore)}%</span>
+              <div className="flex items-center gap-2 bg-[#10B981]/10 px-3 py-2 rounded-lg">
+                <Trophy className="w-5 h-5 text-[#10B981]" />
+                <span className="font-bold text-[#10B981]">{Math.round(exercisesScore)}%</span>
               </div>
             )}
           </div>
@@ -201,7 +201,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
               onClick={() => setActiveTab('video')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'video'
-                  ? 'bg-[#004E89] text-white'
+                  ? 'bg-[#10B981] text-white'
                   : 'bg-white text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -214,7 +214,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
               onClick={() => setActiveTab('article')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'article'
-                  ? 'bg-[#004E89] text-white'
+                  ? 'bg-[#10B981] text-white'
                   : 'bg-white text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -227,7 +227,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
               onClick={() => setActiveTab('exercises')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'exercises'
-                  ? 'bg-[#004E89] text-white'
+                  ? 'bg-[#10B981] text-white'
                   : 'bg-white text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -292,7 +292,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                       onClick={() => setCurrentExerciseIndex(idx)}
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
                         idx === currentExerciseIndex
-                          ? 'bg-[#004E89] text-white'
+                          ? 'bg-[#10B981] text-white'
                           : ex.attempted
                           ? ex.lastAttempt?.isCorrect
                             ? 'bg-green-100 text-green-700'
@@ -311,7 +311,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
               </div>
               <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#004E89] transition-all duration-300"
+                  className="h-full bg-[#10B981] transition-all duration-300"
                   style={{ width: `${((currentExerciseIndex + 1) / lesson.exercises.length) * 100}%` }}
                 />
               </div>
@@ -331,7 +331,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
               <button
                 onClick={() => setCurrentExerciseIndex(prev => Math.min(lesson.exercises.length - 1, prev + 1))}
                 disabled={currentExerciseIndex === lesson.exercises.length - 1}
-                className="flex items-center gap-2 px-4 py-2 bg-[#004E89] text-white rounded-lg hover:bg-[#003A6A] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#003A6A] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 التالي
                 <ArrowRight className="w-4 h-4 rotate-180" />

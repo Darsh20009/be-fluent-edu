@@ -245,10 +245,10 @@ Make the questions appropriate for ${video.level} level students.`
             onClick={() => selectedVideo ? setSelectedVideo(null) : router.push('/dashboard/student')}
             className="p-2 hover:bg-white rounded-lg transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 text-[#004E89]" />
+            <ChevronLeft className="w-5 h-5 text-[#10B981]" />
           </button>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-[#004E89]">
+            <h1 className="text-2xl md:text-3xl font-bold text-[#10B981]">
               تعلم بالفيديو
             </h1>
             <p className="text-gray-600">
@@ -309,7 +309,7 @@ Make the questions appropriate for ${video.level} level students.`
                   </div>
                   <div className="p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-[#004E89]">{video.title}</h3>
+                      <h3 className="font-bold text-[#10B981]">{video.title}</h3>
                       {getLevelBadge(video.level)}
                     </div>
                     <p className="text-sm text-gray-600 mb-2">{video.titleAr}</p>
@@ -340,7 +340,7 @@ Make the questions appropriate for ${video.level} level students.`
                 />
               </div>
               <div className="p-4">
-                <h2 className="text-xl font-bold text-[#004E89]">{selectedVideo.title}</h2>
+                <h2 className="text-xl font-bold text-[#10B981]">{selectedVideo.title}</h2>
                 <p className="text-gray-600">{selectedVideo.titleAr}</p>
               </div>
             </Card>
@@ -348,7 +348,7 @@ Make the questions appropriate for ${video.level} level students.`
             {loadingQuestions ? (
               <Card className="p-8">
                 <div className="flex flex-col items-center gap-4">
-                  <Loader2 className="w-12 h-12 animate-spin text-[#004E89]" />
+                  <Loader2 className="w-12 h-12 animate-spin text-[#10B981]" />
                   <p className="text-gray-600">جاري إنشاء الأسئلة بالذكاء الاصطناعي...</p>
                   <p className="text-sm text-gray-500">Generating AI questions...</p>
                 </div>
@@ -360,13 +360,13 @@ Make the questions appropriate for ${video.level} level students.`
                     <span className="text-sm text-gray-500">
                       السؤال {currentQuestionIndex + 1} من {questions.length}
                     </span>
-                    <span className="text-sm font-bold text-[#004E89]">
+                    <span className="text-sm font-bold text-[#10B981]">
                       النقاط: {score}
                     </span>
                   </div>
                   <div className="h-2 bg-gray-200 rounded-full">
                     <div 
-                      className="h-2 bg-[#004E89] rounded-full transition-all"
+                      className="h-2 bg-[#10B981] rounded-full transition-all"
                       style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
                     />
                   </div>
@@ -383,7 +383,7 @@ Make the questions appropriate for ${video.level} level students.`
                       const q = questions[currentQuestionIndex]
                       return (
                         <div>
-                          <div className="bg-[#004E89] text-white p-4 rounded-lg mb-4">
+                          <div className="bg-[#10B981] text-white p-4 rounded-lg mb-4">
                             <p className="text-lg">{q.question}</p>
                             <p className="text-sm opacity-80 mt-2">{q.questionAr}</p>
                           </div>
@@ -402,8 +402,8 @@ Make the questions appropriate for ${video.level} level students.`
                                         ? 'border-red-500 bg-red-50'
                                         : 'border-gray-200'
                                     : selectedAnswer === option.id
-                                      ? 'border-[#004E89] bg-blue-50'
-                                      : 'border-gray-200 hover:border-[#004E89]'
+                                      ? 'border-[#10B981] bg-blue-50'
+                                      : 'border-gray-200 hover:border-[#10B981]'
                                 }`}
                               >
                                 <div className="flex items-center gap-3">
@@ -469,13 +469,13 @@ Make the questions appropriate for ${video.level} level students.`
             ) : quizCompleted ? (
               <Card className="p-8 text-center">
                 <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-[#004E89] mb-2">
+                <h2 className="text-2xl font-bold text-[#10B981] mb-2">
                   أحسنت! / Well Done!
                 </h2>
                 <p className="text-gray-600 mb-4">
                   لقد أكملت الاختبار بنجاح
                 </p>
-                <div className="text-4xl font-bold text-[#004E89] mb-2">
+                <div className="text-4xl font-bold text-[#10B981] mb-2">
                   {score} / {questions.length}
                 </div>
                 <p className="text-gray-500 mb-6">
@@ -492,7 +492,7 @@ Make the questions appropriate for ${video.level} level students.`
               </Card>
             ) : (
               <Card className="p-6 text-center">
-                <BookOpen className="w-12 h-12 text-[#004E89] mx-auto mb-4" />
+                <BookOpen className="w-12 h-12 text-[#10B981] mx-auto mb-4" />
                 <h3 className="font-bold text-lg mb-2">شاهد الفيديو أولاً</h3>
                 <p className="text-gray-600 mb-4">ثم ستظهر أسئلة لاختبار فهمك</p>
                 <Button onClick={() => generateQuestions(selectedVideo)}>

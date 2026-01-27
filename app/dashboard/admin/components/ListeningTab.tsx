@@ -361,7 +361,7 @@ export default function ListeningTab({ isActive }: ListeningTabProps) {
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Headphones className="w-8 h-8 text-[#004E89]" />
+          <Headphones className="w-8 h-8 text-[#10B981]" />
           <h2 className="text-2xl font-bold text-gray-800">نظام الاستماع</h2>
         </div>
         <Button onClick={() => { resetForm(); setShowModal(true); }}>
@@ -416,7 +416,7 @@ export default function ListeningTab({ isActive }: ListeningTabProps) {
                   <td className="px-4 py-3 text-center">
                     <button 
                       onClick={() => openExercisesModal(content.id)}
-                      className="text-[#004E89] hover:underline"
+                      className="text-[#10B981] hover:underline"
                     >
                       {content.exercisesCount || 0} تمرين
                     </button>
@@ -505,7 +505,7 @@ export default function ListeningTab({ isActive }: ListeningTabProps) {
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   rows={3}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 />
               </div>
               <div>
@@ -514,7 +514,7 @@ export default function ListeningTab({ isActive }: ListeningTabProps) {
                   value={formData.descriptionAr}
                   onChange={(e) => setFormData(prev => ({ ...prev, descriptionAr: e.target.value }))}
                   rows={3}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent text-right"
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent text-right"
                 />
               </div>
             </div>
@@ -556,7 +556,7 @@ export default function ListeningTab({ isActive }: ListeningTabProps) {
                 </Button>
               </div>
               {uploadProgress && (
-                <p className="text-center text-sm text-[#004E89] mt-2">{uploadProgress}</p>
+                <p className="text-center text-sm text-[#10B981] mt-2">{uploadProgress}</p>
               )}
               {formData.mediaUrl && (
                 <p className="text-center text-sm text-green-600 mt-2">
@@ -601,7 +601,7 @@ export default function ListeningTab({ isActive }: ListeningTabProps) {
                 <select
                   value={formData.level}
                   onChange={(e) => setFormData(prev => ({ ...prev, level: e.target.value }))}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89]"
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981]"
                 >
                   <option value="BEGINNER">مبتدئ</option>
                   <option value="INTERMEDIATE">متوسط</option>
@@ -646,7 +646,7 @@ export default function ListeningTab({ isActive }: ListeningTabProps) {
                   value={formData.transcript}
                   onChange={(e) => setFormData(prev => ({ ...prev, transcript: e.target.value }))}
                   rows={4}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   placeholder="نص المحتوى للمتابعة..."
                 />
               </div>
@@ -656,7 +656,7 @@ export default function ListeningTab({ isActive }: ListeningTabProps) {
                   value={formData.transcriptAr}
                   onChange={(e) => setFormData(prev => ({ ...prev, transcriptAr: e.target.value }))}
                   rows={4}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent text-right"
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent text-right"
                   placeholder="نص المحتوى للمتابعة بالعربي..."
                 />
               </div>
@@ -668,7 +668,7 @@ export default function ListeningTab({ isActive }: ListeningTabProps) {
                 id="isPublished"
                 checked={formData.isPublished}
                 onChange={(e) => setFormData(prev => ({ ...prev, isPublished: e.target.checked }))}
-                className="w-4 h-4 accent-[#004E89]"
+                className="w-4 h-4 accent-[#10B981]"
               />
               <label htmlFor="isPublished" className="text-sm text-gray-700">نشر المحتوى</label>
             </div>

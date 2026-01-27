@@ -27,7 +27,7 @@ export default function GrammarPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5F1E8] via-white to-[#F5F1E8]">
-      <div className="bg-gradient-to-r from-[#004E89] to-[#1A5F7A] text-white p-6 shadow-2xl">
+      <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-6 shadow-2xl">
         <div className="container mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -112,11 +112,11 @@ export default function GrammarPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <span className="px-3 py-1 bg-[#004E89] text-white text-xs font-semibold rounded-full">
+                        <span className="px-3 py-1 bg-[#10B981] text-white text-xs font-semibold rounded-full">
                           {rule.category} / {rule.categoryAr}
                         </span>
                       </div>
-                      <h3 className="text-xl font-bold text-[#004E89] mb-1">
+                      <h3 className="text-xl font-bold text-[#10B981] mb-1">
                         {rule.title}
                       </h3>
                       <h4 className="text-lg font-semibold text-gray-700 mb-3">
@@ -127,9 +127,9 @@ export default function GrammarPage() {
                     </div>
                     <div className="flex-shrink-0">
                       {expandedRule === rule.id ? (
-                        <ChevronUp className="h-6 w-6 text-[#004E89]" />
+                        <ChevronUp className="h-6 w-6 text-[#10B981]" />
                       ) : (
-                        <ChevronDown className="h-6 w-6 text-[#004E89]" />
+                        <ChevronDown className="h-6 w-6 text-[#10B981]" />
                       )}
                     </div>
                   </div>
@@ -139,15 +139,15 @@ export default function GrammarPage() {
                   <div className="px-6 pb-6 border-t border-gray-200 pt-4 bg-gradient-to-b from-white to-gray-50">
                     <div className="space-y-4">
                       <div>
-                        <h4 className="font-bold text-[#004E89] mb-3 text-lg flex items-center gap-2">
-                          <span className="w-2 h-2 bg-[#004E89] rounded-full"></span>
+                        <h4 className="font-bold text-[#10B981] mb-3 text-lg flex items-center gap-2">
+                          <span className="w-2 h-2 bg-[#10B981] rounded-full"></span>
                           Examples / أمثلة
                         </h4>
                         <div className="space-y-3">
                           {rule.examples.map((example, index) => (
                             <div
                               key={index}
-                              className="bg-white p-4 rounded-lg border-l-4 border-[#004E89] shadow-sm hover:shadow-md transition-shadow"
+                              className="bg-white p-4 rounded-lg border-l-4 border-[#10B981] shadow-sm hover:shadow-md transition-shadow"
                             >
                               <p className="text-gray-800 font-medium mb-1">{example.en}</p>
                               <p className="text-gray-600">{example.ar}</p>
@@ -175,7 +175,7 @@ export default function GrammarPage() {
         )}
 
         <div className="mt-8 text-center">
-          <Card variant="elevated" className="bg-gradient-to-r from-[#004E89] to-[#1A5F7A] text-white">
+          <Card variant="elevated" className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white">
             <div className="p-6">
               <h3 className="text-2xl font-bold mb-2">Total Grammar Rules / إجمالي القواعد</h3>
               <p className="text-4xl font-bold">{grammarRules.length}</p>

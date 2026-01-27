@@ -127,7 +127,7 @@ export default function TestWordsTab({ isActive, hasSubscription = false }: Test
   if (!isActive) {
     return (
       <div>
-        <h2 className="text-2xl sm:text-3xl font-bold text-[#004E89] mb-4">
+        <h2 className="text-2xl sm:text-3xl font-bold text-[#10B981] mb-4">
           Test Yourself / اختبر نفسك
         </h2>
         <Alert variant="warning">

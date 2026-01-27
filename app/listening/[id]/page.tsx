@@ -218,7 +218,7 @@ export default function ListeningDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F5F1E8] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#004E89] border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#10B981] border-t-transparent"></div>
       </div>
     )
   }
@@ -228,7 +228,7 @@ export default function ListeningDetailPage() {
       <div className="min-h-screen bg-[#F5F1E8] flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl text-gray-600 mb-4">المحتوى غير موجود</h2>
-          <Link href="/listening" className="text-[#004E89] hover:underline">
+          <Link href="/listening" className="text-[#10B981] hover:underline">
             العودة إلى قائمة الاستماع
           </Link>
         </div>
@@ -241,12 +241,12 @@ export default function ListeningDetailPage() {
       <header className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <Headphones className="w-8 h-8 text-[#004E89]" />
-            <span className="text-xl font-bold text-[#004E89]">Youspeak</span>
+            <Headphones className="w-8 h-8 text-[#10B981]" />
+            <span className="text-xl font-bold text-[#10B981]">Youspeak</span>
           </Link>
           <Link 
             href="/listening" 
-            className="flex items-center gap-2 text-gray-600 hover:text-[#004E89]"
+            className="flex items-center gap-2 text-gray-600 hover:text-[#10B981]"
           >
             <span>العودة للقائمة</span>
             <ArrowRight className="w-5 h-5" />
@@ -281,7 +281,7 @@ export default function ListeningDetailPage() {
               />
             </div>
           ) : (
-            <div className="aspect-video bg-gradient-to-br from-[#004E89] to-[#0066B8] relative flex items-center justify-center">
+            <div className="aspect-video bg-gradient-to-br from-[#10B981] to-[#0066B8] relative flex items-center justify-center">
               {content.thumbnailUrl ? (
                 <img
                   src={content.thumbnailUrl}
@@ -313,7 +313,7 @@ export default function ListeningDetailPage() {
                   max={duration || 0}
                   value={currentTime}
                   onChange={handleSeek}
-                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#004E89]"
+                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#10B981]"
                 />
                 <span className="text-sm text-gray-600 min-w-[80px] text-left">
                   {formatTime(currentTime)} / {formatTime(duration)}
@@ -332,7 +332,7 @@ export default function ListeningDetailPage() {
                   
                   <button
                     onClick={togglePlay}
-                    className="p-3 bg-[#004E89] text-white rounded-full hover:bg-[#003A6A] transition-colors"
+                    className="p-3 bg-[#10B981] text-white rounded-full hover:bg-[#003A6A] transition-colors"
                   >
                     {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
                   </button>
@@ -348,7 +348,7 @@ export default function ListeningDetailPage() {
                       step="0.1"
                       value={isMuted ? 0 : volume}
                       onChange={handleVolumeChange}
-                      className="w-20 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#004E89]"
+                      className="w-20 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#10B981]"
                     />
                   </div>
                 </div>
@@ -363,7 +363,7 @@ export default function ListeningDetailPage() {
                         onClick={() => changePlaybackSpeed(speed)}
                         className={`px-2 py-1 text-sm rounded transition-colors ${
                           playbackSpeed === speed 
-                            ? 'bg-[#004E89] text-white' 
+                            ? 'bg-[#10B981] text-white' 
                             : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                         }`}
                       >
@@ -446,7 +446,7 @@ export default function ListeningDetailPage() {
             >
               <span className="font-semibold flex items-center gap-2">
                 التمارين
-                <span className="bg-[#004E89] text-white text-sm px-2 py-0.5 rounded-full">
+                <span className="bg-[#10B981] text-white text-sm px-2 py-0.5 rounded-full">
                   {content.exercises.length}
                 </span>
               </span>
@@ -462,7 +462,7 @@ export default function ListeningDetailPage() {
                   return (
                     <div key={exercise.id} className="border rounded-lg p-4">
                       <div className="flex items-start gap-3 mb-4">
-                        <span className="bg-[#004E89] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0">
+                        <span className="bg-[#10B981] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0">
                           {index + 1}
                         </span>
                         <div className="flex-1 text-right">
@@ -482,7 +482,7 @@ export default function ListeningDetailPage() {
                               key={i}
                               className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                                 exerciseAnswers[exercise.id] === option
-                                  ? 'border-[#004E89] bg-blue-50'
+                                  ? 'border-[#10B981] bg-blue-50'
                                   : 'border-gray-200 hover:bg-gray-50'
                               } ${
                                 result && option === result.correctAnswer
@@ -499,7 +499,7 @@ export default function ListeningDetailPage() {
                                 checked={exerciseAnswers[exercise.id] === option}
                                 onChange={(e) => handleExerciseAnswer(exercise.id, e.target.value)}
                                 disabled={!!result}
-                                className="accent-[#004E89]"
+                                className="accent-[#10B981]"
                               />
                               <span className="text-gray-700">{option}</span>
                               {result && option === result.correctAnswer && (
@@ -516,7 +516,7 @@ export default function ListeningDetailPage() {
                             onChange={(e) => handleExerciseAnswer(exercise.id, e.target.value)}
                             disabled={!!result}
                             placeholder="اكتب إجابتك هنا..."
-                            className="w-full p-3 border border-gray-200 rounded-lg text-right focus:outline-none focus:ring-2 focus:ring-[#004E89]"
+                            className="w-full p-3 border border-gray-200 rounded-lg text-right focus:outline-none focus:ring-2 focus:ring-[#10B981]"
                           />
                         </div>
                       )}
@@ -525,7 +525,7 @@ export default function ListeningDetailPage() {
                         <button
                           onClick={() => submitExercise(exercise.id)}
                           disabled={!exerciseAnswers[exercise.id]}
-                          className="w-full py-2 bg-[#004E89] text-white rounded-lg hover:bg-[#003A6A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#003A6A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           تحقق من الإجابة
                         </button>
@@ -565,7 +565,7 @@ export default function ListeningDetailPage() {
         )}
       </main>
 
-      <footer className="bg-[#004E89] text-white py-6 mt-12">
+      <footer className="bg-[#10B981] text-white py-6 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p>© 2024 Youspeak. جميع الحقوق محفوظة</p>
         </div>

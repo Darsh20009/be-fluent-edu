@@ -67,7 +67,7 @@ export default function HomeTab({ isActive }: HomeTabProps) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-[#004E89]">
+      <h2 className="text-3xl font-bold text-[#10B981]">
         Dashboard / لوحة التحكم
       </h2>
 
@@ -79,7 +79,7 @@ export default function HomeTab({ isActive }: HomeTabProps) {
         <Card variant="elevated">
           <div className="text-center">
             <div className="w-12 h-12 bg-blue-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-              <Calendar className="h-6 w-6 text-[#004E89]" />
+              <Calendar className="h-6 w-6 text-[#10B981]" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-1">Next Session</h3>
             {stats?.nextSession ? (
@@ -111,7 +111,7 @@ export default function HomeTab({ isActive }: HomeTabProps) {
               <Trophy className="h-6 w-6 text-green-600" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-1">Words Learned</h3>
-            <p className="text-2xl font-bold text-[#004E89]">{stats?.wordsLearned || 0}</p>
+            <p className="text-2xl font-bold text-[#10B981]">{stats?.wordsLearned || 0}</p>
             <p className="text-sm text-gray-600">كلمة محفوظة</p>
           </div>
         </Card>
@@ -122,7 +122,7 @@ export default function HomeTab({ isActive }: HomeTabProps) {
               <BookOpen className="h-6 w-6 text-purple-600" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-1">Pending Assignments</h3>
-            <p className="text-2xl font-bold text-[#004E89]">{stats?.pendingAssignments || 0}</p>
+            <p className="text-2xl font-bold text-[#10B981]">{stats?.pendingAssignments || 0}</p>
             <p className="text-sm text-gray-600">واجب مطلوب</p>
           </div>
         </Card>
@@ -130,7 +130,7 @@ export default function HomeTab({ isActive }: HomeTabProps) {
 
       {stats?.activeSubscription && (
         <Card variant="elevated" className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
-          <h3 className="text-xl font-bold text-[#004E89] mb-4 flex items-center gap-2">
+          <h3 className="text-xl font-bold text-[#10B981] mb-4 flex items-center gap-2">
             <Clock className="h-6 w-6 text-green-600" />
             Active Package / باقة نشطة
           </h3>
@@ -153,7 +153,7 @@ export default function HomeTab({ isActive }: HomeTabProps) {
             <div className="space-y-3">
               <div className="bg-white rounded-lg p-4 text-center">
                 <p className="text-sm text-gray-600 mb-1">Remaining Lessons / حصص متبقية</p>
-                <p className="text-3xl font-bold text-[#004E89]">
+                <p className="text-3xl font-bold text-[#10B981]">
                   {stats.activeSubscription.lessonsRemaining}
                 </p>
                 <p className="text-sm text-gray-600">
@@ -173,7 +173,7 @@ export default function HomeTab({ isActive }: HomeTabProps) {
       )}
 
       <Card variant="elevated">
-        <h3 className="text-xl font-bold text-[#004E89] mb-4">
+        <h3 className="text-xl font-bold text-[#10B981] mb-4">
           Quick Actions / إجراءات سريعة
         </h3>
         <div className="grid md:grid-cols-2 gap-4">

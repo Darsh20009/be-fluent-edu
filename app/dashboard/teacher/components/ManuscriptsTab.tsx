@@ -66,7 +66,7 @@ export default function ManuscriptsTab({ teacherProfileId }: { teacherProfileId:
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-[#004E89]">
+      <h2 className="text-3xl font-bold text-[#10B981]">
         Student Manuscripts / مخطوطات الطلاب
       </h2>
 
@@ -84,7 +84,7 @@ export default function ManuscriptsTab({ teacherProfileId }: { teacherProfileId:
             <Card key={manuscript.id} variant="elevated">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-[#004E89] mb-1">
+                  <h3 className="text-lg font-bold text-[#10B981] mb-1">
                     {manuscript.WritingTest.title}
                   </h3>
                   {manuscript.WritingTest.titleAr && (
@@ -156,7 +156,7 @@ export default function ManuscriptsTab({ teacherProfileId }: { teacherProfileId:
                     href={viewingManuscript.manuscriptUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#004E89] hover:underline font-medium"
+                    className="text-[#10B981] hover:underline font-medium"
                   >
                     📎 Download Manuscript
                   </a>

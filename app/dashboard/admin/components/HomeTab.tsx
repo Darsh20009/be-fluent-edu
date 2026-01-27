@@ -49,7 +49,7 @@ export default function HomeTab() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-[#004E89]">
+      <h2 className="text-3xl font-bold text-[#10B981]">
         Dashboard / لوحة التحكم
       </h2>
 
@@ -57,10 +57,10 @@ export default function HomeTab() {
         <Card variant="elevated">
           <div className="text-center">
             <div className="w-12 h-12 bg-blue-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-              <Users className="h-6 w-6 text-[#004E89]" />
+              <Users className="h-6 w-6 text-[#10B981]" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-1">Total Users</h3>
-            <p className="text-2xl font-bold text-[#004E89]">{stats?.totalUsers || 0}</p>
+            <p className="text-2xl font-bold text-[#10B981]">{stats?.totalUsers || 0}</p>
             <p className="text-sm text-gray-600">إجمالي المستخدمين</p>
           </div>
         </Card>
@@ -71,7 +71,7 @@ export default function HomeTab() {
               <UserCheck className="h-6 w-6 text-green-600" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-1">Active Students</h3>
-            <p className="text-2xl font-bold text-[#004E89]">{stats?.activeStudents || 0}</p>
+            <p className="text-2xl font-bold text-[#10B981]">{stats?.activeStudents || 0}</p>
             <p className="text-sm text-gray-600">
               of {stats?.totalStudents || 0} / من {stats?.totalStudents || 0}
             </p>
@@ -84,7 +84,7 @@ export default function HomeTab() {
               <Calendar className="h-6 w-6 text-purple-600" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-1">Sessions This Week</h3>
-            <p className="text-2xl font-bold text-[#004E89]">{stats?.sessionsThisWeek || 0}</p>
+            <p className="text-2xl font-bold text-[#10B981]">{stats?.sessionsThisWeek || 0}</p>
             <p className="text-sm text-gray-600">حصص هذا الأسبوع</p>
           </div>
         </Card>
@@ -95,7 +95,7 @@ export default function HomeTab() {
               <TrendingUp className="h-6 w-6 text-orange-600" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-1">Total Revenue</h3>
-            <p className="text-2xl font-bold text-[#004E89]">{stats?.totalRevenue || 0} SAR</p>
+            <p className="text-2xl font-bold text-[#10B981]">{stats?.totalRevenue || 0} SAR</p>
             <p className="text-sm text-gray-600">الإيرادات</p>
           </div>
         </Card>
@@ -119,7 +119,7 @@ export default function HomeTab() {
 
       <div className="grid md:grid-cols-2 gap-6">
         <Card variant="elevated">
-          <h3 className="text-xl font-bold text-[#004E89] mb-4">
+          <h3 className="text-xl font-bold text-[#10B981] mb-4">
             Platform Statistics / إحصائيات المنصة
           </h3>
           <div className="space-y-3">
@@ -139,12 +139,12 @@ export default function HomeTab() {
         </Card>
 
         <Card variant="elevated" className="bg-gradient-to-r from-purple-50 to-pink-50">
-          <h3 className="text-xl font-bold text-[#004E89] mb-4">
+          <h3 className="text-xl font-bold text-[#10B981] mb-4">
             Quick Actions / إجراءات سريعة
           </h3>
           <div className="grid gap-3">
             <div className="bg-white rounded-lg p-3 flex items-start gap-2 shadow-sm">
-              <Users className="h-5 w-5 text-[#004E89] flex-shrink-0 mt-0.5" />
+              <Users className="h-5 w-5 text-[#10B981] flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium text-gray-900">Manage Users</p>
                 <p className="text-sm text-gray-600">Activate/deactivate accounts in Users tab / إدارة المستخدمين</p>

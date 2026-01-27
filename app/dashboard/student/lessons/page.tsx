@@ -75,7 +75,7 @@ export default function LessonsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F5F1E8] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#004E89]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#10B981]"></div>
       </div>
     )
   }
@@ -88,10 +88,10 @@ export default function LessonsPage() {
             onClick={() => router.push('/dashboard/student')}
             className="p-2 hover:bg-white rounded-lg transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 text-[#004E89]" />
+            <ChevronLeft className="w-5 h-5 text-[#10B981]" />
           </button>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#004E89]">الدروس التعليمية</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#10B981]">الدروس التعليمية</h1>
             <p className="text-gray-600">Lessons</p>
           </div>
         </div>
@@ -102,7 +102,7 @@ export default function LessonsPage() {
             <select
               value={selectedLevel}
               onChange={(e) => setSelectedLevel(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
             >
               <option value="">جميع المستويات</option>
               <option value="BEGINNER">مبتدئ</option>
@@ -114,7 +114,7 @@ export default function LessonsPage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
               >
                 <option value="">جميع الفئات</option>
                 {categories.map((cat) => (
@@ -145,7 +145,7 @@ export default function LessonsPage() {
                     isCompleted ? 'ring-2 ring-green-500' : ''
                   }`}
                 >
-                  <div className="relative h-40 bg-gradient-to-br from-[#004E89] to-[#1A5F7A]">
+                  <div className="relative h-40 bg-gradient-to-br from-[#10B981] to-[#059669]">
                     {lesson.thumbnailUrl ? (
                       <img
                         src={lesson.thumbnailUrl}
@@ -161,7 +161,7 @@ export default function LessonsPage() {
                     {lesson.videoUrl && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                         <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
-                          <Play className="w-6 h-6 text-[#004E89] ml-1" />
+                          <Play className="w-6 h-6 text-[#10B981] ml-1" />
                         </div>
                       </div>
                     )}
@@ -203,7 +203,7 @@ export default function LessonsPage() {
                       </div>
                       
                       {lesson.progress?.exercisesScore !== null && lesson.progress?.exercisesScore !== undefined && (
-                        <span className="text-[#004E89] font-medium">
+                        <span className="text-[#10B981] font-medium">
                           {Math.round(lesson.progress.exercisesScore)}%
                         </span>
                       )}

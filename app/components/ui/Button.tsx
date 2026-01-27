@@ -22,7 +22,7 @@ export default function Button({
   type = 'button'
 }: ButtonProps) {
   const variants = {
-    primary: 'bg-[#004E89] text-white hover:bg-[#003B6F]',
+    primary: 'bg-[#10B981] text-white hover:bg-[#003B6F]',
     secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300',
     danger: 'bg-red-600 text-white hover:bg-red-700',
     ghost: 'bg-transparent text-gray-700 hover:bg-gray-100'

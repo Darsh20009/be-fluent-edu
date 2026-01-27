@@ -39,7 +39,7 @@ export default function ConversationsList({
     <div className="flex flex-col h-full">
       {loading ? (
         <div className="flex-1 flex items-center justify-center">
-          <div className="w-8 h-8 border-4 border-[#004E89] border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-[#10B981] border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : conversations.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-gray-500 p-4 text-center">
@@ -55,7 +55,7 @@ export default function ConversationsList({
               onClick={() => onSelectConversation(conv.user)}
               className={`w-full p-4 transition-all duration-200 hover:scale-102 rounded-xl text-left group ${
                 selectedUserId === conv.user.id
-                  ? 'bg-gradient-to-r from-[#004E89] to-[#1A5F7A] text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-[#10B981] to-[#059669] text-white shadow-lg'
                   : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
               }`}
             >
@@ -63,7 +63,7 @@ export default function ConversationsList({
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white flex-shrink-0 ${
                   selectedUserId === conv.user.id
                     ? 'bg-white/30'
-                    : 'bg-gradient-to-br from-[#004E89] to-[#1A5F7A]'
+                    : 'bg-gradient-to-br from-[#10B981] to-[#059669]'
                 }`}>
                   {conv.user.name?.charAt(0).toUpperCase()}
                 </div>

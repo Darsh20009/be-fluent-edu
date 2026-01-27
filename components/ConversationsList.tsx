@@ -64,7 +64,7 @@ export default function ConversationsList({ onSelectConversation, selectedUserId
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full bg-white">
-        <Loader2 className="w-8 h-8 animate-spin text-[#004E89]" />
+        <Loader2 className="w-8 h-8 animate-spin text-[#10B981]" />
       </div>
     )
   }
@@ -90,7 +90,7 @@ export default function ConversationsList({ onSelectConversation, selectedUserId
             key={conv.user.id}
             onClick={() => onSelectConversation(conv.user)}
             className={`w-full p-4 rounded-lg hover:bg-gray-100 transition-all text-right border ${
-              isSelected ? 'bg-blue-50 border-[#004E89]' : 'bg-white border-gray-300'
+              isSelected ? 'bg-blue-50 border-[#10B981]' : 'bg-white border-gray-300'
             }`}
           >
             <div className="flex items-start gap-3">

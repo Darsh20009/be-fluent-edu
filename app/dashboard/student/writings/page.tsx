@@ -126,8 +126,8 @@ export default function MyWritingsPage() {
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <FileText className="h-8 w-8 text-[#004E89]" />
-          <h1 className="text-3xl font-bold text-[#004E89]">My Writings / كتاباتي</h1>
+          <FileText className="h-8 w-8 text-[#10B981]" />
+          <h1 className="text-3xl font-bold text-[#10B981]">My Writings / كتاباتي</h1>
         </div>
         <p className="text-gray-600">View and submit your writing assignments</p>
       </div>
@@ -168,7 +168,7 @@ export default function MyWritingsPage() {
             <textarea
               value={writingContent}
               onChange={(e) => setWritingContent(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004E89] focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
               rows={12}
               placeholder="Write your essay here... / اكتب مقالك هنا..."
             />

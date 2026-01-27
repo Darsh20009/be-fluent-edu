@@ -483,7 +483,7 @@ Hello! I'm ready to help you learn English!
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-[#004E89]">سجل المحادثات</h2>
+                <h2 className="text-lg font-bold text-[#10B981]">سجل المحادثات</h2>
                 <button onClick={() => setShowHistory(false)}>
                   <X className="w-5 h-5" />
                 </button>
@@ -537,14 +537,14 @@ Hello! I'm ready to help you learn English!
                 <div className={`flex gap-3 max-w-[85%] ${message.role === 'user' ? 'flex-row-reverse' : ''}`}>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                     message.role === 'user' 
-                      ? 'bg-[#004E89] text-white' 
+                      ? 'bg-[#10B981] text-white' 
                       : 'bg-gradient-to-br from-purple-500 to-blue-500 text-white'
                   }`}>
                     {message.role === 'user' ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
                   </div>
                   <div className={`rounded-2xl px-4 py-3 ${
                     message.role === 'user'
-                      ? 'bg-[#004E89] text-white rounded-br-sm'
+                      ? 'bg-[#10B981] text-white rounded-br-sm'
                       : 'bg-white text-gray-800 border border-gray-200 rounded-bl-sm shadow-sm'
                   }`}>
                     <p className="whitespace-pre-wrap text-right" dir="auto">
@@ -584,7 +584,7 @@ Hello! I'm ready to help you learn English!
                 </div>
                 <div className="bg-white rounded-2xl px-4 py-3 border border-gray-200 shadow-sm">
                   <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-[#004E89]" />
+                    <Loader2 className="w-4 h-4 animate-spin text-[#10B981]" />
                     <span className="text-gray-500">جاري التفكير... 🤔</span>
                   </div>
                 </div>
@@ -604,7 +604,7 @@ Hello! I'm ready to help you learn English!
                 <button
                   key={i}
                   onClick={() => setInput(q)}
-                  className="px-3 py-2 bg-white rounded-full text-sm text-[#004E89] border border-[#004E89]/20 hover:bg-[#004E89] hover:text-white transition-colors shadow-sm"
+                  className="px-3 py-2 bg-white rounded-full text-sm text-[#10B981] border border-[#10B981]/20 hover:bg-[#10B981] hover:text-white transition-colors shadow-sm"
                 >
                   {q}
                 </button>
@@ -638,7 +638,7 @@ Hello! I'm ready to help you learn English!
             <button
               onClick={sendMessage}
               disabled={!input.trim() || loading || !puterReady}
-              className="bg-[#004E89] text-white p-3 rounded-full hover:bg-[#003a6a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#10B981] text-white p-3 rounded-full hover:bg-[#003a6a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
             </button>
@@ -650,7 +650,7 @@ Hello! I'm ready to help you learn English!
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={isListening ? '🎤 جاري الاستماع...' : 'اكتب سؤالك هنا... / Type your question...'}
-              className="flex-1 px-4 py-3 border-2 border-gray-300 bg-white text-black placeholder:text-gray-500 rounded-full focus:ring-2 focus:ring-[#004E89] focus:border-transparent text-right"
+              className="flex-1 px-4 py-3 border-2 border-gray-300 bg-white text-black placeholder:text-gray-500 rounded-full focus:ring-2 focus:ring-[#10B981] focus:border-transparent text-right"
               dir="auto"
               disabled={loading || !puterReady}
             />

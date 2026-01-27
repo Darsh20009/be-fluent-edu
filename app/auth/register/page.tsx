@@ -413,7 +413,7 @@ export default function RegisterPage() {
                 value={formData.goal}
                 onChange={(e) => setFormData({ ...formData, goal: e.target.value })}
                 placeholder="مثال: أريد تحسين محادثتي للعمل..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#004E89] focus:border-transparent resize-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent resize-none"
                 rows={3}
               />
             </div>
@@ -435,7 +435,7 @@ export default function RegisterPage() {
                     onClick={() => setFormData({ ...formData, preferredTime: option.value })}
                     className={`p-4 rounded-xl border-2 transition-all ${
                       formData.preferredTime === option.value
-                        ? 'border-[#004E89] bg-blue-50 text-[#004E89]'
+                        ? 'border-[#10B981] bg-blue-50 text-[#10B981]'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -534,7 +534,7 @@ export default function RegisterPage() {
               ) : (
                 <button
                   onClick={handleTestNext}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#004E89] text-white rounded-lg hover:bg-[#003A6B] transition-all"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#003A6B] transition-all"
                 >
                   <span>التالي</span>
                   <ChevronLeft className="w-4 h-4" />
@@ -641,7 +641,7 @@ export default function RegisterPage() {
                 fullWidth
                 size="lg"
                 loading={loading}
-                className="font-semibold bg-gradient-to-r from-[#004E89] to-[#0066B3] hover:from-[#003A6B] hover:to-[#004E89] text-white text-lg py-4"
+                className="font-semibold bg-gradient-to-r from-[#10B981] to-[#0066B3] hover:from-[#003A6B] hover:to-[#10B981] text-white text-lg py-4"
               >
                 {loading ? 'جاري إنشاء الحساب...' : 'إنشاء الحساب 🚀'}
               </Button>
@@ -694,7 +694,7 @@ export default function RegisterPage() {
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
-                  className="bg-gradient-to-r from-[#004E89] to-[#0066B3] h-2 rounded-full"
+                  className="bg-gradient-to-r from-[#10B981] to-[#0066B3] h-2 rounded-full"
                 />
               </div>
             </div>
@@ -722,7 +722,7 @@ export default function RegisterPage() {
                   onClick={handleNext}
                   fullWidth
                   size="lg"
-                  className="font-semibold bg-gradient-to-r from-[#004E89] to-[#0066B3] hover:from-[#003A6B] hover:to-[#004E89] text-white"
+                  className="font-semibold bg-gradient-to-r from-[#10B981] to-[#0066B3] hover:from-[#003A6B] hover:to-[#10B981] text-white"
                 >
                   {currentStep === 'details' ? (
                     <>
@@ -742,7 +742,7 @@ export default function RegisterPage() {
 
           <p className="mt-6 text-center text-gray-600 text-sm">
             لديك حساب بالفعل؟{' '}
-            <Link href="/auth/login" className="text-[#004E89] hover:text-[#003A6B] font-semibold">
+            <Link href="/auth/login" className="text-[#10B981] hover:text-[#003A6B] font-semibold">
               تسجيل الدخول
             </Link>
           </p>

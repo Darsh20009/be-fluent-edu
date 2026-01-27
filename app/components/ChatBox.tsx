@@ -70,7 +70,7 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
   return (
     <div className="flex flex-col h-full bg-white rounded-2xl shadow-2xl border-2 border-slate-200 overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#004E89] to-[#1A5F7A] text-white p-4 sm:p-6 flex items-center justify-between flex-shrink-0 hidden lg:flex">
+      <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-4 sm:p-6 flex items-center justify-between flex-shrink-0 hidden lg:flex">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-lg">
             {otherUser.name?.charAt(0).toUpperCase()}
@@ -89,7 +89,7 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-gradient-to-b from-slate-50 to-white">
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <div className="w-12 h-12 border-4 border-[#004E89] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-12 h-12 border-4 border-[#10B981] border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
@@ -109,7 +109,7 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
                 className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl font-medium break-words shadow-md ${
                   msg.fromUserId === otherUser.id
                     ? 'bg-gray-200 text-gray-900'
-                    : 'bg-gradient-to-r from-[#004E89] to-[#1A5F7A] text-white'
+                    : 'bg-gradient-to-r from-[#10B981] to-[#059669] text-white'
                 }`}
               >
                 <p className="text-sm lg:text-base">{msg.content}</p>
@@ -136,13 +136,13 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             disabled={sending}
-            className="flex-1 px-4 py-3 sm:py-4 border-2 border-slate-300 rounded-2xl focus:outline-none focus:border-[#004E89] focus:ring-2 focus:ring-[#004E89]/20 disabled:opacity-50 transition-all text-base sm:text-lg"
+            className="flex-1 px-4 py-3 sm:py-4 border-2 border-slate-300 rounded-2xl focus:outline-none focus:border-[#10B981] focus:ring-2 focus:ring-[#10B981]/20 disabled:opacity-50 transition-all text-base sm:text-lg"
             autoFocus
           />
           <button
             type="submit"
             disabled={sending || !newMessage.trim()}
-            className="bg-gradient-to-r from-[#004E89] to-[#1A5F7A] text-white px-4 sm:px-6 py-3 sm:py-4 rounded-2xl hover:shadow-lg disabled:opacity-50 transition-all duration-200 hover:scale-105 font-bold flex items-center gap-2 flex-shrink-0"
+            className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white px-4 sm:px-6 py-3 sm:py-4 rounded-2xl hover:shadow-lg disabled:opacity-50 transition-all duration-200 hover:scale-105 font-bold flex items-center gap-2 flex-shrink-0"
             title="إرسال الرسالة"
           >
             <Send className="h-5 w-5" />

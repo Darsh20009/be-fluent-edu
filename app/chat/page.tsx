@@ -26,7 +26,7 @@ export default function ChatPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#004E89] to-[#1A5F7A]">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#10B981] to-[#059669]">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-white text-lg">جاري التحميل...</p>
@@ -77,7 +77,7 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#004E89] to-[#1A5F7A] text-white p-4 sm:p-6 shadow-2xl border-b-4 border-[#003B6F]">
+      <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-4 sm:p-6 shadow-2xl border-b-4 border-[#003B6F]">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
@@ -101,14 +101,14 @@ export default function ChatPage() {
         <div className="hidden lg:flex lg:w-80 flex-col gap-4">
           <div className="bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col h-full border-2 border-slate-200">
             {/* Sidebar Header */}
-            <div className="bg-gradient-to-r from-[#004E89] to-[#1A5F7A] text-white p-4 flex items-center justify-between flex-shrink-0">
+            <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-4 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2">
                 <MessageCircle className="h-5 w-5" />
                 <h2 className="font-bold text-lg">محادثاتك</h2>
               </div>
               <button
                 onClick={() => setShowNewChatModal(true)}
-                className="bg-white text-[#004E89] hover:bg-gray-100 p-2 rounded-lg transition-all duration-200 hover:scale-110 font-bold"
+                className="bg-white text-[#10B981] hover:bg-gray-100 p-2 rounded-lg transition-all duration-200 hover:scale-110 font-bold"
                 title="محادثة جديدة"
               >
                 <Plus className="h-5 w-5" />
@@ -128,7 +128,7 @@ export default function ChatPage() {
         <div className="flex-1 flex flex-col gap-4">
           {/* Mobile Header - Show selected user */}
           {selectedUser && (
-            <div className="lg:hidden bg-gradient-to-r from-[#004E89] to-[#1A5F7A] text-white rounded-2xl p-4 flex items-center justify-between shadow-lg">
+            <div className="lg:hidden bg-gradient-to-r from-[#10B981] to-[#059669] text-white rounded-2xl p-4 flex items-center justify-between shadow-lg">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold text-lg">
                   {selectedUser.name?.charAt(0).toUpperCase()}
@@ -151,15 +151,15 @@ export default function ChatPage() {
             <ChatBox otherUser={selectedUser} onClose={() => setSelectedUser(null)} />
           ) : (
             <div className="flex-1 bg-white rounded-2xl shadow-2xl flex flex-col items-center justify-center text-center border-2 border-slate-200 p-6 lg:p-12">
-              <div className="mb-6 p-8 bg-gradient-to-br from-[#004E89]/10 to-[#1A5F7A]/10 rounded-full">
-                <Send className="w-16 h-16 text-[#004E89]" />
+              <div className="mb-6 p-8 bg-gradient-to-br from-[#10B981]/10 to-[#059669]/10 rounded-full">
+                <Send className="w-16 h-16 text-[#10B981]" />
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-3">لا توجد محادثة نشطة</h2>
               <p className="text-gray-600 mb-8 text-base max-w-md">اختر محادثة من القائمة أو ابدأ محادثة جديدة للتواصل</p>
               
               <button
                 onClick={() => setShowNewChatModal(true)}
-                className="bg-gradient-to-r from-[#004E89] to-[#1A5F7A] text-white px-8 py-4 rounded-xl hover:shadow-lg transition-all duration-200 hover:scale-105 flex items-center gap-3 font-bold text-lg"
+                className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white px-8 py-4 rounded-xl hover:shadow-lg transition-all duration-200 hover:scale-105 flex items-center gap-3 font-bold text-lg"
               >
                 <Plus className="h-6 w-6" />
                 ابدأ محادثة جديدة
@@ -190,7 +190,7 @@ export default function ChatPage() {
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border-2 border-slate-200">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-[#004E89] to-[#1A5F7A] text-white p-6 flex items-center justify-between flex-shrink-0">
+            <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-6 flex items-center justify-between flex-shrink-0">
               <div>
                 <h2 className="text-2xl font-bold">اختر محادثة جديدة</h2>
                 <p className="text-sm text-gray-200 mt-1">اختر الشخص الذي تريد التحدث معه</p>
@@ -207,7 +207,7 @@ export default function ChatPage() {
             <div className="flex-1 overflow-y-auto p-6">
               {loadingContacts ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="w-12 h-12 border-4 border-[#004E89] border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-12 h-12 border-4 border-[#10B981] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               ) : availableContacts.length === 0 ? (
                 <div className="text-center py-12">
@@ -223,10 +223,10 @@ export default function ChatPage() {
                       <button
                         key={contact.id}
                         onClick={() => handleSelectContact(contact)}
-                        className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-gray-200 rounded-xl hover:from-blue-50 hover:to-blue-100 hover:border-[#004E89] transition-all duration-200 text-left hover:shadow-md group"
+                        className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-gray-200 rounded-xl hover:from-blue-50 hover:to-blue-100 hover:border-[#10B981] transition-all duration-200 text-left hover:shadow-md group"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 bg-gradient-to-br from-[#004E89] to-[#1A5F7A] rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0 group-hover:scale-110 transition-transform">
+                          <div className="w-14 h-14 bg-gradient-to-br from-[#10B981] to-[#059669] rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0 group-hover:scale-110 transition-transform">
                             {contact.name?.charAt(0).toUpperCase()}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -240,7 +240,7 @@ export default function ChatPage() {
                             </div>
                             <p className="text-sm text-gray-600 truncate">{contact.email}</p>
                           </div>
-                          <div className="text-[#004E89] text-xl group-hover:translate-x-1 transition-transform">→</div>
+                          <div className="text-[#10B981] text-xl group-hover:translate-x-1 transition-transform">→</div>
                         </div>
                       </button>
                     )

@@ -12,6 +12,6 @@ export default function LoadingSpinner({ size = 'md' }: LoadingSpinnerProps) {
   }
 
   return (
-    <div className={`${sizes[size]} border-4 border-[#004E89] border-t-transparent rounded-full animate-spin`}></div>
+    <div className={`${sizes[size]} border-4 border-[#10B981] border-t-transparent rounded-full animate-spin`}></div>
   )
 }

@@ -154,7 +154,7 @@ export default function MyOrdersClient() {
               Back to Dashboard / العودة للوحة التحكم
             </Button>
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-bold text-[#004E89] mb-2">
+          <h1 className="text-3xl sm:text-4xl font-bold text-[#10B981] mb-2">
             My Orders & Subscriptions / طلباتي واشتراكاتي
           </h1>
           <p className="text-gray-600">
@@ -190,12 +190,12 @@ export default function MyOrdersClient() {
                   {/* Left Side - Package Info */}
                   <div className="flex-1">
                     <div className="flex items-start gap-3 mb-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-[#004E89] to-[#1A5F7A] rounded-lg flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#10B981] to-[#059669] rounded-lg flex items-center justify-center flex-shrink-0">
                         <Package className="h-6 w-6 text-white" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <h3 className="text-xl font-bold text-[#004E89]">
+                          <h3 className="text-xl font-bold text-[#10B981]">
                             {subscription.Package.titleAr || subscription.Package.title}
                           </h3>
                           {getStatusBadge(subscription)}
@@ -242,7 +242,7 @@ export default function MyOrdersClient() {
                       )}
                       <div className="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700">
                         <span className="text-gray-600">Total Amount / المبلغ الإجمالي:</span>
-                        <span className="text-xl font-bold text-[#004E89]">
+                        <span className="text-xl font-bold text-[#10B981]">
                           {subscription.Package.price} SAR
                         </span>
                       </div>

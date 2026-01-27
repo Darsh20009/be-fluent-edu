@@ -46,14 +46,14 @@ export default function SystemTab() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-[#004E89]">
+      <h2 className="text-3xl font-bold text-[#10B981]">
         System Activity / نشاط النظام
       </h2>
 
       <Card variant="elevated">
         <div className="flex items-center gap-3 mb-4">
-          <Activity className="h-6 w-6 text-[#004E89]" />
-          <h3 className="text-xl font-bold text-[#004E89]">
+          <Activity className="h-6 w-6 text-[#10B981]" />
+          <h3 className="text-xl font-bold text-[#10B981]">
             Recent Activity Logs / سجلات النشاط الأخيرة
           </h3>
         </div>
@@ -86,7 +86,7 @@ export default function SystemTab() {
       </Card>
 
       <Card variant="elevated">
-        <h3 className="text-xl font-bold text-[#004E89] mb-4">
+        <h3 className="text-xl font-bold text-[#10B981] mb-4">
           System Information / معلومات النظام
         </h3>
         <div className="space-y-2 text-gray-700">

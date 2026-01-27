@@ -124,7 +124,7 @@ export default function UsersTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold text-[#004E89]">
+        <h2 className="text-3xl font-bold text-[#10B981]">
           Users / المستخدمين
         </h2>
         <Button
@@ -139,19 +139,19 @@ export default function UsersTab() {
       <div className="grid md:grid-cols-3 gap-4">
         <Card variant="elevated">
           <div className="text-center">
-            <p className="text-2xl font-bold text-[#004E89]">{users.length}</p>
+            <p className="text-2xl font-bold text-[#10B981]">{users.length}</p>
             <p className="text-sm text-gray-600">Total Users / المستخدمين</p>
           </div>
         </Card>
         <Card variant="elevated">
           <div className="text-center">
-            <p className="text-2xl font-bold text-[#004E89]">{students.length}</p>
+            <p className="text-2xl font-bold text-[#10B981]">{students.length}</p>
             <p className="text-sm text-gray-600">Students / الطلاب</p>
           </div>
         </Card>
         <Card variant="elevated">
           <div className="text-center">
-            <p className="text-2xl font-bold text-[#004E89]">{teachers.length}</p>
+            <p className="text-2xl font-bold text-[#10B981]">{teachers.length}</p>
             <p className="text-sm text-gray-600">Teachers / المدرسين</p>
           </div>
         </Card>
@@ -188,7 +188,7 @@ export default function UsersTab() {
             <Card key={user.id} variant="elevated">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3 flex-1">
-                  <div className="w-12 h-12 bg-[#004E89] rounded-full flex items-center justify-center text-white text-lg font-bold">
+                  <div className="w-12 h-12 bg-[#10B981] rounded-full flex items-center justify-center text-white text-lg font-bold">
                     {user.name?.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1">
@@ -272,7 +272,7 @@ export default function UsersTab() {
                 Bio / السيرة الذاتية (Optional)
               </label>
               <textarea
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004E89]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10B981]"
                 value={newTeacher.bio}
                 onChange={(e) => setNewTeacher({ ...newTeacher, bio: e.target.value })}
                 placeholder="Teacher background and experience..."
