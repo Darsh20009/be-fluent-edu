@@ -36,14 +36,26 @@ export async function GET(request: NextRequest) {
       }),
       prisma.subscription.count({ where: { status: 'PENDING' } }),
       prisma.subscription.findMany({
-        where: { status: 'APPROVED' },
-        include: { Package: true }
+        where: { status: 'APPROVED' }
       })
     ])
 
-    // Filter out invalid subscriptions where relations might be missing (MongoDB safety)
-    const validApprovedSubscriptions = approvedSubscriptions.filter(sub => sub && sub.Package)
-    const totalRevenue = validApprovedSubscriptions.reduce((sum, sub) => sum + (sub.Package?.price || 0), 0)
+    // Total revenue from approved subscriptions - Robust population
+    let totalRevenue = 0
+    if (approvedSubscriptions && approvedSubscriptions.length > 0) {
+      const packageIds = [...new Set(approvedSubscriptions.map(s => s.packageId).filter(Boolean))]
+      const packages = await prisma.package.findMany({
+        where: { id: { in: packageIds as string[] } }
+      })
+      const packageMap = new Map(packages.map(p => [p.id, p]))
+
+      for (const sub of approvedSubscriptions) {
+        const pkg = packageMap.get(sub.packageId)
+        if (pkg) {
+          totalRevenue += pkg.price
+        }
+      }
+    }
 
     return NextResponse.json({
       totalUsers,
