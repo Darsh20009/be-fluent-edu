@@ -14,7 +14,6 @@ import SubscriptionsTab from './components/SubscriptionsTab'
 import SystemTab from './components/SystemTab'
 import StudentsManagementTab from './components/StudentsManagementTab'
 import LessonsTab from '@/components/admin/LessonsTab'
-import ListeningTab from './components/ListeningTab'
 import PlacementTestTab from './components/PlacementTestTab'
 import Link from 'next/link'
 
@@ -42,7 +41,6 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
     { id: 'subscriptions', label: 'Subscriptions / الاشتراكات', icon: CreditCard },
     { id: 'students', label: 'Students / الطلاب', icon: BookOpen },
     { id: 'lessons', label: 'Lessons / الدروس', icon: BookOpen },
-    { id: 'listening', label: 'Listening / الاستماع', icon: Headphones },
     { id: 'placement-test', label: 'Placement Test / اختبار تحديد المستوى', icon: ClipboardList },
     { id: 'teacher', label: 'Teacher Dashboard / لوحة المعلم', icon: GraduationCap, href: '/dashboard/teacher' },
     { id: 'system', label: 'System / النظام', icon: Activity },
@@ -164,7 +162,6 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
             {activeTab === 'subscriptions' && <SubscriptionsTab />}
             {activeTab === 'students' && <StudentsManagementTab />}
             {activeTab === 'lessons' && <LessonsTab isActive={activeTab === 'lessons'} />}
-            {activeTab === 'listening' && <ListeningTab isActive={activeTab === 'listening'} />}
             {activeTab === 'placement-test' && <PlacementTestTab />}
             {activeTab === 'system' && <SystemTab />}
           </div>

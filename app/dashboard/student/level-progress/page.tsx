@@ -46,7 +46,6 @@ interface LevelProgress {
     vocabulary: string
     grammar: string
     speaking: string
-    listening: string
     writing: string
   }
   colors: { bg: string; text: string; border: string }
@@ -405,7 +404,6 @@ export default function LevelProgressPage() {
             <SkillRequirement label="المفردات" value={progress.skillRequirements.vocabulary} />
             <SkillRequirement label="القواعد" value={progress.skillRequirements.grammar} />
             <SkillRequirement label="التحدث" value={progress.skillRequirements.speaking} />
-            <SkillRequirement label="الاستماع" value={progress.skillRequirements.listening} />
             <SkillRequirement label="الكتابة" value={progress.skillRequirements.writing} />
           </div>
         </motion.div>

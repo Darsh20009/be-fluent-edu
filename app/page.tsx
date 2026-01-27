@@ -88,10 +88,6 @@ export default function Home() {
                 القواعد
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#10B981] group-hover:w-full transition-all duration-300"></span>
               </Link>
-              <Link href="/listening" className="text-gray-700 hover:text-[#10B981] font-semibold transition-colors relative group">
-                الاستماع
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#10B981] group-hover:w-full transition-all duration-300"></span>
-              </Link>
             </nav>
 
             {/* Auth Buttons */}
@@ -131,9 +127,6 @@ export default function Home() {
                 </Link>
                 <Link href="/grammar" className="px-4 py-3 text-gray-700 hover:bg-[#10B981]/10 rounded-lg font-semibold transition-colors" onClick={() => setMobileMenuOpen(false)}>
                   القواعد
-                </Link>
-                <Link href="/listening" className="px-4 py-3 text-gray-700 hover:bg-[#10B981]/10 rounded-lg font-semibold transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                  الاستماع
                 </Link>
                 <div className="border-t border-gray-100 mt-2 pt-4 flex flex-col gap-2">
                   <Link href="/auth/login" className="px-4 py-3 text-center text-[#1F2937] font-bold hover:bg-gray-100 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>
@@ -292,7 +285,6 @@ export default function Home() {
               {[
                 { icon: <Video className="w-8 h-8" />, label: "حصص مباشرة" },
                 { icon: <BookOpen className="w-8 h-8" />, label: "دروس تفاعلية" },
-                { icon: <Headphones className="w-8 h-8" />, label: "تدريب استماع" },
                 { icon: <GraduationCap className="w-8 h-8" />, label: "شهادات معتمدة" },
                 { icon: <Trophy className="w-8 h-8" />, label: "تحديات ومكافآت" },
               ].map((item, i) => (
@@ -336,12 +328,6 @@ export default function Home() {
                   desc: "دروس وفيديوهات ومقالات تعليمية مصممة خصيصاً لتسريع رحلة تعلمك.",
                   icon: <BookOpen className="w-7 h-7" />,
                   color: "from-blue-500 to-cyan-600"
-                },
-                { 
-                  title: "تدريب على الاستماع", 
-                  desc: "تمارين استماع متنوعة لتحسين مهاراتك في فهم اللغة الإنجليزية.",
-                  icon: <Headphones className="w-7 h-7" />,
-                  color: "from-purple-500 to-violet-600"
                 },
                 { 
                   title: "اختبارات وتقييمات", 
