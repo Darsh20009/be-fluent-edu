@@ -9,11 +9,10 @@ const registerSchema = z.object({
   password: z.string().min(6),
   phone: z.string().min(10).optional(),
   age: z.number().min(5).max(100),
-  levelInitial: z.enum(['A1', 'A2', 'B1', 'B2', 'C1']),
   goal: z.string().min(1),
   preferredTime: z.string().min(1),
-  placementTestScore: z.number().optional(),
-  placementTestPercentage: z.number().optional(),
+  packageId: z.string().min(1),
+  receiptUrl: z.string().optional(),
 }).refine(data => data.email || data.phone, {
   message: 'Either email or phone number is required',
   path: ['email'],
@@ -65,11 +64,11 @@ export async function POST(request: Request) {
         StudentProfile: {
           create: {
             age: validatedData.age,
-            levelInitial: validatedData.levelInitial,
             goal: validatedData.goal,
             preferredTime: validatedData.preferredTime,
-            placementTestScore: validatedData.placementTestScore || null,
-            placementTestPercentage: validatedData.placementTestPercentage || null,
+            packageId: validatedData.packageId,
+            receiptUrl: validatedData.receiptUrl || null,
+            levelInitial: 'A1', // Default level
           },
         },
       },
