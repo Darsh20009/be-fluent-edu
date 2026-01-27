@@ -327,12 +327,12 @@ export default function SubscriptionsTab() {
                       {sub.Package.title} / {sub.Package.titleAr}
                     </p>
                     <p className="text-sm text-gray-700">
-                      💰 {sub.Package.price} SAR • 📚 {sub.Package.lessonsCount} lessons • ⏱️ {Math.ceil(sub.Package.durationDays / 30)} month(s)
+                      💰 {sub.Package.price} EGP • 📚 {sub.Package.lessonsCount} lessons • ⏱️ {Math.ceil(sub.Package.durationDays / 30)} month(s)
                     </p>
                   </div>
 
                   <div className="bg-gray-50 p-3 rounded-lg text-sm">
-                    <p><strong>Payment Method:</strong> {sub.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer (eg00)' : `E-Wallet (${sub.eWalletProvider})`}</p>
+                    <p><strong>Payment Method:</strong> {sub.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer' : `E-Wallet (${sub.eWalletProvider || 'Cash'})`}</p>
                     <p><strong>Requested:</strong> {new Date(sub.createdAt).toLocaleString('ar-EG')}</p>
                   </div>
 
@@ -391,7 +391,7 @@ export default function SubscriptionsTab() {
                     <p className="font-medium text-gray-900">
                       {sub.Package.title} / {sub.Package.titleAr}
                     </p>
-                    <p className="text-sm text-gray-600">{sub.Package.price} SAR</p>
+                    <p className="text-sm text-gray-600">{sub.Package.price} EGP</p>
                     {sub.AssignedTeacher && (
                       <p className="text-sm text-blue-600 mt-1">
                         👨‍🏫 Teacher: {sub.AssignedTeacher.User.name}

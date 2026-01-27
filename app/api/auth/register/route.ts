@@ -70,11 +70,19 @@ export async function POST(request: Request) {
             receiptUrl: validatedData.receiptUrl || null,
           },
         },
+        Subscription: {
+          create: {
+            packageId: validatedData.packageId,
+            status: 'PENDING',
+            receiptUrl: validatedData.receiptUrl || null,
+            paymentMethod: 'E_WALLET',
+          }
+        }
       },
       include: {
         StudentProfile: true,
       },
-    })
+    }) as any
 
     return NextResponse.json({
       message: 'Registration successful. Your account is pending activation.',
