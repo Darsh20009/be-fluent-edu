@@ -46,8 +46,8 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Filter out subscriptions that might have lost their relations (shouldn't happen with Prisma, but for safety with MongoDB)
-    const validSubscriptions = subscriptions.filter(sub => sub.User && sub.Package)
+    // Filter out subscriptions that might have lost their relations (MongoDB safety)
+    const validSubscriptions = subscriptions.filter(sub => sub && sub.User && sub.Package)
 
     return NextResponse.json(validSubscriptions)
   } catch (error) {

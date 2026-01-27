@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     ])
 
     // Filter out invalid subscriptions where relations might be missing (MongoDB safety)
-    const validApprovedSubscriptions = approvedSubscriptions.filter(sub => sub.Package)
+    const validApprovedSubscriptions = approvedSubscriptions.filter(sub => sub && sub.Package)
     const totalRevenue = validApprovedSubscriptions.reduce((sum, sub) => sum + (sub.Package?.price || 0), 0)
 
     return NextResponse.json({
