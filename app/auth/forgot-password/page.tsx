@@ -96,7 +96,7 @@ export default function ForgotPasswordPage() {
 
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8] flex flex-col">
+    <div className="min-h-screen bg-[#F9FAFB] flex flex-col">
       <AppHeader variant="marketing">
         <Link
           href="/auth/login"
@@ -107,7 +107,7 @@ export default function ForgotPasswordPage() {
       </AppHeader>
 
       <div className="flex-1 flex items-center justify-center p-3 sm:p-4 md:p-6">
-        <Card className="w-full max-w-md shadow-2xl bg-[#F5F1E8] border-2 border-[#d4c9b8]">
+        <Card className="w-full max-w-md shadow-2xl bg-[#F9FAFB] border-2 border-[#E5E7EB]">
           <div className="flex justify-between items-center mb-4">
             <Link href="/auth/login">
               <Button variant="ghost" size="sm" className="gap-2">
@@ -253,7 +253,7 @@ export default function ForgotPasswordPage() {
         </Card>
       </div>
 
-      <footer className="w-full py-4 sm:py-6 text-center text-sm sm:text-base text-black bg-[#F5F1E8] border-t-2 border-[#d4c9b8] mt-auto">
+      <footer className="w-full py-4 sm:py-6 text-center text-sm sm:text-base text-black bg-[#F9FAFB] border-t-2 border-[#E5E7EB] mt-auto">
         <p className="px-4">Made with ❤️ by MA3K Company</p>
       </footer>
     </div>

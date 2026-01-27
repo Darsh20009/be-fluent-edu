@@ -120,7 +120,7 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
             transform lg:transform-none transition-transform duration-300
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}>
-            <Card variant="elevated" padding="none" className="h-full lg:h-auto bg-[#F5F1E8] border border-[#d4c9b8]">
+            <Card variant="elevated" padding="none" className="h-full lg:h-auto bg-[#F9FAFB] border border-[#E5E7EB]">
               <div className="p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between lg:justify-start gap-3">
                   <div className="flex items-center gap-3 flex-1">

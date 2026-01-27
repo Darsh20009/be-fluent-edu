@@ -225,14 +225,14 @@ Make the questions appropriate for ${video.level} level students.`
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F5F1E8] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8] p-4 md:p-6">
+    <div className="min-h-screen bg-[#F9FAFB] p-4 md:p-6">
       <Script 
         src="https://js.puter.com/v2/" 
         strategy="afterInteractive"

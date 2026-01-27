@@ -403,7 +403,7 @@ Hello! I'm ready to help you learn English!
   ]
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8] flex flex-col hide-floating-contact">
+    <div className="min-h-screen bg-[#F9FAFB] flex flex-col hide-floating-contact">
       <Script 
         src="https://js.puter.com/v2/" 
         strategy="afterInteractive"

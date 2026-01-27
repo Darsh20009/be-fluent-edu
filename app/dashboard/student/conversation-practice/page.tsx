@@ -378,7 +378,7 @@ export default function ConversationPracticePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8] p-4 md:p-6">
+    <div className="min-h-screen bg-[#F9FAFB] p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <button

@@ -641,7 +641,7 @@ export default function RegisterPage() {
                 fullWidth
                 size="lg"
                 loading={loading}
-                className="font-semibold bg-gradient-to-r from-[#10B981] to-[#0066B3] hover:from-[#003A6B] hover:to-[#10B981] text-white text-lg py-4"
+                className="font-semibold bg-gradient-to-r from-[#10B981] to-[#059669] hover:from-[#003A6B] hover:to-[#10B981] text-white text-lg py-4"
               >
                 {loading ? 'جاري إنشاء الحساب...' : 'إنشاء الحساب 🚀'}
               </Button>
@@ -659,7 +659,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F1E8] via-[#E8DCC8] to-[#F5F1E8] flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-[#F9FAFB] via-[#F3F4F6] to-[#F9FAFB] flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-6">
         <div className="w-full max-w-lg">
           <div className="flex items-center justify-between mb-6">
@@ -677,8 +677,8 @@ export default function RegisterPage() {
             )}
             
             <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <Image src="/logo.png" alt="Youspeak" width={32} height={32} style={{ mixBlendMode: 'multiply' }} />
-              <span className="font-bold text-gray-800">Youspeak</span>
+              <Image src="/logo.png" alt="Be Fluent" width={32} height={32} style={{ mixBlendMode: 'multiply' }} />
+              <span className="font-bold text-gray-800">Be Fluent</span>
             </Link>
             
             <LanguageToggle />
@@ -694,7 +694,7 @@ export default function RegisterPage() {
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
-                  className="bg-gradient-to-r from-[#10B981] to-[#0066B3] h-2 rounded-full"
+                  className="bg-gradient-to-r from-[#10B981] to-[#059669] h-2 rounded-full"
                 />
               </div>
             </div>
@@ -722,7 +722,7 @@ export default function RegisterPage() {
                   onClick={handleNext}
                   fullWidth
                   size="lg"
-                  className="font-semibold bg-gradient-to-r from-[#10B981] to-[#0066B3] hover:from-[#003A6B] hover:to-[#10B981] text-white"
+                  className="font-semibold bg-gradient-to-r from-[#10B981] to-[#059669] hover:from-[#003A6B] hover:to-[#10B981] text-white"
                 >
                   {currentStep === 'details' ? (
                     <>

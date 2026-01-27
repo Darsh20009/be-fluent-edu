@@ -26,7 +26,7 @@ export default function GrammarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F1E8] via-white to-[#F5F1E8]">
+    <div className="min-h-screen bg-gradient-to-br from-[#F9FAFB] via-white to-[#F9FAFB]">
       <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-6 shadow-2xl">
         <div className="container mx-auto">
           <div className="flex items-center justify-between mb-4">

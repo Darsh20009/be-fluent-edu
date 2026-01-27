@@ -74,14 +74,14 @@ export default function LessonsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F5F1E8] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#10B981]"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8] p-4 sm:p-6">
+    <div className="min-h-screen bg-[#F9FAFB] p-4 sm:p-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <button

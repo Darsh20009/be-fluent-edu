@@ -133,7 +133,7 @@ export default function AchievementsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F5F1E8] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#10B981] border-t-transparent"></div>
       </div>
     )
@@ -141,7 +141,7 @@ export default function AchievementsPage() {
 
   if (!stats) {
     return (
-      <div className="min-h-screen bg-[#F5F1E8] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center">
         <div className="text-center">
           <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h2 className="text-xl text-gray-600 mb-4">يرجى تسجيل الدخول لعرض إنجازاتك</h2>
@@ -157,7 +157,7 @@ export default function AchievementsPage() {
   const unearnedBadges = badges.filter(b => !b.earned)
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8]">
+    <div className="min-h-screen bg-[#F9FAFB]">
       <header className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">

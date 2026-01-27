@@ -121,8 +121,8 @@ export default function FreeWritingClient() {
 
   if (!hasSubscription) {
     return (
-      <div className="min-h-screen bg-[#F5F1E8] flex items-center justify-center p-4">
-        <div className="max-w-md text-center bg-white rounded-2xl p-8 shadow-lg border-2 border-[#d4c9b8]">
+      <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center p-4">
+        <div className="max-w-md text-center bg-white rounded-2xl p-8 shadow-lg border-2 border-[#E5E7EB]">
           <div className="mb-4 flex justify-center">
             <div className="bg-purple-500 p-4 rounded-full">
               <FileText className="h-12 w-12 text-white" />
@@ -145,7 +145,7 @@ export default function FreeWritingClient() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F1E8]">
+      <div className="min-h-screen flex items-center justify-center bg-[#F9FAFB]">
         <LoadingSpinner size="lg" />
       </div>
     )
@@ -153,7 +153,7 @@ export default function FreeWritingClient() {
 
   if (migrationError) {
     return (
-      <div className="min-h-screen bg-[#F5F1E8]">
+      <div className="min-h-screen bg-[#F9FAFB]">
         <div className="container mx-auto px-4 py-8 max-w-6xl">
           <Link href="/dashboard/student">
             <Button variant="outline" size="sm" className="mb-4">
@@ -190,7 +190,7 @@ export default function FreeWritingClient() {
   const gradedWritings = writings.filter(w => w.grade !== null)
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8]">
+    <div className="min-h-screen bg-[#F9FAFB]">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Header */}
         <div className="mb-8">

@@ -89,7 +89,7 @@ export default function ListeningPage() {
   const categories = [...new Set(contents.map(c => c.category).filter(Boolean))]
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8]">
+    <div className="min-h-screen bg-[#F9FAFB]">
       <header className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">

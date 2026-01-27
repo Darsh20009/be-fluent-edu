@@ -88,14 +88,14 @@ export default function LoginContent() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-[#F5F1E8] flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#F9FAFB] flex flex-col items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#10B981]"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8] flex flex-col">
+    <div className="min-h-screen bg-[#F9FAFB] flex flex-col">
       <AppHeader variant="marketing">
         <Link
           href="/auth/register"
@@ -106,7 +106,7 @@ export default function LoginContent() {
       </AppHeader>
 
       <div className="flex-1 flex items-center justify-center p-3 sm:p-4 md:p-6">
-        <Card className="w-full max-w-md shadow-2xl bg-[#F5F1E8] border-2 border-[#d4c9b8]">
+        <Card className="w-full max-w-md shadow-2xl bg-[#F9FAFB] border-2 border-[#E5E7EB]">
           <div className="flex justify-between items-center mb-4">
             <Link href="/">
               <Button variant="ghost" size="sm" className="gap-2">
@@ -213,7 +213,7 @@ export default function LoginContent() {
         </Card>
       </div>
 
-      <footer className="w-full py-4 sm:py-6 text-center text-sm sm:text-base text-black bg-[#F5F1E8] border-t-2 border-[#d4c9b8] mt-auto">
+      <footer className="w-full py-4 sm:py-6 text-center text-sm sm:text-base text-black bg-[#F9FAFB] border-t-2 border-[#E5E7EB] mt-auto">
         <p className="px-4">Made with ❤️ by MA3K Company</p>
       </footer>
     </div>

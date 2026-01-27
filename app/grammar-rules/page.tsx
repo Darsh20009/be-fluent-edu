@@ -126,7 +126,7 @@ export default function GrammarRulesPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8]">
+    <div className="min-h-screen bg-[#F9FAFB]">
       <AppHeader variant="marketing">
         <Link
           href="/"
@@ -185,7 +185,7 @@ export default function GrammarRulesPage() {
                   {section.rules.map((rule, index) => (
                     <div
                       key={index}
-                      className="bg-[#F5F1E8] rounded-lg p-4 hover:shadow-md transition-shadow"
+                      className="bg-[#F9FAFB] rounded-lg p-4 hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-start gap-3">
                         <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-1" />

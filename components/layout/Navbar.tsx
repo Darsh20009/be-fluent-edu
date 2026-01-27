@@ -49,7 +49,7 @@ const Navbar: React.FC<NavbarProps> = ({ logo, children, className, sticky = tru
 
       {isMobileMenuOpen && (
         <div
-          className="md:hidden border-t border-[#d4c9b8] bg-[#F5F1E8]"
+          className="md:hidden border-t border-[#E5E7EB] bg-[#F9FAFB]"
           role="menu"
         >
           <div className="container mx-auto px-4 py-4 space-y-2">{children}</div>

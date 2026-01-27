@@ -147,7 +147,7 @@ export default function WritingTestsPage() {
   if (!hasSubscription) {
     return (
       <div className="min-h-screen bg-[#F5F5DC] flex items-center justify-center p-4">
-        <div className="max-w-md text-center bg-white rounded-2xl p-8 shadow-lg border-2 border-[#d4c9b8]">
+        <div className="max-w-md text-center bg-white rounded-2xl p-8 shadow-lg border-2 border-[#E5E7EB]">
           <div className="mb-4 flex justify-center">
             <div className="bg-blue-500 p-4 rounded-full">
               <FileText className="h-12 w-12 text-white" />
