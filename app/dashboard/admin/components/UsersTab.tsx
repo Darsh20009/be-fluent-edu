@@ -18,6 +18,13 @@ interface User {
   isActive: boolean
   phone: string | null
   createdAt: string
+  Subscription?: {
+    status: string
+    Package: {
+      title: string
+      titleAr: string
+    }
+  }[]
 }
 
 export default function UsersTab() {
@@ -213,6 +220,13 @@ export default function UsersTab() {
                     <p className="text-sm text-gray-600 mb-1">{user.email}</p>
                     {user.phone && (
                       <p className="text-sm text-gray-600">Phone: {user.phone}</p>
+                    )}
+                    {user.Subscription && user.Subscription[0] && (
+                      <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-100">
+                        <p className="text-xs font-bold text-blue-700">
+                          📦 {user.Subscription[0].Package.titleAr} ({user.Subscription[0].status})
+                        </p>
+                      </div>
                     )}
                     <p className="text-xs text-gray-500 mt-2">
                       Joined: {new Date(user.createdAt).toLocaleDateString('ar-EG')}

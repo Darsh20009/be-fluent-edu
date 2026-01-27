@@ -21,7 +21,14 @@ export async function GET(request: NextRequest) {
         role: true,
         isActive: true,
         phone: true,
-        createdAt: true
+        createdAt: true,
+        Subscription: {
+          take: 1,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            Package: true
+          }
+        }
       }
     })
 

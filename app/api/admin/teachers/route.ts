@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const teachers = await prisma.user.findMany({
       where: {
         role: 'TEACHER',
-        isActive: true
+        // Removed isActive filter to show all teachers in admin dashboard
       },
       select: {
         id: true,
