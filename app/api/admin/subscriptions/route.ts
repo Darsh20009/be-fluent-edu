@@ -46,7 +46,10 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json(subscriptions)
+    // Filter out subscriptions that might have lost their relations (shouldn't happen with Prisma, but for safety with MongoDB)
+    const validSubscriptions = subscriptions.filter(sub => sub.User && sub.Package)
+
+    return NextResponse.json(validSubscriptions)
   } catch (error) {
     console.error('Error fetching subscriptions:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

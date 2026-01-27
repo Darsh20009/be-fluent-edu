@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       totalSessions,
       sessionsThisWeek,
       pendingSubscriptions,
-      paidSubscriptions
+      approvedSubscriptions
     ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { role: 'STUDENT' } }),
@@ -41,7 +41,9 @@ export async function GET(request: NextRequest) {
       })
     ])
 
-    const totalRevenue = paidSubscriptions.reduce((sum, sub) => sum + sub.Package.price, 0)
+    // Filter out invalid subscriptions where relations might be missing (MongoDB safety)
+    const validApprovedSubscriptions = approvedSubscriptions.filter(sub => sub.Package)
+    const totalRevenue = validApprovedSubscriptions.reduce((sum, sub) => sum + (sub.Package?.price || 0), 0)
 
     return NextResponse.json({
       totalUsers,
