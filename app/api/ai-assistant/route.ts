@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
 
-    const systemPrompt = `You are a helpful English learning assistant for Arabic speakers. Your name is "YouSpeak AI".
+    const systemPrompt = `You are a helpful English learning assistant for Arabic speakers. Your name is "Be Fluent AI".
 
 Your role:
 - Help students learn English vocabulary, grammar, and conversation skills

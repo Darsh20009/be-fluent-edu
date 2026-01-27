@@ -11,7 +11,7 @@ async function main() {
 
     // 1. حساب المدير
     const admin = await prisma.user.upsert({
-      where: { email: 'admin@youspeak.com' },
+      where: { email: 'admin@befluent.com' },
       update: {
         isActive: true,
         passwordHash: hashedPassword,
@@ -19,7 +19,7 @@ async function main() {
       create: {
         id: `user_admin_${Date.now()}`,
         name: 'المدير',
-        email: 'admin@youspeak.com',
+        email: 'admin@befluent.com',
         passwordHash: hashedPassword,
         phone: '0500000001',
         role: 'ADMIN',
@@ -30,7 +30,7 @@ async function main() {
 
     // 2. حساب معلم
     const teacher = await prisma.user.upsert({
-      where: { email: 'teacher@youspeak.com' },
+      where: { email: 'teacher@befluent.com' },
       update: {
         isActive: true,
         passwordHash: hashedPassword,
@@ -38,7 +38,7 @@ async function main() {
       create: {
         id: `user_teacher_${Date.now()}`,
         name: 'المعلم',
-        email: 'teacher@youspeak.com',
+        email: 'teacher@befluent.com',
         passwordHash: hashedPassword,
         phone: '0500000002',
         role: 'TEACHER',
@@ -56,7 +56,7 @@ async function main() {
 
     // 3. حساب طالب
     const student = await prisma.user.upsert({
-      where: { email: 'student@youspeak.com' },
+      where: { email: 'student@befluent.com' },
       update: {
         isActive: true,
         passwordHash: hashedPassword,
@@ -64,7 +64,7 @@ async function main() {
       create: {
         id: `user_student_${Date.now()}`,
         name: 'الطالب',
-        email: 'student@youspeak.com',
+        email: 'student@befluent.com',
         passwordHash: hashedPassword,
         phone: '0500000003',
         role: 'STUDENT',
@@ -89,11 +89,11 @@ async function main() {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('🔐 كلمة المرور لجميع الحسابات: 123456');
     console.log('\n👨‍💼 المدير:');
-    console.log('   البريد: admin@youspeak.com');
+    console.log('   البريد: admin@befluent.com');
     console.log('\n👨‍🏫 المعلم:');
-    console.log('   البريد: teacher@youspeak.com');
+    console.log('   البريد: teacher@befluent.com');
     console.log('\n👨‍🎓 الطالب:');
-    console.log('   البريد: student@youspeak.com');
+    console.log('   البريد: student@befluent.com');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
   } catch (error) {
     console.error('❌ خطأ في إنشاء الحسابات:', error);

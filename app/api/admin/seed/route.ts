@@ -11,12 +11,12 @@ export async function POST() {
 
     // Admin
     const adminExists = await prisma.user.findUnique({
-      where: { email: 'admin@youspeak.com' }
+      where: { email: 'admin@befluent.com' }
     })
     if (!adminExists) {
       await prisma.user.create({
         data: {
-          email: 'admin@youspeak.com',
+          email: 'admin@befluent.com',
           passwordHash: hashedAdminPassword,
           name: 'Admin',
           role: 'ADMIN',
@@ -27,12 +27,12 @@ export async function POST() {
 
     // Teacher
     const teacherExists = await prisma.user.findUnique({
-      where: { email: 'teacher@youspeak.com' }
+      where: { email: 'teacher@befluent.com' }
     })
     if (!teacherExists) {
       const teacher = await prisma.user.create({
         data: {
-          email: 'teacher@youspeak.com',
+          email: 'teacher@befluent.com',
           passwordHash: hashedTeacherPassword,
           name: 'Teacher',
           role: 'TEACHER',
@@ -52,12 +52,12 @@ export async function POST() {
 
     // Student
     const studentExists = await prisma.user.findUnique({
-      where: { email: 'student@youspeak.com' }
+      where: { email: 'student@befluent.com' }
     })
     if (!studentExists) {
       const student = await prisma.user.create({
         data: {
-          email: 'student@youspeak.com',
+          email: 'student@befluent.com',
           passwordHash: hashedStudentPassword,
           name: 'Student',
           role: 'STUDENT',
@@ -80,9 +80,9 @@ export async function POST() {
       success: true,
       message: 'Test accounts created successfully',
       accounts: [
-        { email: 'admin@youspeak.com', password: 'admin123456', role: 'ADMIN' },
-        { email: 'teacher@youspeak.com', password: 'teacher123456', role: 'TEACHER' },
-        { email: 'student@youspeak.com', password: 'student123456', role: 'STUDENT' }
+        { email: 'admin@befluent.com', password: 'admin123456', role: 'ADMIN' },
+        { email: 'teacher@befluent.com', password: 'teacher123456', role: 'TEACHER' },
+        { email: 'student@befluent.com', password: 'student123456', role: 'STUDENT' }
       ]
     })
   } catch (error) {

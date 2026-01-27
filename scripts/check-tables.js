@@ -8,11 +8,11 @@ async function checkTables() {
     const tables = await prisma.$queryRaw`
       SELECT table_name 
       FROM information_schema.tables 
-      WHERE table_schema = 'youspeak_exercisein'
+      WHERE table_schema = 'befluent_exercisein'
       ORDER BY table_name
     `;
     
-    console.log('Tables in youspeak_exercisein schema:');
+    console.log('Tables in befluent_exercisein schema:');
     console.log(JSON.stringify(tables, null, 2));
     
     // Now try to get user data

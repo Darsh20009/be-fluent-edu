@@ -151,11 +151,11 @@ export default function InvoicePageClient({
       {/* Invoice Content */}
       <div id="invoice-content" className="max-w-4xl mx-auto">
         {/* HEADER */}
-        <div className="bg-gradient-to-r from-[#004E89] to-[#1A5F7A] text-white p-12 mb-8">
+        <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-12 mb-8">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-5xl font-bold mb-2">Youspeak</h1>
-              <p className="text-blue-100 text-lg">English Learning Platform</p>
+              <h1 className="text-5xl font-bold mb-2">Be Fluent</h1>
+              <p className="text-blue-100 text-lg">Fluency Comes First</p>
             </div>
             <div className="text-right">
               <div className="text-6xl font-bold opacity-20 mb-2">INVOICE</div>
@@ -199,8 +199,8 @@ export default function InvoicePageClient({
             <div>
               <p className="text-gray-500 text-xs uppercase tracking-wide font-bold mb-4">Company / الشركة</p>
               <div className="text-gray-900">
-                <p className="font-bold text-xl mb-2">Youspeak</p>
-                <p className="text-base text-gray-700 mb-1">English Learning Platform</p>
+                <p className="font-bold text-xl mb-2">Be Fluent</p>
+                <p className="text-base text-gray-700 mb-1">Fluency Comes First</p>
                 <p className="text-base text-gray-700">منصة تعليم اللغة الإنجليزية</p>
               </div>
             </div>
@@ -246,7 +246,7 @@ export default function InvoicePageClient({
                 <span className="font-bold">Tax / الضريبة:</span>
                 <span className="font-bold">0.00 SAR</span>
               </div>
-              <div className="flex justify-between bg-gradient-to-r from-[#004E89] to-[#1A5F7A] text-white p-6 rounded-lg">
+              <div className="flex justify-between bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-6 rounded-lg">
                 <span className="font-bold text-xl">Total Amount / الإجمالي:</span>
                 <span className="font-bold text-3xl">{subscription.Package.price} SAR</span>
               </div>
@@ -278,14 +278,14 @@ export default function InvoicePageClient({
           {/* NOTES */}
           <div className="text-center py-8 border-t-2 border-gray-300 space-y-3">
             <p className="text-base text-gray-800">
-              <span className="font-bold text-lg">Thank you for choosing Youspeak!</span>
+              <span className="font-bold text-lg">Thank you for choosing Be Fluent!</span>
               <br />
-              <span className="text-gray-700">شكراً لاختيارك منصة Youspeak</span>
+              <span className="text-gray-700">شكراً لاختيارك منصة Be Fluent</span>
             </p>
             <p className="text-sm text-gray-600 mt-4">
-              For any questions, contact: support@youspeak.com
+              For any questions, contact: support@befluent.com
               <br />
-              لأي استفسارات، تواصل معنا: support@youspeak.com
+              لأي استفسارات، تواصل معنا: support@befluent.com
               <br />
               +20 109 151 5594
             </p>
@@ -293,7 +293,7 @@ export default function InvoicePageClient({
 
           {/* FOOTER */}
           <div className="text-center text-sm text-gray-500 pt-6 border-t border-gray-300">
-            <p className="font-semibold">© 2025 Youspeak Platform. All rights reserved.</p>
+            <p className="font-semibold">© 2025 Be Fluent Platform. All rights reserved.</p>
             <p className="mt-2">This is an electronically generated invoice. No signature required.</p>
             <p className="mt-1 italic">هذه فاتورة مولدة إلكترونياً. لا تتطلب توقيع.</p>
           </div>

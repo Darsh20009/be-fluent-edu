@@ -1,9 +1,9 @@
-# Youspeak Robots.txt
+# Be Fluent Robots.txt
 User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://youspeak.com/sitemap.xml
+Sitemap: https://befluent.com/sitemap.xml
 
 # Disallow admin and API routes
 Disallow: /api/

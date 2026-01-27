@@ -1,5 +1,5 @@
-const CACHE_NAME = 'youspeak-v1';
-const STATIC_CACHE = 'youspeak-static-v1';
+const CACHE_NAME = 'befluent-v1';
+const STATIC_CACHE = 'befluent-static-v1';
 
 const STATIC_ASSETS = [
   '/',

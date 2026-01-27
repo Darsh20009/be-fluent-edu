@@ -342,11 +342,11 @@ function InvoiceModal({ subscription, onClose }: { subscription: Subscription; o
     <Modal isOpen={true} onClose={onClose} title="Invoice / الفاتورة" size="lg">
       <div id="invoice-content" className="bg-white p-0">
         {/* HEADER */}
-        <div className="bg-gradient-to-r from-[#004E89] to-[#1A5F7A] text-white p-8 mb-8">
+        <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-8 mb-8">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-4xl font-bold mb-1">Youspeak</h1>
-              <p className="text-blue-100 text-sm">English Learning Platform</p>
+              <h1 className="text-4xl font-bold mb-1">Be Fluent</h1>
+              <p className="text-blue-100 text-sm">Fluency Comes First</p>
             </div>
             <div className="text-right">
               <div className="text-5xl font-bold opacity-20 mb-2">INVOICE</div>
@@ -390,8 +390,8 @@ function InvoiceModal({ subscription, onClose }: { subscription: Subscription; o
             <div>
               <p className="text-gray-500 text-xs uppercase tracking-wide font-semibold mb-3">Company</p>
               <div className="text-gray-900">
-                <p className="font-bold text-lg mb-1">Youspeak</p>
-                <p className="text-sm text-gray-600">English Learning Platform</p>
+                <p className="font-bold text-lg mb-1">Be Fluent</p>
+                <p className="text-sm text-gray-600">Fluency Comes First</p>
                 <p className="text-sm text-gray-600">منصة تعليم اللغة الإنجليزية</p>
               </div>
             </div>
@@ -437,7 +437,7 @@ function InvoiceModal({ subscription, onClose }: { subscription: Subscription; o
                 <span className="font-medium">Tax / الضريبة:</span>
                 <span className="font-medium">0.00 SAR</span>
               </div>
-              <div className="flex justify-between bg-gradient-to-r from-[#004E89] to-[#1A5F7A] text-white p-4 rounded-lg">
+              <div className="flex justify-between bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-4 rounded-lg">
                 <span className="font-bold text-lg">Total Amount / الإجمالي:</span>
                 <span className="font-bold text-2xl">{subscription.Package.price} SAR</span>
               </div>
@@ -469,20 +469,20 @@ function InvoiceModal({ subscription, onClose }: { subscription: Subscription; o
           {/* NOTES */}
           <div className="text-center py-6 border-t-2 border-gray-200 space-y-2">
             <p className="text-sm text-gray-700">
-              <span className="font-bold">Thank you for choosing Youspeak!</span>
+              <span className="font-bold">Thank you for choosing Be Fluent!</span>
               <br />
-              <span className="text-gray-600">شكراً لاختيارك منصة Youspeak</span>
+              <span className="text-gray-600">شكراً لاختيارك منصة Be Fluent</span>
             </p>
             <p className="text-xs text-gray-500 mt-3">
-              For any questions, contact: support@youspeak.com
+              For any questions, contact: support@befluent.com
               <br />
-              لأي استفسارات، تواصل معنا: support@youspeak.com
+              لأي استفسارات، تواصل معنا: support@befluent.com
             </p>
           </div>
 
           {/* FOOTER */}
           <div className="text-center text-xs text-gray-400 pt-4 border-t border-gray-200">
-            <p>© 2025 Youspeak Platform. All rights reserved.</p>
+            <p>© 2025 Be Fluent Platform. All rights reserved.</p>
             <p className="mt-1">This is an electronically generated invoice. No signature required.</p>
           </div>
         </div>

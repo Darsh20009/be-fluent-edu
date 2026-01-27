@@ -8,7 +8,7 @@ async function checkFields() {
     const result = await prisma.$queryRaw`
       SELECT column_name, data_type 
       FROM information_schema.columns 
-      WHERE table_schema = 'youspeak_exercisein' 
+      WHERE table_schema = 'befluent_exercisein' 
       AND table_name = 'User'
       ORDER BY ordinal_position
     `;

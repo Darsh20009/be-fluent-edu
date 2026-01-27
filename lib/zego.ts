@@ -58,5 +58,5 @@ export function generateZegoToken(
 }
 
 export function getZegoServerUrl(): string {
-  return 'https://youspeak-zego.zegocloud.com'
+  return 'https://befluent-zego.zegocloud.com'
 }

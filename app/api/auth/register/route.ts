@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 
     const hashedPassword = await bcrypt.hash(validatedData.password, 10)
 
-    const uniqueEmail = validatedData.email || `${validatedData.phone}@phone.youspeak.com`
+    const uniqueEmail = validatedData.email || `${validatedData.phone}@phone.befluent.com`
 
     const user = await prisma.user.create({
       data: {

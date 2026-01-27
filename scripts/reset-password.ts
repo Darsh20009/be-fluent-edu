@@ -7,13 +7,13 @@ async function resetPasswords() {
     const hashedPassword = await bcrypt.hash(password, 10)
     
     await prisma.user.update({
-      where: { email: 'admin@youspeak.com' },
+      where: { email: 'admin@befluent.com' },
       data: { passwordHash: hashedPassword },
     })
     console.log('✅ Admin password updated: admin123')
     
     await prisma.user.update({
-      where: { email: 'teacher@youspeak.com' },
+      where: { email: 'teacher@befluent.com' },
       data: { passwordHash: hashedPassword },
     })
     console.log('✅ Teacher password updated: admin123')
@@ -25,8 +25,8 @@ async function resetPasswords() {
     console.log('✅ Student password updated: admin123')
     
     console.log('\n=== Login Credentials ===')
-    console.log('Admin: admin@youspeak.com / admin123')
-    console.log('Teacher: teacher@youspeak.com / admin123')
+    console.log('Admin: admin@befluent.com / admin123')
+    console.log('Teacher: teacher@befluent.com / admin123')
     console.log('Student: student2@test.com / admin123')
   } catch (error) {
     console.error('Error:', error)

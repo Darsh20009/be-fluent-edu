@@ -9,7 +9,7 @@ async function main() {
   const hashedPassword = await bcrypt.hash('admin123', 10)
 
   const existingAdmin = await prisma.user.findFirst({
-    where: { email: 'admin@youspeak.com' }
+    where: { email: 'admin@befluent.com' }
   })
 
   if (!existingAdmin) {
@@ -17,7 +17,7 @@ async function main() {
       data: {
         id: 'admin-001',
         name: 'Admin',
-        email: 'admin@youspeak.com',
+        email: 'admin@befluent.com',
         passwordHash: hashedPassword,
         role: 'ADMIN',
         isActive: true
@@ -27,7 +27,7 @@ async function main() {
   }
 
   const existingTeacher = await prisma.user.findFirst({
-    where: { email: 'teacher@youspeak.com' }
+    where: { email: 'teacher@befluent.com' }
   })
 
   if (!existingTeacher) {
@@ -35,7 +35,7 @@ async function main() {
       data: {
         id: 'teacher-001',
         name: 'محمد أحمد',
-        email: 'teacher@youspeak.com',
+        email: 'teacher@befluent.com',
         passwordHash: hashedPassword,
         role: 'TEACHER',
         isActive: true

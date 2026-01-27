@@ -9,11 +9,11 @@ async function main() {
 
   const adminPassword = await bcrypt.hash('admin123', 10)
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@youspeak.com' },
+    where: { email: 'admin@befluent.com' },
     update: {},
     create: {
       id: uuidv4(),
-      email: 'admin@youspeak.com',
+      email: 'admin@befluent.com',
       name: 'Mister Youssef',
       phone: '+201234567890',
       passwordHash: adminPassword,
@@ -25,11 +25,11 @@ async function main() {
 
   const teacherPassword = await bcrypt.hash('teacher123', 10)
   const teacher = await prisma.user.upsert({
-    where: { email: 'teacher@youspeak.com' },
+    where: { email: 'teacher@befluent.com' },
     update: {},
     create: {
       id: uuidv4(),
-      email: 'teacher@youspeak.com',
+      email: 'teacher@befluent.com',
       name: 'Sarah Ahmed',
       phone: '+201234567891',
       passwordHash: teacherPassword,
@@ -189,8 +189,8 @@ async function main() {
 
   console.log('\n🎉 Seed completed successfully!')
   console.log('\n📝 Test Accounts:')
-  console.log('Admin: admin@youspeak.com / admin123')
-  console.log('Teacher: teacher@youspeak.com / teacher123')
+  console.log('Admin: admin@befluent.com / admin123')
+  console.log('Teacher: teacher@befluent.com / teacher123')
   console.log('Student 1: ahmed@student.com / student123 (Active)')
   console.log('Student 2: fatima@student.com / student123 (Active)')
   console.log('Student 3: omar@student.com / student123 (Inactive)')

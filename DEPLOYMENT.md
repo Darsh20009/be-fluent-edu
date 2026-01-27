@@ -1,4 +1,4 @@
-# Youspeak Deployment Guide
+# befluent Deployment Guide
 
 ## Environment Variables Required for Production
 
@@ -10,7 +10,7 @@ You have two options for database configuration:
 
 #### Option 1: Using DATABASE_URL (Recommended for Render)
 ```
-DATABASE_URL=postgresql://username:password@host:port/database?schema=youspeak_exercisein
+DATABASE_URL=postgresql://username:password@host:port/database?schema=befluent_exercisein
 ```
 
 #### Option 2: Using AWS Database Credentials (Alternative)
@@ -54,15 +54,15 @@ NODE_ENV=production
 
 5. **Important Notes:**
    - The `lib/prisma.ts` file is configured to handle missing DATABASE_URL during build
-   - Make sure your database schema `youspeak_exercisein` exists before deployment
+   - Make sure your database schema `befluent_exercisein` exists before deployment
    - Run `prisma db push` locally first to ensure schema is up to date
 
 ## Test Accounts
 
 After deployment, you can test with these accounts:
 
-- **Admin:** admin@youspeak.com / 123456
-- **Teacher:** teacher@youspeak.com / 123456
+- **Admin:** admin@befluent.com / 123456
+- **Teacher:** teacher@befluent.com / 123456
 - **Student:** ahmed@student.com / 123456
 
 ## Troubleshooting
@@ -74,7 +74,7 @@ After deployment, you can test with these accounts:
 ### Database connection fails
 - Verify your database allows connections from Render's IP addresses
 - Check that your database credentials are correct
-- Ensure the schema `youspeak_exercisein` exists
+- Ensure the schema `befluent_exercisein` exists
 
 ### NextAuth errors
 - Verify NEXTAUTH_SECRET is set and is at least 32 characters

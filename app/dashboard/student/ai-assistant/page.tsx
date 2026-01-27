@@ -130,9 +130,9 @@ export default function AIAssistantPage() {
     const welcomeMessage: Message = {
       id: 'welcome',
       role: 'assistant',
-      content: `مرحباً! 🎓 أنا YouSpeak AI، مساعدك الذكي المجاني لتعلم اللغة الإنجليزية!
+      content: `مرحباً! 🎓 أنا Be Fluent AI، مساعدك الذكي المجاني لتعلم اللغة الإنجليزية!
 
-Hello! I'm YouSpeak AI, your FREE smart English learning assistant!
+Hello! I'm Be Fluent AI, your FREE smart English learning assistant!
 
 🎤 يمكنني التحدث معك بالصوت! اضغط على أيقونة السماعة لسماعي.
 🎙️ يمكنك التحدث معي! اضغط على أيقونة المايكروفون.
@@ -152,7 +152,7 @@ How can I help you today?`,
 
   const loadConversationHistory = () => {
     try {
-      const saved = localStorage.getItem('youspeak-ai-history')
+      const saved = localStorage.getItem('befluent-ai-history')
       if (saved) {
         const history = JSON.parse(saved)
         setConversationHistory(history)
@@ -177,7 +177,7 @@ How can I help you today?`,
       const history = [...conversationHistory.filter(c => c.id !== currentConversationId), conversation]
         .slice(-20) // Keep last 20 conversations
       
-      localStorage.setItem('youspeak-ai-history', JSON.stringify(history))
+      localStorage.setItem('befluent-ai-history', JSON.stringify(history))
       setConversationHistory(history)
     } catch (e) {
       console.error('Error saving conversation:', e)
@@ -263,7 +263,7 @@ How can I help you today?`,
         throw new Error('AI service not ready')
       }
 
-      const systemPrompt = `You are "YouSpeak AI" - a friendly, expert English teacher for Arabic speakers. Your name is YouSpeak AI.
+      const systemPrompt = `You are "Be Fluent AI" - a friendly, expert English teacher for Arabic speakers. Your name is Be Fluent AI.
 
 IMPORTANT RULES:
 1. Always respond in BOTH English AND Arabic to help understanding
@@ -390,7 +390,7 @@ Hello! I'm ready to help you learn English!
   const deleteConversation = (id: string) => {
     const updated = conversationHistory.filter(c => c.id !== id)
     setConversationHistory(updated)
-    localStorage.setItem('youspeak-ai-history', JSON.stringify(updated))
+    localStorage.setItem('befluent-ai-history', JSON.stringify(updated))
   }
 
   const suggestedQuestions = [
@@ -411,7 +411,7 @@ Hello! I'm ready to help you learn English!
       />
       
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#004E89] to-[#0066b3] text-white p-4 shadow-lg">
+      <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-4 shadow-lg">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -426,7 +426,7 @@ Hello! I'm ready to help you learn English!
               </div>
               <div>
                 <h1 className="font-bold text-lg flex items-center gap-2">
-                  YouSpeak AI
+                  Be Fluent AI
                   <span className="text-xs bg-green-500 px-2 py-0.5 rounded-full">مجاني FREE</span>
                 </h1>
                 <p className="text-xs text-white/80">مساعدك الذكي للتعلم • يتكلم ويسمع 🎤</p>

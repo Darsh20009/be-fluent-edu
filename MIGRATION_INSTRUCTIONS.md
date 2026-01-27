@@ -38,13 +38,13 @@ If you still prefer manual execution, you must run these statements IN ORDER:
 ```sql
 -- Step 1: Add new enum value if it doesn't exist
 DO $$ BEGIN
-  ALTER TYPE "youspeak_exercisein"."EWalletProvider" ADD VALUE IF NOT EXISTS 'VODAFONE_CASH';
+  ALTER TYPE "befluent_exercisein"."EWalletProvider" ADD VALUE IF NOT EXISTS 'VODAFONE_CASH';
 EXCEPTION
   WHEN duplicate_object THEN null;
 END $$;
 
 -- Step 2: Create FreeWriting table
-CREATE TABLE IF NOT EXISTS "youspeak_exercisein"."FreeWriting" (
+CREATE TABLE IF NOT EXISTS "befluent_exercisein"."FreeWriting" (
     "id" TEXT NOT NULL,
     "studentId" TEXT NOT NULL,
     "title" TEXT NOT NULL,
@@ -61,14 +61,14 @@ CREATE TABLE IF NOT EXISTS "youspeak_exercisein"."FreeWriting" (
 );
 
 -- Step 3: Add foreign keys
-ALTER TABLE "youspeak_exercisein"."FreeWriting" 
+ALTER TABLE "befluent_exercisein"."FreeWriting" 
   ADD CONSTRAINT "FreeWriting_studentId_fkey" 
-  FOREIGN KEY ("studentId") REFERENCES "youspeak_exercisein"."User"("id") 
+  FOREIGN KEY ("studentId") REFERENCES "befluent_exercisein"."User"("id") 
   ON DELETE CASCADE ON UPDATE NO ACTION;
 
-ALTER TABLE "youspeak_exercisein"."FreeWriting" 
+ALTER TABLE "befluent_exercisein"."FreeWriting" 
   ADD CONSTRAINT "FreeWriting_teacherId_fkey" 
-  FOREIGN KEY ("teacherId") REFERENCES "youspeak_exercisein"."TeacherProfile"("id") 
+  FOREIGN KEY ("teacherId") REFERENCES "befluent_exercisein"."TeacherProfile"("id") 
   ON DELETE SET NULL ON UPDATE NO ACTION;
 ```
 
@@ -79,7 +79,7 @@ ALTER TABLE "youspeak_exercisein"."FreeWriting"
 After running the migration, verify it was successful:
 
 ```bash
-psql $DATABASE_URL -c "SELECT COUNT(*) FROM youspeak_exercisein.\"FreeWriting\";"
+psql $DATABASE_URL -c "SELECT COUNT(*) FROM befluent_exercisein.\"FreeWriting\";"
 ```
 
 Expected output: `0` (table exists but is empty)
@@ -139,13 +139,13 @@ npx prisma migrate deploy --schema prisma/schema.prisma
 ```sql
 -- الخطوة 1: إضافة قيمة enum جديدة إذا لم تكن موجودة
 DO $$ BEGIN
-  ALTER TYPE "youspeak_exercisein"."EWalletProvider" ADD VALUE IF NOT EXISTS 'VODAFONE_CASH';
+  ALTER TYPE "befluent_exercisein"."EWalletProvider" ADD VALUE IF NOT EXISTS 'VODAFONE_CASH';
 EXCEPTION
   WHEN duplicate_object THEN null;
 END $$;
 
 -- الخطوة 2: إنشاء جدول FreeWriting
-CREATE TABLE IF NOT EXISTS "youspeak_exercisein"."FreeWriting" (
+CREATE TABLE IF NOT EXISTS "befluent_exercisein"."FreeWriting" (
     "id" TEXT NOT NULL,
     "studentId" TEXT NOT NULL,
     "title" TEXT NOT NULL,
@@ -162,14 +162,14 @@ CREATE TABLE IF NOT EXISTS "youspeak_exercisein"."FreeWriting" (
 );
 
 -- الخطوة 3: إضافة foreign keys
-ALTER TABLE "youspeak_exercisein"."FreeWriting" 
+ALTER TABLE "befluent_exercisein"."FreeWriting" 
   ADD CONSTRAINT "FreeWriting_studentId_fkey" 
-  FOREIGN KEY ("studentId") REFERENCES "youspeak_exercisein"."User"("id") 
+  FOREIGN KEY ("studentId") REFERENCES "befluent_exercisein"."User"("id") 
   ON DELETE CASCADE ON UPDATE NO ACTION;
 
-ALTER TABLE "youspeak_exercisein"."FreeWriting" 
+ALTER TABLE "befluent_exercisein"."FreeWriting" 
   ADD CONSTRAINT "FreeWriting_teacherId_fkey" 
-  FOREIGN KEY ("teacherId") REFERENCES "youspeak_exercisein"."TeacherProfile"("id") 
+  FOREIGN KEY ("teacherId") REFERENCES "befluent_exercisein"."TeacherProfile"("id") 
   ON DELETE SET NULL ON UPDATE NO ACTION;
 ```
 
@@ -180,7 +180,7 @@ ALTER TABLE "youspeak_exercisein"."FreeWriting"
 بعد تشغيل الترحيل، تحقق من نجاحه:
 
 ```bash
-psql $DATABASE_URL -c "SELECT COUNT(*) FROM youspeak_exercisein.\"FreeWriting\";"
+psql $DATABASE_URL -c "SELECT COUNT(*) FROM befluent_exercisein.\"FreeWriting\";"
 ```
 
 الناتج المتوقع: `0` (الجدول موجود ولكنه فارغ)

@@ -8,7 +8,7 @@ async function main() {
 
   const adminPassword = await bcrypt.hash('admin123', 10);
   await prisma.user.update({
-    where: { email: 'admin@youspeak.com' },
+    where: { email: 'admin@befluent.com' },
     data: { passwordHash: adminPassword }
   });
   console.log('✅ تم تحديث كلمة مرور المدير إلى: admin123\n');
@@ -16,19 +16,19 @@ async function main() {
   const teacherPassword = await bcrypt.hash('teacher123', 10);
   
   let teacher = await prisma.user.findUnique({
-    where: { email: 'teacher@youspeak.com' }
+    where: { email: 'teacher@befluent.com' }
   });
   
   if (teacher) {
     teacher = await prisma.user.update({
-      where: { email: 'teacher@youspeak.com' },
+      where: { email: 'teacher@befluent.com' },
       data: { passwordHash: teacherPassword, isActive: true }
     });
   } else {
     teacher = await prisma.user.create({
       data: {
         id: uuidv4(),
-        email: 'teacher@youspeak.com',
+        email: 'teacher@befluent.com',
         name: 'Mr. Ahmed',
         passwordHash: teacherPassword,
         role: 'TEACHER',
@@ -57,7 +57,7 @@ async function main() {
       }
     });
   }
-  console.log('✅ تم إنشاء حساب معلم: teacher@youspeak.com (كلمة المرور: teacher123)\n');
+  console.log('✅ تم إنشاء حساب معلم: teacher@befluent.com (كلمة المرور: teacher123)\n');
 
   const studentPassword = await bcrypt.hash('student123', 10);
   const students = [];
@@ -157,8 +157,8 @@ async function main() {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('📋 ملخص الحسابات:');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('👨‍💼 المدير: admin@youspeak.com / admin123');
-  console.log('👨‍🏫 المعلم: teacher@youspeak.com / teacher123');
+  console.log('👨‍💼 المدير: admin@befluent.com / admin123');
+  console.log('👨‍🏫 المعلم: teacher@befluent.com / teacher123');
   console.log('👨‍🎓 الطلاب:');
   console.log('  - student1@test.com / student123');
   console.log('  - student2@test.com / student123');

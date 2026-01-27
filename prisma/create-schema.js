@@ -14,11 +14,11 @@ async function createSchema() {
     console.log('✅ Public schema created');
     
     // Grant permissions
-    await client.query('GRANT ALL ON SCHEMA public TO youspeak_exercisein;');
+    await client.query('GRANT ALL ON SCHEMA public TO befluent_exercisein;');
     console.log('✅ Permissions granted');
     
     // Set search path
-    await client.query('ALTER DATABASE youspeak_exercisein SET search_path TO public;');
+    await client.query('ALTER DATABASE befluent_exercisein SET search_path TO public;');
     console.log('✅ Search path set');
     
     await client.end();

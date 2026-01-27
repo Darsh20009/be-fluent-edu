@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function checkLogin() {
   try {
-    const testEmail = 'admin@youspeak.com';
+    const testEmail = 'admin@befluent.com';
     const testPassword = '123456';
     
     console.log('Testing login for:', testEmail);

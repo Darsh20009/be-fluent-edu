@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXTAUTH_URL || 'https://youspeak.com';
+  const baseUrl = process.env.NEXTAUTH_URL || 'https://befluent.com';
   
   return [
     {
