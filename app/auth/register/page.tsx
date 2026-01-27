@@ -24,7 +24,9 @@ import {
   Trophy,
   Star,
   ChevronLeft,
-  ChevronRight as ChevronRightIcon
+  ChevronRight as ChevronRightIcon,
+  CreditCard,
+  Upload
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -33,17 +35,18 @@ import LanguageToggle from '@/components/LanguageToggle'
 import { useTranslation } from '@/lib/hooks/useTranslation'
 import { PLACEMENT_TEST_QUESTIONS, calculateLevel, getLevelDescription, getTotalPossibleScore } from '@/lib/placement-test-questions'
 
-type Step = 'name' | 'email' | 'password' | 'details' | 'placement-test' | 'result'
+type Step = 'name' | 'email' | 'password' | 'details' | 'package' | 'payment' | 'result'
 
-const STEPS: Step[] = ['name', 'email', 'password', 'details', 'placement-test', 'result']
+const STEPS: Step[] = ['name', 'email', 'password', 'details', 'package', 'payment', 'result']
 
 const STEP_INFO = {
   name: { title: 'ما اسمك؟', titleEn: "What's your name?", icon: User },
   email: { title: 'ما بريدك الإلكتروني؟', titleEn: "What's your email?", icon: Mail },
   password: { title: 'أنشئ كلمة مرور', titleEn: 'Create a password', icon: Lock },
   details: { title: 'بعض التفاصيل', titleEn: 'Some details about you', icon: Target },
-  'placement-test': { title: 'اختبار تحديد المستوى', titleEn: 'Placement Test', icon: BookOpen },
-  result: { title: 'تهانينا!', titleEn: 'Congratulations!', icon: Trophy }
+  package: { title: 'اختر الباقة المناسبة', titleEn: 'Choose your package', icon: CreditCard },
+  payment: { title: 'الدفع', titleEn: 'Payment', icon: Upload },
+  result: { title: 'تم التسجيل!', titleEn: 'Registration Complete!', icon: CheckCircle }
 }
 
 const SECTION_INFO = {
@@ -66,7 +69,24 @@ export default function RegisterPage() {
     age: '',
     goal: '',
     preferredTime: '',
+    packageId: '',
+    receiptUrl: '',
   })
+  const [packages, setPackages] = useState<any[]>([])
+  const [uploading, setUploading] = useState(false)
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const response = await fetch('/api/packages')
+        const data = await response.json()
+        setPackages(data)
+      } catch (err) {
+        console.error('Failed to fetch packages:', err)
+      }
+    }
+    fetchPackages()
+  }, [])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -117,18 +137,16 @@ export default function RegisterPage() {
         }
         return true
       
-      case 'details':
-        const age = parseInt(formData.age)
-        if (isNaN(age) || age < 5 || age > 100) {
-          setError('الرجاء إدخال عمر صالح / Please enter a valid age')
+      case 'package':
+        if (!formData.packageId) {
+          setError('الرجاء اختيار باقة / Please select a package')
           return false
         }
-        if (!formData.goal.trim()) {
-          setError('الرجاء إدخال هدفك من التعلم / Please enter your learning goal')
-          return false
-        }
-        if (!formData.preferredTime) {
-          setError('الرجاء اختيار وقت الدراسة المفضل / Please select preferred study time')
+        return true
+
+      case 'payment':
+        if (!formData.receiptUrl) {
+          setError('الرجاء رفع صورة الإيصال / Please upload the receipt image')
           return false
         }
         return true
@@ -143,7 +161,11 @@ export default function RegisterPage() {
     
     const nextIndex = currentStepIndex + 1
     if (nextIndex < STEPS.length) {
-      setCurrentStep(STEPS[nextIndex])
+      if (currentStep === 'payment') {
+        handleSubmit()
+      } else {
+        setCurrentStep(STEPS[nextIndex])
+      }
     }
   }
 
@@ -198,11 +220,10 @@ export default function RegisterPage() {
         password: formData.password,
         phone: formData.phone.replace(/\s/g, '') || undefined,
         age: parseInt(formData.age),
-        levelInitial: testResult?.level || 'A1',
         goal: formData.goal.trim(),
         preferredTime: formData.preferredTime,
-        placementTestScore: testResult?.score,
-        placementTestPercentage: testResult?.percentage,
+        packageId: formData.packageId,
+        receiptUrl: formData.receiptUrl,
       }
 
       const response = await fetch('/api/auth/register', {
@@ -217,7 +238,7 @@ export default function RegisterPage() {
         throw new Error(data.error || 'Registration failed')
       }
 
-      router.push('/auth/login?registered=true')
+      setCurrentStep('result')
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -448,123 +469,122 @@ export default function RegisterPage() {
           </motion.div>
         )
 
-      case 'placement-test':
-        const sectionInfo = SECTION_INFO[currentTestQuestion.type]
-        const SectionIcon = sectionInfo.icon
-        
+      case 'package':
         return (
           <motion.div
-            key="placement-test"
+            key="package"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="space-y-4"
+            className="space-y-6"
           >
-            <div className="text-center mb-4">
-              <h2 className="text-xl font-bold text-gray-800 mb-1">اختبار تحديد المستوى</h2>
-              <p className="text-sm text-gray-600">أجب على الأسئلة لتحديد مستواك</p>
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">اختر باقتك 💎</h2>
+              <p className="text-gray-600">اختر الخطة المناسبة لاحتياجاتك</p>
             </div>
-
-            <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-              <span>السؤال {testQuestionIndex + 1} من {PLACEMENT_TEST_QUESTIONS.length}</span>
-              <span>{answeredCount} إجابة من {PLACEMENT_TEST_QUESTIONS.length}</span>
-            </div>
-            
-            <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-              <div 
-                className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${testProgress}%` }}
-              />
-            </div>
-
-            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r ${sectionInfo.color} text-white text-sm`}>
-              <SectionIcon className="w-4 h-4" />
-              <span>{sectionInfo.titleAr}</span>
-            </div>
-
-            {currentTestQuestion.passage && (
-              <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-700 leading-relaxed border">
-                {currentTestQuestion.passage}
-              </div>
-            )}
-
-            <div className="py-3">
-              <p className="font-semibold text-gray-800 mb-1">{currentTestQuestion.question}</p>
-              <p className="text-sm text-gray-500 text-right">{currentTestQuestion.questionAr}</p>
-            </div>
-
-            <div className="space-y-2">
-              {currentTestQuestion.options.map((option, index) => (
+            <div className="grid gap-4">
+              {packages.map((pkg) => (
                 <button
-                  key={index}
-                  onClick={() => handleTestAnswer(currentTestQuestion.id, option)}
-                  className={`w-full p-3 rounded-xl text-right transition-all border-2 ${
-                    testAnswers[currentTestQuestion.id] === option
-                      ? 'border-purple-500 bg-purple-50 text-purple-700'
-                      : 'border-gray-200 hover:border-gray-300 bg-white'
+                  key={pkg.id}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, packageId: pkg.id })}
+                  className={`p-4 rounded-xl border-2 text-right transition-all flex justify-between items-center ${
+                    formData.packageId === pkg.id
+                      ? 'border-[#10B981] bg-emerald-50'
+                      : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <span className="inline-block w-7 h-7 bg-gray-100 rounded-full text-center leading-7 ml-2 text-sm">
-                    {String.fromCharCode(65 + index)}
-                  </span>
-                  {option}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center justify-between pt-4">
-              <button
-                onClick={handleTestPrev}
-                disabled={testQuestionIndex === 0}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 transition-all"
-              >
-                <ChevronRightIcon className="w-4 h-4" />
-                <span>السابق</span>
-              </button>
-
-              {testQuestionIndex === PLACEMENT_TEST_QUESTIONS.length - 1 ? (
-                <button
-                  onClick={calculateTestResult}
-                  disabled={answeredCount < PLACEMENT_TEST_QUESTIONS.length}
-                  className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:from-green-600 hover:to-emerald-600 transition-all"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  <span>إنهاء الاختبار</span>
-                </button>
-              ) : (
-                <button
-                  onClick={handleTestNext}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#003A6B] transition-all"
-                >
-                  <span>التالي</span>
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            <div className="flex flex-wrap gap-1.5 justify-center pt-4 border-t">
-              {PLACEMENT_TEST_QUESTIONS.map((q, idx) => (
-                <button
-                  key={q.id}
-                  onClick={() => setTestQuestionIndex(idx)}
-                  className={`w-7 h-7 rounded text-xs font-semibold transition-all ${
-                    idx === testQuestionIndex
-                      ? 'bg-purple-500 text-white'
-                      : testAnswers[q.id]
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                  }`}
-                >
-                  {idx + 1}
+                  <div className="text-left font-bold text-emerald-600">
+                    {pkg.price} EGP
+                  </div>
+                  <div>
+                    <div className="font-bold">{pkg.titleAr}</div>
+                    <div className="text-xs text-gray-500">{pkg.lessonsCount} درس</div>
+                  </div>
                 </button>
               ))}
             </div>
           </motion.div>
         )
 
+      case 'payment':
+        return (
+          <motion.div
+            key="payment"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            className="space-y-6"
+          >
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">الدفع 💳</h2>
+              <p className="text-gray-600">حول المبلغ إلى الرقم التالي: <span className="font-bold text-emerald-600">+20 10 91515594</span></p>
+              <div className="flex justify-center gap-4 mt-4">
+                <span className="text-xs bg-gray-100 px-2 py-1 rounded">Vodafone Cash</span>
+                <span className="text-xs bg-gray-100 px-2 py-1 rounded">Etisalat Cash</span>
+                <span className="text-xs bg-gray-100 px-2 py-1 rounded">InstaPay</span>
+              </div>
+            </div>
+
+            <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 text-sm">
+              <p className="text-emerald-800 text-center">بمجرد التحويل، يرجى رفع صورة إيصال الدفع للتفعيل</p>
+            </div>
+
+            <div className="space-y-4">
+              <label className="block text-sm font-medium text-gray-700">إيصال الدفع / Payment Receipt</label>
+              <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-8 hover:border-emerald-500 transition-colors cursor-pointer relative">
+                <input
+                  type="file"
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    setUploading(true)
+                    try {
+                      // Mock upload for now or implement real upload
+                      const reader = new FileReader()
+                      reader.onloadend = () => {
+                        setFormData({ ...formData, receiptUrl: reader.result as string })
+                        setUploading(false)
+                      }
+                      reader.readAsDataURL(file)
+                    } catch (err) {
+                      setError('فشل رفع الملف / Upload failed')
+                      setUploading(false)
+                    }
+                  }}
+                />
+                {formData.receiptUrl ? (
+                  <div className="text-center">
+                    <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-2" />
+                    <p className="text-emerald-600 font-medium">تم اختيار الملف</p>
+                    <p className="text-xs text-gray-500 mt-1">انقر للتغيير</p>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    {uploading ? (
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
+                    ) : (
+                      <>
+                        <Upload className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-600">انقر لرفع الإيصال</p>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {loading && (
+              <div className="text-center text-sm text-emerald-600 animate-pulse">
+                جاري معالجة الطلب...
+              </div>
+            )}
+          </motion.div>
+        )
+
       case 'result':
-        const levelDescription = testResult ? getLevelDescription(testResult.level) : null
-        
         return (
           <motion.div
             key="result"
@@ -573,83 +593,18 @@ export default function RegisterPage() {
             exit={{ opacity: 0, scale: 0.9 }}
             className="text-center space-y-6"
           >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
-            >
-              <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
-                <Trophy className="w-12 h-12 text-white" />
-              </div>
-            </motion.div>
-
-            <div>
-              <motion.h2 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="text-2xl font-bold text-gray-800 mb-2"
-              >
-                تهانينا {formData.name.split(' ')[0]}! 🎉
-              </motion.h2>
-              <p className="text-gray-600">لقد أكملت اختبار تحديد المستوى بنجاح</p>
+            <div className="w-24 h-24 mx-auto mb-4 bg-emerald-100 rounded-full flex items-center justify-center">
+              <CheckCircle className="w-12 h-12 text-emerald-600" />
             </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-6 text-white shadow-lg"
-            >
-              <p className="text-sm uppercase tracking-wider mb-2 opacity-80">مستواك في اللغة الإنجليزية</p>
-              <p className="text-5xl font-bold mb-2">{testResult?.level}</p>
-              <div className="flex items-center justify-center gap-4 text-sm opacity-90">
-                <span className="flex items-center gap-1">
-                  <Star className="w-4 h-4" />
-                  {testResult?.score} نقطة
-                </span>
-                <span>•</span>
-                <span>{testResult?.percentage}%</span>
-              </div>
-            </motion.div>
-
-            {levelDescription && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="bg-gray-50 rounded-xl p-4 text-right"
-              >
-                <p className="text-gray-700 mb-1">{levelDescription.ar}</p>
-                <p className="text-sm text-gray-500">{levelDescription.en}</p>
-              </motion.div>
-            )}
-
-            {error && (
-              <Alert variant="error" dismissible onDismiss={() => setError('')}>
-                {error}
-              </Alert>
-            )}
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-            >
-              <Button
-                onClick={handleSubmit}
-                fullWidth
-                size="lg"
-                loading={loading}
-                className="font-semibold bg-gradient-to-r from-[#10B981] to-[#059669] hover:from-[#003A6B] hover:to-[#10B981] text-white text-lg py-4"
-              >
-                {loading ? 'جاري إنشاء الحساب...' : 'إنشاء الحساب 🚀'}
-              </Button>
-            </motion.div>
-
-            <p className="text-sm text-gray-500">
-              سيتم تفعيل حسابك بعد مراجعة الإدارة
+            <h2 className="text-3xl font-bold text-gray-800">تم التسجيل بنجاح!</h2>
+            <p className="text-gray-600 max-w-sm mx-auto">
+              شكراً لتسجيلك. يتم الآن مراجعة إيصال الدفع من قبل الإدارة. سنقوم بتفعيل حسابك خلال 24 ساعة.
             </p>
+            <Link href="/auth/login" className="block w-full">
+              <Button variant="primary" size="lg" fullWidth>
+                العودة لتسجيل الدخول
+              </Button>
+            </Link>
           </motion.div>
         )
 
@@ -663,7 +618,7 @@ export default function RegisterPage() {
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-6">
         <div className="w-full max-w-lg">
           <div className="flex items-center justify-between mb-6">
-            {currentStep !== 'name' && currentStep !== 'result' && currentStep !== 'placement-test' ? (
+            {currentStep !== 'name' && currentStep !== 'result' ? (
               <button
                 onClick={handleBack}
                 className="p-2 hover:bg-white/50 rounded-lg transition-colors"
@@ -684,7 +639,7 @@ export default function RegisterPage() {
             <LanguageToggle />
           </div>
 
-          {currentStep !== 'placement-test' && currentStep !== 'result' && (
+          {currentStep !== 'result' && (
             <div className="mb-6">
               <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
                 <span>الخطوة {currentStepIndex + 1} من {STEPS.length - 1}</span>
@@ -716,7 +671,7 @@ export default function RegisterPage() {
               {renderStepContent()}
             </AnimatePresence>
 
-            {currentStep !== 'placement-test' && currentStep !== 'result' && (
+            {currentStep !== 'result' && (
               <div className="mt-8">
                 <Button
                   onClick={handleNext}
@@ -724,17 +679,8 @@ export default function RegisterPage() {
                   size="lg"
                   className="font-semibold bg-gradient-to-r from-[#10B981] to-[#059669] hover:from-[#003A6B] hover:to-[#10B981] text-white"
                 >
-                  {currentStep === 'details' ? (
-                    <>
-                      <Sparkles className="w-5 h-5 ml-2" />
-                      ابدأ اختبار تحديد المستوى
-                    </>
-                  ) : (
-                    <>
-                      التالي
-                      <ArrowLeft className="w-5 h-5 mr-2" />
-                    </>
-                  )}
+                  التالي
+                  <ArrowLeft className="w-5 h-5 mr-2" />
                 </Button>
               </div>
             )}

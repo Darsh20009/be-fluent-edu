@@ -68,7 +68,6 @@ export async function POST(request: Request) {
             preferredTime: validatedData.preferredTime,
             packageId: validatedData.packageId,
             receiptUrl: validatedData.receiptUrl || null,
-            levelInitial: 'A1', // Default level
           },
         },
       },
@@ -84,7 +83,6 @@ export async function POST(request: Request) {
         name: user.name,
         email: user.email,
         isActive: user.isActive,
-        level: validatedData.levelInitial,
       },
     })
   } catch (error) {
