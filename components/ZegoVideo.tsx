@@ -8,6 +8,7 @@ interface ZegoVideoProps {
   userId: string
   userName: string
   roomId: string
+  role?: string
   onError?: (error: Error) => void
 }
 
@@ -17,6 +18,7 @@ export default function ZegoVideo({
   userId,
   userName,
   roomId,
+  role = 'STUDENT',
   onError
 }: ZegoVideoProps) {
   const [iframeSrc, setIframeSrc] = useState<string | null>(null)
@@ -27,7 +29,8 @@ export default function ZegoVideo({
       serverSecret,
       roomId,
       userId,
-      userName
+      userName,
+      role
     })
     setIframeSrc(`/zego-room.html?${params.toString()}`)
 

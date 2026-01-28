@@ -22,6 +22,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const role = session.user.role || 'STUDENT'
+
     const ZEGO_APP_ID = process.env.ZEGO_APP_ID
     const ZEGO_SERVER_SECRET = process.env.ZEGO_SERVER_SECRET
 
@@ -38,7 +40,8 @@ export async function POST(request: NextRequest) {
       serverSecret: ZEGO_SERVER_SECRET,
       userId,
       userName,
-      roomId
+      roomId,
+      role
     })
   } catch (error) {
     console.error('Error generating Zego token:', error)
