@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Download, Smartphone, Monitor, Apple, Sparkles, Zap } from 'lucide-react';
+import { X, Download, Smartphone, Monitor, Apple, Sparkles, Zap, Chrome } from 'lucide-react';
 import Image from 'next/image';
+import { Button } from './ui/Button';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -16,7 +17,9 @@ export default function PWAInstallPrompt() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
+    if (typeof window === 'undefined') return;
+    
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(isIOSDevice);
 
     if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -118,45 +121,45 @@ export default function PWAInstallPrompt() {
               <div className="w-12 h-12 bg-gradient-to-br from-[#10B981] to-[#059669] rounded-xl flex items-center justify-center shadow-lg">
                 <Smartphone className="w-6 h-6 text-white" />
               </div>
-              <span className="text-sm font-medium text-gray-700">وصول سريع من الشاشة الرئيسية</span>
+              <span className="text-sm font-medium text-gray-700 text-right w-full">وصول سريع من الشاشة الرئيسية</span>
             </div>
             <div className="flex items-center gap-4 p-3 bg-gradient-to-r from-[#10B981]/10 to-transparent rounded-xl hover:from-[#10B981]/20 transition-all duration-300">
               <div className="w-12 h-12 bg-gradient-to-br from-[#10B981] to-[#059669] rounded-xl flex items-center justify-center shadow-lg">
                 <Monitor className="w-6 h-6 text-white" />
               </div>
-              <span className="text-sm font-medium text-gray-700">تجربة تطبيق كاملة بدون متصفح</span>
+              <span className="text-sm font-medium text-gray-700 text-right w-full">تجربة تطبيق كاملة بدون متصفح</span>
             </div>
             <div className="flex items-center gap-4 p-3 bg-gradient-to-r from-[#10B981]/10 to-transparent rounded-xl hover:from-[#10B981]/20 transition-all duration-300">
               <div className="w-12 h-12 bg-gradient-to-br from-[#10B981] to-[#059669] rounded-xl flex items-center justify-center shadow-lg">
                 <Download className="w-6 h-6 text-white" />
               </div>
-              <span className="text-sm font-medium text-gray-700">لا يحتاج تحميل من المتجر</span>
+              <span className="text-sm font-medium text-gray-700 text-right w-full">لا يحتاج تحميل من المتجر</span>
             </div>
           </div>
 
           {isIOS ? (
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-5 text-sm text-gray-700 border border-gray-200">
-              <div className="flex items-center gap-2 mb-3">
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-5 text-sm text-gray-700 border border-gray-200 text-right" dir="rtl">
+              <div className="flex items-center gap-2 mb-3 flex-row-reverse">
                 <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
                   <Apple className="w-5 h-5 text-white" />
                 </div>
                 <span className="font-bold">لإضافة التطبيق على iPhone/iPad:</span>
               </div>
               <ol className="list-decimal list-inside space-y-2 mr-2 text-gray-600">
-                <li className="flex items-center gap-2">
-                  اضغط على زر المشاركة <span className="text-lg">⬆️</span>
+                <li>
+                  اضغط على زر المشاركة <span className="text-lg">⬆️</span> في متصفح Safari
                 </li>
-                <li>اختر &quot;إضافة إلى الشاشة الرئيسية&quot;</li>
-                <li>اضغط &quot;إضافة&quot;</li>
+                <li>اختر &quot;إضافة إلى الشاشة الرئيسية&quot; (Add to Home Screen)</li>
+                <li>اضغط &quot;إضافة&quot; (Add) في الزاوية العلوية</li>
               </ol>
             </div>
           ) : (
             <button
               onClick={handleInstall}
-              className="w-full bg-gradient-to-r from-[#10B981] to-[#059669] text-white py-4 px-6 rounded-2xl font-bold text-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-3"
+              className="w-full bg-gradient-to-r from-[#10B981] to-[#059669] text-white py-4 px-6 rounded-2xl font-bold text-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-3 shadow-lg shadow-emerald-200"
             >
-              <Download className="w-6 h-6" />
-              تثبيت التطبيق الآن
+              <Chrome className="w-6 h-6" />
+              تثبيت التطبيق عبر Chrome
             </button>
           )}
           

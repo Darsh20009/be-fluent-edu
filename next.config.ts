@@ -21,7 +21,6 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
-    allowedDevOrigins: ['*'],
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',

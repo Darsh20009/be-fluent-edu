@@ -163,6 +163,18 @@ model TeacherProfile {
   WritingTest           WritingTest[]
 }
 
+model Certificate {
+  id             String   @id @default(uuid()) @map("_id")
+  studentId      String
+  adminId        String
+  level          String
+  issueDate      DateTime @default(now())
+  certificateUrl String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+  User           User     @relation("UserCertificates", fields: [studentId], references: [id], onDelete: Cascade)
+}
+
 model User {
   id                         String                    @id @default(uuid()) @map("_id")
   email                      String                    @unique
@@ -191,6 +203,7 @@ model User {
   VoiceRecording             VoiceRecording[]
   TextConversationAttempt    TextConversationAttempt[]
   Gamification               UserGamification?
+  certificates               Certificate[]             @relation("UserCertificates")
 }
 
 model Word {
