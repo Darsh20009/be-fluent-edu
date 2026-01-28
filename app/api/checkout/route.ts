@@ -55,6 +55,9 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    const message = `مرحباً، لقد قمت بالاشتراك في باقة ${subscription.Package.titleAr}. أريد تفعيل اشتراكي.\nرقم الاشتراك: ${subscription.id}`;
+    const whatsappUrl = `https://wa.me/201091515594?text=${encodeURIComponent(message)}`;
+
     const cart = await prisma.cart.findUnique({
       where: { studentId: user.userId }
     })
@@ -68,7 +71,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    return NextResponse.json(subscription, { status: 201 })
+    return NextResponse.json({ ...subscription, whatsappUrl }, { status: 201 })
   } catch (error) {
     console.error('Error creating subscription:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

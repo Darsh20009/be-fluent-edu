@@ -9,19 +9,31 @@ async function main() {
 
   const adminPassword = await bcrypt.hash('admin123', 10)
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@befluent.com' },
+    where: { email: 'admin@befluent-edu.online' },
     update: {},
     create: {
       id: uuidv4(),
-      email: 'admin@befluent.com',
-      name: 'Mister Youssef',
-      phone: '+201234567890',
+      email: 'admin@befluent-edu.online',
+      name: 'Admin Be Fluent',
+      phone: '+201091515594',
       passwordHash: adminPassword,
       role: 'ADMIN',
       isActive: true,
     },
   })
   console.log('✅ Created admin:', admin.email)
+
+  // Ensure Admin has a TeacherProfile to act as the primary teacher
+  await prisma.teacherProfile.upsert({
+    where: { userId: admin.id },
+    update: {},
+    create: {
+      id: uuidv4(),
+      userId: admin.id,
+      bio: 'Admin & Head Teacher of Be Fluent Academy',
+      subjects: 'General English, Business English, Conversation',
+    },
+  })
 
   const teacherPassword = await bcrypt.hash('teacher123', 10)
   const teacher = await prisma.user.upsert({
