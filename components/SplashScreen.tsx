@@ -10,6 +10,13 @@ export default function SplashScreen() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    // Check if splash screen has been shown before
+    const hasShownSplash = localStorage.getItem('hasShownSplash');
+    if (hasShownSplash) {
+      setIsVisible(false);
+      return;
+    }
+
     setMounted(true);
     
     const progressInterval = setInterval(() => {
@@ -22,7 +29,10 @@ export default function SplashScreen() {
       });
     }, 30);
 
-    const hideTimer = setTimeout(() => setIsVisible(false), 2000);
+    const hideTimer = setTimeout(() => {
+      setIsVisible(false);
+      localStorage.setItem('hasShownSplash', 'true');
+    }, 2000);
 
     return () => {
       clearInterval(progressInterval);
@@ -30,6 +40,7 @@ export default function SplashScreen() {
     };
   }, []);
 
+  if (!mounted && typeof window !== 'undefined' && localStorage.getItem('hasShownSplash')) return null;
   if (!mounted) return null;
 
   return (
@@ -39,10 +50,10 @@ export default function SplashScreen() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.1 }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
+          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden backdrop-blur-[98%]"
         >
           {/* Gradient Background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/50"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-emerald-50/90 to-teal-50/90"></div>
           
           {/* Animated Background Shapes */}
           <div className="absolute inset-0 overflow-hidden">
