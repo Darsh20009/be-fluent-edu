@@ -1,23 +1,46 @@
 # Be Fluent Robots.txt
+# https://befluent-edu.online
+
 User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://befluent.com/sitemap.xml
+Sitemap: https://befluent-edu.online/sitemap.xml
 
-# Disallow admin and API routes
-Disallow: /api/
-Disallow: /dashboard/admin/
-Disallow: /dashboard/teacher/
-
-# Allow search engines to crawl main pages
+# Allow main pages
 Allow: /
 Allow: /auth/login
 Allow: /auth/register
 Allow: /grammar
+Allow: /grammar-rules
 Allow: /placement-test
 Allow: /listening
 Allow: /packages
+Allow: /achievements
 
-# Crawl delay
+# Disallow admin, API, and private routes
+Disallow: /api/
+Disallow: /dashboard/admin/
+Disallow: /dashboard/teacher/
+Disallow: /dashboard/student/
+Disallow: /session/
+Disallow: /settings/
+Disallow: /invoice/
+Disallow: /checkout/
+Disallow: /cart/
+
+# Disallow query parameters for cleaner crawling
+Disallow: /*?*
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
+
+# Google specific
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bing specific  
+User-agent: Bingbot
+Allow: /
 Crawl-delay: 1

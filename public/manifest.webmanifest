@@ -1,17 +1,19 @@
 {
-  "name": "Be Fluent - تعلم الإنجليزية بطلاقة",
+  "name": "Be Fluent | منصة تعلم الإنجليزية الاحترافية",
   "short_name": "Be Fluent",
-  "description": "منصة احترافية لتعلم اللغة الإنجليزية مع حصص تفاعلية مباشرة ومتابعة يومية",
+  "description": "منصة Be Fluent التعليمية - تعلم اللغة الإنجليزية بطلاقة مع حصص تفاعلية مباشرة، معلمين محترفين، ومتابعة يومية. befluent-edu.online",
   "start_url": "/",
+  "id": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": ["standalone", "minimal-ui", "window-controls-overlay"],
   "orientation": "portrait-primary",
   "background_color": "#F9FAFB",
   "theme_color": "#10B981",
   "scope": "/",
   "lang": "ar",
   "dir": "rtl",
-  "categories": ["education", "language learning"],
+  "categories": ["education", "language learning", "english"],
+  "iarc_rating_id": "",
   "icons": [
     {
       "src": "/icons/icon-48x48.png",

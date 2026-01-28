@@ -6,7 +6,8 @@ import { ThemeProvider } from "@/lib/contexts/ThemeContext";
 import SessionProvider from "@/lib/providers/SessionProvider";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
-import { defaultMetadata, organizationJsonLd, courseJsonLd, faqJsonLd } from "@/lib/seo";
+import ClientSplashScreen from "@/components/ClientSplashScreen";
+import { defaultMetadata, organizationJsonLd, courseJsonLd, faqJsonLd, websiteJsonLd } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -62,9 +63,15 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
+        <Script
+          id="website-jsonld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
         <ServiceWorkerRegister />
         <SessionProvider>
           <ThemeProvider>
+            <ClientSplashScreen />
             {children}
             <PWAInstallPrompt />
           </ThemeProvider>
