@@ -1,138 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Youspeak Live Session</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #1a1a1a;
-    }
-    #root {
-      width: 100%;
-      height: 100%;
-    }
-    .loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      color: white;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-    .spinner {
-      width: 48px;
-      height: 48px;
-      border: 4px solid #333;
-      border-top-color: #3b82f6;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 16px;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .error {
-      color: #ef4444;
-      text-align: center;
-      padding: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeFluent Meet</title>
+    <style>
+        #root { width: 100vw; height: 100vh; }
+        body { margin: 0; overflow: hidden; background: #000; }
+    </style>
 </head>
 <body>
-  <div id="root">
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Loading video conference...</p>
-      <p style="color: #9ca3af; margin-top: 8px;">جاري تحميل الحصة...</p>
-    </div>
-  </div>
+    <div id="root"></div>
+    <script src="https://unpkg.com/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
+    <script>
+        window.onload = function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const appId = parseInt(urlParams.get('appId'));
+            const serverSecret = urlParams.get('serverSecret');
+            const roomId = urlParams.get('roomId');
+            const userId = urlParams.get('userId');
+            const userName = urlParams.get('userName');
+            const role = urlParams.get('role') || 'STUDENT';
 
-  <script src="https://unpkg.com/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
-  <script>
-    function getUrlParams() {
-      const urlParams = new URLSearchParams(window.location.search);
-      return {
-        appId: parseInt(urlParams.get('appId')),
-        serverSecret: urlParams.get('serverSecret'),
-        roomId: urlParams.get('roomId'),
-        userId: urlParams.get('userId'),
-        userName: urlParams.get('userName')
-      };
-    }
-
-    function init() {
-      const params = getUrlParams();
-      
-      if (!params.appId || !params.serverSecret || !params.roomId || !params.userId || !params.userName) {
-        document.getElementById('root').innerHTML = '<div class="error"><p>Missing parameters</p><p>معلومات ناقصة</p></div>';
-        return;
-      }
-
-      try {
-        const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-          params.appId,
-          params.serverSecret,
-          params.roomId,
-          params.userId,
-          params.userName
-        );
-
-        const zp = ZegoUIKitPrebuilt.create(kitToken);
-
-        zp.joinRoom({
-          container: document.getElementById('root'),
-          scenario: {
-            mode: ZegoUIKitPrebuilt.VideoConference,
-          },
-          showPreJoinView: true,
-          preJoinViewConfig: {
-            title: 'Youspeak Live Session | حصة يوسبيك',
-          },
-          turnOnMicrophoneWhenJoining: true,
-          turnOnCameraWhenJoining: true,
-          showMyCameraToggleButton: true,
-          showMyMicrophoneToggleButton: true,
-          showAudioVideoSettingsButton: true,
-          showScreenSharingButton: true,
-          showTextChat: true,
-          showUserList: true,
-          showLayoutButton: true,
-          layout: 'Auto',
-          maxUsers: 20,
-          onJoinRoom: function() {
-            console.log('Joined Zego room successfully');
-            if (window.parent) {
-              window.parent.postMessage({ type: 'zegoJoined' }, '*');
+            if (!appId || !serverSecret || !roomId || !userId || !userName) {
+                console.error('Missing configuration');
+                window.parent.postMessage({ type: 'zegoError', error: 'Missing configuration' }, '*');
+                return;
             }
-          },
-          onLeaveRoom: function() {
-            console.log('Left Zego room');
-            if (window.parent) {
-              window.parent.postMessage({ type: 'zegoLeft' }, '*');
-            }
-          }
-        });
-      } catch (error) {
-        console.error('Error initializing Zego:', error);
-        document.getElementById('root').innerHTML = '<div class="error"><p>Error: ' + error.message + '</p><p>خطأ في تحميل الفيديو</p></div>';
-      }
-    }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
-  </script>
+            const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(appId, serverSecret, roomId, userId, userName);
+            const zp = ZegoUIKitPrebuilt.create(kitToken);
+
+            const isAdmin = role === 'ADMIN' || role === 'TEACHER';
+
+            zp.joinRoom({
+                container: document.querySelector('#root'),
+                scenario: {
+                    mode: ZegoUIKitPrebuilt.VideoConference,
+                },
+                showScreenSharingButton: true,
+                showUserList: true,
+                showChatWindow: true,
+                showRoomTimer: true,
+                showMyCameraToggleButton: true,
+                showMyMicrophoneToggleButton: true,
+                showAudioVideoSettingsButton: true,
+                showLayoutButton: true,
+                showNonVideoUser: true,
+                showTextChat: true,
+                showUserList: true,
+                layout: "Auto",
+                showPreJoinView: true,
+                onJoinRoom: () => {
+                    window.parent.postMessage({ type: 'zegoJoined' }, '*');
+                },
+                onLeaveRoom: () => {
+                    window.parent.postMessage({ type: 'zegoLeft' }, '*');
+                },
+                whiteboardConfig: {
+                    showAddImageButton: isAdmin,
+                },
+                branding: {
+                    logoURL: '/logo.png',
+                },
+                // Admin specific powers
+                ...(isAdmin && {
+                    showRemoveUserButton: true,
+                    showTurnOffRemoteCameraButton: true,
+                    showTurnOffRemoteMicrophoneToggleButton: true,
+                })
+            });
+        };
+    </script>
 </body>
 </html>
