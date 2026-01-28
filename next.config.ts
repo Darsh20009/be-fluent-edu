@@ -16,15 +16,12 @@ const nextConfig: NextConfig = {
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   },
-  allowedDevOrigins: ['*'],
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
+    allowedDevOrigins: ['*'],
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
