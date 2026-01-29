@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useCallback, useRef } from "react";
+import { cn } from "@/lib/utils";
 import FloatingContactButtons from "@/components/FloatingContactButtons";
 import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, ArrowRight, CheckCircle, Star, Zap, ChevronLeft, ChevronRight, Headphones, GraduationCap, Trophy, Menu, X, Play, ArrowDown } from "lucide-react";
 
