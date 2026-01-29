@@ -25,9 +25,11 @@ export default function MeetVideo({
 
   useEffect(() => {
     if (useZego && appId && serverSecret) {
-      // ZegoCloud integration logic would go here if we were using their SDK
-      // For now, we still use our internal meet as the primary interface
-      // but we could toggle between them based on useZego
+      // If we're using Zego, we can redirect to a page that initializes Zego SDK
+      // For now, let's keep it simple and just update the iframe source if we had a zego page
+      // If no separate zego page exists, we could use Zego UIKits here
+      setIframeSrc(`/meet/index.html?roomId=${roomId}&userId=${userId}&userName=${userName}&role=${role}&provider=zego`)
+      return
     }
     
     const params = new URLSearchParams({

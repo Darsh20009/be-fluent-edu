@@ -48,6 +48,32 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
   const [showLoginModal, setShowLoginModal] = useState(!isAuthenticated)
   const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+  const [useZego, setUseZego] = useState(false)
+  const [zegoToken, setZegoToken] = useState<any>(null)
+  const [zegoLoading, setZegoLoading] = useState(false)
+
+  const initializeZegoSession = async (sessionData: SessionData) => {
+    try {
+      setZegoLoading(true)
+      const response = await fetch('/api/zego/generate-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user?.id,
+          userName: user?.name,
+          roomId: sessionData.id
+        })
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setZegoToken(data)
+      }
+    } catch (error) {
+      console.error('Error initializing Zego:', error)
+    } finally {
+      setZegoLoading(false)
+    }
+  }
 
   useEffect(() => {
     routerRef.current = router
@@ -165,16 +191,22 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
         </div>
         <div className="flex items-center gap-4">
           <button
-            onClick={() => {
-              const useZego = confirm('هل تريد استخدام ZegoCloud كخيار بديل؟ / Do you want to use ZegoCloud as backup?')
+            onClick={async () => {
               if (useZego) {
-                // Logic to switch to Zego if implemented
-                alert('ZegoCloud is ready as backup. Currently using BeFluent Meet for internal recording.')
+                setUseZego(false)
+                return
+              }
+              const confirmZego = confirm('هل تريد استخدام ZegoCloud كخيار بديل؟ / Do you want to use ZegoCloud as backup?')
+              if (confirmZego) {
+                if (!zegoToken && session) {
+                  await initializeZegoSession(session)
+                }
+                setUseZego(true)
               }
             }}
-            className="text-xs text-neutral-400 hover:text-white underline"
+            className={`text-xs px-2 py-1 rounded transition-colors ${useZego ? 'bg-green-600 text-white' : 'text-neutral-400 hover:text-white underline'}`}
           >
-            Backup Options / خيارات احتياطية
+            {useZego ? 'Using ZegoCloud / نستخدم Zego' : 'Switch to ZegoCloud / التبديل إلى Zego'}
           </button>
           {user?.role === 'TEACHER' && session.sessionPassword && (
             <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg px-3 py-2">
@@ -191,15 +223,24 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
 
       {/* Meet Video Container */}
       <div className="flex-1 w-full bg-black relative">
-        <MeetVideo
-          userId={user.id}
-          userName={user.name}
-          roomId={session.id}
-          role={user.role}
-          useZego={false}
-          appId={Number(process.env.ZEGO_APP_ID)}
-          serverSecret={process.env.ZEGO_SERVER_SECRET}
-        />
+        {useZego && zegoToken ? (
+          <MeetVideo
+            userId={user.id}
+            userName={user.name}
+            roomId={session.id}
+            role={user.role}
+            useZego={true}
+            appId={zegoToken.appId}
+            serverSecret={zegoToken.serverSecret}
+          />
+        ) : (
+          <MeetVideo
+            userId={user.id}
+            userName={user.name}
+            roomId={session.id}
+            role={user.role}
+          />
+        )}
       </div>
     </div>
   )
