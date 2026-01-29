@@ -62,6 +62,10 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
               </button>
               <Shield className="h-6 w-6 sm:h-8 sm:w-8" />
               <h1 className="text-xl sm:text-2xl font-bold">Be Fluent</h1>
+              <Link href="/dashboard/teacher" className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-colors">
+                <GraduationCap className="h-4 w-4" />
+                <span className="text-xs font-bold">لوحة المعلم</span>
+              </Link>
               <Badge variant="success" className="hidden sm:inline-flex">{user.role}</Badge>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">

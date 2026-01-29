@@ -47,7 +47,31 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           )}
         </div>
       )}
-      
+
+      {/* Switch Role Button for Admins */}
+      {(userName === 'Be Fluent' || userName === 'Admin Be Fluent') && (
+        <div className="flex gap-2">
+          <Link href="/dashboard/admin">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-white border-white hover:bg-white hover:text-[#10B981] text-[10px] sm:text-xs px-2"
+            >
+              لوحة الأدمن
+            </Button>
+          </Link>
+          <Link href="/dashboard/teacher">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-white border-white hover:bg-white hover:text-[#10B981] text-[10px] sm:text-xs px-2"
+            >
+              لوحة المعلم
+            </Button>
+          </Link>
+        </div>
+      )}
+
       <span className="text-xs sm:text-sm hidden sm:block text-white">{userName}</span>
       
       {showSettings && (

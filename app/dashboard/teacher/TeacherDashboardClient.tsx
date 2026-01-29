@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { 
-  Home, Users, Calendar, BookOpen, MessageCircle, LogOut 
+  Home, Users, Calendar, BookOpen, MessageCircle, LogOut, Shield 
 } from 'lucide-react'
+import Link from 'next/link'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import FloatingContactButtons from '@/components/FloatingContactButtons'
@@ -85,6 +86,10 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
                 </svg>
               </button>
               <h1 className="text-xl sm:text-2xl font-bold">Youspeak</h1>
+              <Link href="/dashboard/admin" className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-colors">
+                <Shield className="h-4 w-4" />
+                <span className="text-xs font-bold">لوحة الأدمن</span>
+              </Link>
               <span className="text-xs sm:text-sm bg-white/20 px-2 sm:px-3 py-1 rounded-full hidden sm:inline">Teacher Portal</span>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
