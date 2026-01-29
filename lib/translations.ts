@@ -128,6 +128,8 @@ export const translations = {
     liveClasses: 'Live Classes',
     levelAssessment: 'Level Assessment',
     smartLearning: 'Smart Learning',
+    dailyFollowup: 'Daily WhatsApp Follow-up',
+    whatsappSupport: '24/7 WhatsApp Support',
     
     // Packages
     ourPackages: 'Our Packages',

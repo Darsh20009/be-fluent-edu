@@ -5,7 +5,8 @@ export function useTranslation() {
   const { language } = useTheme()
   
   const t = (key: TranslationKey): string => {
-    const langTranslations = translations[language as keyof typeof translations]
+    const lang = language as 'ar' | 'en'
+    const langTranslations = translations[lang] || translations.ar
     return (langTranslations as any)[key] || key
   }
   
