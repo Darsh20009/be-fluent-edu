@@ -69,12 +69,15 @@ export async function PUT(
 
     // Deduct lesson from subscription if PRESENT or ABSENT
     if (deductLesson) {
-      const now = new Date()
       const activeSubscription = await prisma.subscription.findFirst({
         where: {
           studentId,
           status: 'APPROVED',
-          paid: true
+          paid: true,
+          lessonsAvailable: { gt: prisma.subscription.fields.lessonsTaken }
+        },
+        orderBy: {
+          createdAt: 'asc'
         }
       })
 
@@ -82,25 +85,31 @@ export async function PUT(
         console.log(`📚 Found subscription for ${studentId}:`, {
           id: activeSubscription.id,
           lessonsAvailable: activeSubscription.lessonsAvailable,
-          lessonsTaken: activeSubscription.lessonsTaken,
-          startDate: activeSubscription.startDate,
-          endDate: activeSubscription.endDate
+          lessonsTaken: activeSubscription.lessonsTaken
         })
 
-        // Check if lessons are still available
-        if (activeSubscription.lessonsAvailable > activeSubscription.lessonsTaken) {
-          const updated = await prisma.subscription.update({
-            where: { id: activeSubscription.id },
-            data: {
-              lessonsTaken: { increment: 1 }
-            }
-          })
-          console.log(`✅ Lesson deducted for ${studentId}. New lessonsTaken: ${updated.lessonsTaken}`)
-        } else {
-          console.log(`⚠️ No lessons available for ${studentId}. Available: ${activeSubscription.lessonsAvailable}, Taken: ${activeSubscription.lessonsTaken}`)
-        }
+        const updatedSubscription = await prisma.subscription.update({
+          where: { id: activeSubscription.id },
+          data: {
+            lessonsTaken: { increment: 1 }
+          }
+        })
+        console.log(`✅ Lesson deducted for ${studentId}. New lessonsTaken: ${updatedSubscription.lessonsTaken}`)
       } else {
-        console.log(`❌ No active subscription found for student ${studentId}`)
+        // If no subscription with available lessons found, check if there's ANY approved/paid subscription
+        const anySubscription = await prisma.subscription.findFirst({
+          where: {
+            studentId,
+            status: 'APPROVED',
+            paid: true
+          }
+        })
+        
+        if (!anySubscription) {
+          console.log(`❌ No active subscription found for student ${studentId}`)
+        } else {
+          console.log(`⚠️ No lessons available in the active subscription for ${studentId}.`)
+        }
       }
     }
 
