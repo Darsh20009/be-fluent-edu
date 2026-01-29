@@ -221,7 +221,7 @@ export default function GrammarRulesPage() {
               هل أنت مستعد للممارسة؟
             </p>
             <p className="text-gray-600 mb-6">
-              Join Youspeak and start improving your English with our expert teachers!
+              Join Be Fluent and start improving your English with our expert teachers!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

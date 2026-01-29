@@ -162,7 +162,7 @@ export default function AchievementsPage() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Trophy className="w-8 h-8 text-[#10B981]" />
-            <span className="text-xl font-bold text-[#10B981]">Youspeak</span>
+            <span className="text-xl font-bold text-[#10B981]">Be Fluent</span>
           </Link>
           <Link 
             href="/dashboard/student" 
@@ -512,7 +512,7 @@ export default function AchievementsPage() {
 
       <footer className="bg-[#10B981] text-white py-6 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <p>© 2024 Youspeak. جميع الحقوق محفوظة</p>
+          <p>© 2024 Be Fluent. جميع الحقوق محفوظة</p>
         </div>
       </footer>
     </div>

@@ -22,7 +22,7 @@ export default function Navigation({ isAuthenticated = false, userRole }: Naviga
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center">
               <h1 className="text-xl sm:text-2xl font-bold text-[#10B981] dark:text-blue-400">
-                Youspeak
+                Be Fluent
               </h1>
             </Link>
             

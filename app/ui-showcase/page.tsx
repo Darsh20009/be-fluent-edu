@@ -43,7 +43,7 @@ export default function UIShowcase() {
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-white font-bold text-sm">YS</span>
             </div>
-            <span className="font-semibold text-lg">Youspeak UI</span>
+            <span className="font-semibold text-lg">Be Fluent UI</span>
           </div>
         }
       >
@@ -56,7 +56,7 @@ export default function UIShowcase() {
       <Container size="2xl" className="py-12 space-y-16">
         <div className="text-center space-y-4">
           <h1 className="text-4xl sm:text-5xl font-bold text-neutral-900 dark:text-neutral-100">
-            Youspeak UI Components
+            Be Fluent UI Components
           </h1>
           <p className="text-lg text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
             Professional, accessible, and mobile-first UI components built with React, TypeScript, and Tailwind CSS 4
@@ -443,7 +443,7 @@ export default function UIShowcase() {
           <Modal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-            title="Welcome to Youspeak"
+            title="Welcome to Be Fluent"
             description="Join thousands of students learning English"
             size="md"
             footer={

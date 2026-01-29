@@ -121,7 +121,7 @@ export default function ForgotPasswordPage() {
             <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
               <Image
                 src="/logo.png"
-                alt="Youspeak Logo"
+                alt="Be Fluent Logo"
                 width={80}
                 height={80}
                 className="sm:w-[80px] sm:h-[80px]"

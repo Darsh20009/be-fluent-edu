@@ -74,7 +74,7 @@ export async function PATCH(
       }
     })
 
-    const approvalMessage = `🎉 *مبروك! تم تفعيل اشتراكك!*\n\nعزيزي ${subscription.User.name},\n\nتم تفعيل اشتراكك بنجاح في:\n📦 ${subscription.Package.titleAr}\n💰 ${subscription.Package.price} SAR\n📚 ${subscription.Package.lessonsCount} حصة\n📅 صالح حتى: ${endDate.toLocaleDateString('ar-EG')}\n\nيمكنك الآن:\n✅ الدخول إلى لوحة التحكم\n✅ حجز الحصص\n✅ التواصل مع المعلمين\n\nنتمنى لك تجربة تعليمية ممتعة! 🎓\n\nفريق Youspeak 🌟`
+    const approvalMessage = `🎉 *مبروك! تم تفعيل اشتراكك!*\n\nعزيزي ${subscription.User.name},\n\nتم تفعيل اشتراكك بنجاح في:\n📦 ${subscription.Package.titleAr}\n💰 ${subscription.Package.price} SAR\n📚 ${subscription.Package.lessonsCount} حصة\n📅 صالح حتى: ${endDate.toLocaleDateString('ar-EG')}\n\nيمكنك الآن:\n✅ الدخول إلى لوحة التحكم\n✅ حجز الحصص\n✅ التواصل مع المعلمين\n\nنتمنى لك تجربة تعليمية ممتعة! 🎓\n\nفريق Be Fluent 🌟`
     
     const phoneNumber = '201091515594'
     const studentPhone = subscription.User.phone

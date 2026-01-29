@@ -85,7 +85,7 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
-              <h1 className="text-xl sm:text-2xl font-bold">Youspeak</h1>
+              <h1 className="text-xl sm:text-2xl font-bold">Be Fluent</h1>
               <Link href="/dashboard/admin" className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-colors">
                 <Shield className="h-4 w-4" />
                 <span className="text-xs font-bold">لوحة الأدمن</span>
