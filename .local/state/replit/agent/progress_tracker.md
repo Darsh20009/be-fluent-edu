@@ -8,3 +8,4 @@
 [x] 8. Design and implement student certificates system
 [x] 9. Fix logo/favicon visibility across all platforms
 [x] 10. Enhance PWA install prompt with creative design and Chrome support
+[x] 11. Reinstall dependencies after migration
