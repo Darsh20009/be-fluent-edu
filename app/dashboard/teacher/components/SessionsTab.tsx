@@ -104,7 +104,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
     }
   }
 
-  async function fetchSessions() {
+  const fetchSessions = async () => {
     try {
       const response = await fetch('/api/teacher/sessions')
       if (response.ok) {
@@ -115,6 +115,22 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
       console.error('Error fetching sessions:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleUpdateStatus = async (sessionId: string, status: string) => {
+    try {
+      const res = await fetch(`/api/teacher/sessions/${sessionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      })
+      if (res.ok) {
+        fetchSessions()
+        alert('Status updated successfully / تم تحديث الحالة بنجاح')
+      }
+    } catch (err) {
+      console.error('Error updating status:', err)
     }
   }
 
@@ -511,12 +527,22 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <Button 
-                      variant="primary" 
-                      size="sm"
-                      onClick={() => router.push(`/session/${session.id}`)}
-                    >
+                    <div className="flex flex-col gap-2">
+                      {session.status === 'SCHEDULED' && (
+                        <Button 
+                          variant="primary" 
+                          size="sm"
+                          onClick={() => handleUpdateStatus(session.id, 'COMPLETED')}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Complete / إنهاء
+                        </Button>
+                      )}
+                      <Button 
+                        variant="primary" 
+                        size="sm"
+                        onClick={() => router.push(`/session/${session.id}`)}
+                      >
                       <Video className="h-4 w-4 mr-2" />
                       Start / ابدأ
                     </Button>

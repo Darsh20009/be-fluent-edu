@@ -108,6 +108,8 @@ export async function PUT(
           approvedAt: new Date(),
           startDate: startDate,
           endDate: endDate,
+          lessonsAvailable: subscription.Package.lessonsCount,
+          lessonsTaken: 0,
           adminNotes: adminNotes,
           updatedAt: new Date()
         },

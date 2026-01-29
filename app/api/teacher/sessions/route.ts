@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
           title: String(title).trim(),
           startTime: startDate,
           endTime: endDate,
-          status: 'SCHEDULED',
+          status: 'SCHEDULED', // Always start as SCHEDULED
           sessionPassword,
           roomId
         }

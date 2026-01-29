@@ -24,6 +24,8 @@ interface Subscription {
   rejectedAt: string | null
   adminNotes: string | null
   paid: boolean
+  lessonsAvailable: number
+  lessonsTaken: number
   User: {
     id: string
     name: string
@@ -155,6 +157,23 @@ export default function SubscriptionsTab() {
       alert('Error rejecting subscription')
     } finally {
       setProcessing(null)
+    }
+  }
+
+  const handleUpdateBalance = async (subscriptionId: string, newBalance: number) => {
+    try {
+      const response = await fetch(`/api/admin/subscriptions/${subscriptionId}/balance`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lessonsAvailable: newBalance })
+      })
+      if (response.ok) {
+        fetchData()
+      } else {
+        alert('Failed to update balance')
+      }
+    } catch (err) {
+      console.error('Error updating balance:', err)
     }
   }
 
@@ -389,9 +408,29 @@ export default function SubscriptionsTab() {
                       {getStatusBadge(sub.status)}
                     </div>
                     <p className="text-sm text-gray-600 mb-2">{sub.User.email}</p>
-                    <p className="font-medium text-gray-900">
-                      {sub.Package.title} / {sub.Package.titleAr}
-                    </p>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="font-medium text-gray-900">
+                        {sub.Package.title} / {sub.Package.titleAr}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-gray-500">Balance:</span>
+                        <Badge variant="primary">{sub.lessonsAvailable}</Badge>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => handleUpdateBalance(sub.id, sub.lessonsAvailable + 1)}
+                            className="p-1 hover:bg-gray-100 rounded text-green-600"
+                          >
+                            +
+                          </button>
+                          <button
+                            onClick={() => handleUpdateBalance(sub.id, Math.max(0, sub.lessonsAvailable - 1))}
+                            className="p-1 hover:bg-gray-100 rounded text-red-600"
+                          >
+                            -
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                     <p className="text-sm text-gray-600">{sub.Package.price} EGP</p>
                     {sub.AssignedTeacher && (
                       <p className="text-sm text-blue-600 mt-1">

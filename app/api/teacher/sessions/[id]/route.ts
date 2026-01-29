@@ -84,6 +84,32 @@ export async function PUT(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    // Handle session completion and lesson deduction
+    if (status === 'COMPLETED' && existingSession.status !== 'COMPLETED') {
+      const studentIds = existingSession.SessionStudent.map(ss => ss.studentId)
+      
+      for (const studentId of studentIds) {
+        // Find approved subscription for this student
+        const subscription = await prisma.subscription.findFirst({
+          where: {
+            studentId,
+            status: 'APPROVED',
+            lessonsAvailable: { gt: 0 }
+          }
+        })
+
+        if (subscription) {
+          await prisma.subscription.update({
+            where: { id: subscription.id },
+            data: {
+              lessonsAvailable: { decrement: 1 },
+              lessonsTaken: { increment: 1 }
+            }
+          })
+        }
+      }
+    }
+
     const updateData: any = {}
     if (title !== undefined) updateData.title = String(title).trim()
     if (startTime !== undefined) {
@@ -102,11 +128,6 @@ export async function PUT(
     }
     if (status !== undefined) updateData.status = String(status).trim()
     updateData.updatedAt = new Date()
-
-    // Validate start time is before end time if both provided
-    if (updateData.startTime && updateData.endTime && updateData.startTime >= updateData.endTime) {
-      return NextResponse.json({ error: 'Start time must be before end time' }, { status: 400 })
-    }
 
     const updatedSession = await prisma.session.update({
       where: { id },
