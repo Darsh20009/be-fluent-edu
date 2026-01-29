@@ -19,27 +19,32 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Teacher profile not found' }, { status: 404 })
     }
 
+    const isSystemAdmin = session.user.role === 'ADMIN' && session.user.name === 'Be Fluent'
+
     const [totalSessions, upcomingSessions, activeStudents, pendingSubmissions] = await Promise.all([
       prisma.session.count({
-        where: { teacherId: teacherProfile.id }
+        where: isSystemAdmin ? {} : { teacherId: teacherProfile.id }
       }),
       prisma.session.count({
-        where: {
+        where: isSystemAdmin ? {
+          startTime: { gte: new Date() },
+          status: 'SCHEDULED'
+        } : {
           teacherId: teacherProfile.id,
           startTime: { gte: new Date() },
           status: 'SCHEDULED'
         }
       }),
-      prisma.sessionStudent.groupBy({
+      isSystemAdmin ? prisma.user.count({ where: { role: 'STUDENT' } }) : prisma.sessionStudent.groupBy({
         by: ['studentId'],
         where: {
           Session: {
             teacherId: teacherProfile.id
           }
         }
-      }),
+      }).then(res => res.length),
       prisma.submission.count({
-        where: {
+        where: isSystemAdmin ? { grade: null } : {
           Assignment: {
             Session: {
               teacherId: teacherProfile.id
@@ -51,7 +56,10 @@ export async function GET(request: NextRequest) {
     ])
 
     const nextSession = await prisma.session.findFirst({
-      where: {
+      where: isSystemAdmin ? {
+        startTime: { gte: new Date() },
+        status: 'SCHEDULED'
+      } : {
         teacherId: teacherProfile.id,
         startTime: { gte: new Date() },
         status: 'SCHEDULED'
@@ -65,7 +73,7 @@ export async function GET(request: NextRequest) {
     })
 
     return NextResponse.json({
-      totalStudents: activeStudents.length,
+      totalStudents: typeof activeStudents === 'number' ? activeStudents : (activeStudents as any).length,
       totalSessions,
       upcomingSessions,
       pendingGrading: pendingSubmissions,
