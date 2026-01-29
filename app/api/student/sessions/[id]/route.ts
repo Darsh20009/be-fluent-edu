@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireStudent, isNextResponse } from '@/lib/auth-helpers'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(
@@ -7,23 +8,27 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const student = await requireStudent()
-    if (isNextResponse(student)) return student
+    const sessionUser = await getServerSession(authOptions)
+
+    if (!sessionUser) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     const { id } = await params
-    const url = new URL(request.url)
-    const password = url.searchParams.get('password')
 
-    const sessionData = await prisma.session.findFirst({
-      where: {
-        id,
-        SessionStudent: {
-          some: {
-            studentId: student.userId
-          }
-        }
-      },
+    const sessionData = await prisma.session.findUnique({
+      where: { id },
       include: {
+        SessionStudent: {
+          include: {
+            User: {
+              select: {
+                name: true,
+                email: true
+              }
+            }
+          }
+        },
         TeacherProfile: {
           include: {
             User: {
@@ -38,13 +43,35 @@ export async function GET(
     })
 
     if (!sessionData) {
-      return NextResponse.json({ error: 'Session not found or not enrolled' }, { status: 404 })
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 })
     }
 
-    // Allow joining if session is in progress or upcoming (start time has passed)
-    const now = new Date()
-    // Don't block - let Zego handle timing
-    // if (!hasStarted) return 403...
+    // Allow Admin and Teacher to join
+    if (sessionUser.user.role === 'ADMIN' || sessionUser.user.role === 'TEACHER') {
+      return NextResponse.json({
+        id: sessionData.id,
+        title: sessionData.title,
+        startTime: sessionData.startTime,
+        endTime: sessionData.endTime,
+        status: sessionData.status,
+        roomId: sessionData.roomId,
+        recordingUrl: sessionData.recordingUrl,
+        sessionPassword: sessionData.sessionPassword,
+        teacher: {
+          name: sessionData.TeacherProfile.User.name,
+          email: sessionData.TeacherProfile.User.email
+        }
+      })
+    }
+
+    // Check if student is assigned to this session
+    const isAssigned = sessionData.SessionStudent.some(
+      (ss) => ss.studentId === sessionUser.user.id
+    )
+
+    if (!isAssigned) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+    }
 
     return NextResponse.json({
       id: sessionData.id,
