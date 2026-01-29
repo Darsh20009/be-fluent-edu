@@ -33,7 +33,7 @@ The platform utilizes a modern web stack: **Next.js 16 (App Router)** with **Rea
 - **Placement Test:** Admin-only feature, removed from public navigation.
 - **State Management:** React hooks and Context API.
 - **Real-time Communication:** Socket.IO v4.8.1 for live chat.
-- **Live Classes:** BigBlueButton integration for video conferencing, recording, and attendance.
+- **Live Classes:** befluent-meet (Internal WebRTC System) featuring screen sharing, local recording with auto-cleanup, raised hands, and admin-exclusive controls. Secondary backup: ZegoCloud integration.
 - **Vocabulary Learning:** "Discover Words" with swipe cards, animations, quizzes, and an advanced system including Daily Words, Flashcards (spaced repetition), Word Tests, and custom word additions.
 - **Internationalization:** Full bilingual support (Arabic/English).
 - **Database Schema:** Prisma ORM managing 13 core tables.
@@ -63,7 +63,7 @@ The platform utilizes a modern web stack: **Next.js 16 (App Router)** with **Rea
 - **ORM:** Prisma
 - **Authentication:** NextAuth.js
 - **Real-time Communication:** Socket.IO
-- **Video Conferencing:** BigBlueButton
+- **Video Conferencing:** befluent-meet & ZegoCloud
 - **Translation Services:** Google Translate API
 - **Communication:** WhatsApp API
 - **Current Database:** MongoDB (for gamification, lessons, listening, conversation models)
