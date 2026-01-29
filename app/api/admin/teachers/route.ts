@@ -7,11 +7,11 @@ export async function GET(request: NextRequest) {
     const admin = await requireAdmin()
     if (isNextResponse(admin)) return admin
 
-    // Query teachers from Users table to avoid orphaned TeacherProfile records
+    // Query teachers from Users table (include ADMINS who have teacher profiles)
     const teachers = await prisma.user.findMany({
       where: {
-        role: 'TEACHER',
-        // Removed isActive filter to show all teachers in admin dashboard
+        role: { in: ['TEACHER', 'ADMIN'] },
+        TeacherProfile: { isNot: null }
       },
       select: {
         id: true,
