@@ -57,59 +57,111 @@ export default function Home() {
       </div>
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100/50 transition-all duration-300">
+      <header className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+        scrollY > 20 
+          ? "bg-white/90 backdrop-blur-xl shadow-lg shadow-emerald-500/5 py-2" 
+          : "bg-transparent py-4 md:py-6"
+      )}>
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative w-11 h-11 md:w-12 md:h-12 rounded-2xl overflow-hidden shadow-lg border-2 border-[#10B981]/20 group-hover:border-[#10B981] group-hover:shadow-emerald-200/50 transition-all duration-500">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-3 group relative z-10">
+              <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl overflow-hidden shadow-md group-hover:shadow-emerald-200/50 transition-all duration-500 transform group-hover:scale-105">
                 <Image src="/logo.png" alt="Be Fluent" fill className="object-contain" sizes="48px" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl md:text-2xl font-black text-[#1F2937] tracking-tight leading-none">Be Fluent</span>
-                <span className="text-[10px] text-[#10B981] font-bold tracking-[0.2em] uppercase">Fluency Comes First</span>
+                <span className={cn(
+                  "text-lg md:text-2xl font-black tracking-tight leading-none transition-colors duration-300",
+                  scrollY > 20 ? "text-[#1F2937]" : "text-[#1F2937]"
+                )}>Be Fluent</span>
+                <span className="text-[9px] md:text-[10px] text-[#10B981] font-bold tracking-[0.2em] uppercase">Fluency Comes First</span>
               </div>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-8">
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center bg-gray-100/50 backdrop-blur-md px-2 py-1.5 rounded-2xl border border-gray-200/50">
               {[
                 { label: "الرئيسية", href: "/" },
                 { label: "باقاتنا", href: "/packages" },
                 { label: "القواعد", href: "/grammar" },
               ].map((item, i) => (
-                <Link key={i} href={item.href} className="relative text-gray-700 hover:text-[#10B981] font-semibold transition-all duration-300 group py-2">
+                <Link 
+                  key={i} 
+                  href={item.href} 
+                  className="px-5 py-2 text-sm font-bold text-gray-700 hover:text-[#10B981] transition-all duration-300 rounded-xl hover:bg-white hover:shadow-sm"
+                >
                   {item.label}
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#10B981] to-emerald-400 group-hover:w-full transition-all duration-300 rounded-full"></span>
                 </Link>
               ))}
             </nav>
 
-            <div className="hidden md:flex items-center gap-4">
-              <Link href="/auth/login" className="px-5 py-2.5 text-sm font-bold text-[#1F2937] hover:text-[#10B981] transition-colors">
+            <div className="hidden md:flex items-center gap-3">
+              <Link href="/auth/login" className="px-5 py-2.5 text-sm font-bold text-gray-700 hover:text-[#10B981] transition-colors rounded-xl hover:bg-gray-100">
                 تسجيل الدخول
               </Link>
-              <Link href="/auth/register" className="px-6 py-2.5 text-sm font-bold rounded-xl bg-gradient-to-r from-[#10B981] to-emerald-500 text-white shadow-lg shadow-emerald-200/50 hover:shadow-xl hover:shadow-emerald-300/50 hover:scale-105 transition-all duration-300">
+              <Link href="/auth/register" className="px-6 py-2.5 text-sm font-bold rounded-xl bg-[#10B981] text-white shadow-lg shadow-emerald-200/50 hover:bg-[#059669] hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
                 انضم إلينا
               </Link>
             </div>
 
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2.5 rounded-xl hover:bg-gray-100 transition-colors">
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            {/* Mobile Actions */}
+            <div className="flex items-center gap-2 md:hidden">
+              <Link href="/auth/login" className="p-2.5 text-gray-700 hover:text-[#10B981] transition-colors">
+                <Users className="w-5 h-5" />
+              </Link>
+              <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+                className="p-2.5 rounded-xl bg-gray-100 text-[#1F2937] hover:bg-gray-200 transition-all duration-300 relative z-50"
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
 
-          {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-gray-100 animate-in slide-in-from-top duration-300">
-              <nav className="flex flex-col gap-2">
-                <Link href="/" className="px-4 py-3 text-gray-700 hover:bg-[#10B981]/10 rounded-xl font-semibold transition-colors" onClick={() => setMobileMenuOpen(false)}>الرئيسية</Link>
-                <Link href="/packages" className="px-4 py-3 text-gray-700 hover:bg-[#10B981]/10 rounded-xl font-semibold transition-colors" onClick={() => setMobileMenuOpen(false)}>باقاتنا</Link>
-                <Link href="/grammar" className="px-4 py-3 text-gray-700 hover:bg-[#10B981]/10 rounded-xl font-semibold transition-colors" onClick={() => setMobileMenuOpen(false)}>القواعد</Link>
-                <div className="border-t border-gray-100 mt-2 pt-4 flex flex-col gap-2">
-                  <Link href="/auth/login" className="px-4 py-3 text-center text-[#1F2937] font-bold hover:bg-gray-100 rounded-xl transition-colors" onClick={() => setMobileMenuOpen(false)}>تسجيل الدخول</Link>
-                  <Link href="/auth/register" className="mx-4 py-3 text-center bg-gradient-to-r from-[#10B981] to-emerald-500 text-white font-bold rounded-xl" onClick={() => setMobileMenuOpen(false)}>انضم إلينا</Link>
-                </div>
+          {/* Mobile Menu Overlay */}
+          <div className={cn(
+            "fixed inset-0 bg-white/95 backdrop-blur-2xl z-40 md:hidden transition-all duration-500 ease-in-out",
+            mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          )}>
+            <div className="flex flex-col h-full pt-24 px-6 pb-10">
+              <nav className="flex flex-col gap-4">
+                {[
+                  { label: "الرئيسية", href: "/", icon: <BookOpen className="w-5 h-5" /> },
+                  { label: "باقاتنا", href: "/packages", icon: <Target className="w-5 h-5" /> },
+                  { label: "القواعد", href: "/grammar", icon: <Globe className="w-5 h-5" /> },
+                ].map((item, i) => (
+                  <Link 
+                    key={i} 
+                    href={item.href} 
+                    className="flex items-center gap-4 p-4 text-xl font-bold text-gray-800 bg-gray-50 rounded-2xl active:scale-95 transition-all"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-[#10B981]">
+                      {item.icon}
+                    </div>
+                    {item.label}
+                  </Link>
+                ))}
               </nav>
+
+              <div className="mt-auto flex flex-col gap-3">
+                <Link 
+                  href="/auth/login" 
+                  className="w-full py-4 text-center text-gray-800 font-bold bg-gray-100 rounded-2xl active:scale-95 transition-all"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  تسجيل الدخول
+                </Link>
+                <Link 
+                  href="/auth/register" 
+                  className="w-full py-4 text-center bg-[#10B981] text-white font-bold rounded-2xl shadow-lg shadow-emerald-200 active:scale-95 transition-all"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  انضم إلينا الآن
+                </Link>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </header>
 
