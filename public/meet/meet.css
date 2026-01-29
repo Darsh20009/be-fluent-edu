@@ -4,69 +4,76 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: #1a1a1a;
+    background: #111;
     display: flex;
     flex-direction: column;
+    color: white;
 }
 
 #video-grid {
     flex: 1;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 15px;
     padding: 20px;
     overflow-y: auto;
+    background: #1a1a1a;
 }
 
 .video-item {
     position: relative;
     background: #000;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
+    aspect-ratio: 16/9;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .video-label {
     position: absolute;
-    bottom: 10px;
-    left: 10px;
-    background: rgba(0,0,0,0.5);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    margin: 0;
-}
-
-.message {
-    margin-bottom: 8px;
-    padding: 5px;
-    border-bottom: 1px solid #eee;
+    bottom: 12px;
+    left: 12px;
+    background: rgba(0,0,0,0.6);
+    padding: 4px 12px;
+    border-radius: 6px;
     font-size: 14px;
+    z-index: 10;
 }
 
 #controls {
-    height: 80px;
-    background: rgba(0,0,0,0.8);
+    height: 90px;
+    background: #000;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
+    border-top: 1px solid #333;
 }
 
 .control-btn {
-    width: 50px;
-    height: 50px;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
     border: none;
-    background: #333;
+    background: #2a2a2a;
     color: white;
-    font-size: 20px;
+    font-size: 22px;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .control-btn:hover {
-    background: #555;
+    background: #3a3a3a;
+    transform: translateY(-2px);
 }
 
 .control-btn.active {
@@ -81,19 +88,88 @@
     position: absolute;
     right: 0;
     top: 0;
-    width: 300px;
-    height: calc(100% - 80px);
-    background: white;
+    width: 350px;
+    height: calc(100% - 90px);
+    background: #fff;
+    color: #333;
     display: flex;
     flex-direction: column;
-    box-shadow: -2px 0 5px rgba(0,0,0,0.3);
     z-index: 100;
+    box-shadow: -4px 0 15px rgba(0,0,0,0.5);
 }
 
 .hidden { display: none !important; }
 
-#chat-header { padding: 15px; background: #10B981; color: white; font-weight: bold; }
-#chat-messages { flex: 1; overflow-y: auto; padding: 10px; }
-#chat-input-area { padding: 10px; border-top: 1px solid #ddd; display: flex; }
-#chat-input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
-#send-btn { margin-left: 5px; background: #10B981; color: white; border: none; padding: 8px 15px; border-radius: 4px; }
+#chat-header { 
+    padding: 20px; 
+    background: #10B981; 
+    color: white; 
+    font-weight: bold; 
+    font-size: 18px;
+}
+
+#chat-messages { 
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 15px; 
+}
+
+.message {
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background: #f3f4f6;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+#chat-input-area { 
+    padding: 15px; 
+    border-top: 1px solid #eee; 
+    display: flex; 
+    gap: 10px;
+}
+
+#chat-input { 
+    flex: 1; 
+    padding: 10px; 
+    border: 1px solid #ddd; 
+    border-radius: 6px; 
+    outline: none;
+}
+
+#send-btn { 
+    background: #10B981; 
+    color: white; 
+    border: none; 
+    padding: 10px 20px; 
+    border-radius: 6px; 
+    cursor: pointer;
+}
+
+#recording-status {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(239, 68, 68, 0.9);
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 200;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}

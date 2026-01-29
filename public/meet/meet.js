@@ -1,6 +1,5 @@
 let socket;
 let myStream;
-let peers = {};
 let roomId = new URLSearchParams(window.location.search).get('roomId');
 let userId = new URLSearchParams(window.location.search).get('userId');
 let userName = new URLSearchParams(window.location.search).get('userName');
@@ -13,9 +12,11 @@ const chatMessages = document.getElementById('chat-messages');
 const handBtn = document.getElementById('hand-btn');
 const screenBtn = document.getElementById('screen-btn');
 const recordBtn = document.getElementById('record-btn');
+const recordingStatus = document.getElementById('recording-status');
 
 let mediaRecorder;
 let recordedChunks = [];
+let screenStream;
 
 async function init() {
     socket = io('/');
@@ -31,10 +32,8 @@ async function init() {
 
         socket.emit('join-room', roomId, userId, userName);
 
-        socket.on('user-connected', (userId, userName) => {
-            console.log('User connected:', userName);
-            // In a full implementation, we would initiate WebRTC offer/answer here
-            appendMessage('النظام', `${userName} انضم إلى الحصة`);
+        socket.on('user-connected', (data) => {
+            appendMessage('النظام', `${data.userName} انضم إلى الحصة`);
         });
 
         socket.on('receive-message', (data) => {
@@ -42,16 +41,16 @@ async function init() {
         });
 
         socket.on('hand-raised', (data) => {
-            appendMessage('النظام', `${data.userName} رفع يده ✋`);
+            appendMessage('النظام', `✋ ${data.userName} قام برفع يده`);
         });
 
-        socket.on('user-disconnected', (userId) => {
+        socket.on('user-disconnected', (data) => {
             appendMessage('النظام', `غادر أحد المستخدمين`);
         });
 
     } catch (err) {
         console.error('Failed to get local stream', err);
-        alert('يرجى السماح بالوصول للكاميرا والمايكروفون');
+        alert('يرجى السماح بالوصول للكاميرا والمايكروفون لبدء الحصة');
     }
 }
 
@@ -99,8 +98,14 @@ handBtn.onclick = () => {
 };
 
 screenBtn.onclick = async () => {
+    if (screenStream) {
+        screenStream.getTracks().forEach(track => track.stop());
+        screenStream = null;
+        screenBtn.classList.remove('active');
+        return;
+    }
     try {
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
         const videoElement = createVideoElement(`${userName} (Screen Share)`);
         addVideoStream(videoElement, screenStream);
         screenBtn.classList.add('active');
@@ -108,6 +113,7 @@ screenBtn.onclick = async () => {
         screenStream.getVideoTracks()[0].onended = () => {
             videoElement.parentElement.remove();
             screenBtn.classList.remove('active');
+            screenStream = null;
         };
     } catch (err) {
         console.error('Error sharing screen:', err);
@@ -118,33 +124,45 @@ recordBtn.onclick = () => {
     if (mediaRecorder && mediaRecorder.state === 'recording') {
         mediaRecorder.stop();
         recordBtn.classList.remove('active');
-        recordBtn.innerText = '⏺️';
+        recordingStatus.classList.add('hidden');
     } else {
         recordedChunks = [];
-        mediaRecorder = new MediaRecorder(myStream);
+        // Combine audio and video for recording
+        const tracks = [...myStream.getTracks()];
+        if (screenStream) tracks.push(...screenStream.getTracks());
+        
+        const combinedStream = new MediaStream(tracks);
+        mediaRecorder = new MediaRecorder(combinedStream);
+        
         mediaRecorder.ondataavailable = (e) => {
             if (e.data.size > 0) recordedChunks.push(e.data);
         };
-        mediaRecorder.onstop = () => {
+        
+        mediaRecorder.onstop = async () => {
             const blob = new Blob(recordedChunks, { type: 'video/webm' });
             const url = URL.createObjectURL(blob);
+            
+            // Download to teacher's device
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
             a.download = `BeFluent-Meet-${new Date().getTime()}.webm`;
             document.body.appendChild(a);
             a.click();
+            
+            // Success notification
+            appendMessage('النظام', '✅ تم حفظ تسجيل الحصة على جهازك. سيتم الآن تنظيف الذاكرة المؤقتة.');
+            
             setTimeout(() => {
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
             }, 100);
-            
-            appendMessage('النظام', 'تم حفظ تسجيل الحصة على جهازك بنجاح');
         };
+        
         mediaRecorder.start();
         recordBtn.classList.add('active');
-        recordBtn.innerText = '⏹️';
-        appendMessage('النظام', 'بدأ تسجيل الحصة...');
+        recordingStatus.classList.remove('hidden');
+        appendMessage('النظام', '🔴 بدأ تسجيل الحصة...');
     }
 };
 
