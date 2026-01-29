@@ -2,25 +2,19 @@
 
 import { useEffect, useState } from 'react'
 
-interface ZegoVideoProps {
-  appId: number
-  serverSecret: string
+interface MeetVideoProps {
   userId: string
   userName: string
   roomId: string
   role?: string
-  onError?: (error: Error) => void
 }
 
-export default function ZegoVideo({
-  appId,
-  serverSecret,
+export default function MeetVideo({
   userId,
   userName,
   roomId,
-  role = 'STUDENT',
-  onError
-}: ZegoVideoProps) {
+  role = 'STUDENT'
+}: MeetVideoProps) {
   const [iframeSrc, setIframeSrc] = useState<string | null>(null)
 
   useEffect(() => {
@@ -31,23 +25,7 @@ export default function ZegoVideo({
       role
     })
     setIframeSrc(`/meet/index.html?${params.toString()}`)
-
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'zegoJoined') {
-        console.log('Received Zego joined message from iframe')
-      } else if (event.data?.type === 'zegoLeft') {
-        console.log('Received Zego left message from iframe')
-      } else if (event.data?.type === 'zegoError') {
-        onError?.(new Error(event.data.error || 'Unknown Zego error'))
-      }
-    }
-
-    window.addEventListener('message', handleMessage)
-
-    return () => {
-      window.removeEventListener('message', handleMessage)
-    }
-  }, [appId, serverSecret, userId, userName, roomId, onError])
+  }, [userId, userName, roomId, role])
 
   if (!iframeSrc) {
     return (
@@ -70,12 +48,12 @@ export default function ZegoVideo({
             width: '48px',
             height: '48px',
             border: '4px solid #333',
-            borderTopColor: '#3b82f6',
+            borderTopColor: '#10B981',
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
           }}
         />
-        <p style={{ marginTop: '16px' }}>Preparing video conference...</p>
+        <p style={{ marginTop: '16px' }}>Preparing BeFluent Meet...</p>
         <p style={{ color: '#9ca3af' }}>جاري تجهيز الحصة...</p>
         <style>{`
           @keyframes spin {

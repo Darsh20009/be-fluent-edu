@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import SessionLoginModal from './SessionLoginModal'
 import SessionPasswordModal from './SessionPasswordModal'
-import ZegoVideo from '@/components/ZegoVideo'
+import MeetVideo from '@/components/ZegoVideo'
 
 interface SessionClientProps {
   sessionId: string
@@ -33,12 +33,11 @@ interface SessionData {
   }
 }
 
-interface ZegoTokenData {
-  serverSecret: string
-  appId: number
+interface MeetVideoProps {
   userId: string
   userName: string
   roomId: string
+  role?: string
 }
 
 export default function SessionClient({ sessionId, user, isAuthenticated }: SessionClientProps) {
@@ -49,8 +48,6 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
   const [showLoginModal, setShowLoginModal] = useState(!isAuthenticated)
   const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
-  const [zegoToken, setZegoToken] = useState<ZegoTokenData | null>(null)
-  const [zegoLoading, setZegoLoading] = useState(false)
 
   useEffect(() => {
     routerRef.current = router
@@ -67,7 +64,7 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
   async function fetchSession(password?: string) {
     if (!user) return
     try {
-      const endpoint = user.role === 'TEACHER' 
+      const endpoint = user.role === 'TEACHER' || user.role === 'ADMIN'
         ? `/api/teacher/sessions/${sessionId}`
         : `/api/student/sessions/${sessionId}${password ? `?password=${password}` : ''}`
       
@@ -85,8 +82,6 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
         const data = await response.json()
         setSession(data)
         setShowPasswordModal(false)
-        // Generate Zego token for the session
-        await initializeZegoSession(data)
       } else {
         alert('Session not found or you do not have access')
         router.push('/dashboard')
@@ -97,35 +92,6 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
       router.push('/dashboard')
     } finally {
       setLoading(false)
-    }
-  }
-
-  async function initializeZegoSession(sessionData: SessionData) {
-    try {
-      setZegoLoading(true)
-
-      // Generate Zego token
-      const tokenResponse = await fetch('/api/zego/generate-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user?.id,
-          userName: user?.name,
-          roomId: `session_${sessionData.id}`
-        })
-      })
-
-      if (!tokenResponse.ok) {
-        throw new Error('Failed to generate Zego token')
-      }
-
-      const tokenData = await tokenResponse.json()
-      setZegoToken(tokenData)
-      setZegoLoading(false)
-    } catch (error) {
-      console.error('Error initializing Zego session:', error)
-      setZegoLoading(false)
-      alert('Error starting the video conference. Please try again.')
     }
   }
 
@@ -211,36 +177,14 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
         </div>
       </div>
 
-      {/* Zego Video Container */}
+      {/* Meet Video Container */}
       <div className="flex-1 w-full bg-black relative">
-        {zegoLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="h-12 w-12 text-white animate-spin" />
-              <p className="text-white font-medium">Connecting to Zego...</p>
-              <p className="text-neutral-400 text-sm">جاري الاتصال...</p>
-            </div>
-          </div>
-        ) : zegoToken ? (
-          <ZegoVideo
-            appId={zegoToken.appId}
-            serverSecret={zegoToken.serverSecret}
-            userId={zegoToken.userId}
-            userName={zegoToken.userName}
-            roomId={zegoToken.roomId}
-            onError={(error) => {
-              console.error('Zego error:', error)
-              alert('Error with video conference: ' + error.message)
-            }}
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <div className="flex flex-col items-center gap-4">
-              <p className="text-white font-medium">Initializing...</p>
-              <LoadingSpinner />
-            </div>
-          </div>
-        )}
+        <MeetVideo
+          userId={user.id}
+          userName={user.name}
+          roomId={session.id}
+          role={user.role}
+        />
       </div>
     </div>
   )
