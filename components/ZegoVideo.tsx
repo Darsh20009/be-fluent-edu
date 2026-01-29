@@ -25,14 +25,12 @@ export default function ZegoVideo({
 
   useEffect(() => {
     const params = new URLSearchParams({
-      appId: appId.toString(),
-      serverSecret,
       roomId,
       userId,
       userName,
       role
     })
-    setIframeSrc(`/zego-room.html?${params.toString()}`)
+    setIframeSrc(`/meet/index.html?${params.toString()}`)
 
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'zegoJoined') {

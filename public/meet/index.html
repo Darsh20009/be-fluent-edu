@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeFluent Meet</title>
+    <link rel="stylesheet" href="meet.css">
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+</head>
+<body>
+    <div id="meet-container">
+        <div id="video-grid"></div>
+        
+        <div id="controls">
+            <button id="mic-btn" class="control-btn" title="Microphone">🎙️</button>
+            <button id="cam-btn" class="control-btn" title="Camera">📷</button>
+            <button id="screen-btn" class="control-btn" title="Share Screen">🖥️</button>
+            <button id="hand-btn" class="control-btn" title="Raise Hand">✋</button>
+            <button id="chat-btn" class="control-btn" title="Chat">💬</button>
+            <button id="record-btn" class="control-btn" title="Record">⏺️</button>
+            <button id="leave-btn" class="control-btn exit" title="Leave">🚪</button>
+        </div>
+
+        <div id="chat-panel" class="hidden">
+            <div id="chat-header">الدردشة / Chat</div>
+            <div id="chat-messages"></div>
+            <div id="chat-input-area">
+                <input type="text" id="chat-input" placeholder="اكتب رسالة...">
+                <button id="send-btn">إرسال</button>
+            </div>
+        </div>
+    </div>
+    <script src="meet.js"></script>
+</body>
+</html>
