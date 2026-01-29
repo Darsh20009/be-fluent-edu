@@ -126,7 +126,7 @@ export default function UsersTab() {
 
   const filteredUsers = users.filter(u => filter === 'ALL' || u.role === filter)
   const students = users.filter(u => u.role === 'STUDENT')
-  const teachers = users.filter(u => u.role === 'TEACHER')
+  const teachers = users.filter(u => u.role === 'TEACHER' || (u.role === 'ADMIN' && u.name === 'Be Fluent'))
 
   return (
     <div className="space-y-6">

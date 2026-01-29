@@ -26,6 +26,19 @@ export async function GET(request: NextRequest) {
       })
       contacts.push(...admins)
 
+      // Add Admin as a teacher if they have a profile
+      const adminTeacher = await prisma.user.findFirst({
+        where: { role: 'ADMIN', TeacherProfile: { isNot: null } },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          profilePhoto: true,
+          role: true
+        }
+      })
+      if (adminTeacher) contacts.push(adminTeacher)
+
       const subscription = await prisma.subscription.findFirst({
         where: {
           studentId: userId,
