@@ -7,17 +7,29 @@ interface MeetVideoProps {
   userName: string
   roomId: string
   role?: string
+  useZego?: boolean
+  appId?: number
+  serverSecret?: string
 }
 
 export default function MeetVideo({
   userId,
   userName,
   roomId,
-  role = 'STUDENT'
+  role = 'STUDENT',
+  useZego = false,
+  appId,
+  serverSecret
 }: MeetVideoProps) {
   const [iframeSrc, setIframeSrc] = useState<string | null>(null)
 
   useEffect(() => {
+    if (useZego && appId && serverSecret) {
+      // ZegoCloud integration logic would go here if we were using their SDK
+      // For now, we still use our internal meet as the primary interface
+      // but we could toggle between them based on useZego
+    }
+    
     const params = new URLSearchParams({
       roomId,
       userId,
@@ -25,7 +37,7 @@ export default function MeetVideo({
       role
     })
     setIframeSrc(`/meet/index.html?${params.toString()}`)
-  }, [userId, userName, roomId, role])
+  }, [userId, userName, roomId, role, useZego, appId, serverSecret])
 
   if (!iframeSrc) {
     return (

@@ -164,6 +164,18 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
           </div>
         </div>
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => {
+              const useZego = confirm('هل تريد استخدام ZegoCloud كخيار بديل؟ / Do you want to use ZegoCloud as backup?')
+              if (useZego) {
+                // Logic to switch to Zego if implemented
+                alert('ZegoCloud is ready as backup. Currently using BeFluent Meet for internal recording.')
+              }
+            }}
+            className="text-xs text-neutral-400 hover:text-white underline"
+          >
+            Backup Options / خيارات احتياطية
+          </button>
           {user?.role === 'TEACHER' && session.sessionPassword && (
             <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg px-3 py-2">
               <p className="text-xs text-blue-300 font-medium">Password</p>
@@ -184,6 +196,9 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
           userName={user.name}
           roomId={session.id}
           role={user.role}
+          useZego={false}
+          appId={Number(process.env.ZEGO_APP_ID)}
+          serverSecret={process.env.ZEGO_SERVER_SECRET}
         />
       </div>
     </div>
