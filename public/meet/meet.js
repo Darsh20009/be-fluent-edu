@@ -17,23 +17,64 @@ const recordingStatus = document.getElementById('recording-status');
 let mediaRecorder;
 let recordedChunks = [];
 let screenStream;
+const peerConnections = new Map();
+const remoteStreams = new Map();
+
+const ICE_SERVERS = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:19302' }
+    ]
+};
 
 async function init() {
-    socket = io('/');
+    socket = io('/', { path: '/api/socket/io' });
     
     try {
         myStream = await navigator.mediaDevices.getUserMedia({
             video: true,
-            audio: true
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
+            }
         });
         
-        const myVideo = createVideoElement(userName, true);
-        addVideoStream(myVideo, myStream);
+        const myVideoContainer = createVideoContainer(userName + ' (أنت)', true);
+        const myVideo = myVideoContainer.querySelector('video');
+        myVideo.srcObject = myStream;
+        myVideo.muted = true;
+        videoGrid.appendChild(myVideoContainer);
 
         socket.emit('join-room', roomId, userId, userName);
 
-        socket.on('user-connected', (data) => {
+        socket.on('existing-users', async (users) => {
+            console.log('📋 Existing users:', users);
+            for (const user of users) {
+                await createPeerConnection(user.socketId, user.userName, true);
+            }
+        });
+
+        socket.on('user-connected', async (data) => {
+            console.log(`👤 ${data.userName} joined`);
             appendMessage('النظام', `${data.userName} انضم إلى الحصة`);
+        });
+
+        socket.on('offer', async (data) => {
+            console.log('📥 Received offer from:', data.fromSocketId);
+            await handleOffer(data);
+        });
+
+        socket.on('answer', async (data) => {
+            console.log('📥 Received answer from:', data.fromSocketId);
+            await handleAnswer(data);
+        });
+
+        socket.on('ice-candidate', async (data) => {
+            await handleIceCandidate(data);
         });
 
         socket.on('receive-message', (data) => {
@@ -45,41 +86,155 @@ async function init() {
         });
 
         socket.on('user-disconnected', (data) => {
+            console.log('❌ User disconnected:', data.socketId);
             appendMessage('النظام', `غادر أحد المستخدمين`);
+            
+            if (peerConnections.has(data.socketId)) {
+                peerConnections.get(data.socketId).close();
+                peerConnections.delete(data.socketId);
+            }
+            
+            const videoContainer = document.getElementById(`video-${data.socketId}`);
+            if (videoContainer) {
+                videoContainer.remove();
+            }
         });
 
     } catch (err) {
         console.error('Failed to get local stream', err);
+        appendMessage('النظام', '⚠️ يرجى السماح بالوصول للكاميرا والمايكروفون');
         alert('يرجى السماح بالوصول للكاميرا والمايكروفون لبدء الحصة');
     }
 }
 
-function addVideoStream(video, stream) {
-    video.srcObject = stream;
-    video.addEventListener('loadedmetadata', () => {
-        video.play();
+async function createPeerConnection(targetSocketId, targetUserName, isInitiator) {
+    console.log(`🔗 Creating peer connection with ${targetUserName} (initiator: ${isInitiator})`);
+    
+    const pc = new RTCPeerConnection(ICE_SERVERS);
+    peerConnections.set(targetSocketId, pc);
+    
+    myStream.getTracks().forEach(track => {
+        pc.addTrack(track, myStream);
     });
-    videoGrid.append(video);
+    
+    pc.onicecandidate = (event) => {
+        if (event.candidate) {
+            socket.emit('ice-candidate', {
+                candidate: event.candidate,
+                targetSocketId: targetSocketId
+            });
+        }
+    };
+    
+    pc.ontrack = (event) => {
+        console.log('🎥 Received remote track from:', targetSocketId);
+        let videoContainer = document.getElementById(`video-${targetSocketId}`);
+        
+        if (!videoContainer) {
+            videoContainer = createVideoContainer(targetUserName, false);
+            videoContainer.id = `video-${targetSocketId}`;
+            videoGrid.appendChild(videoContainer);
+        }
+        
+        const video = videoContainer.querySelector('video');
+        if (event.streams[0]) {
+            video.srcObject = event.streams[0];
+            remoteStreams.set(targetSocketId, event.streams[0]);
+        }
+    };
+    
+    pc.onconnectionstatechange = () => {
+        console.log(`📡 Connection state with ${targetUserName}:`, pc.connectionState);
+        if (pc.connectionState === 'connected') {
+            appendMessage('النظام', `✅ متصل مع ${targetUserName}`);
+        }
+    };
+    
+    if (isInitiator) {
+        try {
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            
+            socket.emit('offer', {
+                offer: offer,
+                targetSocketId: targetSocketId,
+                userName: userName
+            });
+        } catch (err) {
+            console.error('Error creating offer:', err);
+        }
+    }
+    
+    return pc;
 }
 
-function createVideoElement(label, isSelf = false) {
-    const div = document.createElement('div');
-    div.className = 'video-item';
+async function handleOffer(data) {
+    let pc = peerConnections.get(data.fromSocketId);
+    
+    if (!pc) {
+        pc = await createPeerConnection(data.fromSocketId, data.userName, false);
+    }
+    
+    try {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        
+        socket.emit('answer', {
+            answer: answer,
+            targetSocketId: data.fromSocketId
+        });
+    } catch (err) {
+        console.error('Error handling offer:', err);
+    }
+}
+
+async function handleAnswer(data) {
+    const pc = peerConnections.get(data.fromSocketId);
+    if (pc) {
+        try {
+            await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+        } catch (err) {
+            console.error('Error handling answer:', err);
+        }
+    }
+}
+
+async function handleIceCandidate(data) {
+    const pc = peerConnections.get(data.fromSocketId);
+    if (pc) {
+        try {
+            await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+        } catch (err) {
+            console.error('Error adding ICE candidate:', err);
+        }
+    }
+}
+
+function createVideoContainer(label, isSelf = false) {
+    const container = document.createElement('div');
+    container.className = 'video-item';
+    
     const video = document.createElement('video');
+    video.autoplay = true;
+    video.playsInline = true;
     if (isSelf) video.muted = true;
-    const p = document.createElement('p');
-    p.innerText = label;
-    p.className = 'video-label';
-    div.append(video);
-    div.append(p);
-    return video;
+    
+    const labelEl = document.createElement('p');
+    labelEl.className = 'video-label';
+    labelEl.innerText = label;
+    
+    container.appendChild(video);
+    container.appendChild(labelEl);
+    
+    return container;
 }
 
 function appendMessage(user, message) {
     const div = document.createElement('div');
     div.className = 'message';
     div.innerHTML = `<strong>${user}:</strong> ${message}`;
-    chatMessages.append(div);
+    chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
@@ -92,9 +247,16 @@ sendBtn.onclick = () => {
     }
 };
 
+chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        sendBtn.click();
+    }
+});
+
 handBtn.onclick = () => {
     socket.emit('raise-hand', { roomId, userId, userName });
     handBtn.classList.toggle('active');
+    appendMessage('النظام', '✋ رفعت يدك');
 };
 
 screenBtn.onclick = async () => {
@@ -106,12 +268,16 @@ screenBtn.onclick = async () => {
     }
     try {
         screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        const videoElement = createVideoElement(`${userName} (Screen Share)`);
-        addVideoStream(videoElement, screenStream);
+        const videoContainer = createVideoContainer(`${userName} (مشاركة الشاشة)`);
+        videoContainer.id = 'screen-share';
+        const video = videoContainer.querySelector('video');
+        video.srcObject = screenStream;
+        videoGrid.appendChild(videoContainer);
         screenBtn.classList.add('active');
         
         screenStream.getVideoTracks()[0].onended = () => {
-            videoElement.parentElement.remove();
+            const screenContainer = document.getElementById('screen-share');
+            if (screenContainer) screenContainer.remove();
             screenBtn.classList.remove('active');
             screenStream = null;
         };
@@ -127,7 +293,6 @@ recordBtn.onclick = () => {
         recordingStatus.classList.add('hidden');
     } else {
         recordedChunks = [];
-        // Combine audio and video for recording
         const tracks = [...myStream.getTracks()];
         if (screenStream) tracks.push(...screenStream.getTracks());
         
@@ -142,7 +307,6 @@ recordBtn.onclick = () => {
             const blob = new Blob(recordedChunks, { type: 'video/webm' });
             const url = URL.createObjectURL(blob);
             
-            // Download to teacher's device
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
@@ -150,8 +314,7 @@ recordBtn.onclick = () => {
             document.body.appendChild(a);
             a.click();
             
-            // Success notification
-            appendMessage('النظام', '✅ تم حفظ تسجيل الحصة على جهازك. سيتم الآن تنظيف الذاكرة المؤقتة.');
+            appendMessage('النظام', '✅ تم حفظ تسجيل الحصة على جهازك');
             
             setTimeout(() => {
                 document.body.removeChild(a);
@@ -167,17 +330,23 @@ recordBtn.onclick = () => {
 };
 
 document.getElementById('mic-btn').onclick = () => {
-    const enabled = myStream.getAudioTracks()[0].enabled;
-    myStream.getAudioTracks()[0].enabled = !enabled;
-    document.getElementById('mic-btn').classList.toggle('active', !enabled);
-    document.getElementById('mic-btn').innerText = enabled ? '🔇' : '🎙️';
+    const audioTrack = myStream.getAudioTracks()[0];
+    if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled;
+        document.getElementById('mic-btn').classList.toggle('active', audioTrack.enabled);
+        document.getElementById('mic-btn').innerText = audioTrack.enabled ? '🎙️' : '🔇';
+        appendMessage('النظام', audioTrack.enabled ? '🎙️ المايكروفون مفعل' : '🔇 المايكروفون مغلق');
+    }
 };
 
 document.getElementById('cam-btn').onclick = () => {
-    const enabled = myStream.getVideoTracks()[0].enabled;
-    myStream.getVideoTracks()[0].enabled = !enabled;
-    document.getElementById('cam-btn').classList.toggle('active', !enabled);
-    document.getElementById('cam-btn').innerText = enabled ? '📷 (off)' : '📷';
+    const videoTrack = myStream.getVideoTracks()[0];
+    if (videoTrack) {
+        videoTrack.enabled = !videoTrack.enabled;
+        document.getElementById('cam-btn').classList.toggle('active', videoTrack.enabled);
+        document.getElementById('cam-btn').innerText = videoTrack.enabled ? '📷' : '📷❌';
+        appendMessage('النظام', videoTrack.enabled ? '📷 الكاميرا مفعلة' : '📷❌ الكاميرا مغلقة');
+    }
 };
 
 document.getElementById('chat-btn').onclick = () => {
@@ -186,6 +355,13 @@ document.getElementById('chat-btn').onclick = () => {
 
 document.getElementById('leave-btn').onclick = () => {
     if (confirm('هل أنت متأكد من مغادرة الحصة؟')) {
+        peerConnections.forEach(pc => pc.close());
+        if (myStream) {
+            myStream.getTracks().forEach(track => track.stop());
+        }
+        if (screenStream) {
+            screenStream.getTracks().forEach(track => track.stop());
+        }
         window.location.href = '/dashboard';
     }
 };
