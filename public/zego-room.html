@@ -6,7 +6,35 @@
     <title>BeFluent Meet</title>
     <style>
         #root { width: 100vw; height: 100vh; }
-        body { margin: 0; overflow: hidden; background: #000; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        
+        /* Customizing Zego UI to look like Zoom */
+        .zego-uikit-prebuilt-container {
+            background-color: #000 !important;
+        }
+
+        .zego-uikit-prebuilt-footer {
+            background: rgba(28, 28, 30, 0.95) !important;
+            backdrop-filter: blur(10px) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+            padding: 12px 20px !important;
+        }
+
+        .zego-uikit-prebuilt-button {
+            border-radius: 12px !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .zego-uikit-prebuilt-video-container {
+            border-radius: 16px !important;
+            overflow: hidden !important;
+            margin: 4px !important;
+            border: 2px solid transparent !important;
+        }
+
+        .active-speaker {
+            border-color: #0E71EB !important; /* Zoom Blue */
+        }
     </style>
 </head>
 <body>
@@ -36,7 +64,7 @@
             zp.joinRoom({
                 container: document.querySelector('#root'),
                 scenario: {
-                    mode: ZegoUIKitPrebuilt.VideoConference,
+                    mode: ZegoUIKitPrebuilt.GroupCall, // More like Zoom Meeting
                 },
                 showScreenSharingButton: true,
                 showUserList: true,
@@ -49,8 +77,9 @@
                 showNonVideoUser: true,
                 showTextChat: true,
                 showUserList: true,
-                layout: "Auto",
+                layout: "Grid", // Zoom Style
                 showPreJoinView: true,
+                maxUsers: 50,
                 onJoinRoom: () => {
                     window.parent.postMessage({ type: 'zegoJoined' }, '*');
                 },
@@ -62,6 +91,10 @@
                 },
                 branding: {
                     logoURL: '/logo.png',
+                },
+                // Zoom-like features
+                lowerLeftNotification: {
+                    showUserJoinAndLeave: true,
                 },
                 // Admin specific powers
                 ...(isAdmin && {
