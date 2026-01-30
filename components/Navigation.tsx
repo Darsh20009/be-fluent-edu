@@ -46,6 +46,12 @@ export default function Navigation({ isAuthenticated = false, userRole }: Naviga
                 >
                   Grammar / القواعد
                 </Link>
+                <Link 
+                  href="/about-path" 
+                  className={`text-sm font-medium hover:text-[#10B981] dark:hover:text-blue-400 transition-colors ${pathname === '/about-path' ? 'text-[#10B981] dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
+                >
+                  {t('aboutPath')}
+                </Link>
               </div>
             )}
           </div>

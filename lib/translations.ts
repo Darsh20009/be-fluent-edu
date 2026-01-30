@@ -3,6 +3,7 @@ export const translations = {
     // Navigation
     home: 'الرئيسية',
     about: 'من نحن',
+    aboutPath: 'اعرف طريقك',
     packages: 'الباقات',
     contact: 'اتصل بنا',
     login: 'تسجيل الدخول',
@@ -112,6 +113,7 @@ export const translations = {
     // Navigation
     home: 'Home',
     about: 'About',
+    aboutPath: 'About Path',
     packages: 'Plans',
     contact: 'Contact',
     login: 'Login',
