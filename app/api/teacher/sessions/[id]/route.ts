@@ -67,10 +67,18 @@ export async function PUT(
 
     const { id } = await params
     
-    const body = await parseJsonBody<{ title?: string; startTime?: string; endTime?: string; status?: string }>(request)
+    const body = await parseJsonBody<{ 
+      title?: string; 
+      startTime?: string; 
+      endTime?: string; 
+      status?: string;
+      sessionPassword?: string;
+      externalLink?: string;
+      externalLinkType?: string;
+    }>(request)
     if (isNextResponse(body)) return body
 
-    const { title, startTime, endTime, status } = body
+    const { title, startTime, endTime, status, sessionPassword, externalLink, externalLinkType } = body
 
     const existingSession = await prisma.session.findUnique({
       where: { id }
@@ -127,6 +135,9 @@ export async function PUT(
       updateData.endTime = newEndTime
     }
     if (status !== undefined) updateData.status = String(status).trim()
+    if (sessionPassword !== undefined) updateData.sessionPassword = sessionPassword ? String(sessionPassword).trim() : null
+    if (externalLink !== undefined) updateData.externalLink = externalLink ? String(externalLink).trim() : null
+    if (externalLinkType !== undefined) updateData.externalLinkType = externalLinkType ? String(externalLinkType).trim() : null
     updateData.updatedAt = new Date()
 
     const updatedSession = await prisma.session.update({
