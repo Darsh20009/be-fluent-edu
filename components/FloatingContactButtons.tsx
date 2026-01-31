@@ -7,8 +7,18 @@ export default function FloatingContactButtons() {
   const [showLabel, setShowLabel] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowLabel(true), 2000);
-    return () => clearTimeout(timer);
+    // Initial entrance after 2s
+    const initialTimer = setTimeout(() => setShowLabel(true), 2000);
+    
+    // Cycle visibility every 10s (show for 5s, hide for 5s)
+    const interval = setInterval(() => {
+      setShowLabel(prev => !prev);
+    }, 5000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(interval);
+    };
   }, []);
 
   return (
