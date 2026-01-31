@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 import FloatingContactButtons from "@/components/FloatingContactButtons";
-import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, ArrowRight, CheckCircle, Star, Zap, ChevronLeft, ChevronRight, Headphones, GraduationCap, Trophy, Menu, X, Play, ArrowDown } from "lucide-react";
+import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, ArrowRight, CheckCircle, Star, Zap, ChevronLeft, ChevronRight, Headphones, GraduationCap, Trophy, Menu, X, Play, ArrowDown, Map as MapIcon } from "lucide-react";
 
 const heroImages = [
   { src: "/assets/hero-1.png", alt: "Why Us - Be Fluent" },
@@ -85,6 +85,7 @@ export default function Home() {
                 { label: "الرئيسية", href: "/" },
                 { label: "باقاتنا", href: "/packages" },
                 { label: "القواعد", href: "/grammar" },
+                { label: "اعرف طريقك", href: "/about-path" },
               ].map((item, i) => (
                 <Link 
                   key={i} 
@@ -130,6 +131,7 @@ export default function Home() {
                   { label: "الرئيسية", href: "/", icon: <BookOpen className="w-5 h-5" /> },
                   { label: "باقاتنا", href: "/packages", icon: <Target className="w-5 h-5" /> },
                   { label: "القواعد", href: "/grammar", icon: <Globe className="w-5 h-5" /> },
+                  { label: "اعرف طريقك", href: "/about-path", icon: <MapIcon className="w-5 h-5" /> },
                 ].map((item, i) => (
                   <Link 
                     key={i} 
@@ -205,6 +207,10 @@ export default function Home() {
                     <span className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
                     <span className="relative">ابدأ رحلتك الآن</span>
                     <ArrowRight className="relative w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" />
+                  </Link>
+                  <Link href="/about-path" className="group px-8 py-4 bg-white border-2 border-gray-200 text-[#1F2937] rounded-2xl text-lg font-bold hover:border-[#10B981] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
+                    <MapIcon className="w-5 h-5 text-[#10B981] group-hover:scale-110 transition-transform" />
+                    <span>اعرف طريقك</span>
                   </Link>
                   <a href="https://api.whatsapp.com/send/?phone=201091515594" target="_blank" rel="noopener noreferrer" className="group px-8 py-4 bg-white border-2 border-gray-200 text-[#1F2937] rounded-2xl text-lg font-bold hover:border-[#10B981] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
                     <MessageCircle className="w-5 h-5 text-[#10B981] group-hover:scale-110 transition-transform" />
