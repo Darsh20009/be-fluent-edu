@@ -12,9 +12,9 @@ expertMode = true
 NEXTAUTH_URL = "https://befluent-edu.online"
 NEXTAUTH_SECRET = "youspeak-secret-key-2025"
 MONGODB_URI = "mongodb+srv://Vercel-Admin-youspeak:TOTY20009a@youspeak.dsouarr.mongodb.net/youspeak?appName=youspeak"
-ZEGO_APP_ID = "1093321503"
-ZEGO_APP_SIGN = "6e57bac43a9b6199fec4c8c55c3b0b4932097760c06edaf3b035c4dc171add3a"
-ZEGO_SERVER_SECRET = "5323a6030d8d8335117b43739f567b6e"
+ZEGO_APP_ID = "1050328575"
+ZEGO_APP_SIGN = "a670adea7a1b672361f9ba72dad45f7956b6acf05cac8fcb7bbbc5fd73196eb3"
+ZEGO_SERVER_SECRET = "49f95a351146fe9c017267e05b133f67"
 
 [workflows]
 runButton = "Project"
