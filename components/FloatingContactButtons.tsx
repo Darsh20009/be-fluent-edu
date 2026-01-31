@@ -22,7 +22,7 @@ export default function FloatingContactButtons() {
   }, []);
 
   return (
-    <div className="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 z-50 flex flex-col items-end gap-3">
+    <div className={`fixed bottom-6 right-6 sm:bottom-10 sm:right-10 z-50 flex flex-col items-end gap-3 transition-all duration-1000 ${showLabel ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}>
       <a
         href="https://api.whatsapp.com/send/?phone=201091515594"
         target="_blank"
@@ -30,11 +30,7 @@ export default function FloatingContactButtons() {
         className="group relative flex items-center"
       >
         {/* Elegant Label */}
-        <div className={`
-          mr-4 px-5 py-2.5 bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-emerald-100/50 
-          transition-all duration-700 ease-out flex items-center gap-3
-          ${showLabel ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10 pointer-events-none'}
-        `}>
+        <div className="mr-4 px-5 py-2.5 bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-emerald-100/50 flex items-center gap-3">
           <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
           <span className="text-[#1F2937] font-bold text-sm tracking-wide rtl:ml-2">تواصل معنا الآن</span>
         </div>
