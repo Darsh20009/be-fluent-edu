@@ -73,3 +73,18 @@ export function getCertificateEmailTemplate(studentName: string, level: string) 
     </div>
   `;
 }
+
+export function getSubscriptionConfirmationTemplate(studentName: string) {
+  return `
+    <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
+      <h2 style="color: #10B981;">تأكيد الاشتراك / Subscription Confirmed</h2>
+      <p>مرحباً ${studentName}،</p>
+      <p>يسعدنا إبلاغك بأنه تم تأكيد اشتراكك بنجاح في Be Fluent Academy.</p>
+      <p>يمكنك الآن الوصول إلى جميع ميزات المنصة والبدء في رحلة تعلمك.</p>
+      <div style="margin-top: 20px;">
+        <a href="https://befluent.academy/dashboard/student" style="background-color: #10B981; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">انتقل إلى لوحة التحكم</a>
+      </div>
+      <p style="margin-top: 30px; font-size: 12px; color: #6b7280;">Be Fluent Academy - تعليم الإنجليزية بطلاقة</p>
+    </div>
+  `;
+}
