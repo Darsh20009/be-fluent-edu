@@ -41,10 +41,8 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    if (isActive) {
-      fetchAssignments()
-    }
-  }, [isActive])
+    fetchAssignments()
+  }, [])
 
   async function fetchAssignments() {
     try {
@@ -87,9 +85,13 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
         setAnswer('')
         setSelectedOption(null)
         setSelectedAssignment(null)
+      } else {
+        const err = await response.json()
+        alert(err.error || 'Failed to submit')
       }
     } catch (error) {
       console.error('Error submitting assignment:', error)
+      alert('Error submitting')
     } finally {
       setSubmitting(false)
     }
@@ -97,19 +99,6 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
 
   const pendingAssignments = assignments.filter(a => a.submissions.length === 0)
   const submittedAssignments = assignments.filter(a => a.submissions.length > 0)
-
-  if (!isActive) {
-    return (
-      <div>
-        <h2 className="text-3xl font-bold text-[#10B981] mb-6">
-          My Homework / واجباتي
-        </h2>
-        <Alert variant="warning">
-          <p>Activate your account to access homework / قم بتفعيل حسابك للوصول للواجبات</p>
-        </Alert>
-      </div>
-    )
-  }
 
   if (loading) {
     return (
@@ -121,9 +110,21 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-[#10B981]">
-        My Homework / واجباتي
-      </h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold text-[#10B981]">
+          My Homework / واجباتي
+        </h2>
+        {!isActive && (
+          <Badge variant="warning">Account Inactive / الحساب غير نشط</Badge>
+        )}
+      </div>
+
+      {!isActive && pendingAssignments.length === 0 && (
+        <Alert variant="warning">
+          <p>Activate your account to receive assignments from your teacher.</p>
+          <p>قم بتفعيل حسابك لتتمكن من استلام الواجبات من معلمك.</p>
+        </Alert>
+      )}
 
       <div>
         <h3 className="text-xl font-semibold text-gray-900 mb-4">
@@ -145,6 +146,7 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
                       <FileText className="h-5 w-5 text-[#10B981]" />
                       <h3 className="text-lg font-bold text-[#10B981]">{assignment.title}</h3>
                       <Badge variant="warning">Pending / معلق</Badge>
+                      <Badge variant="info" className="text-[10px]">{assignment.type}</Badge>
                     </div>
                     {assignment.description && (
                       <p className="text-gray-700 mb-2">{assignment.description}</p>
@@ -158,26 +160,21 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Clock className="h-4 w-4" />
                         <span>
-                          Due: {new Date(assignment.dueDate).toLocaleDateString('ar-EG', {
-                            weekday: 'short',
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
+                          Due: {new Date(assignment.dueDate).toLocaleDateString('ar-EG')}
                         </span>
                       </div>
                     )}
                   </div>
-                  {assignment.type === 'VIDEO' || assignment.type === 'IMAGE' ? (
-                    <a
-                      href={assignment.attachmentUrls || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block px-4 py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#003d6b] text-sm font-medium"
-                    >
-                      View / عرض
-                    </a>
-                  ) : (
+                  <div className="flex flex-col gap-2">
+                    {assignment.attachmentUrls && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(assignment.attachmentUrls!, '_blank')}
+                      >
+                        View Material / عرض المادة
+                      </Button>
+                    )}
                     <Button
                       variant="primary"
                       size="sm"
@@ -188,9 +185,9 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
                       }}
                     >
                       <Send className="h-4 w-4 mr-2" />
-                      Submit / سلّم
+                      Answer / إجابة
                     </Button>
-                  )}
+                  </div>
                 </div>
               </Card>
             ))}
@@ -198,16 +195,11 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
         )}
       </div>
 
-      <div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">
-          Submitted Assignments / واجبات مسلّمة ({submittedAssignments.length})
-        </h3>
-        {submittedAssignments.length === 0 ? (
-          <Alert variant="info">
-            <p>No submitted assignments yet.</p>
-            <p>لم تسلّم أي واجبات بعد.</p>
-          </Alert>
-        ) : (
+      {submittedAssignments.length > 0 && (
+        <div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            Submitted / واجبات مسلّمة ({submittedAssignments.length})
+          </h3>
           <div className="space-y-4">
             {submittedAssignments.map((assignment) => {
               const submission = assignment.submissions[0]
@@ -216,83 +208,85 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <FileText className="h-5 w-5 text-green-600" />
+                        <FileText className="h-5 w-5 text-[#10B981]" />
                         <h3 className="text-lg font-bold text-gray-900">{assignment.title}</h3>
                         {submission.grade !== null ? (
-                          <Badge variant="success">
-                            Graded: {submission.grade}/100
-                          </Badge>
+                          <Badge variant="success">Graded: {submission.grade}/100</Badge>
                         ) : (
-                          <Badge variant="info">
-                            Under Review / قيد المراجعة
-                          </Badge>
+                          <Badge variant="info">Under Review / قيد المراجعة</Badge>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">
-                        Submitted: {new Date(submission.submittedAt).toLocaleString('ar-EG')}
-                      </p>
                     </div>
                   </div>
-                  {submission.grammarErrors && JSON.parse(submission.grammarErrors).length > 0 ? (
-                    <div className="mb-3">
-                      <GrammarErrorHighlighter
-                        studentAnswer={submission.textAnswer || ''}
-                        errors={JSON.parse(submission.grammarErrors)}
-                        onErrorsChange={() => {}}
-                        readonly={true}
-                      />
-                    </div>
-                  ) : (
-                    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mb-3">
-                      <p className="text-sm text-gray-700 dark:text-gray-300 font-medium mb-1">Your Answer / إجابتك:</p>
-                      <p className="text-sm text-gray-800 dark:text-gray-200">{submission.textAnswer}</p>
+                  {submission.textAnswer && (
+                    <div className="bg-gray-50 p-3 rounded-lg mb-2">
+                      <p className="text-xs text-gray-500 mb-1">Your Answer:</p>
+                      <p className="text-sm">{submission.textAnswer}</p>
                     </div>
                   )}
                   {submission.feedback && (
-                    <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
-                      <p className="text-sm text-blue-900 dark:text-blue-100 font-medium mb-1">
-                        General Feedback / التعليق العام:
-                      </p>
-                      <p className="text-sm text-blue-800 dark:text-blue-200">{submission.feedback}</p>
+                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                      <p className="text-xs text-blue-600 font-bold mb-1">Feedback / ملاحظات:</p>
+                      <p className="text-sm text-blue-800">{submission.feedback}</p>
                     </div>
                   )}
                 </Card>
               )
             })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {selectedAssignment && (
         <Modal
           isOpen={true}
           onClose={() => setSelectedAssignment(null)}
-          title={`Submit: ${selectedAssignment.title}`}
+          title={selectedAssignment.title}
         >
           <div className="space-y-4">
             {selectedAssignment.description && (
-              <div>
-                <p className="font-medium text-gray-900 mb-1">Assignment Description:</p>
-                <p className="text-gray-700">{selectedAssignment.description}</p>
+              <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700">
+                {selectedAssignment.description}
               </div>
             )}
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Your Answer / إجابتك:
-              </label>
-              <textarea
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10B981] min-h-[200px]"
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                placeholder="Type your answer here... / اكتب إجابتك هنا..."
-              />
-            </div>
+
+            {selectedAssignment.type === 'MULTIPLE_CHOICE' && selectedAssignment.multipleChoice && (
+              <div className="space-y-3">
+                <p className="font-bold text-gray-900">{JSON.parse(selectedAssignment.multipleChoice).question}</p>
+                <div className="grid gap-2">
+                  {JSON.parse(selectedAssignment.multipleChoice).options.map((opt: string, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedOption(idx)}
+                      className={`p-3 text-left rounded-xl border transition-all ${selectedOption === idx ? 'bg-[#10B981] text-white border-[#10B981]' : 'bg-white border-gray-200 hover:border-[#10B981]'}`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedAssignment.type !== 'MULTIPLE_CHOICE' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Your Answer / إجابتك:
+                </label>
+                <textarea
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] min-h-[150px]"
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  placeholder="Type your answer here..."
+                />
+              </div>
+            )}
+
             <div className="flex gap-2">
               <Button
                 variant="primary"
                 fullWidth
                 onClick={handleSubmit}
-                disabled={submitting || !answer.trim()}
+                disabled={submitting}
               >
                 {submitting ? 'Submitting...' : 'Submit / تسليم'}
               </Button>

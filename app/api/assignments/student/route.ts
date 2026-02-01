@@ -10,11 +10,20 @@ export async function GET(request: NextRequest) {
 
     const assignments = await prisma.assignment.findMany({
       where: {
-        Session: {
-          SessionStudent: {
-            some: { studentId: student.userId }
+        OR: [
+          {
+            Session: {
+              SessionStudent: {
+                some: { studentId: student.userId }
+              }
+            }
+          },
+          {
+            Session: {
+              teacherId: 'admin'
+            }
           }
-        }
+        ]
       },
       include: {
         Session: {
@@ -28,6 +37,7 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             textAnswer: true,
+            selectedOption: true,
             grade: true,
             feedback: true,
             grammarErrors: true,
@@ -35,7 +45,7 @@ export async function GET(request: NextRequest) {
           }
         }
       },
-      orderBy: { dueDate: 'desc' }
+      orderBy: { createdAt: 'desc' }
     })
 
     // Transform to match frontend interface
@@ -89,7 +99,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Assignment not found' }, { status: 404 })
     }
 
-    if (assignment.Session.SessionStudent.length === 0) {
+    if (assignment.Session.teacherId !== 'admin' && assignment.Session.SessionStudent.length === 0) {
       return NextResponse.json({ error: 'You are not enrolled in this session' }, { status: 403 })
     }
 

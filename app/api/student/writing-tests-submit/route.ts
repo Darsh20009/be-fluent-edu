@@ -51,7 +51,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Writing test not found' }, { status: 404 })
     }
 
-    if (!test.TeacherProfile.AssignedSubscriptions.length) {
+    // Allow submission if it's an admin test OR if student is enrolled with the teacher
+    if (test.teacherId !== 'admin' && (!test.TeacherProfile || !test.TeacherProfile.AssignedSubscriptions.length)) {
       return NextResponse.json({ error: 'You are not enrolled with this teacher' }, { status: 403 })
     }
 

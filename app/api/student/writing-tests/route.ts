@@ -24,7 +24,10 @@ export async function GET(request: NextRequest) {
 
     const tests = await prisma.writingTest.findMany({
       where: {
-        teacherId: subscription.AssignedTeacher.id
+        OR: [
+          { teacherId: subscription.AssignedTeacher.id },
+          { teacherId: 'admin' }
+        ]
       },
       include: {
         WritingTestSubmission: {
