@@ -8,28 +8,34 @@ export async function GET(request: NextRequest) {
     const student = await requireStudent()
     if (isNextResponse(student)) return student
 
-    const assignments = await prisma.assignment.findMany({
-      where: {
-        OR: [
-          {
-            Session: {
-              SessionStudent: {
-                some: { studentId: student.userId }
-              }
-            }
-          },
-          {
-            Session: {
-              teacherId: 'admin'
+    const whereClause: any = {
+      OR: [
+        {
+          Session: {
+            SessionStudent: {
+              some: { studentId: student.userId }
             }
           }
-        ]
-      },
+        },
+        {
+          Session: {
+            teacherId: 'admin'
+          }
+        },
+        {
+          studentId: student.userId
+        }
+      ]
+    }
+
+    const assignments = await prisma.assignment.findMany({
+      where: whereClause,
       include: {
         Session: {
           select: {
             id: true,
-            title: true
+            title: true,
+            teacherId: true
           }
         },
         Submission: {
@@ -95,12 +101,15 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    if (!assignment || !assignment.Session) {
+    if (!assignment) {
       return NextResponse.json({ error: 'Assignment not found' }, { status: 404 })
     }
 
-    if (assignment.Session.teacherId !== 'admin' && assignment.Session.SessionStudent.length === 0) {
-      return NextResponse.json({ error: 'You are not enrolled in this session' }, { status: 403 })
+    const hasAccess = (assignment as any).studentId === student.userId || 
+                     (assignment.Session && (assignment.Session.teacherId === 'admin' || assignment.Session.SessionStudent.length > 0))
+
+    if (!hasAccess) {
+      return NextResponse.json({ error: 'Assignment not assigned to you' }, { status: 403 })
     }
 
     // Check if student has already submitted this assignment

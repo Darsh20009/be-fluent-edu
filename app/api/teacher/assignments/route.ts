@@ -17,9 +17,16 @@ export async function GET(request: NextRequest) {
 
     const assignments = await prisma.assignment.findMany({
       where: {
-        Session: {
-          teacherId: teacherProfile.id
-        }
+        OR: [
+          {
+            Session: {
+              teacherId: teacherProfile.id
+            }
+          },
+          {
+            teacherId: teacherProfile.id
+          }
+        ]
       },
       include: {
         Session: true,
@@ -74,7 +81,8 @@ export async function POST(request: NextRequest) {
       title,
       description: description || null,
       sessionId: sessionId || null,
-      dueDate: dueDate ? new Date(dueDate) : null
+      dueDate: dueDate ? new Date(dueDate) : null,
+      teacherId: teacherProfile.id
     }
     
     if (type) {

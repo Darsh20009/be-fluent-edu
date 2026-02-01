@@ -10,6 +10,8 @@ datasource db {
 model Assignment {
   id             String       @id @default(uuid()) @map("_id")
   sessionId      String?      
+  teacherId      String?      // ID of the teacher who created this (optional)
+  studentId      String?      // ID of the student this is assigned to (optional)
   title          String
   description    String?
   type           String       @default("TEXT")
