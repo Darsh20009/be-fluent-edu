@@ -125,6 +125,13 @@ export async function POST(request: NextRequest) {
           roomId,
           externalLink,
           externalLinkType
+        },
+        include: {
+          TeacherProfile: {
+            include: {
+              User: true
+            }
+          }
         }
       })
 
@@ -132,6 +139,11 @@ export async function POST(request: NextRequest) {
 
       // Add selected students to the session
       if (studentIds && Array.isArray(studentIds) && studentIds.length > 0) {
+        const studentDetails = await prisma.user.findMany({
+          where: { id: { in: studentIds } },
+          select: { email: true, name: true }
+        })
+
         for (const studentId of studentIds) {
           try {
             await prisma.sessionStudent.create({
@@ -143,6 +155,20 @@ export async function POST(request: NextRequest) {
           } catch (err) {
             console.warn(`Could not add student ${studentId} to session:`, err)
           }
+        }
+
+        // Send email notifications
+        try {
+          const { sendEmail, getSessionEmailTemplate } = await import('@/lib/email')
+          await Promise.all(studentDetails.map(student => 
+            sendEmail({
+              to: student.email,
+              subject: `حصة جديدة مجدولة: ${title}`,
+              html: getSessionEmailTemplate(student.name, title, startDate.toLocaleString('ar-EG'))
+            })
+          ))
+        } catch (emailError) {
+          console.error('Failed to send session notification emails:', emailError)
         }
       }
 

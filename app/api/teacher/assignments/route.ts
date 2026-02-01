@@ -122,6 +122,11 @@ export async function POST(request: NextRequest) {
         data: { sessionId: tempSession.id }
       })
 
+      const studentDetails = await prisma.user.findMany({
+        where: { id: { in: studentIds } },
+        select: { email: true, name: true }
+      })
+
       for (const studentId of studentIds) {
         await prisma.sessionStudent.create({
           data: {
@@ -132,6 +137,39 @@ export async function POST(request: NextRequest) {
         }).catch(() => {
           // Ignore duplicate errors
         })
+      }
+
+      // Send email notifications
+      try {
+        const { sendEmail, getAssignmentEmailTemplate } = await import('@/lib/email')
+        await Promise.all(studentDetails.map(student => 
+          sendEmail({
+            to: student.email,
+            subject: `واجب جديد: ${title}`,
+            html: getAssignmentEmailTemplate(student.name, title, dueDate ? new Date(dueDate).toLocaleString('ar-EG') : 'غير محدد')
+          })
+        ))
+      } catch (emailError) {
+        console.error('Failed to send assignment notification emails:', emailError)
+      }
+    } else if (sessionId) {
+      // Find students in that session and notify them
+      const sessionStudents = await prisma.sessionStudent.findMany({
+        where: { sessionId },
+        include: { User: true }
+      })
+
+      try {
+        const { sendEmail, getAssignmentEmailTemplate } = await import('@/lib/email')
+        await Promise.all(sessionStudents.map(ss => 
+          sendEmail({
+            to: ss.User.email,
+            subject: `واجب جديد: ${title}`,
+            html: getAssignmentEmailTemplate(ss.User.name, title, dueDate ? new Date(dueDate).toLocaleString('ar-EG') : 'غير محدد')
+          })
+        ))
+      } catch (emailError) {
+        console.error('Failed to send assignment notification emails:', emailError)
       }
     }
 
