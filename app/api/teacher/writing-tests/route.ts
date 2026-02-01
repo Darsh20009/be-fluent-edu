@@ -50,7 +50,6 @@ export async function POST(request: NextRequest) {
 
     const test = await prisma.writingTest.create({
       data: {
-        id: `wtest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         teacherId: teacher.teacherProfileId,
         title,
         titleAr: titleAr || null,

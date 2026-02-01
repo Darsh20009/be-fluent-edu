@@ -90,7 +90,10 @@ export async function POST(request: NextRequest) {
     }
 
     const assignment = await prisma.assignment.create({
-      data: assignmentData
+      data: {
+        ...assignmentData,
+        title: title.trim()
+      }
     })
 
     // If no sessionId but studentIds provided, create SessionStudents for each student
