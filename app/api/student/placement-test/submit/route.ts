@@ -3,12 +3,17 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const allQuestions = await prisma.placementQuestion.findMany();
+    const { searchParams } = new URL(request.url);
+    const testType = searchParams.get('testType') || 'PLACEMENT';
+
+    const allQuestions = await prisma.placementQuestion.findMany({
+      where: { testType }
+    });
     const shuffled = allQuestions.sort(() => 0.5 - Math.random());
     const selected = shuffled.slice(0, 20);
 
@@ -24,7 +29,7 @@ export async function POST(request: Request) {
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
-    const answers = body.answers;
+    const { answers, testType = 'PLACEMENT' } = body;
     let score = 0;
     const details = [];
 
@@ -48,6 +53,7 @@ export async function POST(request: Request) {
     const attempt = await prisma.placementTestAttempt.create({
       data: {
         studentId: session.user.id,
+        testType,
         score,
         percentage,
         levelResult: level,
@@ -56,14 +62,17 @@ export async function POST(request: Request) {
       }
     });
 
-    await prisma.studentProfile.update({
-      where: { userId: session.user.id },
-      data: { 
-        levelCurrent: level,
-        placementTestScore: score,
-        placementTestPercentage: Math.round(percentage)
-      }
-    });
+    // Only update profile level if it's a placement test
+    if (testType === 'PLACEMENT') {
+      await prisma.studentProfile.update({
+        where: { userId: session.user.id },
+        data: { 
+          levelCurrent: level,
+          placementTestScore: score,
+          placementTestPercentage: Math.round(percentage)
+        }
+      });
+    }
 
     return NextResponse.json({ score, percentage, level });
   } catch (error) {

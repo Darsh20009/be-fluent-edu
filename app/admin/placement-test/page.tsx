@@ -6,24 +6,36 @@ import { toast } from 'react-hot-toast';
 export default function AdminPlacementQuestions() {
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filterType, setFilterType] = useState('PLACEMENT');
   const [newQuestion, setNewQuestion] = useState({
     question: '',
     questionAr: '',
     options: ['', '', '', ''],
     correctAnswer: '',
     level: 'A1',
+    testType: 'PLACEMENT',
     category: 'Grammar'
   });
 
+  const testTypes = [
+    { id: 'PLACEMENT', name: 'Placement Test' },
+    { id: 'A1_FINAL', name: 'A1 Final' },
+    { id: 'A2_FINAL', name: 'A2 Final' },
+    { id: 'B1_FINAL', name: 'B1 Final' },
+    { id: 'B2_FINAL', name: 'B2 Final' },
+    { id: 'C1_FINAL', name: 'C1 Final' },
+  ];
+
   useEffect(() => {
     fetchQuestions();
-  }, []);
+  }, [filterType]);
 
   const fetchQuestions = async () => {
+    setLoading(true);
     try {
-      const res = await fetch('/api/admin/placement-test/questions');
+      const res = await fetch(`/api/admin/placement-test/questions?testType=${filterType}`);
       const data = await res.json();
-      setQuestions(data);
+      setQuestions(Array.isArray(data) ? data : []);
     } catch (error) {
       toast.error('فشل تحميل الأسئلة');
     } finally {
@@ -47,12 +59,11 @@ export default function AdminPlacementQuestions() {
       if (res.ok) {
         toast.success('تم إضافة السؤال بنجاح');
         setNewQuestion({
+          ...newQuestion,
           question: '',
           questionAr: '',
           options: ['', '', '', ''],
           correctAnswer: '',
-          level: 'A1',
-          category: 'Grammar'
         });
         fetchQuestions();
       }
@@ -61,14 +72,27 @@ export default function AdminPlacementQuestions() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center">جاري التحميل...</div>;
-
   return (
     <div className="p-8 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">إدارة بنك أسئلة تحديد المستوى</h1>
+      <h1 className="text-3xl font-bold mb-8">إدارة بنك الأسئلة والمستويات</h1>
       
+      <div className="flex gap-4 mb-8 bg-gray-100 p-4 rounded-xl">
+        <span className="font-bold self-center">عرض بنك:</span>
+        {testTypes.map(type => (
+          <button
+            key={type.id}
+            onClick={() => setFilterType(type.id)}
+            className={`px-4 py-2 rounded-lg transition ${
+              filterType === type.id ? 'bg-green-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            {type.name}
+          </button>
+        ))}
+      </div>
+
       <div className="bg-white p-6 rounded-2xl shadow-lg mb-10 border border-gray-100">
-        <h2 className="text-xl font-bold mb-6 text-green-600">إضافة سؤال جديد</h2>
+        <h2 className="text-xl font-bold mb-6 text-green-600">إضافة سؤال جديد لبنك ({filterType})</h2>
         <form onSubmit={handleAddQuestion} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <input 
@@ -87,6 +111,13 @@ export default function AdminPlacementQuestions() {
             />
             <div className="grid grid-cols-2 gap-2">
               <select 
+                value={newQuestion.testType}
+                onChange={e => setNewQuestion({...newQuestion, testType: e.target.value})}
+                className="p-3 border rounded-lg bg-green-50 font-bold"
+              >
+                {testTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+              <select 
                 value={newQuestion.level}
                 onChange={e => setNewQuestion({...newQuestion, level: e.target.value})}
                 className="p-3 border rounded-lg"
@@ -97,13 +128,6 @@ export default function AdminPlacementQuestions() {
                 <option value="B2">B2 Upper Intermediate</option>
                 <option value="C1">C1 Advanced</option>
               </select>
-              <input 
-                type="text" 
-                placeholder="التصنيف (Grammar...)"
-                value={newQuestion.category}
-                onChange={e => setNewQuestion({...newQuestion, category: e.target.value})}
-                className="p-3 border rounded-lg"
-              />
             </div>
           </div>
           
@@ -131,31 +155,37 @@ export default function AdminPlacementQuestions() {
               </div>
             ))}
             <button type="submit" className="w-full bg-green-600 text-white p-4 rounded-lg font-bold hover:bg-green-700 transition">
-              حفظ السؤال في البنك
+              حفظ في بنك {newQuestion.testType}
             </button>
           </div>
         </form>
       </div>
 
       <div className="grid gap-6">
-        <h2 className="text-xl font-bold">الأسئلة الحالية ({questions.length})</h2>
-        {questions.map((q, i) => (
-          <div key={q.id} className="bg-white p-6 rounded-xl shadow border border-gray-100 flex justify-between items-start">
-            <div>
-              <span className="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded mb-2 mr-2">{q.level}</span>
-              <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded mb-2">{q.category}</span>
-              <h3 className="text-lg font-bold">{q.question}</h3>
-              <p className="text-gray-500 text-sm mb-4">{q.questionAr}</p>
-              <div className="grid grid-cols-2 gap-2">
-                {JSON.parse(q.options).map((opt: string, idx: number) => (
-                  <div key={idx} className={`text-sm p-2 rounded ${opt === q.correctAnswer ? 'bg-green-50 text-green-700 font-bold border border-green-200' : 'bg-gray-50 text-gray-500'}`}>
-                    {opt}
-                  </div>
-                ))}
+        <h2 className="text-xl font-bold">الأسئلة الحالية في بنك {filterType} ({questions.length})</h2>
+        {loading ? (
+          <div className="text-center p-10">جاري التحميل...</div>
+        ) : questions.length === 0 ? (
+          <div className="text-center p-10 text-gray-400 bg-gray-50 rounded-xl">لا توجد أسئلة في هذا البنك بعد.</div>
+        ) : (
+          questions.map((q, i) => (
+            <div key={q.id} className="bg-white p-6 rounded-xl shadow border border-gray-100 flex justify-between items-start">
+              <div>
+                <span className="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded mb-2 mr-2">{q.level}</span>
+                <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded mb-2 mr-2">{q.testType}</span>
+                <h3 className="text-lg font-bold">{q.question}</h3>
+                {q.questionAr && <p className="text-gray-500 text-sm mb-4 text-right">{q.questionAr}</p>}
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {JSON.parse(q.options).map((opt: string, idx: number) => (
+                    <div key={idx} className={`text-sm p-2 rounded ${opt === q.correctAnswer ? 'bg-green-50 text-green-700 font-bold border border-green-200' : 'bg-gray-50 text-gray-500'}`}>
+                      {opt}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

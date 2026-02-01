@@ -557,6 +557,7 @@ model PlacementQuestion {
   options       String   // الخيارات (JSON string array)
   correctAnswer String   // الإجابة الصحيحة
   level         String   @default("A1") // المستوى المستهدف (A1, A2, B1, B2, C1)
+  testType      String   @default("PLACEMENT") // PLACEMENT, A1_FINAL, A2_FINAL, etc.
   category      String?  // Grammar, Vocabulary, Reading
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
@@ -565,6 +566,7 @@ model PlacementQuestion {
 model PlacementTestAttempt {
   id          String   @id @default(uuid()) @map("_id")
   studentId   String
+  testType    String   @default("PLACEMENT")
   score       Int      @default(0)
   percentage  Float    @default(0)
   levelResult String?  // المستوى الذي تم تحديده

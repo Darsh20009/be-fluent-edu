@@ -39,15 +39,20 @@ const defaultQuestions = [
   }
 ];
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const count = await prisma.placementQuestion.count();
-    if (count === 0) {
+    const { searchParams } = new URL(request.url);
+    const testType = searchParams.get('testType') || 'PLACEMENT';
+
+    const count = await prisma.placementQuestion.count({ where: { testType } });
+    if (count === 0 && testType === 'PLACEMENT') {
       await prisma.placementQuestion.createMany({
         data: defaultQuestions
       });
     }
-    const questions = await prisma.placementQuestion.findMany();
+    const questions = await prisma.placementQuestion.findMany({
+      where: { testType }
+    });
     return NextResponse.json(questions);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch questions' }, { status: 500 });
@@ -64,6 +69,7 @@ export async function POST(request: Request) {
         options: JSON.stringify(body.options),
         correctAnswer: body.correctAnswer,
         level: body.level,
+        testType: body.testType || 'PLACEMENT',
         category: body.category
       }
     });

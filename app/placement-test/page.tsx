@@ -45,7 +45,9 @@ export default function PlacementTestPage() {
 
   const fetchQuestions = async () => {
     try {
-      const res = await fetch('/api/student/placement-test/submit');
+      const urlParams = new URLSearchParams(window.location.search);
+      const testType = urlParams.get('testType') || 'PLACEMENT';
+      const res = await fetch(`/api/student/placement-test/submit?testType=${testType}`);
       const data = await res.json();
       if (Array.isArray(data)) {
         setQuestions(data);
@@ -82,10 +84,12 @@ export default function PlacementTestPage() {
 
     setSubmitting(true);
     try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const testType = urlParams.get('testType') || 'PLACEMENT';
       const res = await fetch('/api/student/placement-test/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers })
+        body: JSON.stringify({ answers, testType })
       });
       const data = await res.json();
       if (res.ok) {
