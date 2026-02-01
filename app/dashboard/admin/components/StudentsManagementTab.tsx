@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Users, UserCheck, BookOpen } from 'lucide-react'
+import { Users, UserCheck, BookOpen, Award, Plus, Loader2 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Alert from '@/components/ui/Alert'
+import Modal from '@/components/ui/Modal'
 
 interface Student {
   id: string
@@ -49,6 +50,20 @@ export default function StudentsManagementTab() {
   const [processing, setProcessing] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
   const [selectedTeacherId, setSelectedTeacherId] = useState('')
+  
+  // Certificate state
+  const [certModalStudent, setCertModalStudent] = useState<Student | null>(null)
+  const [certLevel, setCertLevel] = useState('')
+  const [issuingCert, setIssuingCert] = useState(false)
+
+  const levels = [
+    'Beginner (A1)',
+    'Elementary (A2)',
+    'Intermediate (B1)',
+    'Upper-Intermediate (B2)',
+    'Advanced (C1)',
+    'Proficiency (C2)'
+  ]
 
   useEffect(() => {
     fetchData()
@@ -74,6 +89,36 @@ export default function StudentsManagementTab() {
       console.error('Error fetching data:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleIssueCertificate() {
+    if (!certModalStudent || !certLevel) return
+
+    setIssuingCert(true)
+    try {
+      const res = await fetch('/api/admin/certificates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          studentId: certModalStudent.id,
+          level: certLevel
+        })
+      })
+
+      if (res.ok) {
+        alert('✓ Certificate issued successfully! / تم إصدار الشهادة بنجاح!')
+        setCertModalStudent(null)
+        setCertLevel('')
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to issue certificate')
+      }
+    } catch (error) {
+      console.error('Error issuing certificate:', error)
+      alert('Error issuing certificate')
+    } finally {
+      setIssuingCert(false)
     }
   }
 
@@ -270,7 +315,7 @@ export default function StudentsManagementTab() {
                     </p>
                   </div>
 
-                  <div>
+                  <div className="flex flex-col gap-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -279,6 +324,15 @@ export default function StudentsManagementTab() {
                     >
                       <BookOpen className="h-4 w-4 ml-2" />
                       {hasTeacher ? 'Change Teacher' : 'Assign Teacher'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                      onClick={() => setCertModalStudent(student)}
+                    >
+                      <Award className="h-4 w-4 ml-2" />
+                      Issue Certificate
                     </Button>
                     {!subscription && (
                       <p className="text-xs text-red-600 mt-1">
@@ -299,6 +353,64 @@ export default function StudentsManagementTab() {
           </Alert>
         )}
       </div>
+
+      {/* Issue Certificate Modal */}
+      {certModalStudent && (
+        <Modal
+          isOpen={!!certModalStudent}
+          onClose={() => setCertModalStudent(null)}
+          title="Issue Certificate / إصدار شهادة"
+        >
+          <div className="space-y-4 p-4">
+            <div>
+              <p className="font-bold text-gray-900 mb-1">Student: {certModalStudent.name}</p>
+              <p className="text-sm text-gray-500">{certModalStudent.email}</p>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Level / المستوى *
+              </label>
+              <select
+                value={certLevel}
+                onChange={(e) => setCertLevel(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-emerald-100 rounded-xl focus:border-emerald-500 outline-none transition-colors"
+              >
+                <option value="">Select Level...</option>
+                {levels.map(l => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="pt-4 flex gap-2">
+              <Button
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                onClick={handleIssueCertificate}
+                disabled={!certLevel || issuingCert}
+              >
+                {issuingCert ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                    Issuing...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 ml-2" />
+                    Issue Now / إصدار الآن
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setCertModalStudent(null)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }

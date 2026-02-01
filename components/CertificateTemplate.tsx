@@ -34,8 +34,15 @@ export default function CertificateTemplate({ studentName, level, date, certific
 
       {/* Header */}
       <div className="relative z-10 text-center mb-8">
-        <div className="flex justify-center mb-4">
-          <Image src="/logo.png" alt="Be Fluent Logo" width={120} height={120} className="object-contain" />
+        <div className="flex justify-between items-start mb-4">
+          <Image src="/logo.png" alt="Be Fluent Logo" width={100} height={100} className="object-contain" />
+          <div className="text-right">
+            <div className="flex items-center gap-2 justify-end mb-1">
+              <span className="text-xs font-bold text-gray-400">ISO 9001:2015</span>
+              <div className="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-[8px] font-bold text-gray-400">ISO</div>
+            </div>
+            <p className="text-[10px] text-gray-400 uppercase tracking-widest">Certified Institution</p>
+          </div>
         </div>
         <h1 className="text-5xl font-serif text-emerald-800 tracking-widest uppercase mb-2">Certificate of Completion</h1>
         <div className="h-1 w-48 bg-emerald-600 mx-auto" />

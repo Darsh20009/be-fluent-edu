@@ -17,6 +17,7 @@ import FloatingContactButtons from '@/components/FloatingContactButtons'
 import ChatBox from '@/components/ChatBox'
 import ConversationsList from '@/components/ConversationsList'
 import HomeTab from './components/HomeTab'
+import CertificatesTab from './components/CertificatesTab'
 import MyLearnTab from './components/MyLearnTab'
 import SessionsTab from './components/SessionsTab'
 import HomeworkTab from './components/HomeworkTab'
@@ -84,6 +85,7 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
 
   const primaryMenuItems = [
     { id: 'home', label: 'الرئيسية', icon: Home },
+    { id: 'certificates', label: 'شهاداتي', icon: Award },
     { id: 'sessions', label: 'الحصص المباشرة', icon: Video, disabled: !hasSubscription, premium: true },
     { id: 'lessons', label: 'الدروس التعليمية', icon: BookOpen, isLink: '/dashboard/student/lessons', badge: 'جديد' },
     { id: 'homework', label: 'الواجبات اليومية', icon: Trophy, disabled: !hasSubscription, premium: true },
@@ -262,6 +264,7 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
             <div className="bg-white min-h-[700px] border border-gray-100 shadow-sm rounded-[2rem] p-6 sm:p-10">
               {activeTab === 'home' && <HomeTab isActive={isActive} />}
               {activeTab === 'sessions' && <SessionsTab isActive={isActive} />}
+              {activeTab === 'certificates' && <CertificatesTab />}
               {activeTab === 'mylearn' && <MyLearnTab isActive={isActive} />}
               {activeTab === 'discover' && <DiscoverWordsTab isActive={isActive} />}
               {activeTab === 'test' && <TestWordsTab isActive={isActive} />}
