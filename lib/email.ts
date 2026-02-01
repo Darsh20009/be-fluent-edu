@@ -86,20 +86,38 @@ export function getCertificateEmailTemplate(studentName: string, level: string) 
   `;
 }
 
+export function getWelcomeEmailTemplate(studentName: string) {
+  return `
+    <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; max-width: 600px; margin: auto;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img src="${LOGO_URL}" alt="Be Fluent Academy Logo" style="max-width: 150px; height: auto;" />
+      </div>
+      <h2 style="color: #10B981; border-bottom: 2px solid #10B981; padding-bottom: 10px;">أهلاً بك في Be Fluent Academy! / Welcome to Be Fluent Academy!</h2>
+      <p>مرحباً ${studentName}،</p>
+      <p>يسعدنا جداً انضمامك إلينا! لقد تم استلام طلب تسجيلك بنجاح.</p>
+      <p>حسابك الآن في انتظار التفعيل من قبل الإدارة بعد مراجعة بيانات الاشتراك.</p>
+      <div style="margin-top: 20px; text-align: center;">
+        <a href="https://befluent.academy/dashboard/student" style="background-color: #10B981; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">انتقل إلى لوحة التحكم</a>
+      </div>
+      <p style="margin-top: 30px; font-size: 12px; color: #6b7280; border-top: 1px solid #eee; pt: 10px;">فريق Be Fluent Academy - تعلم الإنجليزية بطلاقة</p>
+    </div>
+  `;
+}
+
 export function getSubscriptionConfirmationTemplate(studentName: string) {
   return `
     <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; max-width: 600px; margin: auto;">
       <div style="text-align: center; margin-bottom: 20px;">
         <img src="${LOGO_URL}" alt="Be Fluent Academy Logo" style="max-width: 150px; height: auto;" />
       </div>
-      <h2 style="color: #10B981; border-bottom: 2px solid #10B981; padding-bottom: 10px;">تأكيد الاشتراك / Subscription Confirmed</h2>
+      <h2 style="color: #10B981; border-bottom: 2px solid #10B981; padding-bottom: 10px;">تأكيد تفعيل الاشتراك / Subscription Confirmed</h2>
       <p>مرحباً ${studentName}،</p>
-      <p>يسعدنا إبلاغك بأنه تم تأكيد اشتراكك بنجاح في Be Fluent Academy.</p>
+      <p>يسعدنا إبلاغك بأنه تم تأكيد وتفعيل اشتراكك بنجاح في Be Fluent Academy.</p>
       <p>يمكنك الآن الوصول إلى جميع ميزات المنصة والبدء في رحلة تعلمك.</p>
       <div style="margin-top: 20px; text-align: center;">
         <a href="https://befluent.academy/dashboard/student" style="background-color: #10B981; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">انتقل إلى لوحة التحكم</a>
       </div>
-      <p style="margin-top: 30px; font-size: 12px; color: #6b7280; border-top: 1px solid #eee; pt: 10px;">Be Fluent Academy - تعليم الإنجليزية بطلاقة</p>
+      <p style="margin-top: 30px; font-size: 12px; color: #6b7280; border-top: 1px solid #eee; pt: 10px;">فريق Be Fluent Academy - تعلم الإنجليزية بطلاقة</p>
     </div>
   `;
 }

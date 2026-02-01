@@ -85,6 +85,20 @@ export async function POST(request: Request) {
       },
     }) as any
 
+    // Send Welcome Email
+    if (validatedData.email) {
+      try {
+        const { sendEmail, getWelcomeEmailTemplate } = await import('@/lib/email')
+        await sendEmail({
+          to: validatedData.email,
+          subject: 'مرحباً بك في Be Fluent Academy! / Welcome to Be Fluent Academy!',
+          html: getWelcomeEmailTemplate(validatedData.name)
+        })
+      } catch (emailErr) {
+        console.error('Failed to send welcome email:', emailErr)
+      }
+    }
+
     return NextResponse.json({
       message: 'Registration successful. Your account is pending activation.',
       user: {
