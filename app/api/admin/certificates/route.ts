@@ -57,7 +57,7 @@ export async function POST(req: Request) {
         html: getCertificateEmailTemplate(certificate.User.name, level),
         attachments: pdfBase64 ? [{
           filename: `certificate-${level}.pdf`,
-          content: pdfBase64,
+          fileblob: pdfBase64,
           content_type: 'application/pdf'
         }] : undefined
       })
