@@ -53,6 +53,22 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
   const [useZego, setUseZego] = useState(false)
   const [zegoToken, setZegoToken] = useState<any>(null)
   const [zegoLoading, setZegoLoading] = useState(false)
+  const [currentTime, setCurrentTime] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const canJoinSession = useCallback(() => {
+    if (!session) return false
+    if (user?.role === 'TEACHER' || user?.role === 'ADMIN') return true
+    if (session.status === 'ACTIVE') return true
+    
+    const startTime = new Date(session.startTime)
+    const tenMinutesBefore = new Date(startTime.getTime() - 10 * 60000)
+    return currentTime >= tenMinutesBefore
+  }, [session, user, currentTime])
 
   const initializeZegoSession = async (sessionData: SessionData) => {
     try {
@@ -225,7 +241,29 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
 
       {/* Meet Video Container */}
       <div className="flex-1 w-full bg-black relative">
-        {session.externalLink ? (
+        {!canJoinSession() ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
+            <div className="bg-neutral-800/50 backdrop-blur-xl border border-neutral-700 rounded-3xl p-8 max-w-lg w-full text-center shadow-2xl">
+              <div className="w-20 h-20 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Video className="h-10 w-10 text-blue-500" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-3">
+                الحصة لم تبدأ بعد / Session Not Started
+              </h2>
+              <p className="text-neutral-400 mb-4 leading-relaxed">
+                يمكنك الانضمام قبل موعد الحصة بـ 10 دقائق.
+                <br />
+                You can join 10 minutes before the scheduled time.
+              </p>
+              <div className="text-[#10B981] font-mono text-xl bg-neutral-900/50 p-4 rounded-xl border border-neutral-700">
+                {new Date(session.startTime).toLocaleTimeString('ar-EG', { 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })}
+              </div>
+            </div>
+          </div>
+        ) : session.externalLink ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
             <div className="bg-neutral-800/50 backdrop-blur-xl border border-neutral-700 rounded-3xl p-8 max-w-lg w-full text-center shadow-2xl">
               <div className="w-20 h-20 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">

@@ -10,6 +10,7 @@ interface SessionEditModalProps {
     title: string
     startTime: string
     endTime: string
+    status?: string
     sessionPassword?: string
     externalLink?: string
     externalLinkType?: string
@@ -19,6 +20,7 @@ interface SessionEditModalProps {
     title: string; 
     startTime: string; 
     endTime: string;
+    status?: string;
     sessionPassword?: string;
     externalLink?: string;
     externalLinkType?: string;
@@ -39,6 +41,7 @@ export default function SessionEditModal({
   const [externalLinkType, setExternalLinkType] = useState(session.externalLinkType || 'ZOOM')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [allowEarlyJoin, setAllowEarlyJoin] = useState(session.status === 'ACTIVE')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -61,7 +64,8 @@ export default function SessionEditModal({
         endTime: new Date(endTime).toISOString(),
         sessionPassword: sessionPassword.trim() || undefined,
         externalLink: externalLink.trim() || undefined,
-        externalLinkType: externalLink ? externalLinkType : undefined
+        externalLinkType: externalLink ? externalLinkType : undefined,
+        status: allowEarlyJoin ? 'ACTIVE' : 'SCHEDULED'
       })
       onClose()
     } catch (err) {
@@ -129,6 +133,26 @@ export default function SessionEditModal({
             <h3 className="text-sm font-bold text-[#10B981] mb-4 uppercase tracking-wider">External Link / رابط خارجي</h3>
             
             <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-neutral-800/50 border border-neutral-700 rounded-xl">
+                <div>
+                  <label className="text-sm font-medium text-white block">
+                    Allow Early Join / تفعيل الدخول المبكر
+                  </label>
+                  <p className="text-[10px] text-neutral-500">
+                    يسمح للطلاب بالدخول في أي وقت حتى قبل الموعد
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAllowEarlyJoin(!allowEarlyJoin)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${allowEarlyJoin ? 'bg-[#10B981]' : 'bg-neutral-700'}`}
+                >
+                  <span
+                    className={`${allowEarlyJoin ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                  />
+                </button>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-neutral-300 mb-2">
                   Platform / المنصة

@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Teacher profile not found' }, { status: 404 })
     }
 
-    const { title, startTime, endTime, studentIds } = await request.json()
+    const { title, startTime, endTime, studentIds, externalLink, externalLinkType, status } = await request.json()
 
     if (!title || !startTime || !endTime) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -120,9 +120,11 @@ export async function POST(request: NextRequest) {
           title: String(title).trim(),
           startTime: startDate,
           endTime: endDate,
-          status: 'SCHEDULED', // Always start as SCHEDULED
+          status: status || 'SCHEDULED', 
           sessionPassword,
-          roomId
+          roomId,
+          externalLink,
+          externalLinkType
         }
       })
 
