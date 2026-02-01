@@ -15,7 +15,7 @@ MONGODB_URI = "mongodb+srv://Vercel-Admin-youspeak:TOTY20009a@youspeak.dsouarr.m
 ZEGO_APP_ID = "1050328575"
 ZEGO_APP_SIGN = "a670adea7a1b672361f9ba72dad45f7956b6acf05cac8fcb7bbbc5fd73196eb3"
 ZEGO_SERVER_SECRET = "49f95a351146fe9c017267e05b133f67"
-SMTP2GO_FROM_EMAIL = "noreply@befluent.academy"
+SMTP2GO_FROM_EMAIL = "noreply@befluent-edu.online"
 SMTP2GO_FROM_NAME = "Be Fluent Academy"
 SMTP2GO_API_KEY = "api-EA4791B9D0B14742A27A121B4CA5BC38"
 

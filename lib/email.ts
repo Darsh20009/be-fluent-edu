@@ -10,7 +10,7 @@ export async function sendEmail({ to, subject, html }: { to: string, subject: st
       body: JSON.stringify({
         api_key: apiKey,
         to: [to],
-        sender: process.env.SMTP2GO_FROM_EMAIL || 'noreply@befluent.academy',
+        sender: 'noreply@befluent-edu.online',
         subject: subject,
         html_body: html,
       }),
