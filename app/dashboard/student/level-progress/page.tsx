@@ -171,6 +171,41 @@ export default function LevelProgressPage() {
         <span>العودة للوحة التحكم</span>
       </Link>
 
+      {progress.progressPercentage >= 100 && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-emerald-600 text-white rounded-2xl p-6 text-center shadow-xl shadow-emerald-200"
+        >
+          <Award className="w-16 h-16 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-2">مبروك! لقد أتممت هذا المستوى</h2>
+          <p className="mb-6">يمكنك الآن استلام شهادة إتمام المستوى الخاصة بك</p>
+          <button
+            onClick={async () => {
+              try {
+                const res = await fetch('/api/student/certificates/auto', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ level: progress.currentLevel })
+                })
+                if (res.ok) {
+                  alert('✓ تم إصدار الشهادة بنجاح! يمكنك العثور عليها في قسم "شهاداتي"')
+                  window.location.href = '/dashboard/student'
+                } else {
+                  const data = await res.json()
+                  alert(data.error || 'فشل إصدار الشهادة')
+                }
+              } catch (e) {
+                alert('حدث خطأ أثناء إصدار الشهادة')
+              }
+            }}
+            className="bg-white text-emerald-600 px-8 py-3 rounded-xl font-bold hover:bg-emerald-50 transition-colors"
+          >
+            إصدار الشهادة الآن
+          </button>
+        </motion.div>
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
