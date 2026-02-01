@@ -10,8 +10,7 @@ export default function SplashScreen() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Check if splash screen has been shown before
-    const hasShownSplash = localStorage.getItem('hasShownSplash');
+    const hasShownSplash = sessionStorage.getItem('hasShownSplash');
     if (hasShownSplash) {
       setIsVisible(false);
       return;
@@ -31,7 +30,7 @@ export default function SplashScreen() {
 
     const hideTimer = setTimeout(() => {
       setIsVisible(false);
-      localStorage.setItem('hasShownSplash', 'true');
+      sessionStorage.setItem('hasShownSplash', 'true');
     }, 2000);
 
     return () => {
@@ -40,7 +39,7 @@ export default function SplashScreen() {
     };
   }, []);
 
-  if (!mounted && typeof window !== 'undefined' && localStorage.getItem('hasShownSplash')) return null;
+  if (!mounted && typeof window !== 'undefined' && sessionStorage.getItem('hasShownSplash')) return null;
   if (!mounted) return null;
 
   return (
@@ -48,140 +47,140 @@ export default function SplashScreen() {
       {isVisible && (
         <motion.div
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 1.1 }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden backdrop-blur-[98%]"
+          exit={{ opacity: 0, scale: 1.05 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
         >
-          {/* Gradient Background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-emerald-50/90 to-teal-50/90"></div>
+          {/* Background with blur effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-emerald-50/80 to-teal-50/80 backdrop-blur-xl"></div>
           
-          {/* Animated Background Shapes */}
+          {/* Animated Background Circles - Responsive sizes */}
           <div className="absolute inset-0 overflow-hidden">
             <motion.div
               animate={{ 
-                scale: [1, 1.2, 1],
-                rotate: [0, 180, 360],
+                scale: [1, 1.15, 1],
+                rotate: [0, 90, 180],
               }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="absolute -top-1/4 -right-1/4 w-[600px] h-[600px] bg-gradient-to-br from-[#10B981]/10 to-emerald-200/20 rounded-full blur-3xl"
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+              className="absolute -top-[20%] -right-[20%] w-[50vw] h-[50vw] max-w-[400px] max-h-[400px] bg-gradient-to-br from-[#10B981]/15 to-emerald-300/20 rounded-full blur-3xl"
             />
             <motion.div
               animate={{ 
-                scale: [1.2, 1, 1.2],
-                rotate: [360, 180, 0],
+                scale: [1.1, 1, 1.1],
+                rotate: [180, 90, 0],
               }}
-              transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-              className="absolute -bottom-1/4 -left-1/4 w-[500px] h-[500px] bg-gradient-to-tr from-teal-200/20 to-[#10B981]/10 rounded-full blur-3xl"
+              transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+              className="absolute -bottom-[20%] -left-[20%] w-[45vw] h-[45vw] max-w-[350px] max-h-[350px] bg-gradient-to-tr from-teal-300/20 to-[#10B981]/15 rounded-full blur-3xl"
             />
           </div>
 
-          {/* Floating Particles */}
+          {/* Floating Particles - Fewer on mobile */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(12)].map((_, i) => (
+            {[...Array(8)].map((_, i) => (
               <motion.div
                 key={i}
                 initial={{ 
-                  x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-                  y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800),
+                  x: `${10 + (i * 10)}%`,
+                  y: `${20 + (i * 8)}%`,
                   opacity: 0
                 }}
                 animate={{ 
-                  y: [null, Math.random() * -200 - 100],
-                  opacity: [0, 0.6, 0]
+                  y: [`${20 + (i * 8)}%`, `${-10}%`],
+                  opacity: [0, 0.5, 0]
                 }}
                 transition={{ 
-                  duration: 3 + Math.random() * 2,
+                  duration: 3 + (i * 0.3),
                   repeat: Infinity,
-                  delay: Math.random() * 2,
+                  delay: i * 0.3,
                   ease: "easeOut"
                 }}
-                className="absolute w-2 h-2 rounded-full bg-[#10B981]/40"
+                className="absolute w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#10B981]/30"
               />
             ))}
           </div>
 
-          {/* Main Content */}
-          <div className="relative z-10 text-center px-8">
-            {/* Logo Container */}
+          {/* Main Content - Responsive */}
+          <div className="relative z-10 text-center px-6 sm:px-8 w-full max-w-sm sm:max-w-md">
+            {/* Logo Container - Responsive */}
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ 
                 type: "spring",
-                stiffness: 200,
-                damping: 20,
-                duration: 0.8
+                stiffness: 180,
+                damping: 18,
+                duration: 0.7
               }}
-              className="relative mx-auto mb-8"
+              className="relative mx-auto mb-6 sm:mb-8"
             >
-              {/* Glowing Ring */}
+              {/* Glowing Ring - Responsive */}
               <motion.div
                 animate={{ 
-                  scale: [1, 1.1, 1],
-                  opacity: [0.5, 0.8, 0.5]
+                  scale: [1, 1.08, 1],
+                  opacity: [0.4, 0.7, 0.4]
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="absolute inset-0 w-40 h-40 mx-auto rounded-full bg-gradient-to-r from-[#10B981]/30 to-emerald-400/30 blur-xl"
+                className="absolute inset-0 w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 mx-auto rounded-full bg-gradient-to-r from-[#10B981]/25 to-emerald-400/25 blur-xl"
               />
               
-              {/* Logo */}
-              <div className="relative w-36 h-36 mx-auto rounded-3xl overflow-hidden bg-white shadow-2xl shadow-emerald-200/50 border-4 border-white">
+              {/* Logo - Responsive */}
+              <div className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 mx-auto rounded-2xl sm:rounded-3xl overflow-hidden bg-white shadow-xl shadow-emerald-200/40 border-2 sm:border-4 border-white">
                 <motion.div
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
+                  animate={{ scale: [1, 1.03, 1] }}
+                  transition={{ duration: 2.5, repeat: Infinity }}
                   className="relative w-full h-full"
                 >
                   <Image
                     src="/logo.png"
                     alt="Be Fluent Logo"
                     fill
-                    sizes="144px"
-                    className="object-contain p-3"
+                    sizes="(max-width: 640px) 80px, (max-width: 768px) 112px, 128px"
+                    className="object-contain p-2 sm:p-3"
                     priority
                   />
                 </motion.div>
               </div>
             </motion.div>
 
-            {/* Brand Name */}
+            {/* Brand Name - Responsive */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              className="mb-4"
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="mb-3 sm:mb-4"
             >
-              <h1 className="text-5xl md:text-6xl font-black mb-2">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black mb-1 sm:mb-2">
                 <span className="text-[#1F2937]">Be </span>
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] via-emerald-500 to-teal-500">Fluent</span>
               </h1>
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="text-sm font-bold tracking-[0.3em] text-[#10B981] uppercase"
+                transition={{ delay: 0.5 }}
+                className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.3em] text-[#10B981] uppercase"
               >
                 Fluency Comes First
               </motion.p>
             </motion.div>
 
-            {/* Tagline */}
+            {/* Tagline - Responsive */}
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.5 }}
-              className="text-xl md:text-2xl font-bold text-gray-600 mb-8"
+              transition={{ delay: 0.6, duration: 0.4 }}
+              className="text-base sm:text-lg md:text-xl font-bold text-gray-600 mb-6 sm:mb-8"
             >
               تعلم الإنجليزية بطلاقة
             </motion.p>
 
-            {/* Progress Bar */}
+            {/* Progress Bar - Responsive */}
             <motion.div
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "100%" }}
-              transition={{ delay: 0.5 }}
-              className="max-w-xs mx-auto"
+              transition={{ delay: 0.4 }}
+              className="max-w-[200px] sm:max-w-[240px] mx-auto"
             >
-              <div className="relative h-2 bg-gray-200/50 rounded-full overflow-hidden backdrop-blur-sm">
+              <div className="relative h-1.5 sm:h-2 bg-gray-200/60 rounded-full overflow-hidden backdrop-blur-sm">
                 <motion.div
                   initial={{ width: "0%" }}
                   animate={{ width: `${progress}%` }}
@@ -189,46 +188,46 @@ export default function SplashScreen() {
                 />
                 <motion.div
                   animate={{ x: ["-100%", "200%"] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-full"
+                  transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent rounded-full"
                 />
               </div>
               
-              {/* Loading Text */}
+              {/* Loading Text - Responsive */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-                className="mt-4 flex items-center justify-center gap-2"
+                transition={{ delay: 0.7 }}
+                className="mt-3 sm:mt-4 flex items-center justify-center gap-2"
               >
                 <motion.span
                   animate={{ opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
-                  className="text-gray-500 font-medium text-sm"
+                  className="text-gray-500 font-medium text-xs sm:text-sm"
                 >
                   جاري التحميل
                 </motion.span>
-                <div className="flex gap-1">
+                <div className="flex gap-0.5 sm:gap-1">
                   {[0, 1, 2].map((i) => (
                     <motion.span
                       key={i}
                       animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1, 0.8] }}
                       transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.2 }}
-                      className="w-1.5 h-1.5 bg-[#10B981] rounded-full"
+                      className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-[#10B981] rounded-full"
                     />
                   ))}
                 </div>
               </motion.div>
             </motion.div>
 
-            {/* Domain */}
+            {/* Domain - Responsive */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1.2 }}
-              className="mt-8"
+              transition={{ delay: 1 }}
+              className="mt-6 sm:mt-8"
             >
-              <span className="text-sm text-gray-400 font-medium tracking-wide">
+              <span className="text-[10px] sm:text-xs text-gray-400 font-medium tracking-wide">
                 befluent-edu.online
               </span>
             </motion.div>
@@ -236,10 +235,10 @@ export default function SplashScreen() {
 
           {/* Bottom Decoration */}
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#10B981]/5 to-transparent pointer-events-none"
+            transition={{ delay: 0.4 }}
+            className="absolute bottom-0 left-0 right-0 h-20 sm:h-28 bg-gradient-to-t from-[#10B981]/5 to-transparent pointer-events-none"
           />
         </motion.div>
       )}
