@@ -210,6 +210,7 @@ model User {
   TextConversationAttempt    TextConversationAttempt[]
   Gamification               UserGamification?
   certificates               Certificate[]             @relation("UserCertificates")
+  PlacementTestAttempt       PlacementTestAttempt[]
 }
 
 model Word {
@@ -546,6 +547,31 @@ model VoiceRecording {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @default(now()) @updatedAt
   User            User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+// نظام اختبار تحديد المستوى - Placement Test System
+model PlacementQuestion {
+  id            String   @id @default(uuid()) @map("_id")
+  question      String   // السؤال بالإنجليزية
+  questionAr    String?  // السؤال بالعربي (اختياري)
+  options       String   // الخيارات (JSON string array)
+  correctAnswer String   // الإجابة الصحيحة
+  level         String   @default("A1") // المستوى المستهدف (A1, A2, B1, B2, C1)
+  category      String?  // Grammar, Vocabulary, Reading
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+}
+
+model PlacementTestAttempt {
+  id          String   @id @default(uuid()) @map("_id")
+  studentId   String
+  score       Int      @default(0)
+  percentage  Float    @default(0)
+  levelResult String?  // المستوى الذي تم تحديده
+  details     String?  // تفاصيل الإجابات (JSON)
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  User        User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
 // نظام المحادثة النصية - Text Conversation System
