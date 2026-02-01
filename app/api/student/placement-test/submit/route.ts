@@ -8,7 +8,6 @@ export async function GET() {
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // Get 20 random questions from the bank
     const allQuestions = await prisma.placementQuestion.findMany();
     const shuffled = allQuestions.sort(() => 0.5 - Math.random());
     const selected = shuffled.slice(0, 20);
@@ -24,7 +23,8 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { answers } = await request.json(); // Map of questionId -> answer
+    const body = await request.json();
+    const answers = body.answers;
     let score = 0;
     const details = [];
 
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       details.push({ questionId: q.id, answer: answers[q.id], correct: isCorrect });
     }
 
-    const percentage = (score / questions.length) * 100;
+    const percentage = questions.length > 0 ? (score / questions.length) * 100 : 0;
     let level = 'A1';
     if (percentage >= 90) level = 'C1';
     else if (percentage >= 75) level = 'B2';
@@ -56,7 +56,6 @@ export async function POST(request: Request) {
       }
     });
 
-    // Update student profile level
     await prisma.studentProfile.update({
       where: { userId: session.user.id },
       data: { 
