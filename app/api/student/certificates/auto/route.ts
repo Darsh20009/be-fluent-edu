@@ -56,6 +56,18 @@ export async function POST(req: Request) {
       }
     })
 
+    // Send notification email
+    try {
+      const { sendEmail, getCertificateEmailTemplate } = await import('@/lib/email')
+      await sendEmail({
+        to: session.user.email as string,
+        subject: `تهانينا! شهادة إتمام المستوى ${level}`,
+        html: getCertificateEmailTemplate(session.user.name as string, level)
+      })
+    } catch (emailError) {
+      console.error('Failed to send auto certificate email:', emailError)
+    }
+
     return NextResponse.json({ certificate })
   } catch (error) {
     console.error('Error in automatic certification:', error)

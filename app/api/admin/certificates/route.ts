@@ -23,8 +23,23 @@ export async function POST(req: Request) {
         issuerName: issuerName || session.user.name,
         isManual: true,
         adminId: session.user.id
+      },
+      include: {
+        User: true
       }
     })
+
+    // Send notification email
+    try {
+      const { sendEmail, getCertificateEmailTemplate } = await import('@/lib/email')
+      await sendEmail({
+        to: certificate.User.email,
+        subject: `شهادة جديدة من Be Fluent - ${level}`,
+        html: getCertificateEmailTemplate(certificate.User.name, level)
+      })
+    } catch (emailError) {
+      console.error('Failed to send certificate email:', emailError)
+    }
 
     return NextResponse.json({ certificate })
   } catch (error) {
