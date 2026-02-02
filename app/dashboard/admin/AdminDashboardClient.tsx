@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { Home, Users, CreditCard, Activity, LogOut, Shield, BookOpen, Headphones, GraduationCap, ClipboardList } from 'lucide-react'
+import { Home, Users, CreditCard, Activity, LogOut, Shield, BookOpen, Headphones, GraduationCap, ClipboardList, Mail } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
@@ -15,6 +15,7 @@ import SystemTab from './components/SystemTab'
 import StudentsManagementTab from './components/StudentsManagementTab'
 import LessonsTab from '@/components/admin/LessonsTab'
 import PlacementTestTab from './components/PlacementTestTab'
+import EmailTab from './components/EmailTab'
 import Link from 'next/link'
 
 interface AdminDashboardClientProps {
@@ -42,6 +43,7 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
     { id: 'students', label: 'Students / الطلاب', icon: BookOpen },
     { id: 'lessons', label: 'Lessons / الدروس', icon: BookOpen },
     { id: 'placement-test', label: 'Placement Test / اختبار تحديد المستوى', icon: ClipboardList },
+    { id: 'email', label: 'Direct Email / البريد المباشر', icon: Mail },
     { id: 'teacher', label: 'Teacher Dashboard / لوحة المعلم', icon: GraduationCap, href: '/dashboard/teacher' },
     { id: 'system', label: 'System / النظام', icon: Activity },
   ]
@@ -167,6 +169,7 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
             {activeTab === 'students' && <StudentsManagementTab />}
             {activeTab === 'lessons' && <LessonsTab isActive={activeTab === 'lessons'} />}
             {activeTab === 'placement-test' && <PlacementTestTab />}
+            {activeTab === 'email' && <EmailTab />}
             {activeTab === 'system' && <SystemTab />}
           </div>
         </div>
