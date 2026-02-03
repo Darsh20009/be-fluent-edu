@@ -32,7 +32,7 @@ export async function sendEmail({ to, subject, html, attachments }: { to: string
   }
 }
 
-const LOGO_URL = 'https://befluent-edu.online/logo.png';
+const LOGO_URL = process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL}/logo.png` : 'https://befluent-edu.online/logo.png';
 
 export function getAssignmentEmailTemplate(studentName: string, assignmentTitle: string, dueDate: string) {
   return `
