@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Activity, Clock } from 'lucide-react'
+import { Activity, Clock, Trash2, AlertTriangle } from 'lucide-react'
 import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Alert from '@/components/ui/Alert'
 
@@ -13,13 +14,6 @@ interface AuditLog {
   details: string | null
   createdAt: string
 }
-
-import { useState, useEffect } from 'react'
-import { Activity, Clock, Trash2, AlertTriangle } from 'lucide-react'
-import Card from '@/components/ui/Card'
-import Button from '@/components/ui/Button'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import Alert from '@/components/ui/Alert'
 
 export default function SystemTab() {
   const [logs, setLogs] = useState<AuditLog[]>([])
