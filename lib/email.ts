@@ -1,5 +1,7 @@
 export async function sendEmail({ to, subject, html, attachments }: { to: string, subject: string, html: string, attachments?: Array<{ filename: string, fileblob: string, content_type: string }> }) {
   const apiKey = process.env.SMTP2GO_API_KEY;
+  const fromEmail = process.env.SMTP2GO_FROM_EMAIL || 'befluent2026@outlook.com';
+  const fromName = process.env.SMTP2GO_FROM_NAME || 'Be Fluent Academy';
   
   try {
     const response = await fetch('https://api.smtp2go.com/v3/email/send', {
@@ -10,7 +12,7 @@ export async function sendEmail({ to, subject, html, attachments }: { to: string
       body: JSON.stringify({
         api_key: apiKey,
         to: [to],
-        sender: 'befluent2026@outlook.com',
+        sender: `${fromName} <${fromEmail}>`,
         subject: subject,
         html_body: html,
         attachments: attachments || []
