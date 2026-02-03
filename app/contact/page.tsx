@@ -33,7 +33,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900">Email</h3>
-                    <p className="text-gray-600">info@befluent-edu.online</p>
+                    <p className="text-gray-600">befluent2026@outlook.com</p>
                   </div>
                 </div>
 

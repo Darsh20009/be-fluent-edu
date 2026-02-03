@@ -10,7 +10,7 @@ export async function sendEmail({ to, subject, html, attachments }: { to: string
       body: JSON.stringify({
         api_key: apiKey,
         to: [to],
-        sender: 'noreply@befluent-edu.online',
+        sender: 'befluent2026@outlook.com',
         subject: subject,
         html_body: html,
         attachments: attachments || []
