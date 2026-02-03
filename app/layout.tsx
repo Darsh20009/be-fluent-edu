@@ -38,16 +38,15 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <link rel="icon" type="image/png" href="/logo.png" />
-        <link rel="shortcut icon" href="/logo.png" />
-        <link rel="manifest" href="/manifest.webmanifest" />
+        <link rel="shortcut icon" type="image/png" href="/logo.png" />
         <link rel="apple-touch-icon" href="/logo.png" />
+        <link rel="manifest" href="/manifest.webmanifest" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Be Fluent" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-TileColor" content="#10B981" />
         <meta name="msapplication-TileImage" content="/logo.png" />
-        <link rel="apple-touch-startup-image" href="/logo.png" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#F9FAFB]`} suppressHydrationWarning>
         <Script
