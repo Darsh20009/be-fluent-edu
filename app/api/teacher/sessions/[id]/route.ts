@@ -75,10 +75,11 @@ export async function PUT(
       sessionPassword?: string;
       externalLink?: string;
       externalLinkType?: string;
+      whatsappNumber?: string;
     }>(request)
     if (isNextResponse(body)) return body
 
-    const { title, startTime, endTime, status, sessionPassword, externalLink, externalLinkType } = body
+    const { title, startTime, endTime, status, sessionPassword, externalLink, externalLinkType, whatsappNumber } = body
 
     const existingSession = await prisma.session.findUnique({
       where: { id }
@@ -138,6 +139,7 @@ export async function PUT(
     if (sessionPassword !== undefined) updateData.sessionPassword = sessionPassword ? String(sessionPassword).trim() : null
     if (externalLink !== undefined) updateData.externalLink = externalLink ? String(externalLink).trim() : null
     if (externalLinkType !== undefined) updateData.externalLinkType = externalLinkType ? String(externalLinkType).trim() : null
+    if (whatsappNumber !== undefined) updateData.whatsappNumber = whatsappNumber ? String(whatsappNumber).trim() : null
     updateData.updatedAt = new Date()
 
     const updatedSession = await prisma.session.update({

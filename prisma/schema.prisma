@@ -72,6 +72,7 @@ model Session {
   sessionPassword  String?
   externalLink     String?
   externalLinkType String?          // ZOOM, GOOGLE_MEET, TEAMS, OTHER
+  whatsappNumber   String?          // Direct WhatsApp contact for this session
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @default(now()) @updatedAt
   Assignment       Assignment[]

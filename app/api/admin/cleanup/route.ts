@@ -1,48 +1,62 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
+
     if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { type } = await request.json() as { type: string }
-
-    if (type === 'all') {
-      // DANGEROUS: Clear everything except admin user
-      await prisma.auditLog.deleteMany({})
-      await prisma.certificate.deleteMany({})
-      await prisma.attendance.deleteMany({})
-      await prisma.assignmentSubmission.deleteMany({})
-      await prisma.assignment.deleteMany({})
-      await prisma.session.deleteMany({})
-      await prisma.subscription.deleteMany({})
-      await prisma.studentProfile.deleteMany({})
-      await prisma.teacherProfile.deleteMany({})
-      // Delete users who are not admins
-      await prisma.user.deleteMany({
-        where: { role: { not: 'ADMIN' } }
-      })
-      return NextResponse.json({ success: true, message: 'Database cleared successfully (except admins)' })
-    }
+    const { type } = await request.json()
 
     if (type === 'logs') {
       await prisma.auditLog.deleteMany({})
-      return NextResponse.json({ success: true, message: 'Logs cleared successfully' })
+      return NextResponse.json({ message: 'Logs cleared' })
     }
 
-    if (type === 'sessions') {
+    if (type === 'all') {
+      // 1. Delete transactional data
+      await prisma.submission.deleteMany({})
+      await prisma.assignment.deleteMany({})
+      await prisma.sessionStudent.deleteMany({})
       await prisma.session.deleteMany({})
-      return NextResponse.json({ success: true, message: 'Sessions cleared successfully' })
+      await prisma.chat.deleteMany({})
+      await prisma.cartItem.deleteMany({})
+      await prisma.cart.deleteMany({})
+      await prisma.subscription.deleteMany({})
+      await prisma.certificate.deleteMany({})
+      
+      // 2. Delete profiles and users that are NOT admins
+      const nonAdminUsers = await prisma.user.findMany({
+        where: { role: { not: 'ADMIN' } },
+        select: { id: true }
+      })
+      const nonAdminIds = nonAdminUsers.map(u => u.id)
+
+      await prisma.studentProfile.deleteMany({
+        where: { userId: { in: nonAdminIds } }
+      })
+      
+      await prisma.teacherProfile.deleteMany({
+        where: { userId: { in: nonAdminIds } }
+      })
+
+      await prisma.user.deleteMany({
+        where: { id: { in: nonAdminIds } }
+      })
+
+      await prisma.auditLog.deleteMany({})
+      
+      return NextResponse.json({ message: 'System reset completed' })
     }
 
     return NextResponse.json({ error: 'Invalid cleanup type' }, { status: 400 })
   } catch (error) {
     console.error('Cleanup error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Cleanup failed' }, { status: 500 })
   }
 }

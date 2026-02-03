@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Teacher profile not found' }, { status: 404 })
     }
 
-    const { title, startTime, endTime, studentIds, externalLink, externalLinkType, status } = await request.json()
+    const { title, startTime, endTime, studentIds, externalLink, externalLinkType, whatsappNumber, status } = await request.json()
 
     if (!title || !startTime || !endTime) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -124,7 +124,8 @@ export async function POST(request: NextRequest) {
           sessionPassword,
           roomId,
           externalLink,
-          externalLinkType
+          externalLinkType,
+          whatsappNumber
         },
         include: {
           TeacherProfile: {
