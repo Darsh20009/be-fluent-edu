@@ -14,9 +14,17 @@ interface AuditLog {
   createdAt: string
 }
 
+import { useState, useEffect } from 'react'
+import { Activity, Clock, Trash2, AlertTriangle } from 'lucide-react'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import Alert from '@/components/ui/Alert'
+
 export default function SystemTab() {
   const [logs, setLogs] = useState<AuditLog[]>([])
   const [loading, setLoading] = useState(true)
+  const [cleaning, setCleaning] = useState<string | null>(null)
 
   useEffect(() => {
     fetchLogs()
@@ -36,6 +44,33 @@ export default function SystemTab() {
     }
   }
 
+  async function handleCleanup(type: 'all' | 'logs' | 'sessions') {
+    const confirmMsg = type === 'all' 
+      ? 'هل أنت متأكد من مسح جميع البيانات؟ هذا الإجراء لا يمكن التراجع عنه.' 
+      : 'هل أنت متأكد؟'
+    
+    if (!confirm(confirmMsg)) return
+
+    setCleaning(type)
+    try {
+      const response = await fetch('/api/admin/cleanup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type })
+      })
+      if (response.ok) {
+        alert('تمت العملية بنجاح')
+        if (type === 'logs') fetchLogs()
+      } else {
+        alert('حدث خطأ أثناء العملية')
+      }
+    } catch (error) {
+      alert('فشل الاتصال بالخادم')
+    } finally {
+      setCleaning(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -47,8 +82,72 @@ export default function SystemTab() {
   return (
     <div className="space-y-6">
       <h2 className="text-3xl font-bold text-[#10B981]">
-        System Activity / نشاط النظام
+        System Management / إدارة النظام
       </h2>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <Card variant="elevated" className="border-red-100">
+          <div className="flex items-center gap-3 mb-4 text-red-600">
+            <AlertTriangle className="h-6 w-6" />
+            <h3 className="text-xl font-bold">Dangerous Actions / إجراءات خطيرة</h3>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-100">
+              <div>
+                <p className="font-bold text-red-700">مسح جميع البيانات</p>
+                <p className="text-xs text-red-600">سيتم مسح كل شيء باستثناء حسابات الأدمن</p>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="border-red-200 text-red-600 hover:bg-red-600 hover:text-white"
+                onClick={() => handleCleanup('all')}
+                disabled={cleaning !== null}
+              >
+                {cleaning === 'all' ? <LoadingSpinner size="sm" /> : <Trash2 className="h-4 w-4" />}
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg border border-orange-100">
+              <div>
+                <p className="font-bold text-orange-700">مسح السجلات (Logs)</p>
+                <p className="text-xs text-orange-600">سيتم مسح سجلات النشاط فقط</p>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="border-orange-200 text-orange-600 hover:bg-orange-600 hover:text-white"
+                onClick={() => handleCleanup('logs')}
+                disabled={cleaning !== null}
+              >
+                {cleaning === 'logs' ? <LoadingSpinner size="sm" /> : <Trash2 className="h-4 w-4" />}
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        <Card variant="elevated">
+          <div className="flex items-center gap-3 mb-4 text-[#10B981]">
+            <Activity className="h-6 w-6" />
+            <h3 className="text-xl font-bold">System Status / حالة النظام</h3>
+          </div>
+          <div className="space-y-2 text-sm text-gray-700">
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span>Database Status</span>
+              <span className="text-green-600 font-bold">Connected</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span>Email Service</span>
+              <span className="text-green-600 font-bold">SMTP2GO</span>
+            </div>
+            <div className="flex justify-between py-2">
+              <span>Platform Version</span>
+              <span className="font-bold text-gray-900">1.0.0</span>
+            </div>
+          </div>
+        </Card>
+      </div>
 
       <Card variant="elevated">
         <div className="flex items-center gap-3 mb-4">
@@ -61,10 +160,9 @@ export default function SystemTab() {
         {logs.length === 0 ? (
           <Alert variant="info">
             <p>No activity logs yet.</p>
-            <p>لا توجد سجلات نشاط بعد.</p>
           </Alert>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
             {logs.map((log) => (
               <div key={log.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="flex items-start justify-between">
@@ -83,26 +181,6 @@ export default function SystemTab() {
             ))}
           </div>
         )}
-      </Card>
-
-      <Card variant="elevated">
-        <h3 className="text-xl font-bold text-[#10B981] mb-4">
-          System Information / معلومات النظام
-        </h3>
-        <div className="space-y-2 text-gray-700">
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <span>Platform Version</span>
-            <span className="font-medium">1.0.0</span>
-          </div>
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <span>Database Status</span>
-            <span className="font-medium text-green-600">Connected</span>
-          </div>
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <span>Last Backup</span>
-            <span className="font-medium">Automatic</span>
-          </div>
-        </div>
       </Card>
     </div>
   )

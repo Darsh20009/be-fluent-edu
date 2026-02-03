@@ -319,6 +319,17 @@ export default function StudentsManagementTab() {
                     <Button
                       variant="outline"
                       size="sm"
+                      onClick={() => {
+                        const msg = `مرحباً ${student.name}، معك أكاديمية Be Fluent.`
+                        window.open(`https://wa.me/${student.phone || ''}?text=${encodeURIComponent(msg)}`, '_blank')
+                      }}
+                      className="border-green-500 text-green-600 hover:bg-green-50"
+                    >
+                      WhatsApp / واتساب
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => setSelectedStudent(student)}
                       disabled={!subscription}
                     >

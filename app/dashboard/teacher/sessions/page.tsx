@@ -14,7 +14,8 @@ interface SessionData {
   startTime: string
   endTime: string
   status: string
-  SessionStudent: Array<{ User: { name: string } }>
+  externalLink?: string
+  SessionStudent: Array<{ User: { id: string, name: string, phone?: string } }>
 }
 
 export default function TeacherSessionsPage() {
@@ -142,9 +143,37 @@ export default function TeacherSessionsPage() {
                         {session.SessionStudent.length > 0 && `: ${session.SessionStudent.map(s => s.User.name).join(', ')}`}
                       </span>
                     </div>
+                    {session.SessionStudent.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {session.SessionStudent.map((s: any) => (
+                          <Button
+                            key={s.User.id}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const msg = `مرحباً ${s.User.name}، نذكركم بموعد حصة: ${session.title} الآن.`
+                              window.open(`https://wa.me/${s.User.phone || ''}?text=${encodeURIComponent(msg)}`, '_blank')
+                            }}
+                            className="text-xs py-1 h-auto border-green-500 text-green-600 hover:bg-green-50"
+                          >
+                            WhatsApp {s.User.name}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-2">
+                  {session.externalLink && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => window.open(session.externalLink!, '_blank')}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Join External / انضمام خارجي
+                    </Button>
+                  )}
                   <Button
                     variant="secondary"
                     size="sm"
