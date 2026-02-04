@@ -4,11 +4,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const pathSteps = [
-  { id: 1, title: 'Basics', description: 'Start your journey', x: 100, y: 400, color: '#3B82F6', status: 'completed' },
-  { id: 2, title: 'Vocabulary', description: 'Expand your words', x: 250, y: 300, color: '#10B981', status: 'current' },
-  { id: 3, title: 'Grammar', description: 'Build structures', x: 400, y: 350, color: '#F59E0B', status: 'locked' },
-  { id: 4, title: 'Speaking', description: 'Practice sounds', x: 550, y: 200, color: '#EF4444', status: 'locked' },
-  { id: 5, title: 'Fluency', description: 'Master the tongue', x: 750, y: 150, color: '#8B5CF6', status: 'locked' },
+  { id: 1, title: 'تحديد الهدف', description: 'Goal Setting', x: 100, y: 400, color: '#3B82F6', status: 'completed' },
+  { id: 2, title: 'الحصة التجريبية', description: 'Trial Session', x: 250, y: 300, color: '#10B981', status: 'current' },
+  { id: 3, title: 'الخطة المخصصة', description: 'Personalized Plan', x: 400, y: 350, color: '#F59E0B', status: 'locked' },
+  { id: 4, title: 'نظام المعلمين المزدوج', description: 'Dual Teacher System', x: 550, y: 200, color: '#EF4444', status: 'locked' },
+  { id: 5, title: 'اختبارات قياس المستوى', description: 'Level Assessments', x: 750, y: 150, color: '#8B5CF6', status: 'locked' },
 ];
 
 export default function LearningMap() {

@@ -30,4 +30,7 @@
 [x] 30. Create Learning Path page with interactive SVG map - COMPLETED (Feb 04, 2026)
 [x] 31. Reinstall dependencies and verify workflow after session reset - COMPLETED (Feb 04, 2026)
 [x] 32. Improve UI sharpness and image quality - COMPLETED (Feb 04, 2026)
+[x] 33. Create Learning Path page with interactive SVG map - COMPLETED (Feb 04, 2026)
+[x] 34. Implement Dual-Teacher and Testing UI on Dashboard - COMPLETED (Feb 04, 2026)
+[/] 35. Fix Assignment and Certificate systems - IN PROGRESS
 [x] 33. Reinstall dependencies and verify workflow after session reset - COMPLETED (Feb 04, 2026)
