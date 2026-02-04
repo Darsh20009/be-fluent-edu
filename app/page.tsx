@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
+import LearningMap from "@/components/LearningMap";
 import FloatingContactButtons from "@/components/FloatingContactButtons";
 import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, ArrowRight, CheckCircle, Star, Zap, ChevronLeft, ChevronRight, Headphones, GraduationCap, Trophy, Menu, X, Play, ArrowDown, Map as MapIcon } from "lucide-react";
 
@@ -208,9 +209,9 @@ export default function Home() {
                     <span className="relative">ابدأ رحلتك الآن</span>
                     <ArrowRight className="relative w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" />
                   </Link>
-                  <Link href="/about-path" className="group px-8 py-4 bg-white border-2 border-gray-200 text-[#1F2937] rounded-2xl text-lg font-bold hover:border-[#10B981] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
+                  <Link href="/learning-path" className="group px-8 py-4 bg-white border-2 border-gray-200 text-[#1F2937] rounded-2xl text-lg font-bold hover:border-[#10B981] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
                     <MapIcon className="w-5 h-5 text-[#10B981] group-hover:scale-110 transition-transform" />
-                    <span>اعرف طريقك</span>
+                    <span>خريطة التعلم</span>
                   </Link>
                   <a href="https://api.whatsapp.com/send/?phone=201091515594" target="_blank" rel="noopener noreferrer" className="group px-8 py-4 bg-white border-2 border-gray-200 text-[#1F2937] rounded-2xl text-lg font-bold hover:border-[#10B981] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
                     <MessageCircle className="w-5 h-5 text-[#10B981] group-hover:scale-110 transition-transform" />
@@ -321,7 +322,17 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section className="py-16 bg-gradient-to-b from-white via-gray-50/50 to-white border-y border-gray-100">
+        <section className="py-16 bg-white border-b border-gray-100">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-black text-gray-900 mb-4">رحلتك نحو الإتقان</h2>
+              <p className="text-gray-600">خريطة تفاعلية توضح كيف نأخذك من الصفر حتى الطلاقة</p>
+            </div>
+            <LearningMap />
+          </div>
+        </section>
+
+        {/* Features Section (Original) */}
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
               {[

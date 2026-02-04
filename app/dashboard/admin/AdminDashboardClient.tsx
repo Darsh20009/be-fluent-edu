@@ -16,6 +16,7 @@ import StudentsManagementTab from './components/StudentsManagementTab'
 import LessonsTab from '@/components/admin/LessonsTab'
 import PlacementTestTab from './components/PlacementTestTab'
 import EmailTab from './components/EmailTab'
+import CouponsTab from './components/CouponsTab'
 import Link from 'next/link'
 
 interface AdminDashboardClientProps {
@@ -40,6 +41,7 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
     { id: 'home', label: 'Home / الرئيسية', icon: Home },
     { id: 'users', label: 'Users / المستخدمين', icon: Users },
     { id: 'subscriptions', label: 'Subscriptions / الاشتراكات', icon: CreditCard },
+    { id: 'coupons', label: 'Coupons / الكوبونات', icon: Target },
     { id: 'students', label: 'Students / الطلاب', icon: BookOpen },
     { id: 'lessons', label: 'Lessons / الدروس', icon: BookOpen },
     { id: 'placement-test', label: 'Placement Test / اختبار تحديد المستوى', icon: ClipboardList },
@@ -166,6 +168,7 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
             {activeTab === 'home' && <HomeTab />}
             {activeTab === 'users' && <UsersTab />}
             {activeTab === 'subscriptions' && <SubscriptionsTab />}
+            {activeTab === 'coupons' && <CouponsTab />}
             {activeTab === 'students' && <StudentsManagementTab />}
             {activeTab === 'lessons' && <LessonsTab isActive={activeTab === 'lessons'} />}
             {activeTab === 'placement-test' && <PlacementTestTab />}
