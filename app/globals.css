@@ -29,6 +29,20 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Improve rendering quality and sharpness */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+img {
+  image-rendering: auto;
+  font-smoothing: antialiased;
+}
+
 .dark {
   --background: #F9FAFB;
   --foreground: #1F2937;

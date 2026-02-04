@@ -252,7 +252,16 @@ export default function Home() {
                     <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl shadow-emerald-200/40 border-4 border-white bg-white aspect-[4/3]">
                       {heroImages.map((image, index) => (
                         <div key={index} className={`absolute inset-0 transition-all duration-700 ease-out ${index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}>
-                          <Image src={image.src} alt={image.alt} fill className="object-contain" priority={index === 0} sizes="(max-width: 768px) 100vw, 50vw" loading={index === 0 ? "eager" : "lazy"} />
+                          <Image 
+                            src={image.src} 
+                            alt={image.alt} 
+                            fill 
+                            className="object-contain" 
+                            priority={index === 0} 
+                            sizes="(max-width: 768px) 100vw, 50vw" 
+                            quality={100}
+                            loading={index === 0 ? "eager" : "lazy"} 
+                          />
                         </div>
                       ))}
 

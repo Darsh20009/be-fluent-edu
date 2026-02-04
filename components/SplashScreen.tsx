@@ -52,7 +52,7 @@ export default function SplashScreen() {
           className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
         >
           {/* Background with blur effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white via-emerald-50/80 to-teal-50/80 backdrop-blur-xl"></div>
+          <div className="absolute inset-0 bg-white/90 backdrop-blur-md"></div>
           
           {/* Animated Background Circles - Responsive sizes */}
           <div className="absolute inset-0 overflow-hidden">
@@ -137,6 +137,7 @@ export default function SplashScreen() {
                     sizes="(max-width: 640px) 80px, (max-width: 768px) 112px, 128px"
                     className="object-contain p-2 sm:p-3"
                     priority
+                    quality={100}
                   />
                 </motion.div>
               </div>
