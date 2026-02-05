@@ -5,6 +5,8 @@ import Image from "next/image";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 import LearningMap from "@/components/LearningMap";
+import LearningPathMap from "@/components/learning-path/LearningPathMap";
+import CouponBanner from "@/components/CouponBanner";
 import FloatingContactButtons from "@/components/FloatingContactButtons";
 import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, ArrowRight, CheckCircle, Star, Zap, ChevronLeft, ChevronRight, Headphones, GraduationCap, Trophy, Menu, X, Play, ArrowDown, Map as MapIcon } from "lucide-react";
 
@@ -51,6 +53,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white text-[#1F2937] overflow-x-hidden">
+      <CouponBanner />
       {/* Animated Background */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-bl from-[#10B981]/8 via-emerald-100/20 to-transparent rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/4"></div>
@@ -353,6 +356,11 @@ export default function Home() {
               ))}
             </div>
           </div>
+        </section>
+
+        {/* Learning Path Section */}
+        <section className="py-16 bg-white">
+          <LearningPathMap />
         </section>
 
         {/* Why Us Section */}
