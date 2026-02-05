@@ -333,6 +333,7 @@ export default function Home() {
         </section>
 
         {/* Features Section (Original) */}
+        <section className="py-16 bg-gradient-to-b from-white to-gray-50">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
               {[
