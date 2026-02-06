@@ -214,7 +214,7 @@ export default function Home() {
                   </Link>
                   <Link href="/learning-path" className="group px-8 py-4 bg-white border-2 border-gray-200 text-[#1F2937] rounded-2xl text-lg font-bold hover:border-[#10B981] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
                     <MapIcon className="w-5 h-5 text-[#10B981] group-hover:scale-110 transition-transform" />
-                    <span>خريطة التعلم</span>
+                    <span>خريطة التعلم الذكية</span>
                   </Link>
                   <a href="https://api.whatsapp.com/send/?phone=201091515594" target="_blank" rel="noopener noreferrer" className="group px-8 py-4 bg-white border-2 border-gray-200 text-[#1F2937] rounded-2xl text-lg font-bold hover:border-[#10B981] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
                     <MessageCircle className="w-5 h-5 text-[#10B981] group-hover:scale-110 transition-transform" />
