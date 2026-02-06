@@ -74,7 +74,6 @@ export default function RootLayout({
         <ServiceWorkerRegister />
         <SessionProvider>
           <ThemeProvider>
-            <CouponBanner />
             <ClientSplashScreen />
             {children}
             <PWAInstallPrompt />

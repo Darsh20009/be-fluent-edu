@@ -4,6 +4,8 @@ const replitDomain = process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: [
+    'befluent-edu.online',
+    '*.befluent-edu.online',
     replitDomain,
     '*.replit.dev',
     '127.0.0.1',

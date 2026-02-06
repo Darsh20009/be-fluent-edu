@@ -6,9 +6,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 import LearningMap from "@/components/LearningMap";
 import LearningPathMap from "@/components/learning-path/LearningPathMap";
-import CouponBanner from "@/components/CouponBanner";
 import FloatingContactButtons from "@/components/FloatingContactButtons";
-import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, ArrowRight, CheckCircle, Star, Zap, ChevronLeft, ChevronRight, Headphones, GraduationCap, Trophy, Menu, X, Play, ArrowDown, Map as MapIcon } from "lucide-react";
+import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, ArrowRight, CheckCircle, Star, Zap, ChevronLeft, ChevronRight, Headphones, GraduationCap, Trophy, Menu, X, Play, ArrowDown, Map as MapIcon, Tag } from "lucide-react";
 
 const heroImages = [
   { src: "/assets/hero-1.png", alt: "Why Us - Be Fluent" },
@@ -23,21 +22,35 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [activeCoupons, setActiveCoupons] = useState<any[]>([]);
 
   useEffect(() => {
     setIsVisible(true);
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Fetch active coupons
+    fetch('/api/coupons/active')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setActiveCoupons(data);
+        }
+      })
+      .catch(err => console.error('Failed to fetch coupons:', err));
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const totalSlides = heroImages.length + activeCoupons.length;
+
   const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % heroImages.length);
-  }, []);
+    setCurrentSlide((prev) => (prev + 1) % totalSlides);
+  }, [totalSlides]);
 
   const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length);
-  }, []);
+    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+  }, [totalSlides]);
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
@@ -46,14 +59,13 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (!isAutoPlaying || totalSlides === 0) return;
     const interval = setInterval(nextSlide, 4000);
     return () => clearInterval(interval);
-  }, [isAutoPlaying, nextSlide]);
+  }, [isAutoPlaying, nextSlide, totalSlides]);
 
   return (
     <div className="min-h-screen bg-white text-[#1F2937] overflow-x-hidden">
-      <CouponBanner />
       {/* Animated Background */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-bl from-[#10B981]/8 via-emerald-100/20 to-transparent rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/4"></div>
@@ -255,7 +267,7 @@ export default function Home() {
                     {/* Image Carousel */}
                     <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl shadow-emerald-200/40 border-4 border-white bg-white aspect-[4/3]">
                       {heroImages.map((image, index) => (
-                        <div key={index} className={`absolute inset-0 transition-all duration-700 ease-out ${index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}>
+                        <div key={`hero-${index}`} className={`absolute inset-0 transition-all duration-700 ease-out ${index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}>
                           <Image 
                             src={image.src} 
                             alt={image.alt} 
@@ -269,10 +281,37 @@ export default function Home() {
                         </div>
                       ))}
 
+                      {activeCoupons.map((coupon, index) => {
+                        const slideIndex = heroImages.length + index;
+                        return (
+                          <div key={`coupon-${coupon.id}`} className={`absolute inset-0 transition-all duration-700 ease-out flex flex-col items-center justify-center p-8 bg-gradient-to-br from-emerald-600 via-[#10B981] to-teal-500 text-white text-center ${slideIndex === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}>
+                            <div className="mb-6 p-4 bg-white/20 rounded-full">
+                              <Tag className="w-12 h-12" />
+                            </div>
+                            <h3 className="text-2xl md:text-3xl font-black mb-4">عرض خاص وحصري!</h3>
+                            <div className="bg-white text-emerald-600 px-6 py-3 rounded-2xl text-2xl md:text-4xl font-black shadow-xl mb-6 tracking-wider">
+                              {coupon.code}
+                            </div>
+                            <p className="text-xl md:text-2xl font-bold text-amber-300 mb-2">خصم {coupon.discount}%</p>
+                            <p className="text-sm md:text-base opacity-90">استخدم الكود عند الاشتراك لتفعيل الخصم</p>
+                            {coupon.expiryDate && (
+                              <p className="mt-4 text-xs font-medium bg-black/10 px-3 py-1 rounded-full">
+                                ينتهي في: {new Date(coupon.expiryDate).toLocaleDateString('ar-EG')}
+                              </p>
+                            )}
+                            <div className="mt-8">
+                              <Link href="/auth/register" className="px-8 py-3 bg-white text-[#10B981] rounded-xl font-black hover:bg-emerald-50 transition-colors shadow-lg">
+                                اشترك الآن واستفد من الخصم
+                              </Link>
+                            </div>
+                          </div>
+                        );
+                      })}
+
                       {/* Navigation */}
                       <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/20 to-transparent">
                         <div className="flex items-center justify-center gap-2">
-                          {heroImages.map((_, index) => (
+                          {Array.from({ length: totalSlides }).map((_, index) => (
                             <button key={index} onClick={() => goToSlide(index)} className={`transition-all duration-300 rounded-full ${index === currentSlide ? 'w-10 h-3 bg-white shadow-lg' : 'w-3 h-3 bg-white/50 hover:bg-white/70'}`} />
                           ))}
                         </div>

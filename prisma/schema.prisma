@@ -301,6 +301,17 @@ model WritingTestSubmission {
   WritingTest   WritingTest @relation(fields: [testId], references: [id], onDelete: Cascade)
 }
 
+model Coupon {
+  id          String    @id @default(uuid()) @map("_id")
+  code        String    @unique
+  discount    String
+  expiryDate  DateTime?
+  isActive    Boolean   @default(true)
+  useCount    Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+}
+
 model FreeWriting {
   id             String          @id @default(uuid()) @map("_id")
   studentId      String          
