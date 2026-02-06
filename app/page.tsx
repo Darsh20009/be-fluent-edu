@@ -324,43 +324,51 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="py-16 bg-white border-b border-gray-100">
+        {/* Learning Path Section (Standalone Integration) */}
+        <section className="py-24 bg-gradient-to-b from-white to-emerald-50/30 overflow-hidden" id="learning-path">
           <div className="container mx-auto px-4 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-black text-gray-900 mb-4">رحلتك نحو الإتقان</h2>
-              <p className="text-gray-600">خريطة تفاعلية توضح كيف نأخذك من الصفر حتى الطلاقة</p>
-            </div>
-            <LearningMap />
-          </div>
-        </section>
-
-        {/* Features Section (Original) */}
-        <section className="py-16 bg-gradient-to-b from-white to-gray-50">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
-              {[
-                { icon: <Video className="w-8 h-8" />, label: "حصص مباشرة", desc: "مع معلمين محترفين", color: "from-[#10B981] to-emerald-500" },
-                { icon: <BookOpen className="w-8 h-8" />, label: "دروس تفاعلية", desc: "محتوى حصري", color: "from-blue-500 to-cyan-500" },
-                { icon: <GraduationCap className="w-8 h-8" />, label: "شهادات معتمدة", desc: "عند الإتمام", color: "from-amber-500 to-orange-500" },
-                { icon: <Trophy className="w-8 h-8" />, label: "تحديات ومكافآت", desc: "للتحفيز", color: "from-pink-500 to-rose-500" },
-              ].map((item, i) => (
-                <div key={i} className="group relative p-6 rounded-3xl bg-white border border-gray-100 hover:border-transparent hover:shadow-2xl transition-all duration-500 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className={`relative w-16 h-16 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white mb-4 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300`}>
-                    {item.icon}
-                  </div>
-                  <h3 className="relative text-lg font-bold text-gray-800 mb-1">{item.label}</h3>
-                  <p className="relative text-sm text-gray-500">{item.desc}</p>
+            <div className="flex flex-col lg:flex-row items-center gap-16">
+              <div className="lg:w-1/2" dir="rtl">
+                <div className="inline-flex items-center gap-2 bg-[#10B981]/10 px-4 py-2 rounded-full mb-6 border border-[#10B981]/20">
+                  <MapIcon className="w-4 h-4 text-[#10B981]" />
+                  <span className="text-sm font-bold text-[#047857]">رحلتك تبدأ بخطوة</span>
                 </div>
-              ))}
+                <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-8 leading-tight">
+                  نحن لا نعلمك الإنجليزية فحسب، <br />
+                  <span className="text-[#10B981]">نحن نصمم لك طريقاً للنجاح</span>
+                </h2>
+                <div className="space-y-6">
+                  {[
+                    { title: "تحديد الأهداف بدقة", desc: "نبدأ بفهم دافعك للتعلم لنوجه كل طاقتنا نحوه." },
+                    { title: "نظام المعلمين المزدوج", desc: "معلم يشرح ومعلم يتابع، لأن المتابعة هي سر الاستمرارية." },
+                    { title: "اختبارات ذكية ومفاجئة", desc: "قياس حقيقي لمستواك لضمان عدم نسيان ما تعلمته." },
+                  ].map((item, i) => (
+                    <div key={i} className="flex gap-4 group">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-white shadow-lg border border-gray-100 flex items-center justify-center text-[#10B981] group-hover:bg-[#10B981] group-hover:text-white transition-all duration-300">
+                        <CheckCircle className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-800 mb-1">{item.title}</h3>
+                        <p className="text-gray-600">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-10">
+                  <Link href="/learning-path" className="inline-flex items-center gap-3 px-8 py-4 bg-[#10B981] text-white rounded-2xl text-lg font-bold shadow-xl shadow-emerald-200 hover:bg-[#059669] transition-all duration-300">
+                    <span>استكشف الخريطة التفاعلية بالكامل</span>
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
+                </div>
+              </div>
+              <div className="lg:w-1/2 relative">
+                <div className="absolute inset-0 bg-emerald-500/10 blur-[100px] rounded-full"></div>
+                <div className="relative transform hover:scale-[1.02] transition-transform duration-700">
+                  <LearningMap />
+                </div>
+              </div>
             </div>
           </div>
-        </section>
-
-        {/* Learning Path Section */}
-        <section className="py-16 bg-white">
-          <LearningPathMap />
         </section>
 
         {/* Why Us Section */}

@@ -4,13 +4,13 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const pathSteps = [
-  { id: 1, title: 'تحديد الهدف', description: 'Goal Setting & Assessment', x: 100, y: 400, color: '#3B82F6', status: 'completed' },
-  { id: 2, title: 'الحصة التجريبية', description: 'Trial Session with Teacher', x: 250, y: 300, color: '#10B981', status: 'current' },
-  { id: 3, title: 'الخطة المخصصة', description: 'Your Personal Learning Path', x: 400, y: 350, color: '#F59E0B', status: 'locked' },
-  { id: 4, title: 'نظام المعلمين المزدوج', description: 'Primary & Assistant Teachers', x: 550, y: 200, color: '#EF4444', status: 'locked' },
-  { id: 5, title: 'المختبر والتقييم', description: 'Monthly Level Testing', x: 700, y: 250, color: '#8B5CF6', status: 'locked' },
-  { id: 6, title: 'الاختبارات المفاجئة', description: '2 Surprise Tests Weekly', x: 800, y: 150, color: '#EC4899', status: 'locked' },
-];
+    { id: 1, title: 'تحديد الهدف', description: 'Goal Setting & Assessment', x: 100, y: 400, color: '#3B82F6', status: 'completed' },
+    { id: 2, title: 'الحصة التجريبية', description: 'Trial Session with Teacher', x: 250, y: 250, color: '#10B981', status: 'current' },
+    { id: 3, title: 'الخطة المخصصة', description: 'Personalized Learning Plan', x: 400, y: 350, color: '#F59E0B', status: 'locked' },
+    { id: 4, title: 'المعلم الأساسي والمساعد', description: 'Dual-Teacher Support System', x: 550, y: 150, color: '#EF4444', status: 'locked' },
+    { id: 5, title: 'المختبر والتقييم', description: 'Monthly Level Progress', x: 700, y: 250, color: '#8B5CF6', status: 'locked' },
+    { id: 6, title: 'الاختبارات المفاجئة', description: '2 Surprise Weekly Tests', x: 800, y: 100, color: '#EC4899', status: 'locked' },
+  ];
 
 export default function LearningMap() {
   const generatePath = () => {
