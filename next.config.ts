@@ -1,11 +1,14 @@
 import type { NextConfig } from "next";
 
+const replitDomain = process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS || '';
+
 const nextConfig: NextConfig = {
   allowedDevOrigins: [
-    '905c1dc1-8164-434e-b705-90cc4f241076-00-3kmzv90pvhawt.picard.replit.dev',
+    replitDomain,
+    '*.replit.dev',
     '127.0.0.1',
     '0.0.0.0',
-  ],
+  ].filter(Boolean),
   typescript: {
     ignoreBuildErrors: true,
   },
