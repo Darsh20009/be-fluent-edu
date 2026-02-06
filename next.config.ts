@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: [
+    '905c1dc1-8164-434e-b705-90cc4f241076-00-3kmzv90pvhawt.picard.replit.dev',
+    '127.0.0.1',
+    '0.0.0.0',
+  ],
   typescript: {
     ignoreBuildErrors: true,
   },
