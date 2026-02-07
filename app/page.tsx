@@ -326,30 +326,6 @@ export default function Home() {
                       </button>
                     </div>
 
-                    {/* Floating Cards */}
-                    <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl p-4 shadow-xl border border-gray-100 animate-float" style={{ animationDelay: '0.5s' }}>
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#10B981] to-emerald-500 flex items-center justify-center text-white">
-                          <Video className="w-6 h-6" />
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-bold text-gray-800">حصص مباشرة</div>
-                          <div className="text-xs text-gray-500">يومياً</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="absolute -top-4 -right-4 bg-white rounded-2xl p-4 shadow-xl border border-gray-100 animate-float" style={{ animationDelay: '1s' }}>
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white">
-                          <Trophy className="w-6 h-6" />
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-bold text-gray-800">شهادات معتمدة</div>
-                          <div className="text-xs text-gray-500">عند الإتمام</div>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
