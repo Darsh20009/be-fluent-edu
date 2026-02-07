@@ -352,15 +352,16 @@ export default function Home() {
                   نحن لا نعلمك الإنجليزية فحسب، <br />
                   <span className="text-[#10B981]">نحن نصمم لك طريقاً للنجاح</span>
                 </h2>
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {[
-                    { title: "تحديد الأهداف بدقة", desc: "نبدأ بفهم دافعك للتعلم لنوجه كل طاقتنا نحوه." },
-                    { title: "نظام المعلمين المزدوج", desc: "معلم يشرح ومعلم يتابع، لأن المتابعة هي سر الاستمرارية." },
-                    { title: "اختبارات ذكية ومفاجئة", desc: "قياس حقيقي لمستواك لضمان عدم نسيان ما تعلمته." },
+                    { title: "1. تحديد الهدف والحصة التجريبية", desc: "نبدأ بفهم دافعك للتعلم لنوجه كل طاقتنا نحوه مع تجربة حية لنظامنا.", icon: <Target className="w-6 h-6" /> },
+                    { title: "2. نظام المعلمين المزدوج", desc: "معلم أساسي للشرح، ومعلم مساعد للمتابعة اليومية، ومختبر لتقييم التقدم.", icon: <Users className="w-6 h-6" /> },
+                    { title: "3. اختبارات ذكية ومفاجئة", desc: "اختبارين مفاجئين أسبوعياً واختبار مستوى شهري لضمان إتقان كل ليفل.", icon: <Zap className="w-6 h-6" /> },
+                    { title: "4. مرونة وخصوصية تامة", desc: "دعم خاص ومرونة في الوقت للبرايفت، ومجموعات لا تزيد عن 3 طلاب.", icon: <Sparkles className="w-6 h-6" /> },
                   ].map((item, i) => (
                     <div key={i} className="flex gap-4 group">
                       <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-white shadow-lg border border-gray-100 flex items-center justify-center text-[#10B981] group-hover:bg-[#10B981] group-hover:text-white transition-all duration-300">
-                        <CheckCircle className="w-6 h-6" />
+                        {item.icon}
                       </div>
                       <div>
                         <h3 className="text-xl font-bold text-gray-800 mb-1">{item.title}</h3>
@@ -379,7 +380,7 @@ export default function Home() {
               <div className="lg:w-1/2 relative">
                 <div className="absolute inset-0 bg-emerald-500/10 blur-[100px] rounded-full"></div>
                 <div className="relative transform hover:scale-[1.02] transition-transform duration-700">
-                  <LearningMap />
+                  <LearningPathMap />
                 </div>
               </div>
             </div>
