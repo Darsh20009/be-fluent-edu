@@ -261,29 +261,78 @@ handBtn.onclick = () => {
 
 screenBtn.onclick = async () => {
     if (screenStream) {
+        // Stop screen sharing
         screenStream.getTracks().forEach(track => track.stop());
-        screenStream = null;
+        
+        // Revert to camera stream for all peers
+        const videoTrack = myStream.getVideoTracks()[0];
+        peerConnections.forEach(pc => {
+            const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+            if (sender) sender.replaceTrack(videoTrack);
+        });
+
+        const screenContainer = document.getElementById('screen-share');
+        if (screenContainer) screenContainer.remove();
+        
         screenBtn.classList.remove('active');
+        screenBtn.innerText = '🖥️';
+        screenStream = null;
+        appendMessage('النظام', '📴 توقفت مشاركة الشاشة');
         return;
     }
+
     try {
-        screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        screenStream = await navigator.mediaDevices.getDisplayMedia({ 
+            video: {
+                cursor: "always"
+            },
+            audio: false 
+        });
+
+        // Add local preview
         const videoContainer = createVideoContainer(`${userName} (مشاركة الشاشة)`);
         videoContainer.id = 'screen-share';
         const video = videoContainer.querySelector('video');
         video.srcObject = screenStream;
         videoGrid.appendChild(videoContainer);
-        screenBtn.classList.add('active');
         
-        screenStream.getVideoTracks()[0].onended = () => {
-            const screenContainer = document.getElementById('screen-share');
-            if (screenContainer) screenContainer.remove();
-            screenBtn.classList.remove('active');
-            screenStream = null;
+        // Replace track for all peers
+        const screenTrack = screenStream.getVideoTracks()[0];
+        peerConnections.forEach(pc => {
+            const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+            if (sender) sender.replaceTrack(screenTrack);
+        });
+
+        screenBtn.classList.add('active');
+        screenBtn.innerText = '🖥️❌';
+        appendMessage('النظام', '🖥️ بدأت مشاركة الشاشة');
+        
+        screenTrack.onended = () => {
+            if (screenStream) screenBtn.click();
         };
     } catch (err) {
         console.error('Error sharing screen:', err);
+        appendMessage('النظام', '⚠️ فشل بدء مشاركة الشاشة');
     }
+};
+
+// Add Copy Link Functionality
+document.getElementById('copy-link-btn').onclick = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+        toast.success('تم نسخ رابط الحصة!');
+        appendMessage('النظام', '🔗 تم نسخ رابط الحصة بنجاح');
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+        // Fallback
+        const input = document.createElement('input');
+        input.value = url;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        appendMessage('النظام', '🔗 تم نسخ رابط الحصة');
+    });
 };
 
 recordBtn.onclick = () => {
