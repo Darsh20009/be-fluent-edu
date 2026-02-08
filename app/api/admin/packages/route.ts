@@ -29,13 +29,28 @@ export async function POST(request: NextRequest) {
       description?: string
       descriptionAr?: string
       price: number
+      discountPrice?: number
       lessonsCount: number
       durationDays: number
       isActive?: boolean
+      discountAll?: boolean // حقل لتطبيق خصم على الجميع
+      discountPercent?: number
     }>(request)
     if (isNextResponse(body)) return body
 
-    const { title, titleAr, description, descriptionAr, price, lessonsCount, durationDays, isActive } = body
+    const { title, titleAr, description, descriptionAr, price, discountPrice, lessonsCount, durationDays, isActive, discountAll, discountPercent } = body
+
+    // إذا كان الأدمن يريد تطبيق خصم على جميع الباقات
+    if (discountAll && discountPercent !== undefined) {
+      const allPackages = await prisma.package.findMany();
+      await Promise.all(allPackages.map(pkg => 
+        prisma.package.update({
+          where: { id: pkg.id },
+          data: { discountPrice: Math.floor(pkg.price * (1 - discountPercent / 100)) }
+        })
+      ));
+      return NextResponse.json({ message: 'Discount applied to all packages' });
+    }
 
     if (!title || !titleAr || price === undefined || !lessonsCount || !durationDays) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -53,6 +68,7 @@ export async function POST(request: NextRequest) {
         description: description || null,
         descriptionAr: descriptionAr || null,
         price,
+        discountPrice: discountPrice || null,
         lessonsCount,
         durationDays,
         isActive: isActive !== undefined ? isActive : true

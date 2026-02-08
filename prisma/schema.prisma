@@ -51,6 +51,7 @@ model Package {
   description   String?
   descriptionAr String?
   price         Float
+  discountPrice Float?         // السعر بعد الخصم المباشر
   lessonsCount  Int
   durationDays  Int
   isActive      Boolean        @default(true)
