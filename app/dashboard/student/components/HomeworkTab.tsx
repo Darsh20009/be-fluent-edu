@@ -140,13 +140,19 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
           <div className="space-y-4">
             {pendingAssignments.map((assignment) => (
               <Card key={assignment.id} variant="elevated">
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between p-1">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <FileText className="h-5 w-5 text-[#10B981]" />
-                      <h3 className="text-lg font-bold text-[#10B981]">{assignment.title}</h3>
-                      <Badge variant="warning">Pending / معلق</Badge>
-                      <Badge variant="info" className="text-[10px]">{assignment.type}</Badge>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 bg-[#10B981]/10 rounded-lg">
+                        <FileText className="h-6 w-6 text-[#10B981]" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900">{assignment.title}</h3>
+                        <div className="flex gap-2 mt-1">
+                          <Badge variant="warning">Pending / معلق</Badge>
+                          <Badge variant="info" className="text-[10px] uppercase">{assignment.type}</Badge>
+                        </div>
+                      </div>
                     </div>
                     {assignment.description && (
                       <p className="text-gray-700 mb-2">{assignment.description}</p>

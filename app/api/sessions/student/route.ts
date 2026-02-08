@@ -49,6 +49,8 @@ export async function GET(request: NextRequest) {
         endTime: ss.Session.endTime,
         status: ss.Session.status,
         roomId: ss.Session.roomId,
+        externalLink: ss.Session.externalLink,
+        externalLinkType: ss.Session.externalLinkType,
         teacher: {
           user: {
             name: ss.Session.TeacherProfile.User.name

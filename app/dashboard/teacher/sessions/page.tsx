@@ -22,7 +22,13 @@ export default function TeacherSessionsPage() {
   const [sessions, setSessions] = useState<SessionData[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [editData, setEditData] = useState({ title: '', startTime: '', endTime: '' })
+  const [editData, setEditData] = useState({ 
+    title: '', 
+    startTime: '', 
+    endTime: '',
+    externalLink: '',
+    externalLinkType: 'OTHER'
+  })
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -44,14 +50,6 @@ export default function TeacherSessionsPage() {
       setLoading(false)
     }
   }
-
-  async function handleEdit(session: SessionData) {
-    try {
-      const response = await fetch(`/api/teacher/sessions/${session.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editData)
-      })
 
       if (response.ok) {
         setSuccess('Session updated successfully')
@@ -182,7 +180,9 @@ export default function TeacherSessionsPage() {
                       setEditData({
                         title: session.title,
                         startTime: session.startTime.slice(0, 16),
-                        endTime: session.endTime.slice(0, 16)
+                        endTime: session.endTime.slice(0, 16),
+                        externalLink: session.externalLink || '',
+                        externalLinkType: (session as any).externalLinkType || 'OTHER'
                       })
                     }}
                   >
@@ -221,6 +221,29 @@ export default function TeacherSessionsPage() {
                       onChange={e => setEditData({ ...editData, endTime: e.target.value })}
                       className="w-full p-2 border rounded dark:bg-neutral-800 dark:text-neutral-100"
                     />
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">External Meeting Link (Optional)</label>
+                      <input
+                        type="url"
+                        placeholder="https://zoom.us/j/..."
+                        value={editData.externalLink || ''}
+                        onChange={e => setEditData({ ...editData, externalLink: e.target.value })}
+                        className="w-full p-2 border rounded dark:bg-neutral-800 dark:text-neutral-100"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Link Type</label>
+                      <select
+                        value={editData.externalLinkType || 'OTHER'}
+                        onChange={e => setEditData({ ...editData, externalLinkType: e.target.value })}
+                        className="w-full p-2 border rounded dark:bg-neutral-800 dark:text-neutral-100"
+                      >
+                        <option value="ZOOM">Zoom</option>
+                        <option value="GOOGLE_MEET">Google Meet</option>
+                        <option value="TEAMS">Microsoft Teams</option>
+                        <option value="OTHER">Other</option>
+                      </select>
+                    </div>
                     <div className="flex gap-2">
                       <Button variant="primary" onClick={() => handleEdit(session)}>Save</Button>
                       <Button variant="secondary" onClick={() => setEditingId(null)}>Cancel</Button>

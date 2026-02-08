@@ -20,6 +20,8 @@ interface Session {
     endTime: string
     status: string
     roomId: string | null
+    externalLink: string | null
+    externalLinkType: string | null
     teacher: {
       user: {
         name: string
@@ -138,15 +140,29 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
                       </div>
                     </div>
                   </div>
-                  <Button 
-                    variant="primary" 
-                    size="sm"
-                    onClick={() => router.push(`/session/${session.session.id}`)}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    <Video className="h-4 w-4 mr-2" />
-                    Join Now / انضم
-                  </Button>
+                  <div className="flex flex-col gap-2">
+                    {session.session.externalLink ? (
+                      <Button 
+                        variant="primary" 
+                        size="sm"
+                        onClick={() => window.open(session.session.externalLink!, '_blank')}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Video className="h-4 w-4 mr-2" />
+                        Join External / انضمام خارجي
+                      </Button>
+                    ) : (
+                      <Button 
+                        variant="primary" 
+                        size="sm"
+                        onClick={() => router.push(`/session/${session.session.id}`)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <Video className="h-4 w-4 mr-2" />
+                        Join Now / انضم
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </Card>
             ))}
