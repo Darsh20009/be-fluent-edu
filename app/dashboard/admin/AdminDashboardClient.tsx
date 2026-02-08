@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { Home, Users, CreditCard, Activity, LogOut, Shield, BookOpen, Headphones, GraduationCap, ClipboardList, Mail } from 'lucide-react'
+import { Home, Users, CreditCard, Activity, LogOut, Shield, BookOpen, Headphones, GraduationCap, ClipboardList, Mail, Target } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'

@@ -15,6 +15,7 @@ interface SessionData {
   endTime: string
   status: string
   externalLink?: string
+  externalLinkType?: string
   SessionStudent: Array<{ User: { id: string, name: string, phone?: string } }>
 }
 
@@ -50,6 +51,14 @@ export default function TeacherSessionsPage() {
       setLoading(false)
     }
   }
+
+  async function handleEdit(session: SessionData) {
+    try {
+      const response = await fetch(`/api/teacher/sessions/${session.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editData)
+      })
 
       if (response.ok) {
         setSuccess('Session updated successfully')
@@ -182,7 +191,7 @@ export default function TeacherSessionsPage() {
                         startTime: session.startTime.slice(0, 16),
                         endTime: session.endTime.slice(0, 16),
                         externalLink: session.externalLink || '',
-                        externalLinkType: (session as any).externalLinkType || 'OTHER'
+                        externalLinkType: session.externalLinkType || 'OTHER'
                       })
                     }}
                   >
