@@ -306,8 +306,9 @@ model Coupon {
   code        String    @unique
   discount    String
   expiryDate  DateTime?
-  isActive    Boolean   @default(true)
-  useCount    Int       @default(0)
+  isActive            Boolean   @default(true)
+  applicablePackageId String    @default("ALL")
+  useCount            Int       @default(0)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now()) @updatedAt
 }

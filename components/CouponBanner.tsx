@@ -33,27 +33,47 @@ export default function CouponBanner() {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: -100, opacity: 0 }}
-        className="fixed top-0 left-0 right-0 z-[100] bg-gradient-to-r from-emerald-600 via-[#10B981] to-teal-500 text-white py-3 px-4 shadow-lg"
+        className="fixed top-4 left-4 right-4 z-[100] md:left-auto md:right-4 md:w-96"
       >
-        <div className="container mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 overflow-hidden">
-            <div className="bg-white/20 p-2 rounded-lg hidden sm:block">
-              <Tag className="w-4 h-4" />
+        <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-[#10B981] to-teal-500 text-white p-6 rounded-2xl shadow-2xl border-4 border-white/20">
+          {/* Decorative elements */}
+          <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl" />
+          
+          <div className="relative flex flex-col items-center text-center">
+            <button 
+              onClick={() => setIsVisible(false)}
+              className="absolute -top-2 -right-2 p-1 hover:bg-white/20 rounded-full transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            
+            <div className="bg-white/20 p-3 rounded-2xl mb-4">
+              <Sparkles className="w-8 h-8 text-amber-300 animate-pulse" />
             </div>
-            <p className="text-sm md:text-base font-bold truncate">
-              <span className="hidden sm:inline">{coupon.message}: </span>
-              <span className="bg-white text-emerald-600 px-3 py-1 rounded-full text-xs md:text-sm mx-2">
+            
+            <h3 className="text-xl font-black mb-1 tracking-tight">
+              {coupon.message.split('!')[0]}!
+            </h3>
+            
+            <div className="my-4 w-full py-3 px-4 bg-white/10 backdrop-blur-sm border-2 border-dashed border-white/40 rounded-xl">
+              <p className="text-sm text-white/80 font-medium mb-1 uppercase tracking-widest">Use Code / استخدم الكود</p>
+              <p className="text-3xl font-black text-white tracking-widest font-mono">
                 {coupon.code}
+              </p>
+            </div>
+            
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-black text-amber-300 drop-shadow-sm">
+                {coupon.discount}
               </span>
-              <span className="font-black text-amber-300">خصم {coupon.discount}</span>
+              <span className="text-xl font-bold uppercase tracking-wider">OFF</span>
+            </div>
+            
+            <p className="mt-4 text-xs font-medium text-white/70 italic">
+              Limited time offer. Apply at checkout.
             </p>
           </div>
-          <button 
-            onClick={() => setIsVisible(false)}
-            className="p-1 hover:bg-white/20 rounded-full transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </div>
       </motion.div>
     </AnimatePresence>

@@ -34,6 +34,45 @@ function CheckoutContent() {
   const [receiptFile, setReceiptFile] = useState<File | null>(null)
   const [subscriptionId, setSubscriptionId] = useState<string | null>(null)
   const [step, setStep] = useState<'method' | 'receipt' | 'success'>('method')
+  const [couponCode, setCouponCode] = useState('')
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null)
+  const [availableCoupons, setAvailableCoupons] = useState<any[]>([])
+  const [showCouponSelector, setShowCouponSelector] = useState(false)
+
+  useEffect(() => {
+    fetchAvailableCoupons()
+  }, [])
+
+  async function fetchAvailableCoupons() {
+    try {
+      const response = await fetch('/api/coupons/active')
+      if (response.ok) {
+        const data = await response.json()
+        setAvailableCoupons(data)
+      }
+    } catch (error) {
+      console.error('Error fetching active coupons:', error)
+    }
+  }
+
+  async function handleApplyCoupon(code: string) {
+    if (!code) return
+    try {
+      const response = await fetch(`/api/coupons/validate?code=${code.toUpperCase()}&packageId=${packageId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setAppliedCoupon({ code: data.code, discount: parseInt(data.discount) })
+        toast.success('Coupon applied! / تم تطبيق الكوبون')
+      } else {
+        const error = await response.json()
+        toast.error(error.error || 'Invalid coupon / كوبون غير صالح')
+      }
+    } catch (error) {
+      toast.error('Error applying coupon')
+    }
+  }
+
+  const finalPrice = pkg ? (appliedCoupon ? Math.floor(pkg.price * (1 - appliedCoupon.discount / 100)) : pkg.price) : 0
 
   useEffect(() => {
     if (packageId) {
@@ -382,10 +421,60 @@ function CheckoutContent() {
                 <p className="font-semibold text-gray-900">{Math.ceil(pkg.durationDays / 30)} month(s)</p>
               </div>
             </div>
-            <div className="border-t pt-4">
-              <div className="flex items-center justify-between">
+            <div className="border-t pt-4 space-y-3">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-gray-700">Coupon Code / كود الخصم</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    placeholder="ENTER CODE"
+                    className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  />
+                  <Button size="sm" onClick={() => handleApplyCoupon(couponCode)}>Apply</Button>
+                </div>
+                
+                <button 
+                  onClick={() => setShowCouponSelector(!showCouponSelector)}
+                  className="text-xs text-emerald-600 font-bold hover:underline text-left mt-1"
+                >
+                  Explore our discounts / اكتشف خصوماتنا
+                </button>
+
+                {showCouponSelector && availableCoupons.length > 0 && (
+                  <div className="mt-2 space-y-2 max-h-40 overflow-y-auto p-2 bg-gray-50 rounded-lg border">
+                    {availableCoupons.filter(c => c.applicablePackageId === 'ALL' || c.applicablePackageId === packageId).map(c => (
+                      <div 
+                        key={c.id} 
+                        onClick={() => {
+                          setCouponCode(c.code);
+                          handleApplyCoupon(c.code);
+                          setShowCouponSelector(false);
+                        }}
+                        className="p-2 bg-white border rounded cursor-pointer hover:bg-emerald-50 transition-colors flex justify-between items-center"
+                      >
+                        <div>
+                          <p className="font-bold text-emerald-700 text-sm">{c.code}</p>
+                          <p className="text-xs text-gray-500">Discount: {c.discount}%</p>
+                        </div>
+                        <Tag className="w-4 h-4 text-emerald-500" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {appliedCoupon && (
+                <div className="flex items-center justify-between text-emerald-600 font-bold text-sm bg-emerald-50 p-2 rounded">
+                  <span>Discount Applied / تم تطبيق الخصم:</span>
+                  <span>-{appliedCoupon.discount}%</span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between border-t pt-3">
                 <span className="text-lg font-bold text-gray-900">Total / الإجمالي</span>
-                <span className="text-2xl font-bold text-[#10B981]">{pkg.price} SAR</span>
+                <span className="text-2xl font-bold text-[#10B981]">{finalPrice} SAR</span>
               </div>
             </div>
 

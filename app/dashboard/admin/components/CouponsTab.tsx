@@ -17,11 +17,27 @@ export default function CouponsTab() {
     discount: '',
     expiryDate: '',
     isActive: true,
+    applicablePackageId: 'ALL',
   });
+
+  const [packages, setPackages] = useState<any[]>([]);
 
   useEffect(() => {
     fetchCoupons();
+    fetchPackages();
   }, []);
+
+  const fetchPackages = async () => {
+    try {
+      const response = await fetch('/api/packages');
+      if (response.ok) {
+        const data = await response.json();
+        setPackages(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch packages:', error);
+    }
+  };
 
   const fetchCoupons = async () => {
     setLoading(true);
@@ -116,6 +132,21 @@ export default function CouponsTab() {
               value={newCoupon.expiryDate}
               onChange={(e) => setNewCoupon({ ...newCoupon, expiryDate: e.target.value })}
             />
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-gray-700">Package / الباقة</label>
+              <select
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+                value={newCoupon.applicablePackageId}
+                onChange={(e) => setNewCoupon({ ...newCoupon, applicablePackageId: e.target.value })}
+              >
+                <option value="ALL">All Packages / كل الباقات</option>
+                {packages.map((pkg) => (
+                  <option key={pkg.id} value={pkg.id}>
+                    {pkg.title} / {pkg.titleAr}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="flex items-end">
               <Button onClick={handleAddCoupon} className="w-full bg-[#10B981] hover:bg-[#059669]">
                 Save Coupon / حفظ

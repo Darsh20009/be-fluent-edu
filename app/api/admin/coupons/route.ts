@@ -33,6 +33,7 @@ export async function POST(req: Request) {
         discount: body.discount,
         expiryDate: body.expiryDate ? new Date(body.expiryDate) : null,
         isActive: body.isActive !== undefined ? body.isActive : true,
+        applicablePackageId: body.applicablePackageId || 'ALL',
       }
     });
     return NextResponse.json(coupon);
