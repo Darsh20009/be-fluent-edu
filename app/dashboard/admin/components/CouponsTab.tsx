@@ -70,7 +70,7 @@ export default function CouponsTab() {
       if (response.ok) {
         toast.success('Coupon added successfully');
         setIsAdding(false);
-        setNewCoupon({ code: '', discount: '', expiryDate: '', isActive: true });
+        setNewCoupon({ code: '', discount: '', expiryDate: '', isActive: true, applicablePackageId: 'ALL' });
         fetchCoupons();
       } else {
         toast.error('Failed to add coupon');
@@ -192,7 +192,7 @@ export default function CouponsTab() {
               </div>
 
               <div className="mt-4 flex items-center justify-between">
-                <Badge variant={coupon.isActive ? 'success' : 'secondary'}>
+                <Badge variant={coupon.isActive ? 'success' : 'neutral'}>
                   {coupon.isActive ? 'Active' : 'Inactive'}
                 </Badge>
                 <div className="text-xs text-gray-400">

@@ -2,12 +2,13 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CreditCard, Upload, CheckCircle, AlertCircle, Wallet } from 'lucide-react'
+import { CreditCard, Upload, CheckCircle, AlertCircle, Wallet, Tag } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Alert from '@/components/ui/Alert'
 import Badge from '@/components/ui/Badge'
+import { toast } from 'react-hot-toast'
 
 interface Package {
   id: string
