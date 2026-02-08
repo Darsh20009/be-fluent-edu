@@ -56,7 +56,9 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
     title: '',
     startTime: '',
     endTime: '',
-    selectedStudents: [] as string[]
+    selectedStudents: [] as string[],
+    externalLink: '',
+    externalLinkType: 'ZOOM'
   })
   const [submitting, setSubmitting] = useState(false)
   const [shownAlertSessionIds, setShownAlertSessionIds] = useState<Set<string>>(new Set())
@@ -181,7 +183,9 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
           title: newSession.title.trim(),
           startTime: utcStartTime,
           endTime: utcEndTime,
-          studentIds: newSession.selectedStudents
+          studentIds: newSession.selectedStudents,
+          externalLink: newSession.externalLink.trim() || undefined,
+          externalLinkType: newSession.externalLink ? newSession.externalLinkType : undefined
         })
       })
 
@@ -192,7 +196,14 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
         setSessionTitle(newSession.title)
         setSessionPassword(createdSession.sessionPassword || '')
         setShowPasswordModal(true)
-        setNewSession({ title: '', startTime: '', endTime: '', selectedStudents: [] })
+        setNewSession({ 
+          title: '', 
+          startTime: '', 
+          endTime: '', 
+          selectedStudents: [],
+          externalLink: '',
+          externalLinkType: 'ZOOM'
+        })
         setShowCreateForm(false)
       } else {
         const error = await response.json()
@@ -256,7 +267,9 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
         body: JSON.stringify({
           title: newSession.title.trim(),
           startTime: utcStartTime,
-          endTime: utcEndTime
+          endTime: utcEndTime,
+          externalLink: newSession.externalLink.trim() || null,
+          externalLinkType: newSession.externalLink ? newSession.externalLinkType : null
         })
       })
 
@@ -349,7 +362,9 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
       title: session.title,
       startTime: new Date(session.startTime).toISOString().slice(0, 16),
       endTime: new Date(session.endTime).toISOString().slice(0, 16),
-      selectedStudents: session.SessionStudent.map(s => s.id)
+      selectedStudents: session.SessionStudent.map(s => s.id),
+      externalLink: (session as any).externalLink || '',
+      externalLinkType: (session as any).externalLinkType || 'ZOOM'
     })
     setShowEditForm(true)
   }
@@ -641,7 +656,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
               </label>
               <div className="border border-gray-300 rounded-lg p-3 max-h-64 overflow-y-auto">
                 {students.map((student) => (
-                  <label key={student.id} className="flex items-center gap-2 mb-2">
+                  <label key={student.id} className="flex items-center gap-2 mb-2 cursor-pointer hover:bg-gray-50 p-1 rounded transition-colors">
                     <input
                       type="checkbox"
                       checked={newSession.selectedStudents.includes(student.id)}
@@ -658,7 +673,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                           })
                         }
                       }}
-                      className="w-4 h-4 cursor-pointer"
+                      className="w-4 h-4 cursor-pointer text-[#10B981] focus:ring-[#10B981]"
                     />
                     <span className="text-sm text-gray-700">{student.name} ({student.email})</span>
                   </label>
@@ -668,7 +683,42 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                 {newSession.selectedStudents.length} student(s) selected
               </p>
             </div>
-            <div className="flex gap-2">
+
+            <div className="pt-4 border-t border-gray-100">
+              <h4 className="text-sm font-bold text-[#10B981] mb-3 uppercase tracking-wider">External Link / رابط خارجي</h4>
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                   <div className="col-span-1">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Platform / المنصة</label>
+                    <select
+                      value={newSession.externalLinkType}
+                      onChange={(e) => setNewSession({ ...newSession, externalLinkType: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+                    >
+                      <option value="ZOOM">Zoom</option>
+                      <option value="GOOGLE_MEET">Google Meet</option>
+                      <option value="TEAMS">Microsoft Teams</option>
+                      <option value="OTHER">Other / أخرى</option>
+                    </select>
+                  </div>
+                  <div className="col-span-1 flex items-end">
+                    <p className="text-[10px] text-gray-500 leading-tight">سيتم توجيه الطلاب لهذا الرابط عند انضمامهم</p>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Meeting Link / رابط الاجتماع</label>
+                  <input
+                    type="url"
+                    value={newSession.externalLink}
+                    onChange={(e) => setNewSession({ ...newSession, externalLink: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+                    placeholder="https://zoom.us/j/..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
               <Button
                 variant="primary"
                 fullWidth
@@ -717,7 +767,39 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
               value={newSession.endTime}
               onChange={(e) => setNewSession({ ...newSession, endTime: e.target.value })}
             />
-            <div className="flex gap-2">
+            
+            <div className="pt-4 border-t border-gray-100">
+              <h4 className="text-sm font-bold text-[#10B981] mb-3 uppercase tracking-wider">External Link / رابط خارجي</h4>
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                   <div className="col-span-1">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Platform / المنصة</label>
+                    <select
+                      value={newSession.externalLinkType}
+                      onChange={(e) => setNewSession({ ...newSession, externalLinkType: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+                    >
+                      <option value="ZOOM">Zoom</option>
+                      <option value="GOOGLE_MEET">Google Meet</option>
+                      <option value="TEAMS">Microsoft Teams</option>
+                      <option value="OTHER">Other / أخرى</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Meeting Link / رابط الاجتماع</label>
+                  <input
+                    type="url"
+                    value={newSession.externalLink}
+                    onChange={(e) => setNewSession({ ...newSession, externalLink: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+                    placeholder="https://zoom.us/j/..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
               <Button
                 variant="primary"
                 fullWidth

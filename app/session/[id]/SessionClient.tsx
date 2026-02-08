@@ -7,7 +7,6 @@ import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import SessionLoginModal from './SessionLoginModal'
 import SessionPasswordModal from './SessionPasswordModal'
-import MeetVideo from '@/components/ZegoVideo'
 
 interface SessionClientProps {
   sessionId: string
@@ -50,9 +49,6 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
   const [showLoginModal, setShowLoginModal] = useState(!isAuthenticated)
   const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
-  const [useZego, setUseZego] = useState(false)
-  const [zegoToken, setZegoToken] = useState<any>(null)
-  const [zegoLoading, setZegoLoading] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
 
   useEffect(() => {
@@ -69,29 +65,6 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
     const tenMinutesBefore = new Date(startTime.getTime() - 10 * 60000)
     return currentTime >= tenMinutesBefore
   }, [session, user, currentTime])
-
-  const initializeZegoSession = async (sessionData: SessionData) => {
-    try {
-      setZegoLoading(true)
-      const response = await fetch('/api/zego/generate-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user?.id,
-          userName: user?.name,
-          roomId: sessionData.id
-        })
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setZegoToken(data)
-      }
-    } catch (error) {
-      console.error('Error initializing Zego:', error)
-    } finally {
-      setZegoLoading(false)
-    }
-  }
 
   useEffect(() => {
     routerRef.current = router
@@ -208,24 +181,6 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <button
-            onClick={async () => {
-              if (useZego) {
-                setUseZego(false)
-                return
-              }
-              const confirmZego = confirm('هل تريد استخدام ZegoCloud كخيار بديل؟ / Do you want to use ZegoCloud as backup?')
-              if (confirmZego) {
-                if (!zegoToken && session) {
-                  await initializeZegoSession(session)
-                }
-                setUseZego(true)
-              }
-            }}
-            className={`text-xs px-2 py-1 rounded transition-colors ${useZego ? 'bg-green-600 text-white' : 'text-neutral-400 hover:text-white underline'}`}
-          >
-            {useZego ? 'Using ZegoCloud / نستخدم Zego' : 'Switch to ZegoCloud / التبديل إلى Zego'}
-          </button>
           {user?.role === 'TEACHER' && session.sessionPassword && (
             <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg px-3 py-2">
               <p className="text-xs text-blue-300 font-medium">Password</p>
@@ -286,23 +241,22 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
               </Button>
             </div>
           </div>
-        ) : useZego && zegoToken ? (
-          <MeetVideo
-            userId={user.id}
-            userName={user.name}
-            roomId={session.id}
-            role={user.role}
-            useZego={true}
-            appId={zegoToken.appId}
-            serverSecret={zegoToken.serverSecret}
-          />
         ) : (
-          <MeetVideo
-            userId={user.id}
-            userName={user.name}
-            roomId={session.id}
-            role={user.role}
-          />
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
+             <div className="bg-neutral-800/50 backdrop-blur-xl border border-neutral-700 rounded-3xl p-8 max-w-lg w-full text-center shadow-2xl">
+              <div className="w-20 h-20 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Video className="h-10 w-10 text-red-500" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-3">
+                No Link Provided / لا يوجد رابط
+              </h2>
+              <p className="text-neutral-400 mb-4 leading-relaxed">
+                لم يتم توفير رابط لهذه الحصة بعد. يرجى التواصل مع المعلم.
+                <br />
+                No meeting link has been provided for this session yet. Please contact the teacher.
+              </p>
+            </div>
+          </div>
         )}
       </div>
     </div>
