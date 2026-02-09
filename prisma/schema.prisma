@@ -723,3 +723,15 @@ model LiveSession {
   endedAt   DateTime?
 }
 
+model LiveParticipant {
+  id         String    @id @default(uuid()) @map("_id")
+  liveId     String
+  userId     String
+  role       String
+  joinedAt   DateTime  @default(now())
+  leftAt     DateTime?
+  raisedHand Boolean   @default(false)
+
+  @@unique([liveId, userId])
+}
+
