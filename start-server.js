@@ -103,8 +103,15 @@ app.prepare().then(() => {
       socket.to(data.roomId).emit('draw', data);
     });
 
+    socket.on('mute-all', (data) => {
+      socket.to(data.roomId).emit('toggle-mute', {
+        mute: true
+      });
+    });
+
     socket.on('stealth-join', (roomId) => {
       socket.join(roomId);
+      socket.isStealth = true;
       console.log(`🕵️ Manager joined room ${roomId} in stealth mode`);
     });
 

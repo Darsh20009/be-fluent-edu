@@ -33,23 +33,34 @@ const ICE_SERVERS = {
 async function init() {
     socket = io('/', { path: '/api/socket/io' });
     
-    try {
-        myStream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true
-            }
-        });
-        
-        const myVideoContainer = createVideoContainer(userName + ' (أنت)', true);
-        const myVideo = myVideoContainer.querySelector('video');
-        myVideo.srcObject = myStream;
-        myVideo.muted = true;
-        videoGrid.appendChild(myVideoContainer);
+    // Check for stealth mode (Admin/Manager)
+    const isStealth = role === 'manager' || role === 'admin';
 
-        socket.emit('join-room', roomId, userId, userName);
+    try {
+        if (!isStealth) {
+            myStream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
+            });
+            
+            const myVideoContainer = createVideoContainer(userName + ' (أنت)', true);
+            const myVideo = myVideoContainer.querySelector('video');
+            myVideo.srcObject = myStream;
+            myVideo.muted = true;
+            videoGrid.appendChild(myVideoContainer);
+        } else {
+            // Stealth mode only needs a placeholder or no video
+            appendMessage('النظام', '🕵️ أنت في وضع المشاهدة الخفي');
+            socket.emit('stealth-join', roomId);
+        }
+
+        if (!isStealth) {
+            socket.emit('join-room', roomId, userId, userName);
+        }
 
         socket.on('existing-users', async (users) => {
             console.log('📋 Existing users:', users);
@@ -75,6 +86,16 @@ async function init() {
 
         socket.on('ice-candidate', async (data) => {
             await handleIceCandidate(data);
+        });
+
+        socket.on('toggle-mute', (data) => {
+            const audioTrack = myStream.getAudioTracks()[0];
+            if (audioTrack) {
+                audioTrack.enabled = !data.mute;
+                document.getElementById('mic-btn').classList.toggle('active', audioTrack.enabled);
+                document.getElementById('mic-btn').innerText = audioTrack.enabled ? '🎙️' : '🔇';
+                appendMessage('النظام', data.mute ? '🔇 تم كتم صوتك من قبل المعلم' : '🎙️ تم تفعيل المايكروفون');
+            }
         });
 
         socket.on('receive-message', (data) => {
@@ -152,14 +173,17 @@ async function createPeerConnection(targetSocketId, targetUserName, isInitiator)
     
     if (isInitiator) {
         try {
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
-            
-            socket.emit('offer', {
-                offer: offer,
-                targetSocketId: targetSocketId,
-                userName: userName
-            });
+            // Only send offer if not in stealth mode (Admin check)
+            if (role !== 'manager' && role !== 'admin') {
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+                
+                socket.emit('offer', {
+                    offer: offer,
+                    targetSocketId: targetSocketId,
+                    userName: userName
+                });
+            }
         } catch (err) {
             console.error('Error creating offer:', err);
         }
@@ -397,6 +421,23 @@ document.getElementById('cam-btn').onclick = () => {
         appendMessage('النظام', videoTrack.enabled ? '📷 الكاميرا مفعلة' : '📷❌ الكاميرا مغلقة');
     }
 };
+
+// Add Mute All for Teachers/Admins
+if (role === 'teacher' || role === 'admin' || role === 'manager') {
+    const muteAllBtn = document.createElement('button');
+    muteAllBtn.id = 'mute-all-btn';
+    muteAllBtn.className = 'control-btn';
+    muteAllBtn.innerHTML = '🔇 الكل';
+    muteAllBtn.title = 'كتم صوت الجميع';
+    document.querySelector('.controls').appendChild(muteAllBtn);
+
+    muteAllBtn.onclick = () => {
+        if (confirm('هل تريد كتم صوت جميع الطلاب؟')) {
+            socket.emit('mute-all', { roomId });
+            appendMessage('النظام', '🔇 تم كتم صوت الجميع');
+        }
+    };
+}
 
 document.getElementById('chat-btn').onclick = () => {
     document.getElementById('chat-panel').classList.toggle('hidden');
