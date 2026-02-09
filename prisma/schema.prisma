@@ -714,3 +714,12 @@ enum BadgeRarity {
   LEGENDARY    // أسطورية
 }
 
+model LiveSession {
+  id        String   @id @default(uuid()) @map("_id")
+  sessionId String
+  teacherId String
+  status    String   @default("LIVE")
+  startedAt DateTime @default(now())
+  endedAt   DateTime?
+}
+
