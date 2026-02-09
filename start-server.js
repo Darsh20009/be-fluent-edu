@@ -93,6 +93,21 @@ app.prepare().then(() => {
       });
     });
 
+    socket.on('toggle-mute', (data) => {
+      io.to(data.targetSocketId).emit('toggle-mute', {
+        mute: data.mute
+      });
+    });
+
+    socket.on('draw', (data) => {
+      socket.to(data.roomId).emit('draw', data);
+    });
+
+    socket.on('stealth-join', (roomId) => {
+      socket.join(roomId);
+      console.log(`🕵️ Manager joined room ${roomId} in stealth mode`);
+    });
+
     socket.on('disconnect', () => {
       console.log('❌ Socket disconnected:', socket.id);
       
