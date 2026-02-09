@@ -35,13 +35,17 @@ args = "Be Fluent Server"
 name = "Be Fluent Server"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run socket & npm run dev"
+waitForPort = 5000
+
+[[ports]]
+localPort = 3001
+externalPort = 3001
 
 [[ports]]
 localPort = 5000
