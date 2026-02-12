@@ -330,6 +330,21 @@ model FreeWriting {
   TeacherProfile TeacherProfile? @relation("FreeWritingGrader", fields: [teacherId], references: [id])
 }
 
+model SiteSettings {
+  id              String   @id @default(uuid()) @map("_id")
+  whatsappNumber  String?
+  supportNumber   String?
+  supportEmail    String?
+  facebookUrl     String?
+  instagramUrl    String?
+  heroTitle       String?
+  heroTitleAr     String?
+  heroSubtitle    String?
+  heroSubtitleAr  String?
+  learningPath    String?  // JSON string for learning path steps
+  updatedAt       DateTime @default(now()) @updatedAt
+}
+
 enum SubscriptionStatus {
   PENDING
   UNDER_REVIEW
