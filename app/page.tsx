@@ -23,6 +23,7 @@ export default function Home() {
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [activeCoupons, setActiveCoupons] = useState<any[]>([]);
+  const [siteSettings, setSiteSettings] = useState<any>(null);
 
   useEffect(() => {
     setIsVisible(true);
@@ -38,6 +39,16 @@ export default function Home() {
         }
       })
       .catch(err => console.error('Failed to fetch coupons:', err));
+
+    // Fetch site settings
+    fetch('/api/admin/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) {
+          setSiteSettings(data);
+        }
+      })
+      .catch(err => console.error('Failed to fetch settings:', err));
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -205,17 +216,22 @@ export default function Home() {
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-[#1F2937] mb-6 leading-[1.1]">
-                  تعلم{' '}
+                  {siteSettings?.heroTitleAr || 'تعلم'}
+                  {' '}
                   <span className="relative inline-block">
-                    <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] via-emerald-500 to-teal-500">الإنجليزية</span>
-                    <span className="absolute -bottom-2 left-0 right-0 h-3 bg-gradient-to-r from-[#10B981]/20 to-emerald-200/30 rounded-full blur-sm"></span>
+                    <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] via-emerald-500 to-teal-500">
+                      {siteSettings?.heroTitleAr ? '' : 'الإنجليزية'}
+                    </span>
+                    {!siteSettings?.heroTitleAr && <span className="absolute -bottom-2 left-0 right-0 h-3 bg-gradient-to-r from-[#10B981]/20 to-emerald-200/30 rounded-full blur-sm"></span>}
                   </span>
                   <br />
-                  <span className="text-3xl sm:text-4xl lg:text-5xl bg-gradient-to-r from-gray-700 to-gray-500 bg-clip-text text-transparent">بأسلوب احترافي ومبتكر</span>
+                  <span className="text-3xl sm:text-4xl lg:text-5xl bg-gradient-to-r from-gray-700 to-gray-500 bg-clip-text text-transparent">
+                    {siteSettings?.heroSubtitleAr || 'بأسلوب احترافي ومبتكر'}
+                  </span>
                 </h1>
 
                 <p className="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0 font-medium">
-                  Be Fluent هي المنصة المتكاملة لتعلم اللغة الإنجليزية بأساليب حديثة تفاعلية مع معلمين محترفين ومجتمع داعم
+                  {siteSettings?.heroSubtitleAr || 'Be Fluent هي المنصة المتكاملة لتعلم اللغة الإنجليزية بأساليب حديثة تفاعلية مع معلمين محترفين ومجتمع داعم'}
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-10">
@@ -228,7 +244,7 @@ export default function Home() {
                     <MapIcon className="w-5 h-5 text-[#10B981] group-hover:scale-110 transition-transform" />
                     <span>خريطة التعلم الذكية</span>
                   </Link>
-                  <a href="https://api.whatsapp.com/send/?phone=201091515594" target="_blank" rel="noopener noreferrer" className="group px-8 py-4 bg-white border-2 border-gray-200 text-[#1F2937] rounded-2xl text-lg font-bold hover:border-[#10B981] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
+                  <a href={`https://api.whatsapp.com/send/?phone=${siteSettings?.whatsappNumber || '201091515594'}`} target="_blank" rel="noopener noreferrer" className="group px-8 py-4 bg-white border-2 border-gray-200 text-[#1F2937] rounded-2xl text-lg font-bold hover:border-[#10B981] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
                     <MessageCircle className="w-5 h-5 text-[#10B981] group-hover:scale-110 transition-transform" />
                     <span>تواصل معنا</span>
                   </a>
