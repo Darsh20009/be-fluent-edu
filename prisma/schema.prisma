@@ -213,6 +213,7 @@ model User {
   Gamification               UserGamification?
   certificates               Certificate[]             @relation("UserCertificates")
   PlacementTestAttempt       PlacementTestAttempt[]
+  TestAttempt                TestAttempt[]
 }
 
 model Word {
@@ -343,6 +344,50 @@ model SiteSettings {
   heroSubtitleAr  String?
   learningPath    String?  // JSON string for learning path steps
   updatedAt       DateTime @default(now()) @updatedAt
+}
+
+model Test {
+  id            String         @id @default(uuid()) @map("_id")
+  title         String
+  titleAr       String?
+  description   String?
+  descriptionAr String?
+  level         String         @default("BEGINNER")
+  category      String?
+  duration      Int?           // Duration in minutes
+  passingScore  Int            @default(50)
+  isPublished   Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now()) @updatedAt
+  questions     TestQuestion[]
+  attempts      TestAttempt[]
+}
+
+model TestQuestion {
+  id            String   @id @default(uuid()) @map("_id")
+  testId        String
+  type          String   @default("MULTIPLE_CHOICE")
+  question      String
+  questionAr    String?
+  options       String?  // JSON array
+  correctAnswer String
+  explanation   String?
+  points        Int      @default(1)
+  order         Int      @default(0)
+  test          Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+}
+
+model TestAttempt {
+  id          String   @id @default(uuid()) @map("_id")
+  testId      String
+  studentId   String
+  score       Int      @default(0)
+  totalPoints Int      @default(0)
+  status      String   @default("COMPLETED") // COMPLETED, IN_PROGRESS
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  test        Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
 enum SubscriptionStatus {
