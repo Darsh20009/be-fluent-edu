@@ -59,3 +59,6 @@
 [x] 59. Re-install npm packages after latest environment migration - COMPLETED (Feb 13, 2026)
 [x] 60. Restart workflow and verify server running - COMPLETED (Feb 13, 2026)
 [x] 61. Complete project import to Replit environment - COMPLETED (Feb 13, 2026)
+[x] 62. Fix coupon deletion bug in Admin UI - COMPLETED (Feb 14, 2026)
+[x] 63. Create professional latest coupon popup with branding - COMPLETED (Feb 14, 2026)
+[x] 64. Integrate discount logic in checkout flow - COMPLETED (Feb 14, 2026)

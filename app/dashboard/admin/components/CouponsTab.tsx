@@ -84,7 +84,7 @@ export default function CouponsTab() {
     if (!confirm('Are you sure you want to delete this coupon?')) return;
 
     try {
-      const response = await fetch(`/api/admin/coupons/${id}`, {
+      const response = await fetch(`/api/admin/coupons?id=${id}`, {
         method: 'DELETE',
       });
 
