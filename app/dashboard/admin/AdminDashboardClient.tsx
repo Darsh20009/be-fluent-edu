@@ -47,6 +47,7 @@ export default function AdminDashboardClient({ user }: AdminDashboardClientProps
     { id: 'placement-test', label: 'Placement Test / اختبار تحديد المستوى', icon: ClipboardList },
     { id: 'email', label: 'Direct Email / البريد المباشر', icon: Mail },
     { id: 'teacher', label: 'Teacher Dashboard / لوحة المعلم', icon: GraduationCap, href: '/dashboard/teacher' },
+    { id: 'settings', label: 'Settings / إعدادات المنصة', icon: Shield, href: '/admin/settings' },
     { id: 'system', label: 'System / النظام', icon: Activity },
   ]
 
