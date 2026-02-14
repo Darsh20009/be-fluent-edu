@@ -109,20 +109,31 @@ export default function LatestCouponPopup() {
                 </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-3">
                 <button
                   onClick={copyCode}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all flex items-center justify-center gap-2"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all flex items-center justify-center gap-2"
                 >
                   <Tag className="w-5 h-5" />
                   نسخ الكود
                 </button>
-                <button
-                  onClick={closePopup}
-                  className="px-6 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-4 rounded-2xl transition-all"
-                >
-                  تخطي
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      window.location.href = '/dashboard/student/checkout';
+                      closePopup();
+                    }}
+                    className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2"
+                  >
+                    اكتشف باقتنا
+                  </button>
+                  <button
+                    onClick={closePopup}
+                    className="px-6 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-4 rounded-2xl transition-all"
+                  >
+                    تخطي
+                  </button>
+                </div>
               </div>
               
               <p className="mt-4 text-xs text-gray-400">
