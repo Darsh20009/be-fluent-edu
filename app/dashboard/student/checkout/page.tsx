@@ -113,7 +113,8 @@ function CheckoutContent() {
         body: JSON.stringify({
           packageId: pkg.id,
           paymentMethod,
-          eWalletProvider
+          eWalletProvider,
+          couponCode: appliedCoupon?.code || null
         })
       })
 

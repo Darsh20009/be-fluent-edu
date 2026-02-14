@@ -8,6 +8,7 @@ import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import ClientSplashScreen from "@/components/ClientSplashScreen";
 import CouponBanner from "@/components/CouponBanner";
+import LatestCouponPopup from "@/components/LatestCouponPopup";
 import { defaultMetadata, organizationJsonLd, courseJsonLd, faqJsonLd, websiteJsonLd } from "@/lib/seo";
 
 const geistSans = Geist({
@@ -75,6 +76,7 @@ export default function RootLayout({
         <SessionProvider>
           <ThemeProvider>
             <ClientSplashScreen />
+            <LatestCouponPopup />
             {children}
             <PWAInstallPrompt />
           </ThemeProvider>
