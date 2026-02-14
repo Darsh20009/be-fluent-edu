@@ -50,6 +50,15 @@ function CheckoutContent() {
       if (response.ok) {
         const data = await response.json()
         setAvailableCoupons(data)
+        
+        // Auto-apply the first valid coupon if none applied
+        if (data.length > 0 && !appliedCoupon) {
+          const validCoupon = data.find((c: any) => c.applicablePackageId === 'ALL' || c.applicablePackageId === packageId)
+          if (validCoupon) {
+            setCouponCode(validCoupon.code)
+            handleApplyCoupon(validCoupon.code)
+          }
+        }
       }
     } catch (error) {
       console.error('Error fetching active coupons:', error)

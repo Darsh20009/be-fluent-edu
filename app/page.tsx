@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import LearningMap from "@/components/LearningMap";
 import LearningPathMap from "@/components/learning-path/LearningPathMap";
 import FloatingContactButtons from "@/components/FloatingContactButtons";
+import CouponBanner from "@/components/CouponBanner";
+import LatestCouponPopup from "@/components/LatestCouponPopup";
 import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, ArrowRight, CheckCircle, Star, Zap, ChevronLeft, ChevronRight, Headphones, GraduationCap, Trophy, Menu, X, Play, ArrowDown, Map as MapIcon, Tag } from "lucide-react";
 
 const heroImages = [
