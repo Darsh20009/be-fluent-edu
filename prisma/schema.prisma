@@ -343,6 +343,7 @@ model SiteSettings {
   heroSubtitle    String?
   heroSubtitleAr  String?
   learningPath    String?  // JSON string for learning path steps
+  whyUs           String?  // JSON string for Why Us section
   updatedAt       DateTime @default(now()) @updatedAt
 }
 
