@@ -113,10 +113,19 @@ export default function AdminPlacementQuestions() {
     if (!studentEmail) return toast.error('يرجى إدخال البريد الإلكتروني');
     setEmailLoading(true);
     try {
-      // هنا نقوم بمحاكاة الإرسال، يمكنك لاحقاً ربطها بـ Nodemailer أو SendGrid
       const testLink = `${window.location.origin}/placement-test`;
-      toast.success(`تم إرسال رابط الاختبار إلى ${studentEmail}`);
-      setStudentEmail('');
+      const res = await fetch('/api/admin/send-test-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: studentEmail, link: testLink })
+      });
+      
+      if (res.ok) {
+        toast.success(`تم إرسال رابط الاختبار إلى ${studentEmail}`);
+        setStudentEmail('');
+      } else {
+        toast.error('فشل إرسال الرابط');
+      }
     } catch (error) {
       toast.error('فشل الإرسال');
     } finally {
