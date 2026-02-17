@@ -1,15 +1,19 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Target, Video, Map, Users, Zap, Calendar, Star, GraduationCap, CheckCircle2 } from 'lucide-react';
+import { Target, Video, Map, Users, Zap, Calendar, Star, GraduationCap, CheckCircle2, BookOpen, Loader2 } from 'lucide-react';
 
-const steps = [
+const iconMap: Record<string, any> = {
+  Target, Video, Map, Users, Zap, Calendar, Star, GraduationCap, CheckCircle2, BookOpen
+};
+
+const defaultSteps = [
   {
     id: 'goal',
     title: 'تحديد الهدف',
     desc: 'نبدأ بتحليل مستواك وتحديد أهدافك بدقة (عمل، سفر، أو تطوير ذاتي).',
-    icon: <Target className="w-8 h-8" />,
+    icon: 'Target',
     color: 'text-blue-500',
     bgColor: 'bg-blue-50',
     borderColor: 'border-blue-200'
@@ -18,7 +22,7 @@ const steps = [
     id: 'trial',
     title: 'الحصة التجريبية',
     desc: 'تجربة حية مع أحد معلمينا لتقييم مهارات التحدث والاستماع.',
-    icon: <Video className="w-8 h-8" />,
+    icon: 'Video',
     color: 'text-emerald-500',
     bgColor: 'bg-emerald-50',
     borderColor: 'border-emerald-200'
@@ -27,7 +31,7 @@ const steps = [
     id: 'plan',
     title: 'خطة مخصصة',
     desc: 'نصمم لك منهجاً خاصاً يناسب وقتك وسرعة تعلمك.',
-    icon: <Map className="w-8 h-8" />,
+    icon: 'Map',
     color: 'text-amber-500',
     bgColor: 'bg-amber-50',
     borderColor: 'border-amber-200'
@@ -36,7 +40,7 @@ const steps = [
     id: 'dual',
     title: 'نظام المعلمين المزدوج',
     desc: 'معلم أساسي للحصص، ومعلم متابع للدعم (24/7)، ومختبر لتقييم تقدمك بشكل حيادي.',
-    icon: <Users className="w-8 h-8" />,
+    icon: 'Users',
     color: 'text-purple-500',
     bgColor: 'bg-purple-50',
     borderColor: 'border-purple-200'
@@ -45,7 +49,7 @@ const steps = [
     id: 'exams',
     title: 'نظام الاختبارات والقياس',
     desc: 'اختبارين مفاجئين أسبوعياً واختبار مستوى شهري (Level Test) لضمان انتقالك للمستوى التالي.',
-    icon: <Zap className="w-8 h-8" />,
+    icon: 'Zap',
     color: 'text-rose-500',
     bgColor: 'bg-rose-50',
     borderColor: 'border-rose-200'
@@ -53,6 +57,36 @@ const steps = [
 ];
 
 export default function LearningPathMap() {
+  const [steps, setSteps] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/admin/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.learningPath) {
+          try {
+            const parsed = JSON.parse(data.learningPath);
+            setSteps(Array.isArray(parsed) && parsed.length > 0 ? parsed : defaultSteps);
+          } catch (e) {
+            setSteps(defaultSteps);
+          }
+        } else {
+          setSteps(defaultSteps);
+        }
+      })
+      .catch(() => setSteps(defaultSteps))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+      </div>
+    );
+  }
+
   return (
     <div className="relative py-20 overflow-hidden bg-white">
       {/* Creative SVG Connection Path */}
@@ -87,27 +121,30 @@ export default function LearningPathMap() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 relative">
-          {steps.map((step, index) => (
-            <motion.div
-              key={step.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className={`relative p-8 rounded-[2.5rem] border-2 ${step.borderColor} ${step.bgColor} hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group overflow-hidden`}
-            >
-              {/* Decorative Background Element */}
-              <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-white/40 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
-              
-              <div className="absolute top-4 left-4 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm flex items-center justify-center font-black text-emerald-600 border border-emerald-100">
-                {index + 1}
-              </div>
-              <div className={`${step.color} mb-8 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500`}>
-                {step.icon}
-              </div>
-              <h3 className="text-2xl font-black text-gray-900 mb-4">{step.title}</h3>
-              <p className="text-gray-600 text-base leading-relaxed font-medium">{step.desc}</p>
-            </motion.div>
-          ))}
+          {steps.map((step, index) => {
+            const IconComponent = iconMap[step.icon] || Target;
+            return (
+              <motion.div
+                key={step.id || index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className={`relative p-8 rounded-[2.5rem] border-2 ${step.borderColor || 'border-gray-100'} ${step.bgColor || 'bg-white'} hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group overflow-hidden`}
+              >
+                {/* Decorative Background Element */}
+                <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-white/40 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+                
+                <div className="absolute top-4 left-4 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm flex items-center justify-center font-black text-emerald-600 border border-emerald-100">
+                  {index + 1}
+                </div>
+                <div className={`${step.color || 'text-emerald-600'} mb-8 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500`}>
+                  <IconComponent className="w-8 h-8" />
+                </div>
+                <h3 className="text-2xl font-black text-gray-900 mb-4">{step.title}</h3>
+                <p className="text-gray-600 text-base leading-relaxed font-medium">{step.desc}</p>
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Exclusive Features Section */}
