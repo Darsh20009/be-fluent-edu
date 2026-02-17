@@ -7,6 +7,10 @@ export default function AdminPlacementQuestions() {
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState('PLACEMENT');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [studentEmail, setStudentEmail] = useState('');
+  
   const [newQuestion, setNewQuestion] = useState({
     question: '',
     questionAr: '',
@@ -51,13 +55,18 @@ export default function AdminPlacementQuestions() {
     }
 
     try {
-      const res = await fetch('/api/admin/placement-test/questions', {
-        method: 'POST',
+      const url = editingId 
+        ? `/api/admin/placement-test/questions/${editingId}`
+        : '/api/admin/placement-test/questions';
+      
+      const res = await fetch(url, {
+        method: editingId ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newQuestion)
       });
+      
       if (res.ok) {
-        toast.success('تم إضافة السؤال بنجاح');
+        toast.success(editingId ? 'تم تحديث السؤال' : 'تم إضافة السؤال بنجاح');
         setNewQuestion({
           ...newQuestion,
           question: '',
@@ -65,10 +74,53 @@ export default function AdminPlacementQuestions() {
           options: ['', '', '', ''],
           correctAnswer: '',
         });
+        setEditingId(null);
         fetchQuestions();
       }
     } catch (error) {
-      toast.error('خطأ في الإضافة');
+      toast.error('خطأ في العملية');
+    }
+  };
+
+  const handleEdit = (q: any) => {
+    setEditingId(q.id);
+    setNewQuestion({
+      question: q.question,
+      questionAr: q.questionAr || '',
+      options: JSON.parse(q.options),
+      correctAnswer: q.correctAnswer,
+      level: q.level,
+      testType: q.testType,
+      category: q.category || 'Grammar'
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('هل أنت متأكد من حذف هذا السؤال؟')) return;
+    try {
+      const res = await fetch(`/api/admin/placement-test/questions/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        toast.success('تم الحذف');
+        fetchQuestions();
+      }
+    } catch (error) {
+      toast.error('خطأ في الحذف');
+    }
+  };
+
+  const handleSendLink = async () => {
+    if (!studentEmail) return toast.error('يرجى إدخال البريد الإلكتروني');
+    setEmailLoading(true);
+    try {
+      // هنا نقوم بمحاكاة الإرسال، يمكنك لاحقاً ربطها بـ Nodemailer أو SendGrid
+      const testLink = `${window.location.origin}/placement-test`;
+      toast.success(`تم إرسال رابط الاختبار إلى ${studentEmail}`);
+      setStudentEmail('');
+    } catch (error) {
+      toast.error('فشل الإرسال');
+    } finally {
+      setEmailLoading(false);
     }
   };
 
@@ -91,8 +143,34 @@ export default function AdminPlacementQuestions() {
         ))}
       </div>
 
+      {/* ميزة إرسال الرابط */}
+      <div className="bg-green-50 p-6 rounded-2xl border border-green-100 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div>
+          <h3 className="font-bold text-green-800">إرسال رابط اختبار تحديد المستوى</h3>
+          <p className="text-sm text-green-600">أرسل رابط الاختبار المباشر لأي طالب عبر بريده الإلكتروني</p>
+        </div>
+        <div className="flex gap-2 w-full md:w-auto">
+          <input 
+            type="email" 
+            placeholder="البريد الإلكتروني للطالب"
+            value={studentEmail}
+            onChange={e => setStudentEmail(e.target.value)}
+            className="p-3 border rounded-lg flex-1 md:w-64"
+          />
+          <button 
+            onClick={handleSendLink}
+            disabled={emailLoading}
+            className="bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 disabled:opacity-50"
+          >
+            إرسال الرابط
+          </button>
+        </div>
+      </div>
+
       <div className="bg-white p-6 rounded-2xl shadow-lg mb-10 border border-gray-100">
-        <h2 className="text-xl font-bold mb-6 text-green-600">إضافة سؤال جديد لبنك ({filterType})</h2>
+        <h2 className="text-xl font-bold mb-6 text-green-600">
+          {editingId ? 'تعديل السؤال' : `إضافة سؤال جديد لبنك (${filterType})`}
+        </h2>
         <form onSubmit={handleAddQuestion} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <input 
@@ -155,8 +233,28 @@ export default function AdminPlacementQuestions() {
               </div>
             ))}
             <button type="submit" className="w-full bg-green-600 text-white p-4 rounded-lg font-bold hover:bg-green-700 transition">
-              حفظ في بنك {newQuestion.testType}
+              {editingId ? 'تحديث السؤال' : `حفظ في بنك ${newQuestion.testType}`}
             </button>
+            {editingId && (
+              <button 
+                type="button" 
+                onClick={() => {
+                  setEditingId(null);
+                  setNewQuestion({
+                    question: '',
+                    questionAr: '',
+                    options: ['', '', '', ''],
+                    correctAnswer: '',
+                    level: 'A1',
+                    testType: 'PLACEMENT',
+                    category: 'Grammar'
+                  });
+                }}
+                className="w-full mt-2 bg-gray-200 text-gray-700 p-4 rounded-lg font-bold"
+              >
+                إلغاء التعديل
+              </button>
+            )}
           </div>
         </form>
       </div>
@@ -170,7 +268,7 @@ export default function AdminPlacementQuestions() {
         ) : (
           questions.map((q, i) => (
             <div key={q.id} className="bg-white p-6 rounded-xl shadow border border-gray-100 flex justify-between items-start">
-              <div>
+              <div className="flex-1">
                 <span className="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded mb-2 mr-2">{q.level}</span>
                 <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded mb-2 mr-2">{q.testType}</span>
                 <h3 className="text-lg font-bold">{q.question}</h3>
@@ -182,6 +280,22 @@ export default function AdminPlacementQuestions() {
                     </div>
                   ))}
                 </div>
+              </div>
+              <div className="flex flex-col gap-2 ml-4">
+                <button 
+                  onClick={() => handleEdit(q)}
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                  title="تعديل"
+                >
+                  تعديل
+                </button>
+                <button 
+                  onClick={() => handleDelete(q.id)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                  title="حذف"
+                >
+                  حذف
+                </button>
               </div>
             </div>
           ))

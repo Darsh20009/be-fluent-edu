@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Loader2, MessageCircle, Phone, Mail, Facebook, Instagram, Layout } from 'lucide-react';
+import { Save, Loader2, MessageCircle, Phone, Mail, Facebook, Instagram, Layout, Map as MapIcon } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export default function SettingsPage() {
@@ -214,7 +214,7 @@ export default function SettingsPage() {
         <div className="md:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2 text-[#10B981]">
-              <Map className="w-5 h-5" />
+              <MapIcon className="w-5 h-5" />
               <h2 className="font-bold text-lg">إدارة خطة التعلم (Learning Path)</h2>
             </div>
             <button
