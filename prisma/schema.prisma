@@ -365,16 +365,19 @@ model Test {
 
 model TestQuestion {
   id            String   @id @default(uuid()) @map("_id")
-  testId        String
+  testId        String?
   type          String   @default("MULTIPLE_CHOICE")
+  testType      String   @default("PLACEMENT") // PLACEMENT, A1_FINAL, etc.
   question      String
   questionAr    String?
   options       String?  // JSON array
   correctAnswer String
   explanation   String?
+  level         String   @default("A1")
+  category      String   @default("Grammar")
   points        Int      @default(1)
   order         Int      @default(0)
-  test          Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  test          Test?    @relation(fields: [testId], references: [id], onDelete: Cascade)
 }
 
 model TestAttempt {
