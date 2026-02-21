@@ -95,6 +95,24 @@ export async function POST() {
         level: "A1",
         testType: "PLACEMENT",
         category: "Grammar"
+      },
+      {
+        question: "How ___ you today?",
+        questionAr: "كيف ___ حالك اليوم؟",
+        options: JSON.stringify(["am", "is", "are", "do"]),
+        correctAnswer: "are",
+        level: "A1",
+        testType: "PLACEMENT",
+        category: "Grammar"
+      },
+      {
+        question: "They ___ playing football now.",
+        questionAr: "هم ___ يلعبون كرة القدم الآن.",
+        options: JSON.stringify(["is", "are", "am", "was"]),
+        correctAnswer: "are",
+        level: "A1",
+        testType: "PLACEMENT",
+        category: "Grammar"
       }
     ];
 

@@ -274,6 +274,10 @@ export default function SettingsPage() {
                       <option value="Award">Award</option>
                       <option value="Globe">Globe</option>
                       <option value="Cpu">Cpu</option>
+                      <option value="CheckCircle">CheckCircle</option>
+                      <option value="Clock">Clock</option>
+                      <option value="HelpCircle">HelpCircle</option>
+                      <option value="Info">Info</option>
                     </select>
                   </div>
                   <div className="space-y-2">
