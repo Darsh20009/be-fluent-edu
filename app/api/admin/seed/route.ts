@@ -76,6 +76,39 @@ export async function POST() {
       })
     }
 
+    // Add Sample Placement Test Questions
+    const sampleQuestions = [
+      {
+        question: "I ___ from Egypt.",
+        questionAr: "أنا ___ من مصر.",
+        options: JSON.stringify(["am", "is", "are", "be"]),
+        correctAnswer: "am",
+        level: "A1",
+        testType: "PLACEMENT",
+        category: "Grammar"
+      },
+      {
+        question: "She ___ to the club every Friday.",
+        questionAr: "هي ___ إلى النادي كل يوم جمعة.",
+        options: JSON.stringify(["go", "goes", "going", "went"]),
+        correctAnswer: "goes",
+        level: "A1",
+        testType: "PLACEMENT",
+        category: "Grammar"
+      }
+    ];
+
+    for (const q of sampleQuestions) {
+      await prisma.testQuestion.upsert({
+        where: { id: `sample-${q.level}-${q.question.slice(0, 10)}`.replace(/\s+/g, '-') },
+        update: {},
+        create: {
+          id: `sample-${q.level}-${q.question.slice(0, 10)}`.replace(/\s+/g, '-'),
+          ...q
+        }
+      });
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Test accounts created successfully',

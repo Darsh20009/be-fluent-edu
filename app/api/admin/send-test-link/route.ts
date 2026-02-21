@@ -8,14 +8,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing email or link' }, { status: 400 });
     }
 
-    // Here we would normally use nodemailer or a service like Resend/Postmark
-    // For now, we will simulate the success since we don't have SMTP credentials
-    console.log(`Sending placement test link to ${email}: ${link}`);
+    // Simulate email sending with better logging for development
+    console.log(`[EMAIL SIMULATION] Sending placement test link to ${email}`);
+    console.log(`[EMAIL SIMULATION] Link: ${link}`);
+    console.log(`[EMAIL SIMULATION] Subject: Your Placement Test Link - Be Fluent`);
     
-    // In a real scenario:
-    // await sendEmail({ to: email, subject: 'Placement Test Link', body: `Click here: ${link}` });
-
-    return NextResponse.json({ success: true, message: 'Link sent successfully' });
+    // In production, use search_integrations to find an email provider (Resend, SendGrid, etc.)
+    // For now, we return success to allow the UI to proceed
+    return NextResponse.json({ 
+      success: true, 
+      message: 'تم إرسال الرابط بنجاح (محاكاة)',
+      debug: { email, link }
+    });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to send link' }, { status: 500 });
   }

@@ -270,6 +270,10 @@ export default function SettingsPage() {
                       <option value="Star">Star</option>
                       <option value="GraduationCap">GraduationCap</option>
                       <option value="BookOpen">BookOpen</option>
+                      <option value="MessageCircle">MessageCircle</option>
+                      <option value="Award">Award</option>
+                      <option value="Globe">Globe</option>
+                      <option value="Cpu">Cpu</option>
                     </select>
                   </div>
                   <div className="space-y-2">
