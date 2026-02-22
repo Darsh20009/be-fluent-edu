@@ -161,13 +161,34 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
             <div className="p-6 lg:p-0 space-y-8">
               {/* Profile Card */}
               <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[#10B981] rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-[#10B981]/20">
-                    {user.name?.charAt(0).toUpperCase()}
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <div className="w-14 h-14 bg-gradient-to-br from-[#10B981] to-[#059669] rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-[#10B981]/20">
+                        {user.name?.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center border border-gray-100 shadow-sm">
+                        <Award className="w-3.5 h-3.5 text-[#10B981]" />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="font-black text-[#1F2937] text-lg leading-tight">{user.name}</p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <Badge variant="success" className="text-[10px] px-2 py-0">Level 1</Badge>
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">PRO STUDENT</span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-black text-[#1F2937] leading-tight">{user.name}</p>
-                    <p className="text-xs text-gray-500 font-bold uppercase mt-1">طالب متميز</p>
+                  
+                  {/* XP Bar */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                      <span className="text-gray-400">XP Progress</span>
+                      <span className="text-[#10B981]">450 / 1000</span>
+                    </div>
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-[#10B981] rounded-full" style={{ width: '45%' }}></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -176,7 +197,7 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
               <nav className="space-y-6">
                 <div>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 px-2">الأساسية</p>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     {primaryMenuItems.map((item) => {
                       const Icon = item.icon
                       const isActiveTab = activeTab === item.id
@@ -191,18 +212,24 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
                             }
                           }}
                           disabled={item.disabled}
-                          className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-xl transition-all duration-200 ${
+                          className={`w-full flex items-center gap-4 px-5 py-3 rounded-xl transition-all duration-200 group relative ${
                             isActiveTab 
                               ? 'bg-[#10B981] text-white shadow-lg shadow-[#10B981]/20 font-bold' 
-                              : item.disabled ? 'opacity-40 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-50 hover:text-[#10B981]'
+                              : item.disabled ? 'opacity-40 cursor-not-allowed text-gray-400' : 'text-gray-600 hover:bg-emerald-50 hover:text-[#10B981]'
                           }`}
                         >
-                          <Icon className={`h-5 w-5 ${isActiveTab ? 'text-white' : ''}`} />
+                          {isActiveTab && (
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full" />
+                          )}
+                          <Icon className={`h-5 w-5 transition-transform group-hover:scale-110 ${isActiveTab ? 'text-white' : 'text-gray-400 group-hover:text-[#10B981]'}`} />
                           <span className="text-sm font-bold">{item.label}</span>
                           {item.badge && (
-                            <span className="mr-auto text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-bold uppercase">
+                            <span className="mr-auto text-[10px] px-2 py-0.5 rounded-full bg-orange-500 text-white font-bold uppercase animate-pulse">
                               {item.badge}
                             </span>
+                          )}
+                          {item.premium && (
+                            <Sparkles className={`h-3 w-3 mr-auto ${isActiveTab ? 'text-white/70' : 'text-amber-400'}`} />
                           )}
                         </button>
                       )
@@ -212,25 +239,52 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
 
                 <div>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 px-2">إضافات أخرى</p>
-                  <div className="px-1">
-                    <select 
-                      className="w-full p-4 bg-white border border-gray-200 rounded-xl text-sm text-[#1F2937] font-bold focus:ring-2 focus:ring-[#10B981]/20 outline-none appearance-none cursor-pointer hover:border-[#10B981]/30 transition-all"
-                      onChange={(e) => {
-                        const val = e.target.value
-                        if (val) {
-                          const item = extraMenuItems.find(m => m.id === val)
-                          if (item?.isLink) router.push(item.isLink)
-                          else setActiveTab(val)
-                          setSidebarOpen(false)
-                        }
-                      }}
-                      value={extraMenuItems.some(m => m.id === activeTab) ? activeTab : ""}
-                    >
-                      <option value="" disabled className="font-bold">اختر صفحة أخرى...</option>
-                      {extraMenuItems.map(item => (
-                        <option key={item.id} value={item.id} disabled={item.disabled} className="font-medium py-2">{item.label}</option>
-                      ))}
-                    </select>
+                  <div className="space-y-1">
+                    {extraMenuItems.slice(0, 5).map((item) => {
+                      const Icon = item.icon
+                      const isActiveTab = activeTab === item.id
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            if (!item.disabled) {
+                              if (item.isLink) router.push(item.isLink)
+                              else setActiveTab(item.id)
+                              setSidebarOpen(false)
+                            }
+                          }}
+                          disabled={item.disabled}
+                          className={`w-full flex items-center gap-4 px-5 py-2.5 rounded-xl transition-all duration-200 group ${
+                            isActiveTab 
+                              ? 'bg-[#10B981]/10 text-[#10B981] font-bold' 
+                              : item.disabled ? 'opacity-40 cursor-not-allowed text-gray-400' : 'text-gray-500 hover:bg-gray-50 hover:text-[#10B981]'
+                          }`}
+                        >
+                          <Icon className={`h-4.5 w-4.5 ${isActiveTab ? 'text-[#10B981]' : 'text-gray-400 group-hover:text-[#10B981]'}`} />
+                          <span className="text-sm font-bold">{item.label}</span>
+                        </button>
+                      )
+                    })}
+                    <div className="px-2 pt-2">
+                      <select 
+                        className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs text-gray-500 font-bold focus:ring-2 focus:ring-[#10B981]/20 outline-none appearance-none cursor-pointer hover:bg-gray-100 transition-all"
+                        onChange={(e) => {
+                          const val = e.target.value
+                          if (val) {
+                            const item = extraMenuItems.find(m => m.id === val)
+                            if (item?.isLink) router.push(item.isLink)
+                            else setActiveTab(val)
+                            setSidebarOpen(false)
+                          }
+                        }}
+                        value={extraMenuItems.some(m => m.id === activeTab) ? activeTab : ""}
+                      >
+                        <option value="" disabled>المزيد من الصفحات...</option>
+                        {extraMenuItems.slice(5).map(item => (
+                          <option key={item.id} value={item.id} disabled={item.disabled}>{item.label}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </div>
               </nav>

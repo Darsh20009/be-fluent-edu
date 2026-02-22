@@ -6,6 +6,7 @@ import {
   Video, Image, File, List, AlignLeft, AlertCircle, ChevronDown, Eye
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import Button from '@/components/ui/Button'
 
 interface Assignment {
   id: string
@@ -134,7 +135,7 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
   )
 
   if (!isActive) return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
+    <div className="flex flex-col items-center justify-center py-20 text-center" dir="rtl">
       <div className="w-20 h-20 bg-orange-50 rounded-2xl flex items-center justify-center mb-5">
         <AlertCircle className="w-10 h-10 text-orange-400" />
       </div>
@@ -144,84 +145,94 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
   )
 
   return (
-    <div className="space-y-6" dir="rtl">
-      <div>
-        <h2 className="text-2xl font-black text-gray-900">واجباتي</h2>
-        <p className="text-sm text-gray-500 mt-0.5">{pendingAssignments.length} واجب معلق • {submittedAssignments.length} مسلّم</p>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
-        <button
-          onClick={() => setTab('pending')}
-          className={`px-5 py-2 rounded-lg text-sm font-bold transition ${tab === 'pending' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-        >
-          معلق ({pendingAssignments.length})
-        </button>
-        <button
-          onClick={() => setTab('submitted')}
-          className={`px-5 py-2 rounded-lg text-sm font-bold transition ${tab === 'submitted' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-        >
-          مسلّم ({submittedAssignments.length})
-        </button>
+    <div className="space-y-8" dir="rtl">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-black text-gray-900">واجباتي اليومية</h2>
+          <p className="text-gray-500 mt-1">تابع مهامك وطور مهاراتك من خلال التطبيق العملي</p>
+        </div>
+        
+        {/* Tabs */}
+        <div className="flex gap-1 bg-gray-100 p-1.5 rounded-[1.25rem] w-fit">
+          <button
+            onClick={() => setTab('pending')}
+            className={`px-6 py-2.5 rounded-[1rem] text-sm font-black transition-all ${tab === 'pending' ? 'bg-white shadow-sm text-[#10B981]' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            بانتظارك ({pendingAssignments.length})
+          </button>
+          <button
+            onClick={() => setTab('submitted')}
+            className={`px-6 py-2.5 rounded-[1rem] text-sm font-black transition-all ${tab === 'submitted' ? 'bg-white shadow-sm text-[#10B981]' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            تم التسليم ({submittedAssignments.length})
+          </button>
+        </div>
       </div>
 
       {/* Pending */}
       {tab === 'pending' && (
         pendingAssignments.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-2xl border border-dashed border-gray-200">
-            <CheckCircle className="w-12 h-12 text-emerald-400 mb-4" />
-            <p className="font-black text-gray-900">أحسنت! لا توجد واجبات معلقة</p>
-            <p className="text-sm text-gray-400 mt-1">ستظهر الواجبات الجديدة هنا فور إرسالها من معلمك</p>
+          <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-[2.5rem] border-2 border-dashed border-gray-100">
+            <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center mb-6">
+              <CheckCircle className="w-10 h-10 text-emerald-500" />
+            </div>
+            <h3 className="text-xl font-black text-gray-900">أنت رائع! لا توجد واجبات</h3>
+            <p className="text-gray-400 mt-2 max-w-xs font-medium">استمتع بوقتك أو راجع دروسك السابقة حتى يرسل لك المعلم مهام جديدة.</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid gap-4">
             {pendingAssignments.map(a => {
               const cfg = TYPE_CONFIG[a.type] || TYPE_CONFIG.TEXT
               const Icon = cfg.icon
               const isOverdue = a.dueDate && new Date(a.dueDate) < new Date()
+              
+              // Countdown logic
+              let dueLabel = 'غير محدد'
+              if (a.dueDate) {
+                const diff = new Date(a.dueDate).getTime() - new Date().getTime()
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+                if (isOverdue) dueLabel = 'انتهى الموعد'
+                else if (days === 0) dueLabel = 'ينتهي اليوم'
+                else if (days === 1) dueLabel = 'ينتهي غداً'
+                else dueLabel = `ينتهي خلال ${days} أيام`
+              }
+
               return (
-                <div key={a.id} className="bg-white rounded-2xl border border-gray-200 p-5 hover:border-emerald-200 transition">
-                  <div className="flex items-start gap-4">
-                    <div className={`w-10 h-10 ${cfg.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                      <Icon className={`w-5 h-5 ${cfg.color}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <h3 className="font-black text-gray-900">{a.title}</h3>
-                          <div className="flex items-center gap-2 mt-1 flex-wrap">
-                            <span className={`px-2 py-0.5 rounded-lg text-xs font-bold ${cfg.bg} ${cfg.color}`}>{cfg.labelAr}</span>
-                            {isOverdue && <span className="px-2 py-0.5 bg-red-100 text-red-600 rounded-lg text-xs font-bold">متأخر</span>}
-                            {a.session && <span className="text-xs text-gray-400">{a.session.title}</span>}
-                          </div>
-                          {a.description && <p className="text-sm text-gray-600 mt-1.5">{a.description}</p>}
-                          {a.dueDate && (
-                            <p className={`text-xs mt-1.5 flex items-center gap-1 ${isOverdue ? 'text-red-500' : 'text-gray-400'}`}>
-                              <Clock className="w-3 h-3" />
-                              موعد التسليم: {new Date(a.dueDate).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })}
-                            </p>
-                          )}
+                <div key={a.id} className="group bg-white rounded-[2rem] border border-gray-100 p-6 hover:border-[#10B981]/30 hover:shadow-xl hover:shadow-[#10B981]/5 transition-all">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-start gap-5">
+                      <div className={`w-14 h-14 ${cfg.bg} rounded-2xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110`}>
+                        <Icon className={`w-7 h-7 ${cfg.color}`} />
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="text-lg font-black text-gray-900">{a.title}</h3>
+                          <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${cfg.bg} ${cfg.color}`}>{cfg.labelAr}</span>
+                          {isOverdue && <span className="px-2.5 py-0.5 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-black uppercase tracking-wider">متأخر</span>}
                         </div>
-                        <div className="flex flex-col gap-2 flex-shrink-0">
-                          {a.attachmentUrls && (
-                            <a href={a.attachmentUrls} target="_blank" rel="noopener noreferrer"
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold hover:bg-blue-100 transition border border-blue-200"
-                            >
-                              <Eye className="w-3 h-3" />
-                              عرض
-                            </a>
+                        {a.description && <p className="text-sm text-gray-500 font-medium line-clamp-1">{a.description}</p>}
+                        <div className="flex items-center gap-4 pt-1">
+                          <div className={`flex items-center gap-1.5 text-xs font-bold ${isOverdue ? 'text-rose-500' : 'text-gray-400'}`}>
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>{dueLabel}</span>
+                          </div>
+                          {a.session && (
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400">
+                              <FileText className="w-3.5 h-3.5" />
+                              <span>{a.session.title}</span>
+                            </div>
                           )}
-                          <button
-                            onClick={() => { setSelectedAssignment(a); setAnswer(''); setSelectedOption(null); setAttachedFiles([]) }}
-                            className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-lg shadow-emerald-200"
-                          >
-                            <Send className="w-3 h-3" />
-                            تسليم
-                          </button>
                         </div>
                       </div>
                     </div>
+                    
+                    <button
+                      onClick={() => { setSelectedAssignment(a); setAnswer(''); setSelectedOption(null); setAttachedFiles([]) }}
+                      className="bg-[#10B981] text-white px-8 py-3 rounded-2xl font-black text-sm hover:bg-emerald-600 transition shadow-lg shadow-emerald-100 flex items-center justify-center gap-2"
+                    >
+                      <span>ابدأ الحل</span>
+                      <Send className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               )
@@ -233,69 +244,84 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
       {/* Submitted */}
       {tab === 'submitted' && (
         submittedAssignments.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-2xl border border-dashed border-gray-200">
-            <FileText className="w-12 h-12 text-gray-300 mb-4" />
-            <p className="font-bold text-gray-500">لم تسلّم أي واجب بعد</p>
+          <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-[2.5rem] border-2 border-dashed border-gray-100">
+            <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mb-6">
+              <FileText className="w-10 h-10 text-gray-300" />
+            </div>
+            <p className="font-black text-gray-400">لم تقم بتسليم أي واجب بعد</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid gap-4">
             {submittedAssignments.map(a => {
               const sub = a.submissions[0]
               const cfg = TYPE_CONFIG[a.type] || TYPE_CONFIG.TEXT
               const Icon = cfg.icon
               return (
-                <div key={a.id} className={`bg-white rounded-2xl border p-5 ${sub.grade !== null ? 'border-emerald-200' : 'border-gray-200'}`}>
-                  <div className="flex items-start gap-4">
-                    <div className={`w-10 h-10 ${cfg.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                      <Icon className={`w-5 h-5 ${cfg.color}`} />
+                <div key={a.id} className={`bg-white rounded-[2rem] border p-6 transition-all ${sub.grade !== null ? 'border-emerald-100 bg-emerald-50/10' : 'border-gray-100'}`}>
+                  <div className="flex items-start gap-5">
+                    <div className={`w-12 h-12 ${cfg.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                      <Icon className={`w-6 h-6 ${cfg.color}`} />
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-start justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                         <div>
-                          <h3 className="font-black text-gray-900">{a.title}</h3>
-                          <p className="text-xs text-gray-400 mt-0.5">سُلِّم: {new Date(sub.submittedAt).toLocaleDateString('ar-EG')}</p>
+                          <h3 className="text-lg font-black text-gray-900">{a.title}</h3>
+                          <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-1">تاريخ التسليم: {new Date(sub.submittedAt).toLocaleDateString('ar-EG')}</p>
                         </div>
                         {sub.grade !== null ? (
-                          <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-xl text-sm font-black">
-                            <Star className="w-3.5 h-3.5 fill-emerald-500" />
-                            {sub.grade}/100
+                          <div className="bg-white px-4 py-2 rounded-2xl border border-emerald-100 shadow-sm flex items-center gap-3">
+                            <div className="text-right">
+                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">الدرجة</p>
+                              <p className="text-lg font-black text-emerald-600 leading-none">{sub.grade}/100</p>
+                            </div>
+                            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white">
+                              <Star className="w-5 h-5 fill-current" />
+                            </div>
                           </div>
                         ) : (
-                          <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-xl text-xs font-bold">قيد المراجعة</span>
+                          <div className="px-4 py-2 bg-orange-50 text-orange-600 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2">
+                            <Clock className="w-4 h-4" />
+                            قيد المراجعة
+                          </div>
                         )}
                       </div>
 
-                      {sub.textAnswer && (
-                        <div className="mt-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                          <p className="text-xs text-gray-400 font-bold mb-1">إجابتك:</p>
-                          <p className="text-sm text-gray-700">{sub.textAnswer}</p>
-                        </div>
-                      )}
+                      <div className="space-y-3">
+                        {sub.textAnswer && (
+                          <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">إجابتك:</p>
+                            <p className="text-sm text-gray-700 font-medium leading-relaxed">{sub.textAnswer}</p>
+                          </div>
+                        )}
 
-                      {sub.attachedFiles && (() => {
-                        try {
-                          const files = JSON.parse(sub.attachedFiles) as string[]
-                          return (
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              {files.map((url, i) => (
-                                <a key={i} href={url} target="_blank" rel="noopener noreferrer"
-                                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold hover:bg-blue-100 transition"
-                                >
-                                  <File className="w-3 h-3" />
-                                  الملف المرفق {i + 1}
-                                </a>
-                              ))}
+                        {sub.attachedFiles && (() => {
+                          try {
+                            const files = JSON.parse(sub.attachedFiles) as string[]
+                            return (
+                              <div className="flex flex-wrap gap-2">
+                                {files.map((url, i) => (
+                                  <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-black hover:bg-blue-100 transition border border-blue-100"
+                                  >
+                                    <File className="w-3.5 h-3.5" />
+                                    <span>المرفق {files.length > 1 ? i + 1 : ''}</span>
+                                  </a>
+                                ))}
+                              </div>
+                            )
+                          } catch { return null }
+                        })()}
+
+                        {sub.feedback && (
+                          <div className="p-4 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-100">
+                            <div className="flex items-center gap-2 mb-2">
+                              <MessageSquare className="w-4 h-4" />
+                              <p className="text-[10px] font-black uppercase tracking-widest">تعليق المعلم:</p>
                             </div>
-                          )
-                        } catch { return null }
-                      })()}
-
-                      {sub.feedback && (
-                        <div className="mt-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
-                          <p className="text-xs text-blue-600 font-bold mb-1 flex items-center gap-1"><MessageSquare className="w-3 h-3" /> تعليق المعلم:</p>
-                          <p className="text-sm text-blue-700">{sub.feedback}</p>
-                        </div>
-                      )}
+                            <p className="text-sm font-medium leading-relaxed">{sub.feedback}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -305,117 +331,185 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
         )
       )}
 
-      {/* Submit Modal */}
       {selectedAssignment && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-lg" dir="rtl">
-            <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 rounded-t-3xl sm:rounded-t-2xl flex items-center justify-between">
-              <div>
-                <h3 className="text-white font-black">{selectedAssignment.title}</h3>
-                <p className="text-emerald-100 text-xs mt-0.5">{TYPE_CONFIG[selectedAssignment.type]?.labelAr || selectedAssignment.type}</p>
+        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-[2.5rem] sm:rounded-[2rem] shadow-2xl w-full max-w-2xl overflow-hidden animate-in slide-in-from-bottom duration-300" dir="rtl">
+            <div className="bg-[#10B981] px-8 py-6 flex items-center justify-between text-white">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+                  {(() => {
+                    const Icon = TYPE_CONFIG[selectedAssignment.type]?.icon || FileText
+                    return <Icon className="w-6 h-6" />
+                  })()}
+                </div>
+                <div>
+                  <h3 className="text-xl font-black">{selectedAssignment.title}</h3>
+                  <p className="text-emerald-100 text-xs font-bold uppercase tracking-widest mt-0.5">
+                    {TYPE_CONFIG[selectedAssignment.type]?.labelAr || selectedAssignment.type}
+                  </p>
+                </div>
               </div>
-              <button onClick={() => setSelectedAssignment(null)} className="p-1.5 hover:bg-white/20 rounded-lg transition">
-                <X className="w-5 h-5 text-white" />
+              <button onClick={() => setSelectedAssignment(null)} className="w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-xl transition">
+                <X className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div className="p-8 space-y-8 max-h-[75vh] overflow-y-auto">
               {selectedAssignment.description && (
-                <div className="p-3 bg-gray-50 rounded-xl text-sm text-gray-700 border border-gray-100">
+                <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100 text-gray-600 text-sm leading-relaxed font-medium">
                   {selectedAssignment.description}
                 </div>
               )}
 
-              {selectedAssignment.attachmentUrls && (
-                <a href={selectedAssignment.attachmentUrls} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-xl text-sm font-bold text-blue-700 hover:bg-blue-100 transition"
-                >
-                  <Eye className="w-4 h-4" />
-                  عرض مواد الواجب
-                </a>
-              )}
-
-              {selectedAssignment.type === 'MULTIPLE_CHOICE' && selectedAssignment.multipleChoice && (
-                <div className="space-y-2">
-                  <p className="font-bold text-gray-900 text-sm">{JSON.parse(selectedAssignment.multipleChoice).question}</p>
-                  <div className="space-y-2">
-                    {JSON.parse(selectedAssignment.multipleChoice).options.map((opt: string, idx: number) => (
-                      <button
-                        key={idx}
-                        onClick={() => setSelectedOption(idx)}
-                        className={`w-full text-right p-3.5 rounded-xl border-2 transition text-sm font-bold ${
-                          selectedOption === idx ? 'bg-emerald-600 text-white border-emerald-600' : 'border-gray-200 hover:border-emerald-400 text-gray-700'
-                        }`}
-                      >
-                        <span className="inline-block w-6 h-6 rounded-full bg-white/20 border border-current text-center leading-6 text-xs ml-2">{String.fromCharCode(65 + idx)}</span>
-                        {opt}
-                      </button>
-                    ))}
+              {selectedAssignment.attachmentUrls && (() => {
+                let urls: string[] = []
+                try { urls = JSON.parse(selectedAssignment.attachmentUrls!) } catch { urls = [selectedAssignment.attachmentUrls!] }
+                return urls.length > 0 ? (
+                  <div className="space-y-3">
+                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest">مواد مساعدة من المعلم:</p>
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      {urls.map((url, i) => (
+                        <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-2xl text-sm font-black text-blue-700 hover:bg-blue-100 transition group"
+                        >
+                          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                            <Eye className="w-5 h-5" />
+                          </div>
+                          <span>عرض الملف {urls.length > 1 ? i + 1 : ''}</span>
+                        </a>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                ) : null
+              })()}
 
-              {selectedAssignment.type === 'TEXT' && (
-                <div>
-                  <label className="text-xs font-bold text-gray-500 block mb-1.5">إجابتك</label>
-                  <textarea
-                    value={answer}
-                    onChange={e => setAnswer(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none resize-none"
-                    rows={5}
-                    placeholder="اكتب إجابتك هنا..."
-                  />
-                </div>
-              )}
+              <div className="border-t border-gray-100 pt-8">
+                <h4 className="text-lg font-black text-gray-900 mb-6 flex items-center gap-2">
+                  <div className="w-2 h-6 bg-[#10B981] rounded-full" />
+                  إجابتك على المهمة
+                </h4>
 
-              {['VIDEO', 'IMAGE', 'FILE'].includes(selectedAssignment.type) && (
-                <div>
-                  <label className="text-xs font-bold text-gray-500 block mb-1.5">
-                    {selectedAssignment.type === 'VIDEO' ? 'ارفع مقطع فيديو إجابتك' :
-                     selectedAssignment.type === 'IMAGE' ? 'ارفع صورة إجابتك' : 'ارفع ملف إجابتك'}
-                  </label>
-                  <div
-                    className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30 transition"
-                    onClick={() => fileRef.current?.click()}
-                  >
-                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm font-bold text-gray-600">اضغط لاختيار ملف</p>
-                    {uploading && <p className="text-xs text-emerald-600 mt-2 font-bold animate-pulse">جاري الرفع...</p>}
-                    <input
-                      ref={fileRef}
-                      type="file"
-                      className="hidden"
-                      accept={selectedAssignment.type === 'VIDEO' ? 'video/*' : selectedAssignment.type === 'IMAGE' ? 'image/*' : '*'}
-                      multiple
-                      onChange={e => Array.from(e.target.files || []).forEach(f => handleFileUpload(f))}
-                    />
-                  </div>
-                  {attachedFiles.length > 0 && (
-                    <div className="mt-3 space-y-2">
-                      {attachedFiles.map((url, i) => (
-                        <div key={i} className="flex items-center gap-2 p-2.5 bg-emerald-50 rounded-xl border border-emerald-200">
-                          <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                          <span className="text-xs text-gray-700 flex-1 truncate">{url.split('/').pop()}</span>
-                          <button onClick={() => setAttachedFiles(f => f.filter((_, idx) => idx !== i))} className="text-red-400 hover:text-red-600">
-                            <X className="w-3.5 h-3.5" />
-                          </button>
+                {selectedAssignment.type === 'MULTIPLE_CHOICE' && selectedAssignment.multipleChoice && (() => {
+                  let parsed: any = null
+                  try { parsed = JSON.parse(selectedAssignment.multipleChoice) } catch { return null }
+                  const questions: Array<{question:string,options:string[],correctAnswer:number}> = Array.isArray(parsed) ? parsed : [parsed]
+                  return (
+                    <div className="space-y-6">
+                      {questions.map((q, qi) => (
+                        <div key={qi} className="space-y-4">
+                          <p className="font-black text-gray-900 text-base">{q.question}</p>
+                          <div className="grid gap-3">
+                            {q.options.map((opt: string, idx: number) => (
+                              <button
+                                key={idx}
+                                onClick={() => setSelectedOption(qi * 100 + idx)}
+                                className={`w-full text-right p-4 rounded-2xl border-2 transition-all duration-200 flex items-center gap-4 ${
+                                  selectedOption === (qi * 100 + idx) 
+                                    ? 'bg-[#10B981] text-white border-[#10B981] shadow-lg shadow-emerald-100' 
+                                    : 'border-gray-100 hover:border-emerald-200 text-gray-700 bg-white'
+                                }`}
+                              >
+                                <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black border ${
+                                  selectedOption === (qi * 100 + idx) ? 'bg-white/20 border-white' : 'bg-gray-50 border-gray-100'
+                                }`}>
+                                  {String.fromCharCode(65 + idx)}
+                                </span>
+                                <span className="font-bold">{opt}</span>
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       ))}
                     </div>
-                  )}
-                </div>
-              )}
+                  )
+                })()}
 
-              <div className="flex gap-3">
+                {selectedAssignment.type === 'TEXT' && (
+                  <div className="space-y-2">
+                    <textarea
+                      value={answer}
+                      onChange={e => setAnswer(e.target.value)}
+                      className="w-full px-6 py-4 border-2 border-gray-100 rounded-[2rem] text-sm font-medium focus:ring-4 focus:ring-emerald-50 focus:border-[#10B981] outline-none resize-none transition-all"
+                      rows={6}
+                      placeholder="اكتب إجابتك هنا بالتفصيل..."
+                    />
+                  </div>
+                )}
+
+                {['VIDEO', 'IMAGE', 'FILE'].includes(selectedAssignment.type) && (
+                  <div className="space-y-4">
+                    <div
+                      className="group border-2 border-dashed border-gray-200 rounded-[2rem] p-10 text-center cursor-pointer hover:border-[#10B981] hover:bg-emerald-50/30 transition-all"
+                      onClick={() => fileRef.current?.click()}
+                    >
+                      <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#10B981]" />
+                      </div>
+                      <p className="text-base font-black text-gray-900">اسحب الملف أو اضغط للاختيار</p>
+                      <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-2">
+                        {selectedAssignment.type === 'VIDEO' ? 'MP4, MOV' : selectedAssignment.type === 'IMAGE' ? 'JPG, PNG, WEBP' : 'جميع الملفات مدعومة'}
+                      </p>
+                      
+                      {uploading && (
+                        <div className="mt-6 flex flex-col items-center gap-2">
+                          <div className="w-full max-w-xs h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-[#10B981] animate-progress" style={{ width: '60%' }} />
+                          </div>
+                          <span className="text-xs font-black text-[#10B981] animate-pulse">جاري رفع ملفك...</span>
+                        </div>
+                      )}
+                      
+                      <input
+                        ref={fileRef}
+                        type="file"
+                        className="hidden"
+                        accept={selectedAssignment.type === 'VIDEO' ? 'video/*' : selectedAssignment.type === 'IMAGE' ? 'image/*' : '*'}
+                        multiple
+                        onChange={e => Array.from(e.target.files || []).forEach(f => handleFileUpload(f))}
+                      />
+                    </div>
+
+                    {attachedFiles.length > 0 && (
+                      <div className="grid gap-2">
+                        {attachedFiles.map((url, i) => (
+                          <div key={i} className="flex items-center gap-3 p-3 bg-emerald-50 rounded-2xl border border-emerald-100">
+                            <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white">
+                              <CheckCircle className="w-4 h-4" />
+                            </div>
+                            <span className="text-xs font-black text-emerald-800 flex-1 truncate">{url.split('/').pop()}</span>
+                            <button onClick={() => setAttachedFiles(f => f.filter((_, idx) => idx !== i))} className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <button
                   onClick={handleSubmit}
                   disabled={submitting || uploading}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition disabled:opacity-50 shadow-lg shadow-emerald-200"
+                  className="flex-1 flex items-center justify-center gap-3 py-4 bg-[#10B981] hover:bg-emerald-600 text-white rounded-2xl font-black text-base transition-all disabled:opacity-50 shadow-xl shadow-emerald-100"
                 >
-                  <Send className="w-4 h-4" />
-                  {submitting ? 'جاري التسليم...' : 'تسليم الواجب'}
+                  {submitting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>جاري التسليم...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5" />
+                      <span>تأكيد وتسليم الواجب</span>
+                    </>
+                  )}
                 </button>
-                <button onClick={() => setSelectedAssignment(null)} className="px-5 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-200 transition">
+                <button 
+                  onClick={() => setSelectedAssignment(null)} 
+                  className="px-8 py-4 bg-gray-50 text-gray-500 rounded-2xl font-black text-base hover:bg-gray-100 transition-all"
+                >
                   إلغاء
                 </button>
               </div>

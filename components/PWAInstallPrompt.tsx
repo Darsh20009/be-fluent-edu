@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, Download, Smartphone, Monitor, Apple, Sparkles, Zap, Chrome } from 'lucide-react';
 import Image from 'next/image';
-import { Button } from './ui/Button';
+import Button from './ui/Button';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;

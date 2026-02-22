@@ -27,6 +27,16 @@ interface Assignment {
     grammarErrors: string | null
     submittedAt: string
   }>
+  _count?: {
+    Submission: number
+  }
+}
+
+interface UploadedFile {
+  url: string
+  name: string
+  size: number
+  type: string
 }
 
 interface Session { id: string; title: string }
@@ -40,11 +50,19 @@ const TYPE_CONFIG: Record<string, { label: string; labelAr: string; icon: any; c
   FILE:            { label: 'File',            labelAr: 'ملف',         icon: File,      color: 'text-gray-600',   bg: 'bg-gray-50' },
 }
 
+interface MCQQuestion {
+  question: string
+  options: string[]
+  correctAnswer: number
+}
+
+const emptyMCQ = (): MCQQuestion => ({ question: '', options: ['', '', '', ''], correctAnswer: 0 })
+
 const emptyForm = {
   title: '', description: '', type: 'TEXT', sessionId: '', dueDate: '',
   selectedStudents: [] as string[],
-  attachmentUrls: [] as string[],
-  mcqQuestion: '', mcqOptions: ['', '', ''], mcqCorrect: 0
+  attachmentUrls: [] as UploadedFile[],
+  mcqQuestions: [emptyMCQ()] as MCQQuestion[]
 }
 
 export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId: string }) {
@@ -60,7 +78,10 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
   const [gradeData, setGradeData] = useState({ grade: '', feedback: '' })
   const [gradingId, setGradingId] = useState<string | null>(null)
   const [expandedAssignment, setExpandedAssignment] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const dragRef = useRef<HTMLDivElement>(null)
+  const [isDragging, setIsDragging] = useState(false)
 
   useEffect(() => { fetchData() }, [])
 
@@ -88,8 +109,14 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
       fd.append('file', file)
       const res = await fetch('/api/upload', { method: 'POST', body: fd })
       if (res.ok) {
-        const { url } = await res.json()
-        setForm(f => ({ ...f, attachmentUrls: [...f.attachmentUrls, url] }))
+        const data = await res.json()
+        const uploadedFile: UploadedFile = {
+          url: data.url,
+          name: file.name,
+          size: file.size,
+          type: file.type
+        }
+        setForm(f => ({ ...f, attachmentUrls: [...f.attachmentUrls, uploadedFile] }))
         toast.success('تم رفع الملف بنجاح')
       } else {
         toast.error('فشل رفع الملف')
@@ -98,6 +125,24 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
       toast.error('خطأ في رفع الملف')
     } finally {
       setUploading(false)
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('هل أنت متأكد من حذف هذا الواجب؟ سيتم حذف جميع التسليمات المرتبطة به.')) return
+    setIsDeleting(id)
+    try {
+      const res = await fetch(`/api/teacher/assignments/${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        toast.success('تم حذف الواجب')
+        fetchData()
+      } else {
+        toast.error('فشل حذف الواجب')
+      }
+    } catch {
+      toast.error('خطأ في الحذف')
+    } finally {
+      setIsDeleting(null)
     }
   }
 
@@ -111,15 +156,17 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
         type: form.type,
         sessionId: form.sessionId || undefined,
         dueDate: form.dueDate || undefined,
-        attachmentUrls: form.attachmentUrls,
+        attachmentUrls: JSON.stringify(form.attachmentUrls),
         studentIds: form.selectedStudents
       }
       if (form.type === 'MULTIPLE_CHOICE') {
-        body.multipleChoice = {
-          question: form.mcqQuestion,
-          options: form.mcqOptions,
-          correctAnswer: form.mcqCorrect
+        // Validate MCQ questions
+        const validQuestions = form.mcqQuestions.filter(q => q.question.trim() && q.options.some(o => o.trim()))
+        if (validQuestions.length === 0) {
+          setSubmitting(false)
+          return toast.error('أضف سؤالاً وخيارات للواجب الاختياري')
         }
+        body.multipleChoice = validQuestions.length === 1 ? validQuestions[0] : validQuestions
       }
       const res = await fetch('/api/teacher/assignments', {
         method: 'POST',
@@ -163,6 +210,33 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
     } finally {
       setGradingId(null)
     }
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const files = Array.from(e.dataTransfer.files)
+    if (files.length > 0) {
+      files.forEach(f => handleFileUpload(f))
+    }
+  }
+
+  function formatFileSize(bytes: number) {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
   const pendingCount = assignments.reduce((acc, a) => acc + a.Submission.filter(s => s.grade === null).length, 0)
@@ -256,39 +330,101 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
               />
             </div>
 
-            {/* MCQ Options */}
+            {/* MCQ Options - Multiple Questions Support */}
             {form.type === 'MULTIPLE_CHOICE' && (
-              <div className="p-4 bg-purple-50 border border-purple-200 rounded-xl space-y-3">
-                <p className="text-xs font-bold text-purple-700 mb-2">إعداد السؤال الاختياري</p>
-                <input
-                  value={form.mcqQuestion}
-                  onChange={e => setForm(f => ({ ...f, mcqQuestion: e.target.value }))}
-                  className="w-full px-3 py-2.5 border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-400 outline-none bg-white"
-                  placeholder="نص السؤال..."
-                />
-                {form.mcqOptions.map((opt, i) => (
-                  <div key={i} className={`flex items-center gap-2 p-2.5 rounded-lg border-2 ${form.mcqCorrect === i ? 'border-purple-500 bg-purple-100' : 'border-purple-100 bg-white'}`}>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-bold text-gray-500">أسئلة الاختيار المتعدد</p>
+                  <button
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, mcqQuestions: [...f.mcqQuestions, emptyMCQ()] }))}
+                    className="text-xs text-purple-600 font-bold hover:underline flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> إضافة سؤال
+                  </button>
+                </div>
+                {form.mcqQuestions.map((q, qi) => (
+                  <div key={qi} className="p-4 bg-purple-50 border border-purple-200 rounded-xl space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-purple-700">السؤال {qi + 1}</p>
+                      {form.mcqQuestions.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => setForm(f => ({ ...f, mcqQuestions: f.mcqQuestions.filter((_, idx) => idx !== qi) }))}
+                          className="text-red-400 hover:text-red-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                     <input
-                      type="radio"
-                      checked={form.mcqCorrect === i}
-                      onChange={() => setForm(f => ({ ...f, mcqCorrect: i }))}
-                      className="w-4 h-4 accent-purple-600"
-                      title="الإجابة الصحيحة"
-                    />
-                    <input
-                      value={opt}
+                      value={q.question}
                       onChange={e => {
-                        const opts = [...form.mcqOptions]; opts[i] = e.target.value;
-                        setForm(f => ({ ...f, mcqOptions: opts }))
+                        const qs = [...form.mcqQuestions]
+                        qs[qi] = { ...qs[qi], question: e.target.value }
+                        setForm(f => ({ ...f, mcqQuestions: qs }))
                       }}
-                      className="flex-1 bg-transparent outline-none text-sm"
-                      placeholder={`الخيار ${i + 1}`}
+                      className="w-full px-3 py-2.5 border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-400 outline-none bg-white"
+                      placeholder="نص السؤال..."
                     />
+                    <div className="space-y-2">
+                      {q.options.map((opt, oi) => (
+                        <div key={oi} className={`flex items-center gap-2 p-2.5 rounded-lg border-2 ${q.correctAnswer === oi ? 'border-purple-500 bg-purple-100' : 'border-purple-100 bg-white'}`}>
+                          <input
+                            type="radio"
+                            checked={q.correctAnswer === oi}
+                            onChange={() => {
+                              const qs = [...form.mcqQuestions]
+                              qs[qi] = { ...qs[qi], correctAnswer: oi }
+                              setForm(f => ({ ...f, mcqQuestions: qs }))
+                            }}
+                            className="w-4 h-4 accent-purple-600"
+                            title="الإجابة الصحيحة"
+                          />
+                          <input
+                            value={opt}
+                            onChange={e => {
+                              const qs = [...form.mcqQuestions]
+                              const opts = [...qs[qi].options]; opts[oi] = e.target.value
+                              qs[qi] = { ...qs[qi], options: opts }
+                              setForm(f => ({ ...f, mcqQuestions: qs }))
+                            }}
+                            className="flex-1 bg-transparent outline-none text-sm"
+                            placeholder={`الخيار ${oi + 1}`}
+                          />
+                          {q.options.length > 2 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const qs = [...form.mcqQuestions]
+                                const opts = qs[qi].options.filter((_, idx) => idx !== oi)
+                                const correct = q.correctAnswer >= opts.length ? 0 : q.correctAnswer
+                                qs[qi] = { ...qs[qi], options: opts, correctAnswer: correct }
+                                setForm(f => ({ ...f, mcqQuestions: qs }))
+                              }}
+                              className="text-red-300 hover:text-red-500"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    {q.options.length < 6 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const qs = [...form.mcqQuestions]
+                          qs[qi] = { ...qs[qi], options: [...qs[qi].options, ''] }
+                          setForm(f => ({ ...f, mcqQuestions: qs }))
+                        }}
+                        className="text-xs text-purple-600 font-bold hover:underline"
+                      >
+                        + إضافة خيار
+                      </button>
+                    )}
                   </div>
                 ))}
-                {form.mcqOptions.length < 5 && (
-                  <button type="button" onClick={() => setForm(f => ({ ...f, mcqOptions: [...f.mcqOptions, ''] }))} className="text-xs text-purple-600 font-bold hover:underline">+ إضافة خيار</button>
-                )}
               </div>
             )}
 
@@ -299,14 +435,22 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                   {form.type === 'VIDEO' ? 'رفع الفيديو' : form.type === 'IMAGE' ? 'رفع الصورة' : 'رفع الملف'}
                 </label>
                 <div
-                  className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30 transition"
+                  ref={dragRef}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition ${
+                    isDragging ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-emerald-400 hover:bg-emerald-50/30'
+                  }`}
                   onClick={() => fileRef.current?.click()}
                 >
-                  <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm font-bold text-gray-600">اضغط لاختيار ملف</p>
+                  <div className={`w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center ${isDragging ? 'bg-emerald-100' : 'bg-gray-100'}`}>
+                    <Upload className={`w-6 h-6 ${isDragging ? 'text-emerald-600' : 'text-gray-400'}`} />
+                  </div>
+                  <p className="text-sm font-bold text-gray-600">اسحب الملف هنا أو اضغط للاختيار</p>
                   <p className="text-xs text-gray-400 mt-1">
                     {form.type === 'VIDEO' ? 'MP4, MOV, AVI' : form.type === 'IMAGE' ? 'JPG, PNG, GIF, WebP' : 'PDF, DOC, ZIP'}
-                    {' '} - حتى 50MB
+                    {' '} • حتى 50MB
                   </p>
                   <input
                     ref={fileRef}
@@ -316,15 +460,39 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                     multiple
                     onChange={e => { Array.from(e.target.files || []).forEach(f => handleFileUpload(f)) }}
                   />
-                  {uploading && <p className="text-xs text-emerald-600 mt-2 font-bold">جاري الرفع...</p>}
+                  {uploading && (
+                    <div className="mt-4 flex flex-col items-center gap-2">
+                      <div className="w-full bg-gray-100 rounded-full h-1.5 max-w-[200px] overflow-hidden">
+                        <div className="bg-emerald-500 h-full animate-progress-indeterminate"></div>
+                      </div>
+                      <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">جاري الرفع...</p>
+                    </div>
+                  )}
                 </div>
                 {form.attachmentUrls.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    {form.attachmentUrls.map((url, i) => (
-                      <div key={i} className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg border border-gray-200">
-                        <File className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span className="flex-1 text-xs text-gray-700 truncate">{url}</span>
-                        <button onClick={() => setForm(f => ({ ...f, attachmentUrls: f.attachmentUrls.filter((_, idx) => idx !== i) }))} className="text-red-400 hover:text-red-600">
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {form.attachmentUrls.map((file, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 group hover:border-emerald-200 transition">
+                        <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center flex-shrink-0">
+                          {file.type.startsWith('image/') ? (
+                            <img src={file.url} className="w-full h-full object-cover rounded-lg" alt="" />
+                          ) : file.type.startsWith('video/') ? (
+                            <Video className="w-5 h-5 text-red-500" />
+                          ) : (
+                            <File className="w-5 h-5 text-blue-500" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-gray-900 truncate">{file.name}</p>
+                          <p className="text-[10px] text-gray-400 uppercase">{formatFileSize(file.size)} • {file.type.split('/')[1]}</p>
+                        </div>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setForm(f => ({ ...f, attachmentUrls: f.attachmentUrls.filter((_, idx) => idx !== i) }));
+                          }} 
+                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                        >
                           <X className="w-4 h-4" />
                         </button>
                       </div>
@@ -413,111 +581,194 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
             const isExpanded = expandedAssignment === assignment.id
 
             return (
-              <div key={assignment.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+              <div key={assignment.id} className={`bg-white rounded-2xl border transition-all duration-200 overflow-hidden ${isExpanded ? 'ring-2 ring-emerald-500/20 border-emerald-200 shadow-lg' : 'border-gray-200 hover:border-emerald-200'}`}>
                 <div
-                  className="flex items-center gap-4 p-5 cursor-pointer hover:bg-gray-50 transition"
+                  className="flex items-center gap-4 p-5 cursor-pointer hover:bg-emerald-50/20 transition"
                   onClick={() => setExpandedAssignment(isExpanded ? null : assignment.id)}
                 >
-                  <div className={`w-10 h-10 ${cfg.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                    <Icon className={`w-5 h-5 ${cfg.color}`} />
+                  <div className={`w-12 h-12 ${cfg.bg} rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                    <Icon className={`w-6 h-6 ${cfg.color}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-black text-gray-900">{assignment.title}</h3>
-                      <span className={`px-2 py-0.5 rounded-lg text-xs font-bold ${cfg.bg} ${cfg.color}`}>{cfg.labelAr}</span>
-                      {ungraded > 0 && (
-                        <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-lg text-xs font-bold">{ungraded} بانتظار التقييم</span>
-                      )}
-                      {assignment.Submission.length > 0 && ungraded === 0 && (
-                        <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-lg text-xs font-bold flex items-center gap-1"><CheckCircle className="w-3 h-3" />مكتمل</span>
-                      )}
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <h3 className="font-black text-gray-900 truncate">{assignment.title}</h3>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${cfg.bg} ${cfg.color}`}>
+                          {cfg.labelAr}
+                        </span>
+                        {ungraded > 0 && (
+                          <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-lg text-[10px] font-black uppercase tracking-wider animate-pulse">
+                            {ungraded} بانتظار التقييم
+                          </span>
+                        )}
+                        {assignment.Submission.length > 0 && ungraded === 0 && (
+                          <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                            <CheckCircle className="w-2.5 h-2.5" /> مكتمل
+                          </span>
+                        )}
+                      </div>
                     </div>
                     {assignment.description && <p className="text-sm text-gray-500 mt-0.5 truncate">{assignment.description}</p>}
-                    <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400">
-                      {assignment.Session && <span>{assignment.Session.title}</span>}
-                      {assignment.dueDate && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(assignment.dueDate).toLocaleDateString('ar-EG')}</span>}
-                      <span className="flex items-center gap-1"><User className="w-3 h-3" />{assignment.Submission.length} تسليم</span>
+                    <div className="flex items-center gap-4 mt-2 text-[11px] font-bold text-gray-400">
+                      {assignment.Session && (
+                        <span className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-md">
+                          <FileText className="w-3 h-3" /> {assignment.Session.title}
+                        </span>
+                      )}
+                      {assignment.dueDate && (
+                        <span className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${new Date(assignment.dueDate) < new Date() ? 'bg-red-50 text-red-500' : 'bg-gray-50'}`}>
+                          <Clock className="w-3 h-3" /> {new Date(assignment.dueDate).toLocaleDateString('ar-EG')}
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-md">
+                        <User className="w-3 h-3" /> {assignment.Submission.length} تسليم
+                      </span>
+                      {assignment.attachmentUrls && (() => {
+                        try {
+                          const urls = JSON.parse(assignment.attachmentUrls)
+                          if (urls.length > 0) return (
+                            <span className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 text-blue-600 rounded-md">
+                              <Plus className="w-3 h-3" /> {urls.length} مرفقات
+                            </span>
+                          )
+                        } catch { return null }
+                      })()}
                     </div>
                   </div>
-                  <div className="flex-shrink-0">
-                    {isExpanded ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDelete(assignment.id); }}
+                      disabled={isDeleting === assignment.id}
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition"
+                      title="حذف الواجب"
+                    >
+                      {isDeleting === assignment.id ? (
+                        <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
+                    </button>
+                    <div className={`p-1 rounded-lg transition ${isExpanded ? 'bg-emerald-50 text-emerald-600 rotate-180' : 'text-gray-400'}`}>
+                      <ChevronDown className="w-5 h-5" />
+                    </div>
                   </div>
                 </div>
 
-                {isExpanded && assignment.Submission.length > 0 && (
-                  <div className="border-t border-gray-100 p-5">
-                    <h4 className="text-sm font-bold text-gray-700 mb-3">التسليمات ({assignment.Submission.length})</h4>
-                    <div className="space-y-3">
-                      {assignment.Submission.map(sub => (
-                        <div key={sub.id} className={`p-4 rounded-xl border ${sub.grade !== null ? 'border-green-100 bg-green-50' : 'border-orange-100 bg-orange-50'}`}>
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 bg-white rounded-full border border-gray-200 flex items-center justify-center text-xs font-black text-gray-700">
-                                {sub.User.name.charAt(0)}
-                              </div>
-                              <div>
-                                <p className="text-sm font-bold text-gray-900">{sub.User.name}</p>
-                                <p className="text-xs text-gray-400">{new Date(sub.submittedAt).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {sub.grade !== null ? (
-                                <div className="flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm font-black">
-                                  <Star className="w-3 h-3 fill-green-500" />
-                                  {sub.grade}/100
-                                </div>
-                              ) : (
-                                <button
-                                  onClick={() => { setSelectedSubmission(sub); setGradeData({ grade: '', feedback: '' }) }}
-                                  className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 text-white rounded-lg text-xs font-bold hover:bg-orange-700 transition"
+                {isExpanded && (
+                  <div className="border-t border-gray-100 bg-gray-50/30 p-5 space-y-4 animate-in slide-in-from-top-2 duration-300">
+                    {/* Materials */}
+                    {assignment.attachmentUrls && (() => {
+                      try {
+                        const files = JSON.parse(assignment.attachmentUrls) as UploadedFile[]
+                        if (files.length === 0) return null
+                        return (
+                          <div className="space-y-2">
+                            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">مواد الواجب</h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                              {files.map((file, idx) => (
+                                <a key={idx} href={file.url} target="_blank" rel="noopener noreferrer" 
+                                  className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-sm transition group"
                                 >
-                                  <Send className="w-3 h-3" />
-                                  تقييم
-                                </button>
-                              )}
+                                  <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0 group-hover:bg-blue-100">
+                                    {file.type?.startsWith('image/') ? <Image className="w-4 h-4" /> : file.type?.startsWith('video/') ? <Video className="w-4 h-4" /> : <File className="w-4 h-4" />}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-bold text-gray-700 truncate">{file.name || 'ملف مرفق'}</p>
+                                    <p className="text-[10px] text-gray-400 uppercase tracking-tighter">{file.size ? formatFileSize(file.size) : '---'}</p>
+                                  </div>
+                                </a>
+                              ))}
                             </div>
                           </div>
+                        )
+                      } catch { return null }
+                    })()}
 
-                          {sub.textAnswer && (
-                            <div className="mt-2 p-3 bg-white rounded-lg border border-gray-200">
-                              <p className="text-xs text-gray-400 font-bold mb-1">الإجابة:</p>
-                              <p className="text-sm text-gray-700">{sub.textAnswer}</p>
-                            </div>
-                          )}
-
-                          {sub.attachedFiles && (() => {
-                            try {
-                              const files = JSON.parse(sub.attachedFiles) as string[]
-                              return (
-                                <div className="mt-2 flex flex-wrap gap-2">
-                                  {files.map((url, i) => (
-                                    <a key={i} href={url} target="_blank" rel="noopener noreferrer"
-                                      className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold hover:bg-blue-100 transition border border-blue-200"
-                                    >
-                                      <File className="w-3 h-3" />
-                                      {url.includes('video') || url.endsWith('.mp4') ? 'فيديو' : url.includes('image') || /\.(jpg|png|gif|webp)$/i.test(url) ? 'صورة' : 'ملف'} {i + 1}
-                                    </a>
-                                  ))}
-                                </div>
-                              )
-                            } catch { return null }
-                          })()}
-
-                          {sub.feedback && (
-                            <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                              <p className="text-xs text-blue-600 font-bold mb-0.5">التعليق:</p>
-                              <p className="text-sm text-blue-700">{sub.feedback}</p>
-                            </div>
-                          )}
+                    {/* Submissions */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between px-1">
+                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">التسليمات ({assignment.Submission.length})</h4>
+                      </div>
+                      {assignment.Submission.length === 0 ? (
+                        <div className="p-8 text-center bg-white rounded-2xl border border-dashed border-gray-200">
+                          <Clock className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                          <p className="text-sm font-bold text-gray-400">لم يسلّم أي طالب هذا الواجب بعد</p>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                      ) : (
+                        <div className="grid grid-cols-1 gap-3">
+                          {assignment.Submission.map(sub => (
+                            <div key={sub.id} className={`p-4 rounded-2xl border transition-all ${sub.grade !== null ? 'bg-white border-emerald-100' : 'bg-orange-50/50 border-orange-100'}`}>
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-black border-2 ${sub.grade !== null ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-white border-orange-200 text-orange-700'}`}>
+                                    {sub.User.name.charAt(0)}
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-black text-gray-900">{sub.User.name}</p>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                      <span className="text-[10px] font-bold text-gray-400 flex items-center gap-1">
+                                        <Calendar className="w-2.5 h-2.5" />
+                                        {new Date(sub.submittedAt).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {sub.grade !== null ? (
+                                    <div className="flex flex-col items-end">
+                                      <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-600 text-white rounded-xl text-sm font-black shadow-sm shadow-emerald-200">
+                                        <Star className="w-3.5 h-3.5 fill-current" />
+                                        {sub.grade}/100
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      onClick={() => { setSelectedSubmission(sub); setGradeData({ grade: '', feedback: '' }) }}
+                                      className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-xl text-xs font-black hover:bg-orange-700 transition shadow-lg shadow-orange-200"
+                                    >
+                                      <Send className="w-3.5 h-3.5" />
+                                      رصد الدرجة
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
 
-                {isExpanded && assignment.Submission.length === 0 && (
-                  <div className="border-t border-gray-100 p-8 text-center text-gray-400 text-sm">
-                    لم يسلّم أي طالب هذا الواجب بعد
+                              {sub.textAnswer && (
+                                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm text-gray-700 mb-3 leading-relaxed">
+                                  {sub.textAnswer}
+                                </div>
+                              )}
+
+                              {sub.attachedFiles && (() => {
+                                try {
+                                  const files = JSON.parse(sub.attachedFiles) as string[]
+                                  if (files.length === 0) return null
+                                  return (
+                                    <div className="flex flex-wrap gap-2 mb-3">
+                                      {files.map((url, i) => (
+                                        <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                                          className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:border-emerald-500 hover:text-emerald-600 transition group shadow-sm"
+                                        >
+                                          <File className="w-3.5 h-3.5 group-hover:scale-110 transition" />
+                                          {url.includes('video') || /\.(mp4|mov|avi)$/i.test(url) ? 'عرض الفيديو' : /\.(jpg|png|gif|webp)$/i.test(url) ? 'مشاهدة الصورة' : 'تحميل الملف'}
+                                        </a>
+                                      ))}
+                                    </div>
+                                  )
+                                } catch { return null }
+                              })()}
+
+                              {sub.feedback && (
+                                <div className="p-3 bg-blue-50 rounded-xl border border-blue-100 text-xs text-blue-700 flex gap-2">
+                                  <MessageSquare className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                                  <p>{sub.feedback}</p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

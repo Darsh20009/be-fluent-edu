@@ -11,47 +11,78 @@ const PAGES = [
     sections: [
       {
         id: 'hero',
-        name: 'القسم الرئيسي (Hero)',
+        name: 'SECTION 1 - Hero',
         fields: [
           { id: 'title_ar', label: 'العنوان الرئيسي (عربي)', type: 'text', placeholder: 'تعلم الإنجليزية بطريقة ذكية' },
           { id: 'title_en', label: 'العنوان الرئيسي (إنجليزي)', type: 'text', placeholder: 'Learn English the Smart Way' },
           { id: 'subtitle_ar', label: 'العنوان الفرعي (عربي)', type: 'textarea', placeholder: 'وصف مختصر للأكاديمية...' },
           { id: 'subtitle_en', label: 'العنوان الفرعي (إنجليزي)', type: 'textarea', placeholder: 'Short description...' },
-          { id: 'cta_button', label: 'نص زر الدعوة للعمل', type: 'text', placeholder: 'ابدأ الآن' },
-          { id: 'whatsapp_number', label: 'رقم واتساب', type: 'text', placeholder: '201091515594' },
+          { id: 'cta_text', label: 'نص زر الدعوة للعمل', type: 'text', placeholder: 'ابدأ الآن' },
+          { id: 'hero_bg', label: 'صورة الخلفية', type: 'image' },
         ]
       },
       {
         id: 'stats',
-        name: 'الإحصاءات',
+        name: 'SECTION 2 - Stats',
         fields: [
-          { id: 'students_count', label: 'عدد الطلاب', type: 'text', placeholder: '+500' },
-          { id: 'teachers_count', label: 'عدد المعلمين', type: 'text', placeholder: '+50' },
-          { id: 'satisfaction', label: 'نسبة الرضا', type: 'text', placeholder: '98%' },
-          { id: 'courses_count', label: 'عدد الدورات', type: 'text', placeholder: '+20' },
+          { id: 'stat1_num', label: 'الإحصائية 1 (الرقم)', type: 'text', placeholder: '+500' },
+          { id: 'stat1_label', label: 'الإحصائية 1 (الوصف)', type: 'text', placeholder: 'طالب سعيد' },
+          { id: 'stat2_num', label: 'الإحصائية 2 (الرقم)', type: 'text', placeholder: '+50' },
+          { id: 'stat2_label', label: 'الإحصائية 2 (الوصف)', type: 'text', placeholder: 'معلم خبير' },
+          { id: 'stat3_num', label: 'الإحصائية 3 (الرقم)', type: 'text', placeholder: '98%' },
+          { id: 'stat3_label', label: 'الإحصائية 3 (الوصف)', type: 'text', placeholder: 'نسبة الرضا' },
+          { id: 'stat4_num', label: 'الإحصائية 4 (الرقم)', type: 'text', placeholder: '+20' },
+          { id: 'stat4_label', label: 'الإحصائية 4 (الوصف)', type: 'text', placeholder: 'دورة تدريبية' },
         ]
       },
       {
-        id: 'about',
-        name: 'قسم من نحن',
+        id: 'features',
+        name: 'SECTION 3 - Features',
         fields: [
-          { id: 'about_title', label: 'عنوان القسم', type: 'text', placeholder: 'لماذا تختار Be Fluent؟' },
-          { id: 'about_text', label: 'النص التعريفي', type: 'textarea', placeholder: 'نص وصفي...' },
-          { id: 'feature1', label: 'الميزة 1', type: 'text', placeholder: 'تعلم بالطريقة الأمثل' },
-          { id: 'feature2', label: 'الميزة 2', type: 'text', placeholder: 'معلمون خبراء' },
-          { id: 'feature3', label: 'الميزة 3', type: 'text', placeholder: 'نتائج مضمونة' },
-          { id: 'feature4', label: 'الميزة 4', type: 'text', placeholder: 'دعم مستمر' },
+          { id: 'feat1_title_ar', label: 'الميزة 1 (العنوان - عربي)', type: 'text' },
+          { id: 'feat1_title_en', label: 'الميزة 1 (العنوان - إنجليزي)', type: 'text' },
+          { id: 'feat1_desc_ar', label: 'الميزة 1 (الوصف - عربي)', type: 'textarea' },
+          { id: 'feat1_desc_en', label: 'الميزة 1 (الوصف - إنجليزي)', type: 'textarea' },
+          { id: 'feat1_icon', label: 'الميزة 1 (أيقونة)', type: 'image' },
+          
+          { id: 'feat2_title_ar', label: 'الميزة 2 (العنوان - عربي)', type: 'text' },
+          { id: 'feat2_title_en', label: 'الميزة 2 (العنوان - إنجليزي)', type: 'text' },
+          { id: 'feat2_desc_ar', label: 'الميزة 2 (الوصف - عربي)', type: 'textarea' },
+          { id: 'feat2_desc_en', label: 'الميزة 2 (الوصف - إنجليزي)', type: 'textarea' },
+          { id: 'feat2_icon', label: 'الميزة 2 (أيقونة)', type: 'image' },
+
+          { id: 'feat3_title_ar', label: 'الميزة 3 (العنوان - عربي)', type: 'text' },
+          { id: 'feat3_title_en', label: 'الميزة 3 (العنوان - إنجليزي)', type: 'text' },
+          { id: 'feat3_desc_ar', label: 'الميزة 3 (الوصف - عربي)', type: 'textarea' },
+          { id: 'feat3_desc_en', label: 'الميزة 3 (الوصف - إنجليزي)', type: 'textarea' },
+          { id: 'feat3_icon', label: 'الميزة 3 (أيقونة)', type: 'image' },
         ]
       },
       {
         id: 'contact',
-        name: 'معلومات الاتصال',
+        name: 'SECTION 4 - Contact',
         fields: [
+          { id: 'whatsapp', label: 'رقم واتساب', type: 'text', placeholder: '201091515594' },
           { id: 'email', label: 'البريد الإلكتروني', type: 'text', placeholder: 'info@befluent-edu.online' },
-          { id: 'phone', label: 'رقم الهاتف', type: 'text', placeholder: '+20 109 151 5594' },
-          { id: 'facebook_url', label: 'رابط فيسبوك', type: 'url', placeholder: 'https://facebook.com/...' },
-          { id: 'instagram_url', label: 'رابط إنستغرام', type: 'url', placeholder: 'https://instagram.com/...' },
-          { id: 'tiktok_url', label: 'رابط تيك توك', type: 'url', placeholder: 'https://tiktok.com/...' },
+          { id: 'facebook', label: 'رابط فيسبوك', type: 'url' },
+          { id: 'instagram', label: 'رابط إنستغرام', type: 'url' },
+        ]
+      },
+      {
+        id: 'learning_path',
+        name: 'SECTION 5 - Learning Path',
+        fields: [
+          { id: 'step1_title', label: 'الخطوة 1 (العنوان)', type: 'text' },
+          { id: 'step1_desc', label: 'الخطوة 1 (الوصف)', type: 'textarea' },
+          { id: 'step1_icon', label: 'الخطوة 1 (أيقونة)', type: 'image' },
+          
+          { id: 'step2_title', label: 'الخطوة 2 (العنوان)', type: 'text' },
+          { id: 'step2_desc', label: 'الخطوة 2 (الوصف)', type: 'textarea' },
+          { id: 'step2_icon', label: 'الخطوة 2 (أيقونة)', type: 'image' },
+
+          { id: 'step3_title', label: 'الخطوة 3 (العنوان)', type: 'text' },
+          { id: 'step3_desc', label: 'الخطوة 3 (الوصف)', type: 'textarea' },
+          { id: 'step3_icon', label: 'الخطوة 3 (أيقونة)', type: 'image' },
         ]
       }
     ]
@@ -271,6 +302,36 @@ export default function PageEditorTab() {
 
                   {isExpanded && (
                     <div className="px-6 pb-6 border-t border-gray-100">
+                      {/* Live Preview for Hero */}
+                      {section.id === 'hero' && (
+                        <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                          <p className="text-xs font-bold text-gray-400 mb-3 flex items-center gap-2">
+                            <Eye className="w-3.5 h-3.5" />
+                            معاينة مباشرة للقسم
+                          </p>
+                          <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-900 flex flex-col items-center justify-center text-center p-6 space-y-3">
+                            {getVal('hero', 'hero_bg') && (
+                              <img src={getVal('hero', 'hero_bg')} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+                            )}
+                            <div className="relative z-10 space-y-2">
+                              <h3 className="text-white font-black text-xl leading-tight">
+                                {getVal('hero', 'title_ar') || 'العنوان الرئيسي'}
+                                <br />
+                                <span className="text-emerald-400">{getVal('hero', 'title_en') || 'Main Title'}</span>
+                              </h3>
+                              <p className="text-gray-300 text-xs line-clamp-2 max-w-xs mx-auto">
+                                {getVal('hero', 'subtitle_ar') || 'وصف فرعي يظهر هنا...'}
+                              </p>
+                              <div className="pt-2">
+                                <span className="px-4 py-1.5 bg-emerald-500 text-white text-[10px] font-bold rounded-lg shadow-lg">
+                                  {getVal('hero', 'cta_text') || 'ابدأ الآن'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="space-y-4 mt-4">
                         {section.fields.map(field => {
                           const Icon = TYPE_ICONS[field.type] || Type
@@ -278,28 +339,44 @@ export default function PageEditorTab() {
                           const isUploading = uploadingField === `${section.id}__${field.id}`
 
                           return (
-                            <div key={field.id}>
-                              <label className="flex items-center gap-2 text-xs font-bold text-gray-500 mb-1.5">
+                            <div key={field.id} className="space-y-1.5">
+                              <label className="flex items-center gap-2 text-xs font-bold text-gray-500">
                                 <Icon className="w-3.5 h-3.5" />
                                 {field.label}
                               </label>
 
                               {field.type === 'image' ? (
-                                <div className="flex items-center gap-3">
-                                  {val && <img src={val} alt="" className="w-16 h-16 object-cover rounded-xl border border-gray-200" />}
-                                  <div className="flex-1">
-                                    <input
-                                      type="text"
-                                      value={val}
-                                      onChange={e => setVal(section.id, field.id, e.target.value)}
-                                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none mb-2"
-                                      placeholder="أو أدخل رابط الصورة..."
-                                    />
-                                    <label className={`flex items-center gap-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-bold text-gray-600 cursor-pointer transition ${isUploading ? 'opacity-50' : ''}`}>
-                                      <Upload className="w-3.5 h-3.5" />
-                                      {isUploading ? 'جاري الرفع...' : 'رفع صورة'}
-                                      <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && handleImageUpload(e.target.files[0], section.id, field.id)} disabled={isUploading} />
-                                    </label>
+                                <div className="space-y-3">
+                                  <div className="flex items-center gap-3">
+                                    {val ? (
+                                      <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 group">
+                                        <img src={val} alt="" className="w-full h-full object-cover" />
+                                        <button 
+                                          onClick={() => setVal(section.id, field.id, '')}
+                                          className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                          <Trash2 className="w-5 h-5 text-white" />
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center bg-gray-50">
+                                        <Image className="w-6 h-6 text-gray-300" />
+                                      </div>
+                                    )}
+                                    <div className="flex-1">
+                                      <input
+                                        type="text"
+                                        value={val}
+                                        onChange={e => setVal(section.id, field.id, e.target.value)}
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none mb-2"
+                                        placeholder="أو أدخل رابط الصورة..."
+                                      />
+                                      <label className={`flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-bold text-gray-600 cursor-pointer transition ${isUploading ? 'opacity-50' : ''}`}>
+                                        <Upload className="w-4 h-4" />
+                                        {isUploading ? 'جاري الرفع...' : 'رفع صورة'}
+                                        <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && handleImageUpload(e.target.files[0], section.id, field.id)} disabled={isUploading} />
+                                      </label>
+                                    </div>
                                   </div>
                                 </div>
                               ) : field.type === 'textarea' ? (

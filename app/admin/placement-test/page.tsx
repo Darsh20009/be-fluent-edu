@@ -54,14 +54,28 @@ export default function PlacementTestAdmin() {
   const [showSettings, setShowSettings] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
   const [emailInput, setEmailInput] = useState('');
+  const [studentNameInput, setStudentNameInput] = useState('');
   const [emailLoading, setEmailLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [testStats, setTestStats] = useState<Record<string, number>>({});
+
   useEffect(() => {
     fetchQuestions();
     fetchSettings();
+    fetchTestStats();
   }, [activeTestType]);
+
+  const fetchTestStats = async () => {
+    try {
+      const res = await fetch('/api/admin/stats');
+      const data = await res.json();
+      if (data.placementTestCounts) {
+        setTestStats(data.placementTestCounts);
+      }
+    } catch {}
+  };
 
   const fetchQuestions = async () => {
     setLoading(true);
@@ -204,13 +218,15 @@ export default function PlacementTestAdmin() {
       const res = await fetch('/api/admin/send-test-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailInput, link: testLink })
+        body: JSON.stringify({ email: emailInput, link: testLink, studentName: studentNameInput || undefined })
       });
+      const data = await res.json();
       if (res.ok) {
-        toast.success(`تم إرسال الرابط إلى ${emailInput}`);
+        toast.success(`تم إرسال الرابط إلى ${emailInput} ✓`);
         setEmailInput('');
+        setStudentNameInput('');
       } else {
-        toast.error('فشل إرسال الرابط');
+        toast.error(data.error || 'فشل إرسال الرابط');
       }
     } catch {
       toast.error('فشل الإرسال');
@@ -263,15 +279,17 @@ export default function PlacementTestAdmin() {
             <button
               key={type.id}
               onClick={() => { setActiveTestType(type.id); setShowForm(false); }}
-              className={`flex-1 min-w-fit px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              className={`flex-1 min-w-fit px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
                 activeTestType === type.id
                   ? 'bg-emerald-600 text-white shadow-md'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
               {type.name}
-              <span className="mr-2 text-xs opacity-70">
-                {activeTestType === type.id ? `(${questions.length})` : ''}
+              <span className={`px-2 py-0.5 rounded-full text-[10px] ${
+                activeTestType === type.id ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'
+              }`}>
+                {testStats[type.id] || 0}
               </span>
             </button>
           ))}
@@ -340,26 +358,36 @@ export default function PlacementTestAdmin() {
         )}
 
         {/* Send Test Link */}
-        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-5 flex flex-col sm:flex-row items-center gap-4">
-          <div className="flex-1">
-            <p className="font-bold text-emerald-900 text-sm">إرسال رابط اختبار تحديد المستوى</p>
-            <p className="text-xs text-emerald-600 mt-0.5">أرسل رابطاً مباشراً للطالب عبر بريده الإلكتروني</p>
+        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="font-bold text-emerald-900 text-sm">إرسال رابط اختبار تحديد المستوى</p>
+              <p className="text-xs text-emerald-600 mt-0.5">أرسل رابطاً مباشراً للطالب عبر بريده الإلكتروني</p>
+            </div>
           </div>
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="text"
+              placeholder="اسم الطالب (اختياري)"
+              value={studentNameInput}
+              onChange={e => setStudentNameInput(e.target.value)}
+              className="flex-1 px-4 py-2.5 border border-emerald-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-emerald-400 outline-none"
+            />
             <input
               type="email"
               placeholder="البريد الإلكتروني..."
               value={emailInput}
               onChange={e => setEmailInput(e.target.value)}
-              className="flex-1 sm:w-60 px-4 py-2.5 border border-emerald-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-emerald-400 outline-none"
+              onKeyDown={e => e.key === 'Enter' && handleSendLink()}
+              className="flex-1 px-4 py-2.5 border border-emerald-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-emerald-400 outline-none"
             />
             <button
               onClick={handleSendLink}
               disabled={emailLoading}
-              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition disabled:opacity-50 whitespace-nowrap"
             >
               <Send className="w-4 h-4" />
-              {emailLoading ? '...' : 'إرسال'}
+              {emailLoading ? 'جاري الإرسال...' : 'إرسال الرابط'}
             </button>
           </div>
         </div>

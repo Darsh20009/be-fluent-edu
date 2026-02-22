@@ -133,6 +133,16 @@ h1, h2, h3, h4, h5, h6, p, span, label {
   }
 }
 
+@keyframes progress-indeterminate {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(0%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-progress-indeterminate {
+  animation: progress-indeterminate 1.5s ease-in-out infinite;
+}
+
 @keyframes fade-out {
   0% {
     opacity: 1;

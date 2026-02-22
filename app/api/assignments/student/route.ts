@@ -8,35 +8,34 @@ export async function GET(request: NextRequest) {
     const student = await requireStudent()
     if (isNextResponse(student)) return student
 
-    const whereClause: any = {
-      OR: [
-        {
-          Session: {
-            SessionStudent: {
-              some: { studentId: student.userId }
-            }
-          }
-        },
-        {
-          Session: {
-            teacherId: 'admin'
-          }
-        },
-        {
-          studentId: student.userId
-        }
-      ]
-    }
+    // Find which teachers this student is assigned to
+    const subscriptions = await prisma.subscription.findMany({
+      where: { studentId: student.userId },
+      select: { assignedTeacherId: true }
+    })
+    const teacherIds = subscriptions
+      .map(s => s.assignedTeacherId)
+      .filter(Boolean) as string[]
 
     const assignments = await prisma.assignment.findMany({
-      where: whereClause,
+      where: {
+        OR: [
+          // Assignments in sessions where the student is enrolled
+          { Session: { SessionStudent: { some: { studentId: student.userId } } } },
+          // Admin session assignments (visible to all)
+          { Session: { teacherId: 'admin' } },
+          // Directly assigned to this student (by studentId on assignment)
+          { studentId: student.userId },
+          // Assignments from teachers assigned to this student (no session = for all their students)
+          ...(teacherIds.length > 0 ? [{
+            teacherId: { in: teacherIds },
+            sessionId: null
+          }] : [])
+        ]
+      },
       include: {
         Session: {
-          select: {
-            id: true,
-            title: true,
-            teacherId: true
-          }
+          select: { id: true, title: true, teacherId: true }
         },
         Submission: {
           where: { studentId: student.userId },
@@ -44,6 +43,7 @@ export async function GET(request: NextRequest) {
             id: true,
             textAnswer: true,
             selectedOption: true,
+            attachedFiles: true,
             grade: true,
             feedback: true,
             grammarErrors: true,
@@ -63,10 +63,7 @@ export async function GET(request: NextRequest) {
       attachmentUrls: a.attachmentUrls,
       multipleChoice: a.multipleChoice,
       session: a.Session ? { title: a.Session.title } : null,
-      submissions: a.Submission.map((s: any) => ({
-        ...s,
-        attachedFiles: s.attachedFiles
-      }))
+      submissions: a.Submission.map((s: any) => ({ ...s }))
     }))
 
     return NextResponse.json(transformed)
@@ -88,19 +85,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing assignmentId' }, { status: 400 })
     }
 
-    if (!textAnswer && selectedOption === null && selectedOption === undefined && !attachedFiles) {
-      return NextResponse.json({ error: 'Missing submission data' }, { status: 400 })
-    }
-
-    // Verify the student is enrolled in the session that owns this assignment
+    // Verify the assignment exists and student has access
     const assignment = await prisma.assignment.findUnique({
       where: { id: assignmentId },
       include: {
         Session: {
           include: {
-            SessionStudent: {
-              where: { studentId: student.userId }
-            }
+            SessionStudent: { where: { studentId: student.userId } }
           }
         }
       }
@@ -110,21 +101,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Assignment not found' }, { status: 404 })
     }
 
-    const hasAccess = (assignment as any).studentId === student.userId || 
-                     (assignment.Session && (assignment.Session.teacherId === 'admin' || assignment.Session.SessionStudent.length > 0))
+    // Check access
+    const hasAccess =
+      (assignment as any).studentId === student.userId ||
+      (assignment.Session && (
+        assignment.Session.teacherId === 'admin' ||
+        assignment.Session.SessionStudent.length > 0
+      )) ||
+      assignment.sessionId === null // Teacher broadcast assignment
 
     if (!hasAccess) {
       return NextResponse.json({ error: 'Assignment not assigned to you' }, { status: 403 })
     }
 
-    // Check if student has already submitted this assignment
+    // Check for existing submission
     const existingSubmission = await prisma.submission.findFirst({
-      where: {
-        assignmentId,
-        studentId: student.userId
-      }
+      where: { assignmentId, studentId: student.userId }
     })
-
     if (existingSubmission) {
       return NextResponse.json({ error: 'You have already submitted this assignment' }, { status: 400 })
     }
@@ -135,14 +128,11 @@ export async function POST(request: NextRequest) {
       textAnswer: textAnswer || null,
       attachedFiles: attachedFiles || null
     }
-    
     if (selectedOption !== undefined && selectedOption !== null) {
       submissionData.selectedOption = selectedOption
     }
 
-    const submission = await prisma.submission.create({
-      data: submissionData
-    })
+    const submission = await prisma.submission.create({ data: submissionData })
 
     await addXP(student.userId, XP_REWARDS.HOMEWORK_SUBMITTED, 'تقديم واجب', 'other')
     await updateStreak(student.userId)

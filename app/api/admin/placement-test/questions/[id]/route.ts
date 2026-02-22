@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const data = await req.json();
     const question = await prisma.placementQuestion.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         question: data.question,
         questionAr: data.questionAr || null,
@@ -27,10 +28,11 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await prisma.placementQuestion.delete({
-      where: { id: params.id }
+      where: { id },
     });
     return NextResponse.json({ success: true });
   } catch (error) {

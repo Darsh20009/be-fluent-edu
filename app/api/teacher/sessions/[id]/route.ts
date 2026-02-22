@@ -82,7 +82,8 @@ export async function PUT(
     const { title, startTime, endTime, status, sessionPassword, externalLink, externalLinkType, whatsappNumber } = body
 
     const existingSession = await prisma.session.findUnique({
-      where: { id }
+      where: { id },
+      include: { SessionStudent: true }
     })
 
     if (!existingSession) {

@@ -24,6 +24,11 @@ export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
   const [activeCoupons, setActiveCoupons] = useState<any[]>([]);
   const [siteSettings, setSiteSettings] = useState<any>(null);
+  const [pageContent, setPageContent] = useState<Record<string, string>>({});
+
+  // Helper to get CMS content with fallback
+  const cms = (section: string, field: string, fallback: string): string =>
+    pageContent[`${section}.${field}`] || fallback;
 
   useEffect(() => {
     setIsVisible(true);
@@ -33,22 +38,26 @@ export default function Home() {
     // Fetch active coupons
     fetch('/api/coupons/active')
       .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setActiveCoupons(data);
-        }
-      })
-      .catch(err => console.error('Failed to fetch coupons:', err));
+      .then(data => { if (Array.isArray(data)) setActiveCoupons(data); })
+      .catch(() => {});
 
     // Fetch site settings
     fetch('/api/admin/settings')
       .then(res => res.json())
-      .then(data => {
-        if (!data.error) {
-          setSiteSettings(data);
+      .then(data => { if (!data.error) setSiteSettings(data); })
+      .catch(() => {});
+
+    // Fetch CMS page content
+    fetch('/api/admin/page-content?page=homepage')
+      .then(res => res.json())
+      .then(items => {
+        if (Array.isArray(items)) {
+          const map: Record<string, string> = {};
+          items.forEach((item: any) => { map[`${item.section}.${item.field}`] = item.value; });
+          setPageContent(map);
         }
       })
-      .catch(err => console.error('Failed to fetch settings:', err));
+      .catch(() => {});
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -198,6 +207,19 @@ export default function Home() {
       <main className="relative z-10">
         {/* Hero Section */}
         <section className="relative min-h-screen flex items-center pt-20 pb-16 lg:pt-0 lg:pb-0 overflow-hidden">
+          {/* Background Image from CMS */}
+          {cms('hero', 'hero_bg', '') && (
+            <div className="absolute inset-0 z-0">
+              <Image 
+                src={cms('hero', 'hero_bg', '')} 
+                alt="Background" 
+                fill 
+                className="object-cover opacity-20 grayscale-[0.5]" 
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/40 to-white"></div>
+            </div>
+          )}
           {/* Floating Decorative Elements */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-[15%] left-[5%] w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400/20 to-teal-300/10 animate-float" style={{ animationDelay: '0s' }}></div>
@@ -216,35 +238,32 @@ export default function Home() {
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-[#1F2937] mb-6 leading-[1.1]">
-                  {siteSettings?.heroTitleAr || 'تعلم'}
-                  {' '}
-                  <span className="relative inline-block">
-                    <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] via-emerald-500 to-teal-500">
-                      {siteSettings?.heroTitleAr ? '' : 'الإنجليزية'}
-                    </span>
-                    {!siteSettings?.heroTitleAr && <span className="absolute -bottom-2 left-0 right-0 h-3 bg-gradient-to-r from-[#10B981]/20 to-emerald-200/30 rounded-full blur-sm"></span>}
+                  {cms('hero', 'title_ar', 'تعلم الإنجليزية')}
+                  <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] via-emerald-500 to-teal-500">
+                    {cms('hero', 'title_en', 'Learn English')}
                   </span>
                   <br />
                   <span className="text-3xl sm:text-4xl lg:text-5xl bg-gradient-to-r from-gray-700 to-gray-500 bg-clip-text text-transparent">
-                    {siteSettings?.heroSubtitleAr || 'بأسلوب احترافي ومبتكر'}
+                    {cms('hero', 'subtitle_ar', 'بأسلوب احترافي ومبتكر')}
                   </span>
                 </h1>
 
                 <p className="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0 font-medium">
-                  {siteSettings?.heroSubtitleAr || 'Be Fluent هي المنصة المتكاملة لتعلم اللغة الإنجليزية بأساليب حديثة تفاعلية مع معلمين محترفين ومجتمع داعم'}
+                  {cms('hero', 'subtitle_en', 'Be Fluent هي المنصة المتكاملة لتعلم اللغة الإنجليزية بأساليب حديثة تفاعلية مع معلمين محترفين ومجتمع داعم')}
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-10">
                   <Link href="/auth/register" className="group relative px-8 py-4 bg-gradient-to-r from-[#10B981] to-emerald-500 text-white rounded-2xl text-lg font-bold shadow-xl shadow-emerald-200/50 hover:shadow-2xl hover:shadow-emerald-300/60 transition-all duration-500 flex items-center justify-center gap-3 overflow-hidden">
                     <span className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
-                    <span className="relative">ابدأ رحلتك الآن</span>
+                    <span className="relative">{cms('hero', 'cta_text', 'ابدأ رحلتك الآن')}</span>
                     <ArrowRight className="relative w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" />
                   </Link>
                   <Link href="/learning-path" className="group px-8 py-4 bg-white border-2 border-gray-200 text-[#1F2937] rounded-2xl text-lg font-bold hover:border-[#10B981] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
                     <MapIcon className="w-5 h-5 text-[#10B981] group-hover:scale-110 transition-transform" />
                     <span>خريطة التعلم الذكية</span>
                   </Link>
-                  <a href={`https://api.whatsapp.com/send/?phone=${siteSettings?.whatsappNumber || '201091515594'}`} target="_blank" rel="noopener noreferrer" className="group px-8 py-4 bg-white border-2 border-gray-200 text-[#1F2937] rounded-2xl text-lg font-bold hover:border-[#10B981] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
+                  <a href={`https://api.whatsapp.com/send/?phone=${cms('contact', 'whatsapp', '201091515594')}`} target="_blank" rel="noopener noreferrer" className="group px-8 py-4 bg-white border-2 border-gray-200 text-[#1F2937] rounded-2xl text-lg font-bold hover:border-[#10B981] hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
                     <MessageCircle className="w-5 h-5 text-[#10B981] group-hover:scale-110 transition-transform" />
                     <span>تواصل معنا</span>
                   </a>
@@ -353,13 +372,24 @@ export default function Home() {
                 </h2>
                 <div className="space-y-8">
                   {[
-                    { title: "1. تحديد الهدف والحصة التجريبية", desc: "نبدأ بفهم دافعك للتعلم لنوجه كل طاقتنا نحوه مع تجربة حية لنظامنا.", icon: <Target className="w-6 h-6" /> },
-                    { title: "2. نظام المعلمين المزدوج", desc: "معلم أساسي للشرح، ومعلم مساعد للمتابعة اليومية، ومختبر لتقييم التقدم.", icon: <Users className="w-6 h-6" /> },
-                    { title: "3. اختبارات ذكية ومفاجئة", desc: "اختبارين مفاجئين أسبوعياً واختبار مستوى شهري لضمان إتقان كل ليفل.", icon: <Zap className="w-6 h-6" /> },
-                    { title: "4. مرونة وخصوصية تامة", desc: "دعم خاص ومرونة في الوقت للبرايفت، ومجموعات لا تزيد عن 3 طلاب.", icon: <Sparkles className="w-6 h-6" /> },
+                    { 
+                      title: cms('learning_path', 'step1_title', "1. تحديد الهدف والحصة التجريبية"), 
+                      desc: cms('learning_path', 'step1_desc', "نبدأ بفهم دافعك للتعلم لنوجه كل طاقتنا نحوه مع تجربة حية لنظامنا."), 
+                      icon: cms('learning_path', 'step1_icon', "") ? <Image src={cms('learning_path', 'step1_icon', "")} width={24} height={24} alt="" /> : <Target className="w-6 h-6" /> 
+                    },
+                    { 
+                      title: cms('learning_path', 'step2_title', "2. نظام المعلمين المزدوج"), 
+                      desc: cms('learning_path', 'step2_desc', "معلم أساسي للشرح، ومعلم مساعد للمتابعة اليومية، ومختبر لتقييم التقدم."), 
+                      icon: cms('learning_path', 'step2_icon', "") ? <Image src={cms('learning_path', 'step2_icon', "")} width={24} height={24} alt="" /> : <Users className="w-6 h-6" /> 
+                    },
+                    { 
+                      title: cms('learning_path', 'step3_title', "3. اختبارات ذكية ومفاجئة"), 
+                      desc: cms('learning_path', 'step3_desc', "اختبارين مفاجئين أسبوعياً واختبار مستوى شهري لضمان إتقان كل ليفل."), 
+                      icon: cms('learning_path', 'step3_icon', "") ? <Image src={cms('learning_path', 'step3_icon', "")} width={24} height={24} alt="" /> : <Zap className="w-6 h-6" /> 
+                    },
                   ].map((item, i) => (
                     <div key={i} className="flex gap-4 group">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-white shadow-lg border border-gray-100 flex items-center justify-center text-[#10B981] group-hover:bg-[#10B981] group-hover:text-white transition-all duration-300">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-white shadow-lg border border-gray-100 flex items-center justify-center text-[#10B981] group-hover:bg-[#10B981] group-hover:text-white transition-all duration-300 overflow-hidden">
                         {item.icon}
                       </div>
                       <div>
@@ -407,16 +437,34 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
               {[
-                { title: "حصص تفاعلية مباشرة", desc: "تعلم مع معلمين محترفين في حصص حية تفاعلية مع طلاب من جميع أنحاء العالم.", icon: <Video className="w-7 h-7" />, gradient: "from-emerald-500 to-teal-600", bg: "from-emerald-50 to-teal-50" },
-                { title: "محتوى تعليمي حصري", desc: "دروس وفيديوهات ومقالات تعليمية مصممة خصيصاً لتسريع رحلة تعلمك.", icon: <BookOpen className="w-7 h-7" />, gradient: "from-blue-500 to-indigo-600", bg: "from-blue-50 to-indigo-50" },
-                { title: "اختبارات وتقييمات", desc: "اختبارات دورية لقياس تقدمك مع تقارير مفصلة عن نقاط القوة والضعف.", icon: <Target className="w-7 h-7" />, gradient: "from-orange-500 to-red-500", bg: "from-orange-50 to-red-50" },
+                { 
+                  title: cms('features', 'feat1_title_ar', "حصص تفاعلية مباشرة"), 
+                  desc: cms('features', 'feat1_desc_ar', "تعلم مع معلمين محترفين في حصص حية تفاعلية مع طلاب من جميع أنحاء العالم."), 
+                  icon: cms('features', 'feat1_icon', "") ? <Image src={cms('features', 'feat1_icon', "")} width={28} height={28} alt="" /> : <Video className="w-7 h-7" />, 
+                  gradient: "from-emerald-500 to-teal-600", 
+                  bg: "from-emerald-50 to-teal-50" 
+                },
+                { 
+                  title: cms('features', 'feat2_title_ar', "محتوى تعليمي حصري"), 
+                  desc: cms('features', 'feat2_desc_ar', "دروس وفيديوهات ومقالات تعليمية مصممة خصيصاً لتسريع رحلة تعلمك."), 
+                  icon: cms('features', 'feat2_icon', "") ? <Image src={cms('features', 'feat2_icon', "")} width={28} height={28} alt="" /> : <BookOpen className="w-7 h-7" />, 
+                  gradient: "from-blue-500 to-indigo-600", 
+                  bg: "from-blue-50 to-indigo-50" 
+                },
+                { 
+                  title: cms('features', 'feat3_title_ar', "اختبارات وتقييمات"), 
+                  desc: cms('features', 'feat3_desc_ar', "اختبارات دورية لقياس تقدمك مع تقارير مفصلة عن نقاط القوة والضعف."), 
+                  icon: cms('features', 'feat3_icon', "") ? <Image src={cms('features', 'feat3_icon', "")} width={28} height={28} alt="" /> : <Target className="w-7 h-7" />, 
+                  gradient: "from-orange-500 to-red-500", 
+                  bg: "from-orange-50 to-red-50" 
+                },
                 { title: "مجتمع تفاعلي", desc: "انضم لآلاف الطلاب في مجتمعنا التفاعلي للتدريب والتحفيز المتبادل.", icon: <Users className="w-7 h-7" />, gradient: "from-pink-500 to-rose-600", bg: "from-pink-50 to-rose-50" },
                 { title: "شهادات معتمدة", desc: "احصل على شهادات معتمدة عند إتمام المستويات تؤهلك للعمل والدراسة.", icon: <Award className="w-7 h-7" />, gradient: "from-amber-500 to-yellow-500", bg: "from-amber-50 to-yellow-50" },
                 { title: "دعم على مدار الساعة", desc: "فريق دعم متخصص لمساعدتك في أي وقت والإجابة على جميع استفساراتك.", icon: <MessageCircle className="w-7 h-7" />, gradient: "from-violet-500 to-purple-600", bg: "from-violet-50 to-purple-50" },
               ].map((feature, i) => (
                 <div key={i} className="group relative p-8 rounded-3xl bg-white border border-gray-100 hover:border-transparent shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden">
                   <div className={`absolute inset-0 bg-gradient-to-br ${feature.bg} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
-                  <div className={`relative w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center text-white mb-5 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300`}>
+                  <div className={`relative w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center text-white mb-5 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300 overflow-hidden`}>
                     {feature.icon}
                   </div>
                   <h3 className="relative text-xl font-bold text-[#1F2937] mb-3">{feature.title}</h3>
@@ -616,6 +664,8 @@ export default function Home() {
                 <Link href="/packages" className="text-gray-400 hover:text-[#10B981] transition-colors font-medium">الباقات</Link>
                 <Link href="/grammar" className="text-gray-400 hover:text-[#10B981] transition-colors font-medium">القواعد</Link>
                 <Link href="/listening" className="text-gray-400 hover:text-[#10B981] transition-colors font-medium">الاستماع</Link>
+                <a href={cms('contact', 'facebook', '#')} target="_blank" className="text-gray-400 hover:text-[#10B981] transition-colors font-medium">فيسبوك</a>
+                <a href={cms('contact', 'instagram', '#')} target="_blank" className="text-gray-400 hover:text-[#10B981] transition-colors font-medium">إنستغرام</a>
                 <Link href="/auth/login" className="text-gray-400 hover:text-[#10B981] transition-colors font-medium">تسجيل الدخول</Link>
               </div>
               <p className="text-gray-500 text-sm">

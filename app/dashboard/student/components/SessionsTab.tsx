@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Calendar, Clock, User, CheckCircle, XCircle, Video } from 'lucide-react'
+import { Calendar, Clock, User, CheckCircle, XCircle, Video, Play, ExternalLink, Timer } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Alert from '@/components/ui/Alert'
@@ -34,6 +34,12 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
   const router = useRouter()
   const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
+  const [now, setNow] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   useEffect(() => {
     if (isActive) {
@@ -61,18 +67,16 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
 
   const upcomingSessions = sessions.filter(s => {
     const startTime = new Date(s.session.startTime)
-    return startTime > new Date() && s.session.status === 'SCHEDULED'
+    return startTime > now && s.session.status === 'SCHEDULED'
   })
   
   const activeSessions = sessions.filter(s => {
-    const now = new Date()
     const startTime = new Date(s.session.startTime)
     const minutesFromStart = (now.getTime() - startTime.getTime()) / (1000 * 60)
     return startTime <= now && minutesFromStart <= 10 && s.session.status === 'SCHEDULED'
   })
   
   const pastSessions = sessions.filter(s => {
-    const now = new Date()
     const startTime = new Date(s.session.startTime)
     const minutesFromStart = (now.getTime() - startTime.getTime()) / (1000 * 60)
     return (startTime <= now && minutesFromStart > 10) || s.session.status !== 'SCHEDULED'
@@ -80,12 +84,10 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
 
   if (!isActive) {
     return (
-      <div>
-        <h2 className="text-3xl font-bold text-primary-600 dark:text-primary-300 mb-6">
-          My Sessions / حصصي
-        </h2>
+      <div dir="rtl">
+        <h2 className="text-3xl font-black text-gray-900 mb-6">حصصي المباشرة</h2>
         <Alert variant="warning">
-          <p>Activate your account to book sessions / قم بتفعيل حسابك لحجز الحصص</p>
+          <p>قم بتفعيل حسابك لحجز الحصص والوصول للبث المباشر.</p>
         </Alert>
       </div>
     )
@@ -100,206 +102,191 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
   }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-primary-600 dark:text-primary-300">
-        My Sessions / حصصي
-      </h2>
+    <div className="space-y-10" dir="rtl">
+      <div>
+        <h2 className="text-3xl font-black text-gray-900">حصصي المباشرة</h2>
+        <p className="text-gray-500 mt-1">تابع حصصك المجدولة وانضم للبث المباشر</p>
+      </div>
 
       {activeSessions.length > 0 && (
-        <div>
-          <h3 className="text-xl font-semibold text-green-600 mb-4">
-            🟢 Join Now! / انضم الآن!
-          </h3>
-          <div className="space-y-4">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-emerald-600">
+            <div className="w-2 h-2 bg-emerald-600 rounded-full animate-ping" />
+            <h3 className="text-xl font-black">الحصص الجارية الآن</h3>
+          </div>
+          <div className="grid gap-4">
             {activeSessions.map((session) => (
-              <Card key={session.id} variant="elevated" className="border-2 border-green-300">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-bold text-green-600">{session.session.title}</h3>
-                      <Badge variant="success">Session Started / الحصة بدأت</Badge>
+              <div key={session.id} className="relative overflow-hidden bg-white border-2 border-emerald-500 rounded-[2rem] p-6 sm:p-8 shadow-xl shadow-emerald-100 group">
+                <div className="absolute top-0 left-0 w-32 h-32 bg-emerald-50 rounded-full -translate-x-16 -translate-y-16 group-hover:scale-110 transition-transform" />
+                <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="flex items-start gap-5">
+                    <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+                      <Video className="w-7 h-7 text-emerald-600" />
                     </div>
-                    <div className="space-y-1 text-sm text-neutral-600 dark:text-neutral-400">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
-                        <span>
-                          {new Date(session.session.startTime).toLocaleTimeString('ar-EG', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                          {' - '}
-                          {new Date(session.session.endTime).toLocaleTimeString('ar-EG', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </span>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-xl font-black text-gray-900">{session.session.title}</h3>
+                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-black rounded-lg uppercase">LIVE</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        <span>Teacher / المعلم: {session.session.teacher.user.name}</span>
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 font-medium">
+                        <div className="flex items-center gap-1.5">
+                          <User className="w-4 h-4" />
+                          <span>المعلم: {session.session.teacher.user.name}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="w-4 h-4" />
+                          <span>
+                            {new Date(session.session.startTime).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
                     {session.session.externalLink ? (
                       <Button 
                         variant="primary" 
-                        size="sm"
+                        className="!rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 px-8 py-4 h-auto text-base font-black"
                         onClick={() => window.open(session.session.externalLink!, '_blank')}
-                        className="bg-blue-600 hover:bg-blue-700"
                       >
-                        <Video className="h-4 w-4 mr-2" />
-                        Join External / انضمام خارجي
+                        <ExternalLink className="h-5 w-5 ml-2" />
+                        انضم عبر الرابط الخارجي
                       </Button>
                     ) : (
                       <Button 
                         variant="primary" 
-                        size="sm"
+                        className="!rounded-2xl bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200 px-8 py-4 h-auto text-base font-black animate-bounce"
                         onClick={() => router.push(`/session/${session.session.id}`)}
-                        className="bg-green-600 hover:bg-green-700"
                       >
-                        <Video className="h-4 w-4 mr-2" />
-                        Join Now / انضم
+                        <Play className="h-5 w-5 ml-2" />
+                        انضم للحصة الآن
                       </Button>
                     )}
                   </div>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         </div>
       )}
 
-      <div>
-        <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
-          Upcoming Sessions / الحصص القادمة ({upcomingSessions.length})
+      <div className="space-y-6">
+        <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
+          <Calendar className="w-5 h-5 text-[#10B981]" />
+          الحصص القادمة ({upcomingSessions.length})
         </h3>
         {upcomingSessions.length === 0 ? (
-          <Alert variant="info">
-            <p>No upcoming sessions scheduled.</p>
-            <p>لا توجد حصص مجدولة حالياً.</p>
-          </Alert>
+          <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-[2rem] p-12 text-center">
+            <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <p className="font-black text-gray-900">لا توجد حصص قادمة</p>
+            <p className="text-sm text-gray-400 mt-1">بمجرد جدولة حصة جديدة ستظهر هنا</p>
+          </div>
         ) : (
-          <div className="space-y-4">
-            {upcomingSessions.map((session) => (
-              <Card key={session.id} variant="elevated">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-bold text-primary-600 dark:text-primary-300">{session.session.title}</h3>
-                      <Badge variant="primary">Upcoming / قادمة</Badge>
-                    </div>
-                    <div className="space-y-1 text-sm text-neutral-600 dark:text-neutral-400">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>{new Date(session.session.startTime).toLocaleDateString('ar-EG', {
-                          weekday: 'long',
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
-                        <span>
-                          {new Date(session.session.startTime).toLocaleTimeString('ar-EG', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                          {' - '}
-                          {new Date(session.session.endTime).toLocaleTimeString('ar-EG', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
+          <div className="grid gap-4">
+            {upcomingSessions.map((session) => {
+              const startTime = new Date(session.session.startTime)
+              const diff = startTime.getTime() - now.getTime()
+              const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+              const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+              const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+              
+              return (
+                <div key={session.id} className="bg-white border border-gray-100 rounded-[2rem] p-6 shadow-sm hover:shadow-md transition-all group">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-5">
+                      <div className="w-16 h-16 bg-gray-50 rounded-2xl flex flex-col items-center justify-center border border-gray-100 group-hover:bg-[#10B981]/5 transition-colors">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">
+                          {startTime.toLocaleDateString('ar-EG', { month: 'short' })}
+                        </span>
+                        <span className="text-xl font-black text-gray-900">
+                          {startTime.getDate()}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        <span>Teacher / المعلم: {session.session.teacher.user.name}</span>
+                      <div>
+                        <h4 className="text-lg font-black text-gray-900 mb-1">{session.session.title}</h4>
+                        <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 font-bold uppercase tracking-wider">
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>{startTime.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <User className="w-3.5 h-3.5" />
+                            <span>{session.session.teacher.user.name}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#10B981]/5 px-6 py-3 rounded-2xl border border-[#10B981]/10 text-center">
+                      <div className="flex items-center gap-2 text-[#10B981] mb-1">
+                        <Timer className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">يبدأ خلال</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {days > 0 && (
+                          <div className="text-center">
+                            <span className="block text-lg font-black text-gray-900 leading-none">{days}</span>
+                            <span className="text-[8px] font-bold text-gray-400 uppercase">يوم</span>
+                          </div>
+                        )}
+                        <div className="text-center">
+                          <span className="block text-lg font-black text-gray-900 leading-none">{hours}</span>
+                          <span className="text-[8px] font-bold text-gray-400 uppercase">ساعة</span>
+                        </div>
+                        <div className="text-center">
+                          <span className="block text-lg font-black text-gray-900 leading-none">{minutes}</span>
+                          <span className="text-[8px] font-bold text-gray-400 uppercase">دقيقة</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  {(() => {
-                    const now = new Date()
-                    const startTime = new Date(session.session.startTime)
-                    const minutesUntilStart = (startTime.getTime() - now.getTime()) / (1000 * 60)
-                    const isJoinable = minutesUntilStart <= 10 && minutesUntilStart >= 0
-                    
-                    return isJoinable ? (
-                      <Button 
-                        variant="primary" 
-                        size="sm"
-                        onClick={() => router.push(`/session/${session.session.id}`)}
-                      >
-                        <Video className="h-4 w-4 mr-2" />
-                        Join Session / انضم للحصة
-                      </Button>
-                    ) : (
-                      <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                        {minutesUntilStart > 0 
-                          ? `Starts in ${Math.ceil(minutesUntilStart)} min / ستبدأ خلال ${Math.ceil(minutesUntilStart)} دقائق`
-                          : 'Session ended / انتهت الحصة'
-                        }
-                      </div>
-                    )
-                  })()} 
                 </div>
-              </Card>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
 
-      <div>
-        <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
-          Past Sessions / الحصص السابقة ({pastSessions.length})
+      <div className="space-y-6">
+        <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
+          <CheckCircle className="w-5 h-5 text-gray-400" />
+          الحصص السابقة
         </h3>
-        {pastSessions.length === 0 ? (
-          <Alert variant="info">
-            <p>No past sessions yet.</p>
-            <p>لا توجد حصص سابقة بعد.</p>
-          </Alert>
-        ) : (
-          <div className="space-y-4">
-            {pastSessions.slice(0, 5).map((session) => (
-              <Card key={session.id} variant="elevated">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-bold text-neutral-700 dark:text-neutral-300">{session.session.title}</h3>
-                      {session.attended === true ? (
-                        <Badge variant="success">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Attended / حضور
-                        </Badge>
-                      ) : session.attended === false ? (
-                        <Badge variant="warning">
-                          <XCircle className="h-3 w-3 mr-1" />
-                          Absent / غياب
-                        </Badge>
-                      ) : (
-                        <Badge variant="neutral">
-                          <XCircle className="h-3 w-3 mr-1" />
-                          Pending / قيد الانتظار
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="space-y-1 text-sm text-neutral-600 dark:text-neutral-400">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>{new Date(session.session.startTime).toLocaleDateString('ar-EG')}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        <span>{session.session.teacher.user.name}</span>
-                      </div>
-                    </div>
-                  </div>
+        <div className="grid gap-3">
+          {pastSessions.slice(0, 5).map((session) => (
+            <div key={session.id} className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center justify-between opacity-75 hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400">
+                  <Video className="w-5 h-5" />
                 </div>
-              </Card>
-            ))}
-          </div>
-        )}
+                <div>
+                  <h4 className="text-sm font-black text-gray-900">{session.session.title}</h4>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                    {new Date(session.session.startTime).toLocaleDateString('ar-EG')} • {session.session.teacher.user.name}
+                  </p>
+                </div>
+              </div>
+              <div>
+                {session.attended === true ? (
+                  <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase">
+                    <CheckCircle className="w-3 h-3" />
+                    حضور
+                  </div>
+                ) : session.attended === false ? (
+                  <div className="flex items-center gap-1.5 px-3 py-1 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-black uppercase">
+                    <XCircle className="w-3 h-3" />
+                    غياب
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-[10px] font-black uppercase">
+                    <Clock className="w-3 h-3" />
+                    انتظار
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )

@@ -276,7 +276,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
       if (response.ok) {
         console.log('✅ Session updated successfully')
         await fetchSessions()
-        setNewSession({ title: '', startTime: '', endTime: '', selectedStudents: [] })
+        setNewSession({ title: '', startTime: '', endTime: '', selectedStudents: [], externalLink: '', externalLinkType: 'ZOOM' })
         setEditingSessionId(null)
         setShowEditForm(false)
         alert('✅ Session updated successfully / تم تحديث الحصة بنجاح')
@@ -745,7 +745,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
           onClose={() => {
             setShowEditForm(false)
             setEditingSessionId(null)
-            setNewSession({ title: '', startTime: '', endTime: '', selectedStudents: [] })
+            setNewSession({ title: '', startTime: '', endTime: '', selectedStudents: [], externalLink: '', externalLinkType: 'ZOOM' })
           }}
           title="Edit Session / تعديل الحصة"
         >
@@ -814,7 +814,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                 onClick={() => {
                   setShowEditForm(false)
                   setEditingSessionId(null)
-                  setNewSession({ title: '', startTime: '', endTime: '', selectedStudents: [] })
+                  setNewSession({ title: '', startTime: '', endTime: '', selectedStudents: [], externalLink: '', externalLinkType: 'ZOOM' })
                 }}
               >
                 Cancel / إلغاء

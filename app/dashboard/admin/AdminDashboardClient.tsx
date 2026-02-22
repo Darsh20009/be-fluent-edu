@@ -160,9 +160,11 @@ export default function AdminDashboardClient({ user }: Props) {
           </Link>
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition"
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition-all group"
           >
-            <LogOut className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors">
+              <LogOut className="w-4 h-4" />
+            </div>
             تسجيل الخروج
           </button>
         </div>
@@ -193,6 +195,22 @@ export default function AdminDashboardClient({ user }: Props) {
             </div>
 
             <div className="flex items-center gap-3">
+              {/* Notification & Messages Icons */}
+              <div className="flex items-center gap-1 sm:gap-2 mr-2">
+                <button className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all relative">
+                  <Bell className="w-5 h-5" />
+                  {stats?.pendingSubscriptions > 0 && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white animate-pulse" />
+                  )}
+                </button>
+                <button className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
+                  <Mail className="w-5 h-5" />
+                </button>
+                <button className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
+                  <Settings className="w-5 h-5" />
+                </button>
+              </div>
+
               {/* Quick stats in header */}
               {stats && (
                 <div className="hidden md:flex items-center gap-4 px-4 py-2 bg-gray-50 rounded-xl border border-gray-200 text-xs">
@@ -229,7 +247,7 @@ export default function AdminDashboardClient({ user }: Props) {
         {/* Content */}
         <main className="flex-1 p-6">
           <div className="max-w-7xl mx-auto">
-            {activeTab === 'home'          && <HomeTab />}
+            {activeTab === 'home'          && <HomeTab setActiveTab={setActiveTab} />}
             {activeTab === 'users'         && <UsersTab />}
             {activeTab === 'subscriptions' && <SubscriptionsTab />}
             {activeTab === 'coupons'       && <CouponsTab />}

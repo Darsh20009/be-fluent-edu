@@ -26,6 +26,7 @@ interface SessionData {
   startTime: string
   endTime: string
   teacherId: string
+  status: string
   sessionPassword?: string
   externalLink?: string
   externalLinkType?: string

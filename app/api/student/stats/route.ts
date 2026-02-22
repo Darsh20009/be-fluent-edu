@@ -13,61 +13,43 @@ export async function GET(request: NextRequest) {
 
     const userId = session.user.id
 
-    const [wordsCount, sessionsCount, activeSubscription] = await Promise.all([
-      prisma.word.count({
-        where: { studentId: userId }
-      }),
-      prisma.sessionStudent.count({
-        where: { studentId: userId, attended: true }
-      }),
+    const [wordsCount, sessionsCount, activeSubscription, studentProfile] = await Promise.all([
+      prisma.word.count({ where: { studentId: userId } }),
+      prisma.sessionStudent.count({ where: { studentId: userId, attended: true } }),
       prisma.subscription.findFirst({
-        where: {
-          studentId: userId,
-          paid: true,
-          endDate: { gte: new Date() }
-        },
+        where: { studentId: userId, paid: true, endDate: { gte: new Date() } },
         include: { Package: true }
+      }),
+      prisma.studentProfile.findUnique({
+        where: { userId },
+        select: { levelCurrent: true, placementTestScore: true }
       })
     ])
 
-    // Count pending assignments: assignments for sessions the student is enrolled in that have no submission
+    // Pending assignments — include all ways a student can receive assignments
     const studentAssignments = await prisma.assignment.findMany({
       where: {
-        Session: {
-          SessionStudent: {
-            some: { studentId: userId }
-          }
-        }
+        OR: [
+          { Session: { SessionStudent: { some: { studentId: userId } } } },
+          { Session: { teacherId: 'admin' } },
+          { studentId: userId }
+        ]
       },
-      include: {
-        Submission: {
-          where: { studentId: userId }
-        }
-      }
+      include: { Submission: { where: { studentId: userId } } }
     })
-    
     const pendingAssignments = studentAssignments.filter(a => a.Submission.length === 0).length
 
     const nextSession = await prisma.sessionStudent.findFirst({
       where: {
         studentId: userId,
-        Session: {
-          startTime: { gte: new Date() },
-          status: 'SCHEDULED'
-        }
+        Session: { startTime: { gte: new Date() }, status: 'SCHEDULED' }
       },
       include: {
         Session: {
-          include: {
-            TeacherProfile: {
-              include: { User: true }
-            }
-          }
+          include: { TeacherProfile: { include: { User: true } } }
         }
       },
-      orderBy: {
-        Session: { startTime: 'asc' }
-      }
+      orderBy: { Session: { startTime: 'asc' } }
     })
 
     let activeSubDetails = null
@@ -76,18 +58,13 @@ export async function GET(request: NextRequest) {
         where: {
           studentId: userId,
           attended: true,
-          Session: {
-            createdAt: {
-              gte: activeSubscription.startDate || new Date()
-            }
-          }
+          Session: { createdAt: { gte: activeSubscription.startDate || new Date() } }
         }
       })
-      
-      const daysRemaining = activeSubscription.endDate 
+      const daysRemaining = activeSubscription.endDate
         ? Math.ceil((new Date(activeSubscription.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
         : 0
-      
+
       activeSubDetails = {
         packageTitle: activeSubscription.Package.title,
         packageTitleAr: activeSubscription.Package.titleAr,
@@ -99,10 +76,14 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    const placementTestTaken = studentProfile?.placementTestScore !== null && studentProfile?.placementTestScore !== undefined
+
     return NextResponse.json({
       wordsLearned: wordsCount,
       sessionsAttended: sessionsCount,
       pendingAssignments,
+      placementTestTaken,
+      levelCurrent: studentProfile?.levelCurrent || null,
       activeSubscription: activeSubDetails,
       nextSession: nextSession ? {
         id: nextSession.Session.id,
