@@ -1,25 +1,27 @@
 import { NextResponse } from 'next/server';
-import LiveSession from '@/models/LiveSession';
-import { dbConnect } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
   try {
-    await dbConnect();
     const { sessionId, teacherId } = await req.json();
 
     if (!sessionId || !teacherId) {
       return NextResponse.json({ error: 'Missing sessionId or teacherId' }, { status: 400 });
     }
 
-    const liveSession = await LiveSession.findOneAndUpdate(
-      { sessionId },
-      { 
-        teacherId,
-        status: 'live',
-        startedAt: new Date()
-      },
-      { upsert: true, new: true }
-    );
+    const existing = await prisma.liveSession.findFirst({ where: { sessionId } });
+
+    let liveSession;
+    if (existing) {
+      liveSession = await prisma.liveSession.update({
+        where: { id: existing.id },
+        data: { teacherId, status: 'live', startedAt: new Date() }
+      });
+    } else {
+      liveSession = await prisma.liveSession.create({
+        data: { sessionId, teacherId, status: 'live', startedAt: new Date() }
+      });
+    }
 
     return NextResponse.json(liveSession);
   } catch (error) {

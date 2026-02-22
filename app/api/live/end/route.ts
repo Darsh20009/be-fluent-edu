@@ -1,28 +1,24 @@
 import { NextResponse } from 'next/server';
-import LiveSession from '@/models/LiveSession';
-import { dbConnect } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
   try {
-    await dbConnect();
     const { sessionId } = await req.json();
 
     if (!sessionId) {
       return NextResponse.json({ error: 'Missing sessionId' }, { status: 400 });
     }
 
-    const liveSession = await LiveSession.findOneAndUpdate(
-      { sessionId },
-      { 
-        status: 'finished',
-        endedAt: new Date()
-      },
-      { new: true }
-    );
+    const existing = await prisma.liveSession.findFirst({ where: { sessionId } });
 
-    if (!liveSession) {
+    if (!existing) {
       return NextResponse.json({ error: 'Live session not found' }, { status: 404 });
     }
+
+    const liveSession = await prisma.liveSession.update({
+      where: { id: existing.id },
+      data: { status: 'finished', endedAt: new Date() }
+    });
 
     return NextResponse.json(liveSession);
   } catch (error) {
