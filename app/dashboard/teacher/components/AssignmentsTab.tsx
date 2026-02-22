@@ -1,30 +1,27 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { FileText, Plus, CheckCircle, Clock, Send, Upload, X } from 'lucide-react'
-import Card from '@/components/ui/Card'
-import Badge from '@/components/ui/Badge'
-import Alert from '@/components/ui/Alert'
-import Button from '@/components/ui/Button'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import Modal from '@/components/ui/Modal'
-import Input from '@/components/ui/Input'
-import GrammarErrorHighlighter from '@/components/GrammarErrorHighlighter'
+import { useState, useEffect, useRef } from 'react'
+import {
+  FileText, Plus, CheckCircle, Clock, Send, Upload, X, Trash2, Pencil,
+  Video, Image, File, AlignLeft, List, AlertCircle, ChevronDown, ChevronUp,
+  User, Calendar, Star, MessageSquare
+} from 'lucide-react'
+import { toast } from 'react-hot-toast'
 
 interface Assignment {
   id: string
   title: string
   description: string | null
+  type: string
   dueDate: string | null
-  Session: {
-    title: string
-  } | null
+  attachmentUrls: string | null
+  Session: { title: string } | null
   Submission: Array<{
     id: string
-    User: {
-      name: string
-    }
-    textAnswer: string
+    User: { name: string }
+    textAnswer: string | null
+    selectedOption: number | null
+    attachedFiles: string | null
     grade: number | null
     feedback: string | null
     grammarErrors: string | null
@@ -32,15 +29,22 @@ interface Assignment {
   }>
 }
 
-interface Session {
-  id: string
-  title: string
+interface Session { id: string; title: string }
+interface Student { id: string; name: string; email: string }
+
+const TYPE_CONFIG: Record<string, { label: string; labelAr: string; icon: any; color: string; bg: string }> = {
+  TEXT:            { label: 'Text',            labelAr: 'نصي',         icon: AlignLeft, color: 'text-blue-600',   bg: 'bg-blue-50' },
+  MULTIPLE_CHOICE: { label: 'Multiple Choice', labelAr: 'اختيارات',   icon: List,      color: 'text-purple-600', bg: 'bg-purple-50' },
+  VIDEO:           { label: 'Video',           labelAr: 'فيديو',       icon: Video,     color: 'text-red-600',    bg: 'bg-red-50' },
+  IMAGE:           { label: 'Image',           labelAr: 'صورة',        icon: Image,     color: 'text-orange-600', bg: 'bg-orange-50' },
+  FILE:            { label: 'File',            labelAr: 'ملف',         icon: File,      color: 'text-gray-600',   bg: 'bg-gray-50' },
 }
 
-interface Student {
-  id: string
-  name: string
-  email: string
+const emptyForm = {
+  title: '', description: '', type: 'TEXT', sessionId: '', dueDate: '',
+  selectedStudents: [] as string[],
+  attachmentUrls: [] as string[],
+  mcqQuestion: '', mcqOptions: ['', '', ''], mcqCorrect: 0
 }
 
 export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId: string }) {
@@ -48,514 +52,532 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
   const [sessions, setSessions] = useState<Session[]>([])
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
-  const [showCreateForm, setShowCreateForm] = useState(false)
-  const [selectedSubmission, setSelectedSubmission] = useState<Assignment['Submission'][0] | null>(null)
-  const [gradeData, setGradeData] = useState({ grade: '', feedback: '', grammarErrors: [] as Array<{text: string, correction: string, explanation: string}> })
-  const [newAssignment, setNewAssignment] = useState({
-    title: '',
-    description: '',
-    type: 'TEXT',
-    sessionId: '',
-    dueDate: '',
-    selectedStudents: [] as string[],
-    attachmentUrls: [] as string[],
-    multipleChoice: { question: '', options: [] as string[], correctAnswer: 0 }
-  })
+  const [showForm, setShowForm] = useState(false)
+  const [form, setForm] = useState({ ...emptyForm })
   const [submitting, setSubmitting] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [selectedSubmission, setSelectedSubmission] = useState<any>(null)
+  const [gradeData, setGradeData] = useState({ grade: '', feedback: '' })
+  const [gradingId, setGradingId] = useState<string | null>(null)
+  const [expandedAssignment, setExpandedAssignment] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    fetchData()
-  }, [])
+  useEffect(() => { fetchData() }, [])
 
   async function fetchData() {
     try {
-      const [assignmentsRes, sessionsRes, studentsRes] = await Promise.all([
+      const [aRes, sRes, stRes] = await Promise.all([
         fetch('/api/teacher/assignments'),
         fetch('/api/teacher/sessions'),
         fetch('/api/teacher/students')
       ])
-
-      if (assignmentsRes.ok) {
-        const data = await assignmentsRes.json()
-        setAssignments(data)
-      }
-
-      if (sessionsRes.ok) {
-        const data = await sessionsRes.json()
-        setSessions(data)
-      }
-
-      if (studentsRes.ok) {
-        const data = await studentsRes.json()
-        setStudents(data)
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error)
+      if (aRes.ok) setAssignments(await aRes.json())
+      if (sRes.ok) setSessions(await sRes.json())
+      if (stRes.ok) setStudents(await stRes.json())
+    } catch (e) {
+      toast.error('فشل تحميل البيانات')
     } finally {
       setLoading(false)
     }
   }
 
-  async function handleCreateAssignment() {
-    if (!newAssignment.title) {
-      alert('Please enter a title')
-      return
+  async function handleFileUpload(file: File) {
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+      if (res.ok) {
+        const { url } = await res.json()
+        setForm(f => ({ ...f, attachmentUrls: [...f.attachmentUrls, url] }))
+        toast.success('تم رفع الملف بنجاح')
+      } else {
+        toast.error('فشل رفع الملف')
+      }
+    } catch {
+      toast.error('خطأ في رفع الملف')
+    } finally {
+      setUploading(false)
     }
+  }
 
+  async function handleCreate() {
+    if (!form.title.trim()) return toast.error('أدخل عنوان الواجب')
     setSubmitting(true)
     try {
-      const response = await fetch('/api/teacher/assignments', {
+      const body: any = {
+        title: form.title,
+        description: form.description,
+        type: form.type,
+        sessionId: form.sessionId || undefined,
+        dueDate: form.dueDate || undefined,
+        attachmentUrls: form.attachmentUrls,
+        studentIds: form.selectedStudents
+      }
+      if (form.type === 'MULTIPLE_CHOICE') {
+        body.multipleChoice = {
+          question: form.mcqQuestion,
+          options: form.mcqOptions,
+          correctAnswer: form.mcqCorrect
+        }
+      }
+      const res = await fetch('/api/teacher/assignments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: newAssignment.title,
-          description: newAssignment.description,
-          type: newAssignment.type,
-          sessionId: newAssignment.sessionId,
-          dueDate: newAssignment.dueDate,
-          attachmentUrls: newAssignment.attachmentUrls,
-          multipleChoice: newAssignment.type === 'MULTIPLE_CHOICE' ? newAssignment.multipleChoice : null,
-          studentIds: newAssignment.selectedStudents
-        })
+        body: JSON.stringify(body)
       })
-
-      if (response.ok) {
-        await fetchData()
-        setNewAssignment({ title: '', description: '', type: 'TEXT', sessionId: '', dueDate: '', selectedStudents: [], attachmentUrls: [], multipleChoice: { question: '', options: [], correctAnswer: 0 } })
-        setShowCreateForm(false)
-        alert('Assignment created successfully!')
+      if (res.ok) {
+        toast.success('تم إنشاء الواجب بنجاح')
+        setForm({ ...emptyForm })
+        setShowForm(false)
+        fetchData()
       } else {
-        alert('Failed to create assignment')
+        toast.error('فشل إنشاء الواجب')
       }
-    } catch (error) {
-      console.error('Error creating assignment:', error)
-      alert('Error creating assignment')
+    } catch {
+      toast.error('خطأ في إنشاء الواجب')
     } finally {
       setSubmitting(false)
     }
   }
 
-  async function handleGradeSubmission() {
-    if (!selectedSubmission || !gradeData.grade) {
-      alert('Please enter a grade')
-      return
-    }
-
-    setSubmitting(true)
+  async function handleGrade(submissionId: string) {
+    if (!gradeData.grade) return toast.error('أدخل الدرجة')
+    setGradingId(submissionId)
     try {
-      const response = await fetch(`/api/teacher/assignments/${selectedSubmission.id}/grade`, {
+      const res = await fetch(`/api/teacher/assignments/${submissionId}/grade`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          grade: parseFloat(gradeData.grade),
-          feedback: gradeData.feedback,
-          grammarErrors: JSON.stringify(gradeData.grammarErrors)
-        })
+        body: JSON.stringify({ grade: parseFloat(gradeData.grade), feedback: gradeData.feedback })
       })
-
-      if (response.ok) {
-        await fetchData()
+      if (res.ok) {
+        toast.success('تم تسليم الدرجة')
         setSelectedSubmission(null)
-        setGradeData({ grade: '', feedback: '', grammarErrors: [] })
-        alert('Submission graded successfully!')
+        setGradeData({ grade: '', feedback: '' })
+        fetchData()
       } else {
-        alert('Failed to grade submission')
+        toast.error('فشل تسليم الدرجة')
       }
-    } catch (error) {
-      console.error('Error grading submission:', error)
-      alert('Error grading submission')
+    } catch {
+      toast.error('خطأ في التقييم')
     } finally {
-      setSubmitting(false)
+      setGradingId(null)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
-  }
+  const pendingCount = assignments.reduce((acc, a) => acc + a.Submission.filter(s => s.grade === null).length, 0)
 
-  const pendingGrading = assignments.flatMap(a => 
-    a.Submission.filter(s => s.grade === null)
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+    </div>
   )
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir="rtl">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold text-[#10B981]">
-          Assignments / الواجبات
-        </h2>
-        <Button
-          variant="primary"
-          onClick={() => setShowCreateForm(true)}
+        <div>
+          <h2 className="text-2xl font-black text-gray-900">الواجبات</h2>
+          <p className="text-sm text-gray-500 mt-0.5">{assignments.length} واجب • {pendingCount} بانتظار التقييم</p>
+        </div>
+        <button
+          onClick={() => setShowForm(true)}
+          className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-200 transition"
         >
-          <Plus className="h-4 w-4 mr-2" />
-          Create Assignment / إنشاء واجب
-        </Button>
+          <Plus className="w-4 h-4" />
+          واجب جديد
+        </button>
       </div>
 
-      {pendingGrading.length > 0 && (
-        <Card variant="elevated" className="bg-orange-50 border-orange-200">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-              <Clock className="h-6 w-6 text-orange-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">Pending Grading</h3>
-              <p className="text-sm text-gray-700">
-                {pendingGrading.length} submission(s) waiting for your review
-              </p>
-            </div>
+      {/* Pending Alert */}
+      {pendingCount > 0 && (
+        <div className="flex items-center gap-3 p-4 bg-orange-50 border border-orange-200 rounded-2xl">
+          <AlertCircle className="w-5 h-5 text-orange-600 flex-shrink-0" />
+          <div>
+            <p className="font-bold text-orange-800 text-sm">{pendingCount} تسليم بانتظار التقييم</p>
+            <p className="text-xs text-orange-600 mt-0.5">راجع التسليمات أدناه وأضف الدرجات</p>
           </div>
-        </Card>
+        </div>
       )}
 
-      <div className="space-y-4">
-        {assignments.length === 0 ? (
-          <Alert variant="info">
-            <p>No assignments created yet. Create your first assignment!</p>
-            <p>لم يتم إنشاء واجبات بعد. قم بإنشاء أول واجب!</p>
-          </Alert>
-        ) : (
-          assignments.map((assignment) => (
-            <Card key={assignment.id} variant="elevated">
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <FileText className="h-5 w-5 text-[#10B981]" />
-                  <h3 className="text-lg font-bold text-[#10B981]">{assignment.title}</h3>
-                  {assignment.Submission.length > 0 && (
-                    <Badge variant="info">
-                      {assignment.Submission.length} submission(s)
-                    </Badge>
-                  )}
-                </div>
-                {assignment.description && (
-                  <p className="text-gray-700 mb-2">{assignment.description}</p>
-                )}
-                {assignment.Session && (
-                  <p className="text-sm text-gray-600">Session: {assignment.Session.title}</p>
-                )}
-                {assignment.dueDate && (
-                  <p className="text-sm text-gray-600">
-                    Due: {new Date(assignment.dueDate).toLocaleDateString('ar-EG')}
-                  </p>
-                )}
-              </div>
+      {/* Create Form */}
+      {showForm && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 flex items-center justify-between">
+            <h3 className="text-white font-black text-lg">إنشاء واجب جديد</h3>
+            <button onClick={() => setShowForm(false)} className="p-1.5 hover:bg-white/20 rounded-lg transition">
+              <X className="w-5 h-5 text-white" />
+            </button>
+          </div>
 
-              {assignment.Submission.length > 0 && (
-                <div className="space-y-3 mt-4 pt-4 border-t border-gray-200">
-                  <h4 className="font-semibold text-gray-900">Submissions:</h4>
-                  {assignment.Submission.map((submission) => (
-                    <div key={submission.id} className="bg-gray-50 p-3 rounded-lg">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-900">{submission.User.name}</p>
-                          <p className="text-sm text-gray-600">
-                            Submitted: {new Date(submission.submittedAt).toLocaleString('ar-EG')}
-                          </p>
-                        </div>
-                        {submission.grade !== null ? (
-                          <Badge variant="success">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Graded: {submission.grade}/100
-                          </Badge>
-                        ) : (
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedSubmission(submission)
-                              const existingErrors = submission.grammarErrors 
-                                ? JSON.parse(submission.grammarErrors) 
-                                : []
-                              setGradeData({ 
-                                grade: submission.grade?.toString() || '', 
-                                feedback: submission.feedback || '', 
-                                grammarErrors: existingErrors 
-                              })
-                            }}
-                          >
-                            <Send className="h-3 w-3 mr-1" />
-                            Grade
-                          </Button>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-700 mb-2">
-                        <strong>Answer:</strong> {submission.textAnswer}
-                      </p>
-                      {submission.feedback && (
-                        <p className="text-sm text-blue-700">
-                          <strong>Your Feedback:</strong> {submission.feedback}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </Card>
-          ))
-        )}
-      </div>
-
-      {showCreateForm && (
-        <Modal
-          isOpen={true}
-          onClose={() => setShowCreateForm(false)}
-          title="Create New Assignment / إنشاء واجب جديد"
-        >
-          <div className="space-y-4">
-            <Input
-              label="Assignment Title / عنوان الواجب"
-              value={newAssignment.title}
-              onChange={(e) => setNewAssignment({ ...newAssignment, title: e.target.value })}
-              placeholder="e.g., Essay on Environmental Protection"
-            />
+          <div className="p-6 space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Assignment Type / نوع الواجب
-              </label>
-              <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10B981]"
-                value={newAssignment.type}
-                onChange={(e) => setNewAssignment({ ...newAssignment, type: e.target.value, multipleChoice: { question: '', options: [], correctAnswer: 0 }, attachmentUrls: [] })}
-              >
-                <option value="TEXT">Text Assignment / واجب نصي</option>
-                <option value="MULTIPLE_CHOICE">Multiple Choice / أسئلة متعدد الخيارات</option>
-                <option value="VIDEO">Video / فيديو</option>
-                <option value="IMAGE">Image / صورة</option>
-                <option value="FILE">File / ملف</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Description / الوصف
-              </label>
-              <textarea
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10B981]"
-                value={newAssignment.description}
-                onChange={(e) => setNewAssignment({ ...newAssignment, description: e.target.value })}
-                placeholder="Assignment instructions..."
-                rows={4}
+              <label className="text-xs font-bold text-gray-500 block mb-1.5">عنوان الواجب *</label>
+              <input
+                value={form.title}
+                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                placeholder="مثال: واجب درس المضارع التام"
               />
             </div>
 
-            {newAssignment.type === 'MULTIPLE_CHOICE' && (
-              <div className="space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <Input
-                  label="Question / السؤال"
-                  value={newAssignment.multipleChoice.question}
-                  onChange={(e) => setNewAssignment({
-                    ...newAssignment,
-                    multipleChoice: { ...newAssignment.multipleChoice, question: e.target.value }
-                  })}
-                  placeholder="Enter the question"
+            {/* Type Selector */}
+            <div>
+              <label className="text-xs font-bold text-gray-500 block mb-2">نوع الواجب</label>
+              <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
+                {Object.entries(TYPE_CONFIG).map(([key, cfg]) => {
+                  const Icon = cfg.icon
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setForm(f => ({ ...f, type: key, attachmentUrls: [] }))}
+                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition font-bold text-xs ${
+                        form.type === key ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      }`}
+                    >
+                      <Icon className={`w-4 h-4 ${form.type === key ? 'text-emerald-600' : 'text-gray-400'}`} />
+                      {cfg.labelAr}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-gray-500 block mb-1.5">التعليمات / الوصف</label>
+              <textarea
+                value={form.description}
+                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none resize-none"
+                rows={3}
+                placeholder="اكتب تعليمات الواجب..."
+              />
+            </div>
+
+            {/* MCQ Options */}
+            {form.type === 'MULTIPLE_CHOICE' && (
+              <div className="p-4 bg-purple-50 border border-purple-200 rounded-xl space-y-3">
+                <p className="text-xs font-bold text-purple-700 mb-2">إعداد السؤال الاختياري</p>
+                <input
+                  value={form.mcqQuestion}
+                  onChange={e => setForm(f => ({ ...f, mcqQuestion: e.target.value }))}
+                  className="w-full px-3 py-2.5 border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-400 outline-none bg-white"
+                  placeholder="نص السؤال..."
                 />
-                <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-2">
-                    Options / الخيارات
-                  </label>
-                  {newAssignment.multipleChoice.options.map((option, idx) => (
-                    <div key={idx} className="flex gap-2 mb-2">
-                      <Input
-                        value={option}
-                        onChange={(e) => {
-                          const newOptions = [...newAssignment.multipleChoice.options]
-                          newOptions[idx] = e.target.value
-                          setNewAssignment({
-                            ...newAssignment,
-                            multipleChoice: { ...newAssignment.multipleChoice, options: newOptions }
-                          })
-                        }}
-                        placeholder={`Option ${idx + 1}`}
-                      />
-                      <input
-                        type="radio"
-                        name="correct"
-                        checked={newAssignment.multipleChoice.correctAnswer === idx}
-                        onChange={() => setNewAssignment({
-                          ...newAssignment,
-                          multipleChoice: { ...newAssignment.multipleChoice, correctAnswer: idx }
-                        })}
-                        className="w-4 h-4"
-                        title="Correct answer"
-                      />
-                    </div>
-                  ))}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      if (newAssignment.multipleChoice.options.length < 5) {
-                        setNewAssignment({
-                          ...newAssignment,
-                          multipleChoice: {
-                            ...newAssignment.multipleChoice,
-                            options: [...newAssignment.multipleChoice.options, '']
-                          }
-                        })
-                      }
-                    }}
-                  >
-                    Add Option
-                  </Button>
-                </div>
+                {form.mcqOptions.map((opt, i) => (
+                  <div key={i} className={`flex items-center gap-2 p-2.5 rounded-lg border-2 ${form.mcqCorrect === i ? 'border-purple-500 bg-purple-100' : 'border-purple-100 bg-white'}`}>
+                    <input
+                      type="radio"
+                      checked={form.mcqCorrect === i}
+                      onChange={() => setForm(f => ({ ...f, mcqCorrect: i }))}
+                      className="w-4 h-4 accent-purple-600"
+                      title="الإجابة الصحيحة"
+                    />
+                    <input
+                      value={opt}
+                      onChange={e => {
+                        const opts = [...form.mcqOptions]; opts[i] = e.target.value;
+                        setForm(f => ({ ...f, mcqOptions: opts }))
+                      }}
+                      className="flex-1 bg-transparent outline-none text-sm"
+                      placeholder={`الخيار ${i + 1}`}
+                    />
+                  </div>
+                ))}
+                {form.mcqOptions.length < 5 && (
+                  <button type="button" onClick={() => setForm(f => ({ ...f, mcqOptions: [...f.mcqOptions, ''] }))} className="text-xs text-purple-600 font-bold hover:underline">+ إضافة خيار</button>
+                )}
               </div>
             )}
 
-            {['VIDEO', 'IMAGE', 'FILE'].includes(newAssignment.type) && (
-              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Upload Files / رفع الملفات
+            {/* File Upload */}
+            {['VIDEO', 'IMAGE', 'FILE'].includes(form.type) && (
+              <div>
+                <label className="text-xs font-bold text-gray-500 block mb-1.5">
+                  {form.type === 'VIDEO' ? 'رفع الفيديو' : form.type === 'IMAGE' ? 'رفع الصورة' : 'رفع الملف'}
                 </label>
-                <div className="border-2 border-dashed border-green-300 rounded-lg p-4 text-center">
-                  <Upload className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">
-                    Enter file URL or click to upload
+                <div
+                  className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30 transition"
+                  onClick={() => fileRef.current?.click()}
+                >
+                  <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm font-bold text-gray-600">اضغط لاختيار ملف</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {form.type === 'VIDEO' ? 'MP4, MOV, AVI' : form.type === 'IMAGE' ? 'JPG, PNG, GIF, WebP' : 'PDF, DOC, ZIP'}
+                    {' '} - حتى 50MB
                   </p>
-                  <Input
-                    placeholder="https://example.com/file.mp4"
-                    value={newAssignment.attachmentUrls[0] || ''}
-                    onChange={(e) => setNewAssignment({
-                      ...newAssignment,
-                      attachmentUrls: [e.target.value]
-                    })}
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    className="hidden"
+                    accept={form.type === 'VIDEO' ? 'video/*' : form.type === 'IMAGE' ? 'image/*' : '*'}
+                    multiple
+                    onChange={e => { Array.from(e.target.files || []).forEach(f => handleFileUpload(f)) }}
                   />
+                  {uploading && <p className="text-xs text-emerald-600 mt-2 font-bold">جاري الرفع...</p>}
                 </div>
+                {form.attachmentUrls.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    {form.attachmentUrls.map((url, i) => (
+                      <div key={i} className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg border border-gray-200">
+                        <File className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <span className="flex-1 text-xs text-gray-700 truncate">{url}</span>
+                        <button onClick={() => setForm(f => ({ ...f, attachmentUrls: f.attachmentUrls.filter((_, idx) => idx !== i) }))} className="text-red-400 hover:text-red-600">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Linked Session (Optional) / الحصة المرتبطة (اختياري)
-              </label>
-              <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10B981]"
-                value={newAssignment.sessionId}
-                onChange={(e) => setNewAssignment({ ...newAssignment, sessionId: e.target.value })}
-              >
-                <option value="">No session</option>
-                {sessions.map((session) => (
-                  <option key={session.id} value={session.id}>
-                    {session.title}
-                  </option>
-                ))}
-              </select>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold text-gray-500 block mb-1.5">الحصة المرتبطة (اختياري)</label>
+                <select value={form.sessionId} onChange={e => setForm(f => ({ ...f, sessionId: e.target.value }))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                  <option value="">لا توجد حصة</option>
+                  {sessions.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-500 block mb-1.5">تاريخ التسليم (اختياري)</label>
+                <input type="datetime-local" value={form.dueDate} onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+              </div>
             </div>
-            <Input
-              label="Due Date (Optional) / تاريخ التسليم (اختياري)"
-              type="datetime-local"
-              value={newAssignment.dueDate}
-              onChange={(e) => setNewAssignment({ ...newAssignment, dueDate: e.target.value })}
-            />
+
+            {/* Students */}
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Select Students (Optional) / اختر الطلاب (اختياري)
+              <label className="text-xs font-bold text-gray-500 block mb-2">
+                تحديد الطلاب (اختياري - فارغ = للكل)
+                <span className="mr-2 font-normal text-emerald-600">{form.selectedStudents.length} محدد</span>
               </label>
-              <div className="border border-gray-300 rounded-lg p-3 max-h-64 overflow-y-auto">
-                {students.map((student) => (
-                  <label key={student.id} className="flex items-center gap-2 mb-2">
+              <div className="border border-gray-200 rounded-xl p-3 max-h-48 overflow-y-auto space-y-1">
+                {students.length === 0 ? (
+                  <p className="text-xs text-gray-400 text-center py-4">لا يوجد طلاب</p>
+                ) : students.map(st => (
+                  <label key={st.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={newAssignment.selectedStudents.includes(student.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setNewAssignment({
-                            ...newAssignment,
-                            selectedStudents: [...newAssignment.selectedStudents, student.id]
-                          })
-                        } else {
-                          setNewAssignment({
-                            ...newAssignment,
-                            selectedStudents: newAssignment.selectedStudents.filter(id => id !== student.id)
-                          })
-                        }
-                      }}
-                      className="w-4 h-4 cursor-pointer"
+                      checked={form.selectedStudents.includes(st.id)}
+                      onChange={e => setForm(f => ({
+                        ...f,
+                        selectedStudents: e.target.checked
+                          ? [...f.selectedStudents, st.id]
+                          : f.selectedStudents.filter(id => id !== st.id)
+                      }))}
+                      className="w-4 h-4 accent-emerald-600"
                     />
-                    <span className="text-sm text-gray-700">{student.name} ({student.email})</span>
+                    <div className="w-7 h-7 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-700 font-black text-xs">
+                      {st.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">{st.name}</p>
+                      <p className="text-xs text-gray-400">{st.email}</p>
+                    </div>
                   </label>
                 ))}
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {newAssignment.selectedStudents.length} student(s) selected
-              </p>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="primary"
-                fullWidth
-                onClick={handleCreateAssignment}
-                disabled={submitting}
-              >
-                {submitting ? 'Creating...' : 'Create / إنشاء'}
-              </Button>
-              <Button
-                variant="outline"
-                fullWidth
-                onClick={() => setShowCreateForm(false)}
-              >
-                Cancel / إلغاء
-              </Button>
+
+            <div className="flex gap-3">
+              <button onClick={handleCreate} disabled={submitting} className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition disabled:opacity-50 shadow-lg shadow-emerald-200">
+                <Send className="w-4 h-4" />
+                {submitting ? 'جاري الإنشاء...' : 'إنشاء الواجب'}
+              </button>
+              <button onClick={() => { setShowForm(false); setForm({ ...emptyForm }) }} className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition">
+                إلغاء
+              </button>
             </div>
           </div>
-        </Modal>
+        </div>
       )}
 
+      {/* Assignments List */}
+      {assignments.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-16 text-center">
+          <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <p className="font-bold text-gray-500">لا توجد واجبات حتى الآن</p>
+          <button onClick={() => setShowForm(true)} className="mt-4 px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 transition">
+            + أنشئ أول واجب
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {assignments.map(assignment => {
+            const cfg = TYPE_CONFIG[assignment.type] || TYPE_CONFIG.TEXT
+            const Icon = cfg.icon
+            const ungraded = assignment.Submission.filter(s => s.grade === null).length
+            const isExpanded = expandedAssignment === assignment.id
+
+            return (
+              <div key={assignment.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                <div
+                  className="flex items-center gap-4 p-5 cursor-pointer hover:bg-gray-50 transition"
+                  onClick={() => setExpandedAssignment(isExpanded ? null : assignment.id)}
+                >
+                  <div className={`w-10 h-10 ${cfg.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                    <Icon className={`w-5 h-5 ${cfg.color}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-black text-gray-900">{assignment.title}</h3>
+                      <span className={`px-2 py-0.5 rounded-lg text-xs font-bold ${cfg.bg} ${cfg.color}`}>{cfg.labelAr}</span>
+                      {ungraded > 0 && (
+                        <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-lg text-xs font-bold">{ungraded} بانتظار التقييم</span>
+                      )}
+                      {assignment.Submission.length > 0 && ungraded === 0 && (
+                        <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-lg text-xs font-bold flex items-center gap-1"><CheckCircle className="w-3 h-3" />مكتمل</span>
+                      )}
+                    </div>
+                    {assignment.description && <p className="text-sm text-gray-500 mt-0.5 truncate">{assignment.description}</p>}
+                    <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400">
+                      {assignment.Session && <span>{assignment.Session.title}</span>}
+                      {assignment.dueDate && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(assignment.dueDate).toLocaleDateString('ar-EG')}</span>}
+                      <span className="flex items-center gap-1"><User className="w-3 h-3" />{assignment.Submission.length} تسليم</span>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0">
+                    {isExpanded ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+                  </div>
+                </div>
+
+                {isExpanded && assignment.Submission.length > 0 && (
+                  <div className="border-t border-gray-100 p-5">
+                    <h4 className="text-sm font-bold text-gray-700 mb-3">التسليمات ({assignment.Submission.length})</h4>
+                    <div className="space-y-3">
+                      {assignment.Submission.map(sub => (
+                        <div key={sub.id} className={`p-4 rounded-xl border ${sub.grade !== null ? 'border-green-100 bg-green-50' : 'border-orange-100 bg-orange-50'}`}>
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 bg-white rounded-full border border-gray-200 flex items-center justify-center text-xs font-black text-gray-700">
+                                {sub.User.name.charAt(0)}
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold text-gray-900">{sub.User.name}</p>
+                                <p className="text-xs text-gray-400">{new Date(sub.submittedAt).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {sub.grade !== null ? (
+                                <div className="flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm font-black">
+                                  <Star className="w-3 h-3 fill-green-500" />
+                                  {sub.grade}/100
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => { setSelectedSubmission(sub); setGradeData({ grade: '', feedback: '' }) }}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 text-white rounded-lg text-xs font-bold hover:bg-orange-700 transition"
+                                >
+                                  <Send className="w-3 h-3" />
+                                  تقييم
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {sub.textAnswer && (
+                            <div className="mt-2 p-3 bg-white rounded-lg border border-gray-200">
+                              <p className="text-xs text-gray-400 font-bold mb-1">الإجابة:</p>
+                              <p className="text-sm text-gray-700">{sub.textAnswer}</p>
+                            </div>
+                          )}
+
+                          {sub.attachedFiles && (() => {
+                            try {
+                              const files = JSON.parse(sub.attachedFiles) as string[]
+                              return (
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                  {files.map((url, i) => (
+                                    <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                                      className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold hover:bg-blue-100 transition border border-blue-200"
+                                    >
+                                      <File className="w-3 h-3" />
+                                      {url.includes('video') || url.endsWith('.mp4') ? 'فيديو' : url.includes('image') || /\.(jpg|png|gif|webp)$/i.test(url) ? 'صورة' : 'ملف'} {i + 1}
+                                    </a>
+                                  ))}
+                                </div>
+                              )
+                            } catch { return null }
+                          })()}
+
+                          {sub.feedback && (
+                            <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                              <p className="text-xs text-blue-600 font-bold mb-0.5">التعليق:</p>
+                              <p className="text-sm text-blue-700">{sub.feedback}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {isExpanded && assignment.Submission.length === 0 && (
+                  <div className="border-t border-gray-100 p-8 text-center text-gray-400 text-sm">
+                    لم يسلّم أي طالب هذا الواجب بعد
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Grade Modal */}
       {selectedSubmission && (
-        <Modal
-          isOpen={true}
-          onClose={() => setSelectedSubmission(null)}
-          title={`Grade: ${selectedSubmission.User.name}`}
-        >
-          <div className="space-y-4 max-h-[80vh] overflow-y-auto">
-            <GrammarErrorHighlighter
-              studentAnswer={selectedSubmission.textAnswer}
-              errors={gradeData.grammarErrors}
-              onErrorsChange={(errors) => setGradeData({ ...gradeData, grammarErrors: errors })}
-            />
-            
-            <Input
-              label="Grade (0-100) / الدرجة"
-              type="number"
-              min="0"
-              max="100"
-              value={gradeData.grade}
-              onChange={(e) => setGradeData({ ...gradeData, grade: e.target.value })}
-              placeholder="e.g., 85"
-            />
-            <div>
-              <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-                General Feedback (Optional) / التعليق العام (اختياري)
-              </label>
-              <textarea
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10B981] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                value={gradeData.feedback}
-                onChange={(e) => setGradeData({ ...gradeData, feedback: e.target.value })}
-                placeholder="Provide general feedback to the student..."
-                rows={4}
-              />
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" dir="rtl">
+            <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-4 rounded-t-2xl flex items-center justify-between">
+              <h3 className="text-white font-black">تقييم: {selectedSubmission.User.name}</h3>
+              <button onClick={() => setSelectedSubmission(null)} className="p-1.5 hover:bg-white/20 rounded-lg transition">
+                <X className="w-5 h-5 text-white" />
+              </button>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="primary"
-                fullWidth
-                onClick={handleGradeSubmission}
-                disabled={submitting}
-              >
-                {submitting ? 'Submitting...' : 'Submit Grade / تسليم'}
-              </Button>
-              <Button
-                variant="outline"
-                fullWidth
-                onClick={() => setSelectedSubmission(null)}
-              >
-                Cancel / إلغاء
-              </Button>
+            <div className="p-6 space-y-4">
+              {selectedSubmission.textAnswer && (
+                <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  <p className="text-xs font-bold text-gray-500 mb-2">إجابة الطالب:</p>
+                  <p className="text-sm text-gray-800">{selectedSubmission.textAnswer}</p>
+                </div>
+              )}
+              <div>
+                <label className="text-xs font-bold text-gray-500 block mb-1.5">الدرجة (من 100) *</label>
+                <input
+                  type="number" min="0" max="100"
+                  value={gradeData.grade}
+                  onChange={e => setGradeData(g => ({ ...g, grade: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-center font-black text-2xl focus:ring-2 focus:ring-orange-400 outline-none"
+                  placeholder="0 - 100"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-500 block mb-1.5">تعليق (اختياري)</label>
+                <textarea
+                  value={gradeData.feedback}
+                  onChange={e => setGradeData(g => ({ ...g, feedback: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-orange-400 outline-none resize-none"
+                  rows={3}
+                  placeholder="أضف تعليقاً للطالب..."
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => handleGrade(selectedSubmission.id)}
+                  disabled={!!gradingId}
+                  className="flex-1 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-sm transition disabled:opacity-50"
+                >
+                  {gradingId ? 'جاري التسليم...' : 'تسليم التقييم'}
+                </button>
+                <button onClick={() => setSelectedSubmission(null)} className="px-5 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-200 transition">
+                  إلغاء
+                </button>
+              </div>
             </div>
           </div>
-        </Modal>
+        </div>
       )}
     </div>
   )

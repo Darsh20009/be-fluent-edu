@@ -8,12 +8,17 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       where: { id: params.id },
       data: {
         question: data.question,
-        questionAr: data.questionAr,
-        options: JSON.stringify(data.options),
-        correctAnswer: data.correctAnswer,
+        questionAr: data.questionAr || null,
+        questionType: data.questionType || 'MCQ',
+        options: data.options ? JSON.stringify(data.options) : null,
+        correctAnswer: data.correctAnswer || null,
+        mediaUrl: data.mediaUrl || null,
+        explanation: data.explanation || null,
+        points: data.points || 1,
+        order: data.order ?? 0,
         level: data.level,
         testType: data.testType,
-        category: data.category
+        category: data.category || null
       }
     });
     return NextResponse.json(question);

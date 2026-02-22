@@ -50,6 +50,14 @@ The platform utilizes a modern web stack: **Next.js 16 (App Router)** with **Rea
 - **Gamification System:** Duolingo-style XP, levels, streaks, and badges based on internal calculations for various learning activities.
 - **Student Level Progress System:** Automatic tracking of student English proficiency (A1-C1) with performance metrics from words, exercises, lessons, and writings. Features include: progress visualization, level recommendations, auto-adjustment when 20+ activities completed, and personalized recommendations for improvement.
 
+**Admin Dashboard (Updated February 2026):**
+- Professional sidebar navigation with grouped menus and icons
+- Quick stats displayed in the header bar
+- CMS Page Editor tab for editing all page content without coding
+- Real file upload support for assignments (video/image/file up to 50MB)
+- Full placement test management with 4 question types (MCQ, written, video recording, image)
+- Uploads stored in `/public/uploads/` directory
+
 **System Design Choices:**
 - Development server on port 5000 for Socket.IO.
 - `lib/auth-helpers.ts` for authentication.
@@ -57,6 +65,8 @@ The platform utilizes a modern web stack: **Next.js 16 (App Router)** with **Rea
 - Manuscript uploads stored as Base64.
 - BigBlueButton for video conferencing.
 - Modal-based session login for improved UX.
+- File uploads: multipart/form-data → `/api/upload` → `/public/uploads/` (max 50MB)
+- CMS: PageContent model (page/section/field/value) → `/api/admin/page-content`
 
 ### External Dependencies
 - **Database:** PostgreSQL (hosted on AWS)

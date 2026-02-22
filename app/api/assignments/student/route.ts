@@ -54,14 +54,19 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' }
     })
 
-    // Transform to match frontend interface
     const transformed = assignments.map(a => ({
       id: a.id,
       title: a.title,
       description: a.description,
+      type: a.type,
       dueDate: a.dueDate,
+      attachmentUrls: a.attachmentUrls,
+      multipleChoice: a.multipleChoice,
       session: a.Session ? { title: a.Session.title } : null,
-      submissions: a.Submission
+      submissions: a.Submission.map((s: any) => ({
+        ...s,
+        attachedFiles: s.attachedFiles
+      }))
     }))
 
     return NextResponse.json(transformed)
@@ -83,7 +88,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing assignmentId' }, { status: 400 })
     }
 
-    if (!textAnswer && selectedOption === null && selectedOption === undefined) {
+    if (!textAnswer && selectedOption === null && selectedOption === undefined && !attachedFiles) {
       return NextResponse.json({ error: 'Missing submission data' }, { status: 400 })
     }
 

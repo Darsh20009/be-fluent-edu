@@ -629,15 +629,42 @@ model VoiceRecording {
 // نظام اختبار تحديد المستوى - Placement Test System
 model PlacementQuestion {
   id            String   @id @default(uuid()) @map("_id")
-  question      String   // السؤال بالإنجليزية
-  questionAr    String?  // السؤال بالعربي (اختياري)
-  options       String   // الخيارات (JSON string array)
-  correctAnswer String   // الإجابة الصحيحة
-  level         String   @default("A1") // المستوى المستهدف (A1, A2, B1, B2, C1)
-  testType      String   @default("PLACEMENT") // PLACEMENT, A1_FINAL, A2_FINAL, etc.
-  category      String?  // Grammar, Vocabulary, Reading
+  question      String
+  questionAr    String?
+  questionType  String   @default("MCQ") // MCQ, WRITTEN, VIDEO_RECORDING, IMAGE
+  options       String?  // JSON string array - for MCQ only
+  correctAnswer String?  // for MCQ only
+  mediaUrl      String?  // URL for image/video questions
+  explanation   String?  // explanation for the correct answer
+  points        Int      @default(1)
+  order         Int      @default(0)
+  level         String   @default("A1")
+  testType      String   @default("PLACEMENT")
+  category      String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
+}
+
+model TestSettings {
+  id              String   @id @default(uuid()) @map("_id")
+  testType        String   @unique
+  questionsCount  Int      @default(10)
+  timeLimitMins   Int      @default(30)
+  passScore       Int      @default(60)
+  shuffleQuestions Boolean @default(true)
+  updatedAt       DateTime @default(now()) @updatedAt
+}
+
+model PageContent {
+  id        String   @id @default(uuid()) @map("_id")
+  page      String
+  section   String
+  field     String
+  value     String
+  type      String   @default("text") // text, image, color, url, richtext
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([page, section, field])
 }
 
 model PlacementTestAttempt {

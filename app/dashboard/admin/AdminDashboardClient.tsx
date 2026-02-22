@@ -1,13 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { Home, Users, CreditCard, Activity, LogOut, Shield, BookOpen, Headphones, GraduationCap, ClipboardList, Mail, Target } from 'lucide-react'
-import Button from '@/components/ui/Button'
-import Card from '@/components/ui/Card'
-import Badge from '@/components/ui/Badge'
-import FloatingContactButtons from '@/components/FloatingContactButtons'
+import {
+  Home, Users, CreditCard, Activity, LogOut, Shield, BookOpen,
+  GraduationCap, ClipboardList, Mail, Tag, ChevronRight, Menu, X,
+  Bell, Settings, BarChart3, Globe, Layers, ChevronDown
+} from 'lucide-react'
+import Link from 'next/link'
+import Image from 'next/image'
 import HomeTab from './components/HomeTab'
 import UsersTab from './components/UsersTab'
 import SubscriptionsTab from './components/SubscriptionsTab'
@@ -17,166 +19,230 @@ import LessonsTab from '@/components/admin/LessonsTab'
 import PlacementTestTab from './components/PlacementTestTab'
 import EmailTab from './components/EmailTab'
 import CouponsTab from './components/CouponsTab'
-import Link from 'next/link'
+import PageEditorTab from './components/PageEditorTab'
+import FloatingContactButtons from '@/components/FloatingContactButtons'
 
-interface AdminDashboardClientProps {
-  user: {
-    name: string
-    email: string
-    role: string
-  }
+interface Props {
+  user: { name: string; email: string; role: string }
 }
 
-export default function AdminDashboardClient({ user }: AdminDashboardClientProps) {
+const MENU_GROUPS = [
+  {
+    label: 'الرئيسية',
+    items: [
+      { id: 'home', label: 'لوحة التحكم', icon: Home },
+    ]
+  },
+  {
+    label: 'إدارة المستخدمين',
+    items: [
+      { id: 'users',         label: 'المستخدمين',       icon: Users },
+      { id: 'students',      label: 'الطلاب',            icon: BookOpen },
+      { id: 'subscriptions', label: 'الاشتراكات',        icon: CreditCard },
+      { id: 'coupons',       label: 'الكوبونات',         icon: Tag },
+    ]
+  },
+  {
+    label: 'المحتوى التعليمي',
+    items: [
+      { id: 'lessons',         label: 'الدروس',              icon: Layers },
+      { id: 'placement-test',  label: 'اختبار تحديد المستوى', icon: ClipboardList },
+      { id: 'page-editor',     label: 'محرر الصفحات (CMS)',   icon: Globe },
+    ]
+  },
+  {
+    label: 'النظام',
+    items: [
+      { id: 'email',  label: 'البريد المباشر', icon: Mail },
+      { id: 'system', label: 'النظام والسجلات', icon: Activity },
+    ]
+  }
+]
+
+export default function AdminDashboardClient({ user }: Props) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('home')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [stats, setStats] = useState<any>(null)
+
+  useEffect(() => {
+    fetch('/api/admin/stats').then(r => r.ok ? r.json() : null).then(d => { if (d) setStats(d) }).catch(() => {})
+  }, [])
 
   const handleSignOut = async () => {
     await signOut({ redirect: false })
     router.push('/auth/login')
   }
 
-  const menuItems = [
-    { id: 'home', label: 'Home / الرئيسية', icon: Home },
-    { id: 'users', label: 'Users / المستخدمين', icon: Users },
-    { id: 'subscriptions', label: 'Subscriptions / الاشتراكات', icon: CreditCard },
-    { id: 'coupons', label: 'Coupons / الكوبونات', icon: Target },
-    { id: 'students', label: 'Students / الطلاب', icon: BookOpen },
-    { id: 'lessons', label: 'Lessons / الدروس', icon: BookOpen },
-    { id: 'placement-test', label: 'Placement Test / اختبار تحديد المستوى', icon: ClipboardList },
-    { id: 'email', label: 'Direct Email / البريد المباشر', icon: Mail },
-    { id: 'teacher', label: 'Teacher Dashboard / لوحة المعلم', icon: GraduationCap, href: '/dashboard/teacher' },
-    { id: 'system', label: 'System / النظام', icon: Activity },
-  ]
+  const activeLabel = MENU_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || 'لوحة التحكم'
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F5F5DC] to-white">
-      <header className="bg-[#10B981] text-white shadow-lg">
-        <div className="container mx-auto px-4 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <button
-                className="lg:hidden p-2 hover:bg-white/10 rounded-lg"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-              <Shield className="h-6 w-6 sm:h-8 sm:w-8" />
-              <h1 className="text-xl sm:text-2xl font-bold">Be Fluent</h1>
-              <Link href="/dashboard/teacher" className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-colors">
-                <GraduationCap className="h-4 w-4" />
-                <span className="text-xs font-bold">لوحة المعلم</span>
-              </Link>
-              <Badge variant="success" className="hidden sm:inline-flex">{user.role}</Badge>
+    <div className="min-h-screen bg-[#F4F6FA]" dir="rtl">
+      {/* Sidebar */}
+      <aside className={`
+        fixed top-0 right-0 h-full z-50 w-64 bg-white border-l border-gray-200 shadow-2xl
+        flex flex-col transition-transform duration-300
+        ${sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+      `}>
+        {/* Logo */}
+        <div className="px-5 py-5 border-b border-gray-100 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200">
+              <Shield className="w-5 h-5 text-white" />
             </div>
-            <div className="flex items-center gap-2 sm:gap-4">
-              <span className="text-xs sm:text-sm hidden sm:block">{user.name}</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSignOut}
-                className="text-white border-white hover:bg-white hover:text-[#10B981] text-xs sm:text-sm px-2 sm:px-4"
-              >
-                <LogOut className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Logout / خروج</span>
-              </Button>
+            <div>
+              <p className="font-black text-gray-900 text-sm">Be Fluent</p>
+              <p className="text-[10px] text-gray-400 font-medium">لوحة الإدارة</p>
+            </div>
+          </Link>
+          <button className="lg:hidden p-1.5 hover:bg-gray-100 rounded-lg" onClick={() => setSidebarOpen(false)}>
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+
+        {/* User Card */}
+        <div className="mx-4 my-4 p-3.5 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-lg shadow-emerald-200">
+              {user.name?.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-black text-gray-900 text-sm truncate">{user.name}</p>
+              <p className="text-[10px] text-emerald-600 font-bold uppercase">{user.role === 'ADMIN' ? 'مدير النظام' : 'مساعد'}</p>
             </div>
           </div>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-4 sm:py-6">
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
-          {/* Mobile Sidebar Overlay */}
-          {sidebarOpen && (
-            <div
-              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-              onClick={() => setSidebarOpen(false)}
-            />
-          )}
-
-          {/* Sidebar */}
-          <div className={`
-            fixed lg:static inset-y-0 left-0 z-50 lg:z-auto
-            w-64 lg:w-auto lg:flex-none
-            transform lg:transform-none transition-transform duration-300
-            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          `}>
-            <Card variant="elevated" padding="none" className="h-full lg:h-auto bg-[#F9FAFB] border border-[#E5E7EB]">
-              <div className="p-4 border-b border-gray-200">
-                <div className="flex items-center justify-between lg:justify-start gap-3">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#10B981] rounded-full flex items-center justify-center">
-                      <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900 text-sm sm:text-base">{user.name}</p>
-                      <p className="text-xs sm:text-sm text-gray-600">{user.role}</p>
-                    </div>
-                  </div>
-                  <button
-                    className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <nav className="p-2">
-                {menuItems.map((item) => {
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto px-3 pb-4 space-y-5">
+          {MENU_GROUPS.map(group => (
+            <div key={group.label}>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-3 mb-2">{group.label}</p>
+              <div className="space-y-0.5">
+                {group.items.map(item => {
                   const Icon = item.icon
-                  if ('href' in item && item.href) {
-                    return (
-                      <Link
-                        key={item.id}
-                        href={item.href}
-                        className="w-full flex items-center gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors mb-1 text-gray-700 hover:bg-gray-100"
-                      >
-                        <Icon className="h-5 w-5" />
-                        <span className="text-xs sm:text-sm font-medium">{item.label}</span>
-                      </Link>
-                    )
-                  }
+                  const isActive = activeTab === item.id
                   return (
                     <button
                       key={item.id}
-                      onClick={() => {
-                        setActiveTab(item.id)
-                        setSidebarOpen(false)
-                      }}
-                      className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors mb-1 ${
-                        activeTab === item.id
-                          ? 'bg-[#10B981] text-white'
-                          : 'text-gray-700 hover:bg-gray-100'
+                      onClick={() => { setActiveTab(item.id); setSidebarOpen(false) }}
+                      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-sm font-bold ${
+                        isActive
+                          ? 'bg-emerald-600 text-white shadow-md shadow-emerald-200'
+                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                       }`}
                     >
-                      <Icon className="h-5 w-5" />
-                      <span className="text-xs sm:text-sm font-medium">{item.label}</span>
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+                      {item.label}
                     </button>
                   )
                 })}
-              </nav>
-            </Card>
-          </div>
+              </div>
+            </div>
+          ))}
+        </nav>
 
-          <div className="flex-1 min-w-0">
-            {activeTab === 'home' && <HomeTab />}
-            {activeTab === 'users' && <UsersTab />}
-            {activeTab === 'subscriptions' && <SubscriptionsTab />}
-            {activeTab === 'coupons' && <CouponsTab />}
-            {activeTab === 'students' && <StudentsManagementTab />}
-            {activeTab === 'lessons' && <LessonsTab isActive={activeTab === 'lessons'} />}
-            {activeTab === 'placement-test' && <PlacementTestTab />}
-            {activeTab === 'email' && <EmailTab />}
-            {activeTab === 'system' && <SystemTab />}
-          </div>
+        {/* Bottom Actions */}
+        <div className="p-3 border-t border-gray-100 space-y-1.5">
+          <Link
+            href="/dashboard/teacher"
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition"
+          >
+            <GraduationCap className="w-4 h-4 text-gray-400" />
+            لوحة المعلم
+          </Link>
+          <Link
+            href="/admin/placement-test"
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition"
+          >
+            <ClipboardList className="w-4 h-4 text-gray-400" />
+            إدارة بنك الأسئلة
+          </Link>
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition"
+          >
+            <LogOut className="w-4 h-4" />
+            تسجيل الخروج
+          </button>
         </div>
+      </aside>
+
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+
+      {/* Main Content */}
+      <div className="lg:pr-64 min-h-screen flex flex-col">
+        {/* Top Bar */}
+        <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
+          <div className="px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button className="lg:hidden p-2 hover:bg-gray-100 rounded-xl transition" onClick={() => setSidebarOpen(true)}>
+                <Menu className="w-5 h-5 text-gray-600" />
+              </button>
+              <div>
+                <h1 className="font-black text-gray-900 text-lg">{activeLabel}</h1>
+                <div className="flex items-center gap-1 text-xs text-gray-400">
+                  <span>لوحة الإدارة</span>
+                  <ChevronRight className="w-3 h-3" />
+                  <span className="text-emerald-600 font-bold">{activeLabel}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* Quick stats in header */}
+              {stats && (
+                <div className="hidden md:flex items-center gap-4 px-4 py-2 bg-gray-50 rounded-xl border border-gray-200 text-xs">
+                  <div className="text-center">
+                    <p className="font-black text-gray-900">{stats.totalStudents || 0}</p>
+                    <p className="text-gray-400">طالب</p>
+                  </div>
+                  <div className="w-px h-6 bg-gray-200" />
+                  <div className="text-center">
+                    <p className="font-black text-orange-600">{stats.pendingSubscriptions || 0}</p>
+                    <p className="text-gray-400">معلق</p>
+                  </div>
+                  <div className="w-px h-6 bg-gray-200" />
+                  <div className="text-center">
+                    <p className="font-black text-emerald-600">{stats.activeStudents || 0}</p>
+                    <p className="text-gray-400">نشط</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black text-xs shadow-lg shadow-emerald-200">
+                  {user.name?.charAt(0).toUpperCase()}
+                </div>
+                <div className="hidden sm:block">
+                  <p className="text-xs font-black text-gray-900">{user.name}</p>
+                  <p className="text-[10px] text-emerald-600 font-bold">{user.role === 'ADMIN' ? 'مدير' : 'مساعد'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Content */}
+        <main className="flex-1 p-6">
+          <div className="max-w-7xl mx-auto">
+            {activeTab === 'home'          && <HomeTab />}
+            {activeTab === 'users'         && <UsersTab />}
+            {activeTab === 'subscriptions' && <SubscriptionsTab />}
+            {activeTab === 'coupons'       && <CouponsTab />}
+            {activeTab === 'students'      && <StudentsManagementTab />}
+            {activeTab === 'lessons'       && <LessonsTab isActive={activeTab === 'lessons'} />}
+            {activeTab === 'placement-test' && <PlacementTestTab />}
+            {activeTab === 'page-editor'   && <PageEditorTab />}
+            {activeTab === 'email'         && <EmailTab />}
+            {activeTab === 'system'        && <SystemTab />}
+          </div>
+        </main>
       </div>
+
       <FloatingContactButtons />
     </div>
   )
