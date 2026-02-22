@@ -249,23 +249,6 @@ export default function Home() {
                     <span>تواصل معنا</span>
                   </a>
                 </div>
-
-                {/* Animated Stats */}
-                <div className="grid grid-cols-3 gap-4 max-w-md mx-auto lg:mx-0">
-                  {[
-                    { number: "500+", label: "طالب نشط", icon: <Users className="w-5 h-5" /> },
-                    { number: "50+", label: "معلم محترف", icon: <GraduationCap className="w-5 h-5" /> },
-                    { number: "98%", label: "نسبة الرضا", icon: <Star className="w-5 h-5" /> },
-                  ].map((stat, i) => (
-                    <div key={i} className="group text-center p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-gray-100 hover:border-[#10B981]/30 hover:shadow-lg hover:shadow-emerald-100/50 transition-all duration-300">
-                      <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-gradient-to-br from-[#10B981]/10 to-emerald-50 flex items-center justify-center text-[#10B981] group-hover:scale-110 transition-transform">
-                        {stat.icon}
-                      </div>
-                      <div className="text-2xl font-black text-[#10B981]">{stat.number}</div>
-                      <div className="text-xs text-gray-500 font-medium">{stat.label}</div>
-                    </div>
-                  ))}
-                </div>
               </div>
 
               {/* Innovative Image Section */}
