@@ -123,9 +123,10 @@ export async function DELETE(
     const existingAssignment = await prisma.assignment.findFirst({
       where: {
         id,
-        Session: {
-          teacherId: teacher.teacherProfileId
-        }
+        OR: [
+          { Session: { teacherId: teacher.teacherProfileId } },
+          { teacherId: teacher.teacherProfileId }
+        ]
       }
     })
 
