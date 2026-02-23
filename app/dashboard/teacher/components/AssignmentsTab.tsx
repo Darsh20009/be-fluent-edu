@@ -428,79 +428,76 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
               </div>
             )}
 
-            {/* File Upload */}
-            {['VIDEO', 'IMAGE', 'FILE'].includes(form.type) && (
-              <div>
-                <label className="text-xs font-bold text-gray-500 block mb-1.5">
-                  {form.type === 'VIDEO' ? 'رفع الفيديو' : form.type === 'IMAGE' ? 'رفع الصورة' : 'رفع الملف'}
-                </label>
-                <div
-                  ref={dragRef}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition ${
-                    isDragging ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-emerald-400 hover:bg-emerald-50/30'
-                  }`}
-                  onClick={() => fileRef.current?.click()}
-                >
-                  <div className={`w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center ${isDragging ? 'bg-emerald-100' : 'bg-gray-100'}`}>
-                    <Upload className={`w-6 h-6 ${isDragging ? 'text-emerald-600' : 'text-gray-400'}`} />
-                  </div>
-                  <p className="text-sm font-bold text-gray-600">اسحب الملف هنا أو اضغط للاختيار</p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {form.type === 'VIDEO' ? 'MP4, MOV, AVI' : form.type === 'IMAGE' ? 'JPG, PNG, GIF, WebP' : 'PDF, DOC, ZIP'}
-                    {' '} • حتى 50MB
-                  </p>
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    className="hidden"
-                    accept={form.type === 'VIDEO' ? 'video/*' : form.type === 'IMAGE' ? 'image/*' : '*'}
-                    multiple
-                    onChange={e => { Array.from(e.target.files || []).forEach(f => handleFileUpload(f)) }}
-                  />
-                  {uploading && (
-                    <div className="mt-4 flex flex-col items-center gap-2">
-                      <div className="w-full bg-gray-100 rounded-full h-1.5 max-w-[200px] overflow-hidden">
-                        <div className="bg-emerald-500 h-full animate-progress-indeterminate"></div>
-                      </div>
-                      <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">جاري الرفع...</p>
-                    </div>
-                  )}
+            {/* File Upload - Moved outside of conditional check for form.type to allow attachments for all types */}
+            <div>
+              <label className="text-xs font-bold text-gray-500 block mb-1.5">
+                المرفقات (صور، فيديو، ملفات)
+              </label>
+              <div
+                ref={dragRef}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition ${
+                  isDragging ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-emerald-400 hover:bg-emerald-50/30'
+                }`}
+                onClick={() => fileRef.current?.click()}
+              >
+                <div className={`w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center ${isDragging ? 'bg-emerald-100' : 'bg-gray-100'}`}>
+                  <Upload className={`w-6 h-6 ${isDragging ? 'text-emerald-600' : 'text-gray-400'}`} />
                 </div>
-                {form.attachmentUrls.length > 0 && (
-                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {form.attachmentUrls.map((file, i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 group hover:border-emerald-200 transition">
-                        <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center flex-shrink-0">
-                          {file.type.startsWith('image/') ? (
-                            <img src={file.url} className="w-full h-full object-cover rounded-lg" alt="" />
-                          ) : file.type.startsWith('video/') ? (
-                            <Video className="w-5 h-5 text-red-500" />
-                          ) : (
-                            <File className="w-5 h-5 text-blue-500" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-gray-900 truncate">{file.name}</p>
-                          <p className="text-[10px] text-gray-400 uppercase">{formatFileSize(file.size)} • {file.type.split('/')[1]}</p>
-                        </div>
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setForm(f => ({ ...f, attachmentUrls: f.attachmentUrls.filter((_, idx) => idx !== i) }));
-                          }} 
-                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
+                <p className="text-sm font-bold text-gray-600">اسحب الملف هنا أو اضغط للاختيار</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  JPG, PNG, MP4, PDF... • حتى 50MB
+                </p>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  className="hidden"
+                  accept="*"
+                  multiple
+                  onChange={e => { Array.from(e.target.files || []).forEach(f => handleFileUpload(f)) }}
+                />
+                {uploading && (
+                  <div className="mt-4 flex flex-col items-center gap-2">
+                    <div className="w-full bg-gray-100 rounded-full h-1.5 max-w-[200px] overflow-hidden">
+                      <div className="bg-emerald-500 h-full animate-progress-indeterminate"></div>
+                    </div>
+                    <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">جاري الرفع...</p>
                   </div>
                 )}
               </div>
-            )}
+              {form.attachmentUrls.length > 0 && (
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {form.attachmentUrls.map((file, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 group hover:border-emerald-200 transition">
+                      <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center flex-shrink-0">
+                        {file.type.startsWith('image/') ? (
+                          <img src={file.url} className="w-full h-full object-cover rounded-lg" alt="" />
+                        ) : file.type.startsWith('video/') ? (
+                          <Video className="w-5 h-5 text-red-500" />
+                        ) : (
+                          <File className="w-5 h-5 text-blue-500" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-gray-900 truncate">{file.name}</p>
+                        <p className="text-[10px] text-gray-400 uppercase">{formatFileSize(file.size)} • {file.type.split('/')[1]}</p>
+                      </div>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setForm(f => ({ ...f, attachmentUrls: f.attachmentUrls.filter((_, idx) => idx !== i) }));
+                        }} 
+                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>

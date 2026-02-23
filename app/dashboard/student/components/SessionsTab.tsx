@@ -217,27 +217,37 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
                       </div>
                     </div>
 
-                    <div className="bg-[#10B981]/5 px-6 py-3 rounded-2xl border border-[#10B981]/10 text-center">
-                      <div className="flex items-center gap-2 text-[#10B981] mb-1">
-                        <Timer className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">يبدأ خلال</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        {days > 0 && (
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                      <div className="bg-[#10B981]/5 px-6 py-3 rounded-2xl border border-[#10B981]/10 text-center">
+                        <div className="flex items-center gap-2 text-[#10B981] mb-1 justify-center">
+                          <Timer className="w-3.5 h-3.5" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">يبدأ خلال</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {days > 0 && (
+                            <div className="text-center">
+                              <span className="block text-lg font-black text-gray-900 leading-none">{days}</span>
+                              <span className="text-[8px] font-bold text-gray-400 uppercase">يوم</span>
+                            </div>
+                          )}
                           <div className="text-center">
-                            <span className="block text-lg font-black text-gray-900 leading-none">{days}</span>
-                            <span className="text-[8px] font-bold text-gray-400 uppercase">يوم</span>
+                            <span className="block text-lg font-black text-gray-900 leading-none">{hours}</span>
+                            <span className="text-[8px] font-bold text-gray-400 uppercase">ساعة</span>
                           </div>
-                        )}
-                        <div className="text-center">
-                          <span className="block text-lg font-black text-gray-900 leading-none">{hours}</span>
-                          <span className="text-[8px] font-bold text-gray-400 uppercase">ساعة</span>
-                        </div>
-                        <div className="text-center">
-                          <span className="block text-lg font-black text-gray-900 leading-none">{minutes}</span>
-                          <span className="text-[8px] font-bold text-gray-400 uppercase">دقيقة</span>
+                          <div className="text-center">
+                            <span className="block text-lg font-black text-gray-900 leading-none">{minutes}</span>
+                            <span className="text-[8px] font-bold text-gray-400 uppercase">دقيقة</span>
+                          </div>
                         </div>
                       </div>
+                      
+                      <Button 
+                        variant="outline" 
+                        disabled 
+                        className="!rounded-2xl border-gray-200 text-gray-400 font-black px-6"
+                      >
+                        بانتظار الموعد
+                      </Button>
                     </div>
                   </div>
                 </div>

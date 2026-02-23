@@ -77,48 +77,48 @@ export default function AdminDashboardClient({ user }: Props) {
   const activeLabel = MENU_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || 'لوحة التحكم'
 
   return (
-    <div className="min-h-screen bg-[#F4F6FA]" dir="rtl">
+    <div className="min-h-screen bg-[#F8FAFC]" dir="rtl">
       {/* Sidebar */}
       <aside className={`
-        fixed top-0 right-0 h-full z-50 w-64 bg-white border-l border-gray-200 shadow-2xl
-        flex flex-col transition-transform duration-300
+        fixed top-0 right-0 h-full z-50 w-72 bg-white border-l border-slate-200 shadow-2xl
+        flex flex-col transition-all duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
       `}>
         {/* Logo */}
-        <div className="px-5 py-5 border-b border-gray-100 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200">
-              <Shield className="w-5 h-5 text-white" />
+        <div className="px-6 py-8 border-b border-slate-50 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-200 group-hover:scale-105 transition-transform">
+              <Shield className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="font-black text-gray-900 text-sm">Be Fluent</p>
-              <p className="text-[10px] text-gray-400 font-medium">لوحة الإدارة</p>
+              <p className="font-black text-slate-900 text-lg tracking-tight leading-none">Be Fluent</p>
+              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-1">لوحة الإدارة / Admin</p>
             </div>
           </Link>
-          <button className="lg:hidden p-1.5 hover:bg-gray-100 rounded-lg" onClick={() => setSidebarOpen(false)}>
-            <X className="w-5 h-5 text-gray-500" />
+          <button className="lg:hidden p-2 hover:bg-slate-100 rounded-xl transition-colors" onClick={() => setSidebarOpen(false)}>
+            <X className="w-6 h-6 text-slate-500" />
           </button>
         </div>
 
         {/* User Card */}
-        <div className="mx-4 my-4 p-3.5 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl">
+        <div className="mx-4 my-6 p-4 bg-slate-50 border border-slate-100 rounded-2xl">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-lg shadow-emerald-200">
+            <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-md shadow-emerald-100">
               {user.name?.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-black text-gray-900 text-sm truncate">{user.name}</p>
-              <p className="text-[10px] text-emerald-600 font-bold uppercase">{user.role === 'ADMIN' ? 'مدير النظام' : 'مساعد'}</p>
+              <p className="font-bold text-slate-900 text-sm truncate">{user.name}</p>
+              <p className="text-[10px] text-emerald-600 font-black uppercase tracking-tighter">{user.role === 'ADMIN' ? 'المدير العام / Super Admin' : 'مساعد / Assistant'}</p>
             </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 pb-4 space-y-5">
+        <nav className="flex-1 overflow-y-auto px-4 pb-6 space-y-8 custom-scrollbar">
           {MENU_GROUPS.map(group => (
-            <div key={group.label}>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-3 mb-2">{group.label}</p>
-              <div className="space-y-0.5">
+            <div key={group.label} className="space-y-2">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-3">{group.label}</p>
+              <div className="space-y-1">
                 {group.items.map(item => {
                   const Icon = item.icon
                   const isActive = activeTab === item.id
@@ -126,13 +126,13 @@ export default function AdminDashboardClient({ user }: Props) {
                     <button
                       key={item.id}
                       onClick={() => { setActiveTab(item.id); setSidebarOpen(false) }}
-                      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-sm font-bold ${
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-bold ${
                         isActive
-                          ? 'bg-emerald-600 text-white shadow-md shadow-emerald-200'
-                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                          ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100 translate-x-[-4px]'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-emerald-600'
                       }`}
                     >
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+                      <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                       {item.label}
                     </button>
                   )
@@ -143,24 +143,17 @@ export default function AdminDashboardClient({ user }: Props) {
         </nav>
 
         {/* Bottom Actions */}
-        <div className="p-3 border-t border-gray-100 space-y-1.5">
+        <div className="p-4 border-t border-slate-100 space-y-2">
           <Link
             href="/dashboard/teacher"
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-emerald-600 transition-all"
           >
-            <GraduationCap className="w-4 h-4 text-gray-400" />
+            <GraduationCap className="w-5 h-5 text-slate-400" />
             لوحة المعلم
-          </Link>
-          <Link
-            href="/admin/placement-test"
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition"
-          >
-            <ClipboardList className="w-4 h-4 text-gray-400" />
-            إدارة بنك الأسئلة
           </Link>
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition-all group"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition-all group"
           >
             <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors">
               <LogOut className="w-4 h-4" />
@@ -172,72 +165,59 @@ export default function AdminDashboardClient({ user }: Props) {
 
       {/* Mobile Overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden transition-opacity" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Main Content */}
-      <div className="lg:pr-64 min-h-screen flex flex-col">
+      <div className="lg:pr-72 min-h-screen flex flex-col">
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-          <div className="px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button className="lg:hidden p-2 hover:bg-gray-100 rounded-xl transition" onClick={() => setSidebarOpen(true)}>
-                <Menu className="w-5 h-5 text-gray-600" />
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
+          <div className="px-8 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button className="lg:hidden p-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all" onClick={() => setSidebarOpen(true)}>
+                <Menu className="w-6 h-6 text-slate-600" />
               </button>
               <div>
-                <h1 className="font-black text-gray-900 text-lg">{activeLabel}</h1>
-                <div className="flex items-center gap-1 text-xs text-gray-400">
-                  <span>لوحة الإدارة</span>
+                <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">
+                  <Link href="/dashboard/admin" className="hover:text-emerald-600 transition-colors">الرئيسية</Link>
                   <ChevronRight className="w-3 h-3" />
-                  <span className="text-emerald-600 font-bold">{activeLabel}</span>
+                  <span className="text-emerald-600">{activeLabel}</span>
                 </div>
+                <h1 className="font-black text-slate-900 text-xl tracking-tight">{activeLabel}</h1>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               {/* Notification & Messages Icons */}
-              <div className="flex items-center gap-1 sm:gap-2 mr-2">
-                <button className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all relative">
+              <div className="flex items-center gap-2">
+                <button className="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all relative group">
                   <Bell className="w-5 h-5" />
                   {stats?.pendingSubscriptions > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white animate-pulse" />
+                    <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-bounce" />
                   )}
+                  {/* Tooltip */}
+                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-slate-900 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">التنبيهات</span>
                 </button>
-                <button className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
+                <button className="hidden sm:flex p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all relative group">
                   <Mail className="w-5 h-5" />
+                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-slate-900 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">الرسائل</span>
                 </button>
-                <button className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
+                <button className="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all relative group">
                   <Settings className="w-5 h-5" />
+                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-slate-900 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">الإعدادات</span>
                 </button>
               </div>
 
-              {/* Quick stats in header */}
-              {stats && (
-                <div className="hidden md:flex items-center gap-4 px-4 py-2 bg-gray-50 rounded-xl border border-gray-200 text-xs">
-                  <div className="text-center">
-                    <p className="font-black text-gray-900">{stats.totalStudents || 0}</p>
-                    <p className="text-gray-400">طالب</p>
-                  </div>
-                  <div className="w-px h-6 bg-gray-200" />
-                  <div className="text-center">
-                    <p className="font-black text-orange-600">{stats.pendingSubscriptions || 0}</p>
-                    <p className="text-gray-400">معلق</p>
-                  </div>
-                  <div className="w-px h-6 bg-gray-200" />
-                  <div className="text-center">
-                    <p className="font-black text-emerald-600">{stats.activeStudents || 0}</p>
-                    <p className="text-gray-400">نشط</p>
-                  </div>
-                </div>
-              )}
+              <div className="h-8 w-px bg-slate-200 mx-1" />
 
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black text-xs shadow-lg shadow-emerald-200">
-                  {user.name?.charAt(0).toUpperCase()}
+              {/* User Profile */}
+              <div className="flex items-center gap-3 pl-2">
+                <div className="hidden sm:block text-left text-right">
+                  <p className="text-sm font-bold text-slate-900 leading-none mb-1">{user.name}</p>
+                  <p className="text-[10px] text-emerald-600 font-black uppercase tracking-tighter">{user.role === 'ADMIN' ? 'مدير النظام' : 'مساعد'}</p>
                 </div>
-                <div className="hidden sm:block">
-                  <p className="text-xs font-black text-gray-900">{user.name}</p>
-                  <p className="text-[10px] text-emerald-600 font-bold">{user.role === 'ADMIN' ? 'مدير' : 'مساعد'}</p>
+                <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-lg shadow-emerald-100">
+                  {user.name?.charAt(0).toUpperCase()}
                 </div>
               </div>
             </div>

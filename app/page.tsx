@@ -357,6 +357,67 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Stats Section */}
+        <section className="py-20 bg-white relative overflow-hidden">
+          <div className="container mx-auto px-4 lg:px-8 relative z-10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {[1, 2, 3, 4].map((n) => {
+                const num = cms('stats', `stat${n}_num`, '');
+                const labelAr = cms('stats', `stat${n}_label_ar`, '');
+                const labelEn = cms('stats', `stat${n}_label_en`, '');
+                
+                if (!num && !labelAr) return null;
+
+                return (
+                  <div key={n} className="text-center group p-6 rounded-3xl hover:bg-emerald-50 transition-all duration-500 border border-transparent hover:border-emerald-100">
+                    <div className="text-4xl md:text-5xl font-black text-[#10B981] mb-2 group-hover:scale-110 transition-transform duration-500">{num}</div>
+                    <div className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-1">{labelEn}</div>
+                    <div className="text-lg font-bold text-gray-800">{labelAr}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="py-24 bg-gray-50/50">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto mb-16" dir="rtl">
+              <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-6">لماذا تختار Be Fluent؟</h2>
+              <p className="text-gray-600 text-lg">نحن نقدم تجربة تعليمية فريدة تركز على النتائج الحقيقية والتمكن الكامل من اللغة.</p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-8">
+              {Array.from({ length: 6 }).map((_, i) => {
+                const n = i + 1;
+                const titleAr = cms('features', `feat${n}_title_ar`, '');
+                const titleEn = cms('features', `feat${n}_title_en`, '');
+                const descAr = cms('features', `feat${n}_desc_ar`, '');
+                const icon = cms('features', `feat${n}_icon`, '');
+
+                if (!titleAr && !titleEn && !descAr) return null;
+
+                return (
+                  <div key={i} className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-emerald-500/5 border border-gray-100 hover:border-[#10B981]/30 transition-all duration-500 group" dir="rtl">
+                    <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mb-6 group-hover:bg-[#10B981] transition-colors duration-500 overflow-hidden">
+                      {icon ? (
+                        <div className="relative w-full h-full p-3">
+                          <Image src={icon} fill className="object-contain" alt="" />
+                        </div>
+                      ) : (
+                        <Star className="w-8 h-8 text-[#10B981] group-hover:text-white transition-colors" />
+                      )}
+                    </div>
+                    <h3 className="text-xl font-black text-gray-900 mb-2 uppercase tracking-tight">{titleEn}</h3>
+                    <h4 className="text-2xl font-bold text-gray-800 mb-4">{titleAr}</h4>
+                    <p className="text-gray-600 leading-relaxed">{descAr}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
         {/* Learning Path Section (Standalone Integration) */}
         <section className="py-24 bg-gradient-to-b from-white to-emerald-50/30 overflow-hidden" id="learning-path">
           <div className="container mx-auto px-4 lg:px-8">
@@ -371,33 +432,33 @@ export default function Home() {
                   <span className="text-[#10B981]">نحن نصمم لك طريقاً للنجاح</span>
                 </h2>
                 <div className="space-y-8">
-                  {[
-                    { 
-                      title: cms('learning_path', 'step1_title', "1. تحديد الهدف والحصة التجريبية"), 
-                      desc: cms('learning_path', 'step1_desc', "نبدأ بفهم دافعك للتعلم لنوجه كل طاقتنا نحوه مع تجربة حية لنظامنا."), 
-                      icon: cms('learning_path', 'step1_icon', "") ? <Image src={cms('learning_path', 'step1_icon', "")} width={24} height={24} alt="" /> : <Target className="w-6 h-6" /> 
-                    },
-                    { 
-                      title: cms('learning_path', 'step2_title', "2. نظام المعلمين المزدوج"), 
-                      desc: cms('learning_path', 'step2_desc', "معلم أساسي للشرح، ومعلم مساعد للمتابعة اليومية، ومختبر لتقييم التقدم."), 
-                      icon: cms('learning_path', 'step2_icon', "") ? <Image src={cms('learning_path', 'step2_icon', "")} width={24} height={24} alt="" /> : <Users className="w-6 h-6" /> 
-                    },
-                    { 
-                      title: cms('learning_path', 'step3_title', "3. اختبارات ذكية ومفاجئة"), 
-                      desc: cms('learning_path', 'step3_desc', "اختبارين مفاجئين أسبوعياً واختبار مستوى شهري لضمان إتقان كل ليفل."), 
-                      icon: cms('learning_path', 'step3_icon', "") ? <Image src={cms('learning_path', 'step3_icon', "")} width={24} height={24} alt="" /> : <Zap className="w-6 h-6" /> 
-                    },
-                  ].map((item, i) => (
-                    <div key={i} className="flex gap-4 group">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-white shadow-lg border border-gray-100 flex items-center justify-center text-[#10B981] group-hover:bg-[#10B981] group-hover:text-white transition-all duration-300 overflow-hidden">
-                        {item.icon}
+                  {Array.from({ length: 10 }).map((_, i) => {
+                    const n = i + 1;
+                    const stepTitleAr = cms('learning_path', `step${n}_title_ar`, '');
+                    const stepTitleEn = cms('learning_path', `step${n}_title`, '');
+                    const stepDesc = cms('learning_path', `step${n}_desc`, '');
+                    const stepIcon = cms('learning_path', `step${n}_icon`, '');
+                    
+                    if (!stepTitleAr && !stepTitleEn && !stepDesc) return null;
+
+                    return (
+                      <div key={i} className="flex gap-4 group">
+                        <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-white shadow-lg border border-gray-100 flex items-center justify-center text-[#10B981] group-hover:bg-[#10B981] group-hover:text-white transition-all duration-300 overflow-hidden">
+                          {stepIcon ? (
+                            <div className="relative w-full h-full p-2">
+                              <Image src={stepIcon} fill className="object-contain" alt="" />
+                            </div>
+                          ) : (
+                            <Zap className="w-6 h-6" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-800 mb-1">{stepTitleAr || stepTitleEn}</h3>
+                          <p className="text-gray-600">{stepDesc}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-1">{item.title}</h3>
-                        <p className="text-gray-600">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div className="mt-10">
                   <Link href="/learning-path" className="inline-flex items-center gap-3 px-8 py-4 bg-[#10B981] text-white rounded-2xl text-lg font-bold shadow-xl shadow-emerald-200 hover:bg-[#059669] transition-all duration-300">

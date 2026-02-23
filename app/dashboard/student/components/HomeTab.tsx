@@ -120,11 +120,31 @@ export default function HomeTab({ isActive }: HomeTabProps) {
             <div className={`w-12 h-12 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
               <item.icon className="w-6 h-6" />
             </div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{item.label}</p>
-            <p className="text-xl font-black text-gray-900">{item.value}</p>
+            <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{item.label}</p>
+            <p className="text-lg sm:text-xl font-black text-gray-900">{item.value}</p>
           </div>
         ))}
       </div>
+
+      {/* Placement Test Banner */}
+      {!stats?.placementTestTaken && (
+        <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-8 rounded-[2rem] text-white shadow-xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+            <ClipboardList size={120} />
+          </div>
+          <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="text-center md:text-right">
+              <h3 className="text-2xl font-black mb-2">تحديد المستوى</h3>
+              <p className="text-amber-50 font-medium">ابدأ الآن بتحديد مستواك لتحصل على خطة دراسية مخصصة لك.</p>
+            </div>
+            <Link href="/placement-test">
+              <Button className="bg-white text-orange-600 hover:bg-amber-50 font-black px-10 py-4 !rounded-2xl text-lg shadow-lg">
+                ابدأ الاختبار الآن
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

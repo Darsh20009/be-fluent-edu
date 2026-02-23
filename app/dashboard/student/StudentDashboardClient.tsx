@@ -7,7 +7,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { 
   Home, BookOpen, Calendar, MessageCircle, Trophy, Menu,
-  CreditCard, LogOut, CheckCircle, XCircle, Bell, Sparkles, Settings, Brain, FileText, ShoppingCart, Receipt, Layers, Mic, Flame, Award, Medal, TrendingUp, Target, Bot, Video, AlertCircle
+  CreditCard, LogOut, CheckCircle, XCircle, Bell, Sparkles, Settings, Brain, FileText, ShoppingCart, Receipt, Layers, Mic, Flame, Award, Medal, TrendingUp, Target, Bot, Video, AlertCircle, Clock
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
@@ -171,11 +171,15 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
                         <Award className="w-3.5 h-3.5 text-[#10B981]" />
                       </div>
                     </div>
-                    <div>
-                      <p className="font-black text-[#1F2937] text-lg leading-tight">{user.name}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-black text-[#1F2937] text-lg leading-tight truncate">{user.name}</p>
                       <div className="flex items-center gap-1.5 mt-1">
                         <Badge variant="success" className="text-[10px] px-2 py-0">Level 1</Badge>
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">PRO STUDENT</span>
+                        {hasSubscription ? (
+                          <span className="text-[10px] text-[#10B981] font-bold uppercase tracking-wider">PRO STUDENT</span>
+                        ) : (
+                          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">FREE STUDENT</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -188,6 +192,26 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
                     </div>
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div className="h-full bg-[#10B981] rounded-full" style={{ width: '45%' }}></div>
+                    </div>
+                  </div>
+
+                  {/* Subscription Status Badge */}
+                  <div className="pt-2 border-t border-gray-50">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase">Subscription</span>
+                      {hasSubscription ? (
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600">
+                          <CheckCircle className="w-3 h-3" /> ACTIVE
+                        </span>
+                      ) : subscription?.status === 'PENDING' ? (
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-amber-500">
+                          <Clock className="w-3 h-3" /> PENDING
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-rose-500">
+                          <XCircle className="w-3 h-3" /> INACTIVE
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

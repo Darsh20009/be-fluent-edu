@@ -437,25 +437,32 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
                 )}
 
                 {['VIDEO', 'IMAGE', 'FILE'].includes(selectedAssignment.type) && (
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     <div
-                      className="group border-2 border-dashed border-gray-200 rounded-[2rem] p-10 text-center cursor-pointer hover:border-[#10B981] hover:bg-emerald-50/30 transition-all"
+                      className="group border-2 border-dashed border-gray-200 rounded-[2rem] p-10 text-center cursor-pointer hover:border-[#10B981] hover:bg-emerald-50/30 transition-all relative overflow-hidden"
                       onClick={() => fileRef.current?.click()}
                     >
-                      <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                        <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#10B981]" />
+                      <div className="relative z-10">
+                        <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                          <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#10B981]" />
+                        </div>
+                        <p className="text-base font-black text-gray-900">اسحب الملف أو اضغط للاختيار</p>
+                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-2">
+                          {selectedAssignment.type === 'VIDEO' ? 'MP4, MOV (بحد أقصى 50MB)' : selectedAssignment.type === 'IMAGE' ? 'JPG, PNG, WEBP' : 'جميع الملفات مدعومة'}
+                        </p>
                       </div>
-                      <p className="text-base font-black text-gray-900">اسحب الملف أو اضغط للاختيار</p>
-                      <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-2">
-                        {selectedAssignment.type === 'VIDEO' ? 'MP4, MOV' : selectedAssignment.type === 'IMAGE' ? 'JPG, PNG, WEBP' : 'جميع الملفات مدعومة'}
-                      </p>
                       
                       {uploading && (
-                        <div className="mt-6 flex flex-col items-center gap-2">
-                          <div className="w-full max-w-xs h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                            <div className="h-full bg-[#10B981] animate-progress" style={{ width: '60%' }} />
+                        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                          <div className="w-full max-w-xs px-8">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-xs font-black text-[#10B981]">جاري الرفع...</span>
+                              <span className="text-xs font-black text-[#10B981]">60%</span>
+                            </div>
+                            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                              <div className="h-full bg-[#10B981] animate-pulse" style={{ width: '60%' }} />
+                            </div>
                           </div>
-                          <span className="text-xs font-black text-[#10B981] animate-pulse">جاري رفع ملفك...</span>
                         </div>
                       )}
                       
@@ -470,18 +477,42 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
                     </div>
 
                     {attachedFiles.length > 0 && (
-                      <div className="grid gap-2">
-                        {attachedFiles.map((url, i) => (
-                          <div key={i} className="flex items-center gap-3 p-3 bg-emerald-50 rounded-2xl border border-emerald-100">
-                            <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white">
-                              <CheckCircle className="w-4 h-4" />
+                      <div className="space-y-3">
+                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest">الملفات المرفقة ({attachedFiles.length}):</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {attachedFiles.map((url, i) => (
+                            <div key={i} className="group relative aspect-square bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden">
+                              {selectedAssignment.type === 'IMAGE' ? (
+                                <img src={url} alt="Uploaded" className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center p-4">
+                                  <File className="w-8 h-8 text-gray-300 mb-2" />
+                                  <span className="text-[10px] font-bold text-gray-400 truncate w-full text-center">
+                                    {url.split('/').pop()}
+                                  </span>
+                                </div>
+                              )}
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setAttachedFiles(f => f.filter((_, idx) => idx !== i)) }}
+                                className="absolute top-2 right-2 w-8 h-8 bg-rose-500 text-white rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow-lg"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
                             </div>
-                            <span className="text-xs font-black text-emerald-800 flex-1 truncate">{url.split('/').pop()}</span>
-                            <button onClick={() => setAttachedFiles(f => f.filter((_, idx) => idx !== i))} className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition">
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedAssignment.type === 'VIDEO' && (
+                      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0">
+                          <Video className="w-4 h-4" />
+                        </div>
+                        <div className="text-xs">
+                          <p className="font-black text-blue-800 mb-1">تسجيل الفيديو</p>
+                          <p className="text-blue-600/80 font-medium">تأكد من وضوح الصوت والإضاءة عند التسجيل. يمكنك استخدام هاتفك ورفع الفيديو مباشرة.</p>
+                        </div>
                       </div>
                     )}
                   </div>

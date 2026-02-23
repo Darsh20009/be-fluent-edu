@@ -498,7 +498,7 @@ export default function PlacementTestAdmin() {
                           ref={fileInputRef}
                           type="file"
                           className="hidden"
-                          accept={form.questionType === 'IMAGE' ? 'image/*' : 'video/*'}
+                          accept={form.questionType === 'IMAGE' ? 'image/*' : 'image/*,video/*'}
                           onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
                         />
                         <div className="mt-3">
@@ -664,34 +664,44 @@ export default function PlacementTestAdmin() {
                 const qType = QUESTION_TYPES.find(t => t.id === (q.questionType || 'MCQ'));
                 const QIcon = qType?.icon || List;
                 return (
-                  <div key={q.id} className="bg-white rounded-2xl border border-gray-200 p-5 hover:border-emerald-200 transition group">
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 flex flex-col items-center gap-2">
-                        <span className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-sm font-black text-gray-500">
-                          {i + 1}
-                        </span>
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                          q.questionType === 'MCQ' ? 'bg-blue-50' :
-                          q.questionType === 'WRITTEN' ? 'bg-green-50' :
-                          q.questionType === 'VIDEO_RECORDING' ? 'bg-purple-50' : 'bg-orange-50'
-                        }`}>
-                          <QIcon className={`w-4 h-4 ${
-                            q.questionType === 'MCQ' ? 'text-blue-600' :
-                            q.questionType === 'WRITTEN' ? 'text-green-600' :
-                            q.questionType === 'VIDEO_RECORDING' ? 'text-purple-600' : 'text-orange-600'
-                          }`} />
-                        </div>
-                      </div>
+                      <div key={q.id} className="bg-white rounded-2xl border border-gray-200 p-5 hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-50 transition group relative overflow-hidden">
+                        <div className={`absolute top-0 right-0 w-1.5 h-full ${
+                          q.questionType === 'MCQ' ? 'bg-blue-500' :
+                          q.questionType === 'WRITTEN' ? 'bg-green-500' :
+                          q.questionType === 'VIDEO_RECORDING' ? 'bg-purple-500' : 'bg-orange-500'
+                        }`} />
+                        <div className="flex items-start gap-4">
+                          <div className="flex-shrink-0 flex flex-col items-center gap-2">
+                            <span className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-sm font-black text-gray-500">
+                              {i + 1}
+                            </span>
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${
+                              q.questionType === 'MCQ' ? 'bg-blue-50' :
+                              q.questionType === 'WRITTEN' ? 'bg-green-50' :
+                              q.questionType === 'VIDEO_RECORDING' ? 'bg-purple-50' : 'bg-orange-50'
+                            }`}>
+                              <QIcon className={`w-5 h-5 ${
+                                q.questionType === 'MCQ' ? 'text-blue-600' :
+                                q.questionType === 'WRITTEN' ? 'text-green-600' :
+                                q.questionType === 'VIDEO_RECORDING' ? 'text-purple-600' : 'text-orange-600'
+                              }`} />
+                            </div>
+                          </div>
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-bold rounded">{q.level}</span>
-                          <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-bold rounded">{qType?.label || q.questionType}</span>
-                          {q.category && <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-bold rounded">{q.category}</span>}
-                          <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-bold rounded">{q.points} نقطة</span>
-                        </div>
-                        <p className="font-bold text-gray-900 text-sm">{q.question}</p>
-                        {q.questionAr && <p className="text-gray-500 text-xs mt-0.5 text-right" dir="rtl">{q.questionAr}</p>}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-wider rounded-lg border border-emerald-100">{q.level}</span>
+                              <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg border ${
+                                q.questionType === 'MCQ' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                q.questionType === 'WRITTEN' ? 'bg-green-50 text-green-700 border-green-100' :
+                                q.questionType === 'VIDEO_RECORDING' ? 'bg-purple-50 text-purple-700 border-purple-100' :
+                                'bg-orange-50 text-orange-700 border-orange-100'
+                              }`}>{qType?.label || q.questionType}</span>
+                              {q.category && <span className="px-2.5 py-1 bg-gray-50 text-gray-600 text-[10px] font-black uppercase tracking-wider rounded-lg border border-gray-100">{q.category}</span>}
+                              <span className="px-2.5 py-1 bg-yellow-50 text-yellow-700 text-[10px] font-black uppercase tracking-wider rounded-lg border border-yellow-100">{q.points} نقطة</span>
+                            </div>
+                            <p className="font-bold text-gray-900 text-base leading-relaxed">{q.question}</p>
+                            {q.questionAr && <p className="text-gray-500 text-sm mt-1 text-right font-medium" dir="rtl">{q.questionAr}</p>}
 
                         {q.questionType === 'MCQ' && q.options && (
                           <div className="grid grid-cols-2 gap-1.5 mt-3">
@@ -709,11 +719,14 @@ export default function PlacementTestAdmin() {
                         )}
 
                         {q.mediaUrl && (
-                          <div className="mt-2">
+                          <div className="mt-4">
                             {q.questionType === 'IMAGE' ? (
-                              <img src={q.mediaUrl} alt="Q media" className="h-20 rounded-lg object-cover" />
+                              <img src={q.mediaUrl} alt="Q media" className="max-h-32 rounded-xl object-cover border border-gray-100 shadow-sm" />
                             ) : (
-                              <a href={q.mediaUrl} target="_blank" className="text-xs text-blue-600 underline">عرض الفيديو</a>
+                              <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100 w-fit">
+                                <Video className="w-4 h-4 text-purple-600" />
+                                <a href={q.mediaUrl} target="_blank" className="text-xs text-blue-600 hover:underline font-bold">عرض الفيديو المرفق</a>
+                              </div>
                             )}
                           </div>
                         )}
