@@ -479,27 +479,59 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
                     {attachedFiles.length > 0 && (
                       <div className="space-y-3">
                         <p className="text-xs font-black text-gray-400 uppercase tracking-widest">الملفات المرفقة ({attachedFiles.length}):</p>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          {attachedFiles.map((url, i) => (
-                            <div key={i} className="group relative aspect-square bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden">
-                              {selectedAssignment.type === 'IMAGE' ? (
-                                <img src={url} alt="Uploaded" className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full flex flex-col items-center justify-center p-4">
-                                  <File className="w-8 h-8 text-gray-300 mb-2" />
-                                  <span className="text-[10px] font-bold text-gray-400 truncate w-full text-center">
-                                    {url.split('/').pop()}
-                                  </span>
-                                </div>
-                              )}
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setAttachedFiles(f => f.filter((_, idx) => idx !== i)) }}
-                                className="absolute top-2 right-2 w-8 h-8 bg-rose-500 text-white rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow-lg"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
-                            </div>
-                          ))}
+                        <div className="space-y-3">
+                          {attachedFiles.map((url, i) => {
+                            const isVideo = /\.(mp4|mov|avi|webm|mkv|m4v)(\?|$)/i.test(url) || selectedAssignment.type === 'VIDEO'
+                            const isImg = /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url) || selectedAssignment.type === 'IMAGE'
+                            return (
+                              <div key={i} className="group relative bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden">
+                                {isVideo ? (
+                                  <>
+                                    <div className="bg-gray-900 px-4 py-2.5 flex items-center gap-2">
+                                      <div className="w-6 h-6 bg-red-500 rounded-md flex items-center justify-center">
+                                        <Video className="w-3.5 h-3.5 text-white" />
+                                      </div>
+                                      <span className="text-xs font-bold text-gray-300 flex-1 truncate">
+                                        {url.split('/').pop() || 'تسجيلك'}
+                                      </span>
+                                      <button
+                                        onClick={() => setAttachedFiles(f => f.filter((_, idx) => idx !== i))}
+                                        className="p-1 hover:bg-white/20 rounded-lg transition"
+                                      >
+                                        <X className="w-4 h-4 text-gray-400 hover:text-red-400" />
+                                      </button>
+                                    </div>
+                                    <video controls preload="metadata" className="w-full max-h-56 object-contain bg-black" src={url}>
+                                      <source src={url} />
+                                    </video>
+                                  </>
+                                ) : isImg ? (
+                                  <div className="relative aspect-square">
+                                    <img src={url} alt="Uploaded" className="w-full h-full object-cover" />
+                                    <button
+                                      onClick={() => setAttachedFiles(f => f.filter((_, idx) => idx !== i))}
+                                      className="absolute top-2 right-2 w-8 h-8 bg-rose-500 text-white rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow-lg"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-3 p-4">
+                                    <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center">
+                                      <File className="w-5 h-5 text-gray-500" />
+                                    </div>
+                                    <span className="text-sm font-bold text-gray-700 flex-1 truncate">{url.split('/').pop()}</span>
+                                    <button
+                                      onClick={() => setAttachedFiles(f => f.filter((_, idx) => idx !== i))}
+                                      className="p-2 hover:bg-red-50 rounded-xl transition"
+                                    >
+                                      <X className="w-4 h-4 text-red-400" />
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
                         </div>
                       </div>
                     )}

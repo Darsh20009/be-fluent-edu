@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import {
   FileText, Plus, CheckCircle, Clock, Send, Upload, X, Trash2, Pencil,
   Video, Image, File, AlignLeft, List, AlertCircle, ChevronDown, ChevronUp,
-  User, Calendar, Star, MessageSquare
+  User, Calendar, Star, MessageSquare, Download, Play
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
@@ -57,6 +57,70 @@ interface MCQQuestion {
 }
 
 const emptyMCQ = (): MCQQuestion => ({ question: '', options: ['', '', '', ''], correctAnswer: 0 })
+
+function isVideoUrl(url: string) {
+  return /\.(mp4|mov|avi|webm|mkv|m4v)(\?|$)/i.test(url) || url.includes('/video')
+}
+function isImageUrl(url: string) {
+  return /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(url)
+}
+
+function SubmissionFiles({ files }: { files: string[] }) {
+  const videos = files.filter(isVideoUrl)
+  const images = files.filter(f => isImageUrl(f) && !isVideoUrl(f))
+  const others = files.filter(f => !isVideoUrl(f) && !isImageUrl(f))
+
+  return (
+    <div className="space-y-3 mb-3">
+      {/* Video player(s) */}
+      {videos.map((url, i) => (
+        <div key={i} className="rounded-xl overflow-hidden border border-gray-200 bg-black">
+          <div className="bg-gray-900 px-3 py-2 flex items-center gap-2">
+            <div className="w-6 h-6 bg-red-500 rounded-md flex items-center justify-center flex-shrink-0">
+              <Play className="w-3 h-3 text-white fill-white" />
+            </div>
+            <span className="text-xs font-bold text-gray-300 flex-1 truncate">{url.split('/').pop() || 'تسجيل الطالب'}</span>
+            <a href={url} download target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1 px-2 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-[10px] font-bold text-gray-300 transition">
+              <Download className="w-3 h-3" /> تحميل
+            </a>
+          </div>
+          <video
+            controls
+            preload="metadata"
+            className="w-full max-h-64 object-contain bg-black"
+            src={url}
+          >
+            <source src={url} />
+          </video>
+        </div>
+      ))}
+      {/* Images */}
+      {images.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {images.map((url, i) => (
+            <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+              className="relative group w-24 h-24 rounded-xl overflow-hidden border border-gray-200 block">
+              <img src={url} alt="" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                <Download className="w-4 h-4 text-white" />
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+      {/* Other files */}
+      {others.map((url, i) => (
+        <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:border-emerald-500 hover:text-emerald-600 transition group shadow-sm">
+          <File className="w-3.5 h-3.5 group-hover:scale-110 transition" />
+          {url.split('/').pop() || 'تحميل الملف'}
+          <Download className="w-3 h-3 mr-auto opacity-0 group-hover:opacity-100 transition" />
+        </a>
+      ))}
+    </div>
+  )
+}
 
 const emptyForm = {
   title: '', description: '', type: 'TEXT', sessionId: '', dueDate: '',
@@ -740,18 +804,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                                 try {
                                   const files = JSON.parse(sub.attachedFiles) as string[]
                                   if (files.length === 0) return null
-                                  return (
-                                    <div className="flex flex-wrap gap-2 mb-3">
-                                      {files.map((url, i) => (
-                                        <a key={i} href={url} target="_blank" rel="noopener noreferrer"
-                                          className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:border-emerald-500 hover:text-emerald-600 transition group shadow-sm"
-                                        >
-                                          <File className="w-3.5 h-3.5 group-hover:scale-110 transition" />
-                                          {url.includes('video') || /\.(mp4|mov|avi)$/i.test(url) ? 'عرض الفيديو' : /\.(jpg|png|gif|webp)$/i.test(url) ? 'مشاهدة الصورة' : 'تحميل الملف'}
-                                        </a>
-                                      ))}
-                                    </div>
-                                  )
+                                  return <SubmissionFiles files={files} />
                                 } catch { return null }
                               })()}
 
@@ -776,52 +829,90 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
 
       {/* Grade Modal */}
       {selectedSubmission && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" dir="rtl">
-            <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-4 rounded-t-2xl flex items-center justify-between">
-              <h3 className="text-white font-black">تقييم: {selectedSubmission.User.name}</h3>
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" dir="rtl">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-4 rounded-t-2xl flex items-center justify-between sticky top-0 z-10">
+              <div>
+                <h3 className="text-white font-black">تقييم تسليم الطالب</h3>
+                <p className="text-orange-100 text-xs font-bold mt-0.5">{selectedSubmission.User.name}</p>
+              </div>
               <button onClick={() => setSelectedSubmission(null)} className="p-1.5 hover:bg-white/20 rounded-lg transition">
                 <X className="w-5 h-5 text-white" />
               </button>
             </div>
-            <div className="p-6 space-y-4">
+
+            <div className="p-6 space-y-5">
+              {/* Files / Video Section */}
+              {selectedSubmission.attachedFiles && (() => {
+                try {
+                  const files = JSON.parse(selectedSubmission.attachedFiles) as string[]
+                  if (files.length === 0) return null
+                  const hasVideo = files.some(isVideoUrl)
+                  return (
+                    <div>
+                      <p className="text-xs font-black text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        {hasVideo ? (
+                          <><Video className="w-3.5 h-3.5 text-red-500" />تسجيل الطالب — شاهد قبل التقييم</>
+                        ) : (
+                          <><File className="w-3.5 h-3.5" />مرفقات الطالب</>
+                        )}
+                      </p>
+                      <SubmissionFiles files={files} />
+                    </div>
+                  )
+                } catch { return null }
+              })()}
+
+              {/* Text answer */}
               {selectedSubmission.textAnswer && (
                 <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                  <p className="text-xs font-bold text-gray-500 mb-2">إجابة الطالب:</p>
-                  <p className="text-sm text-gray-800">{selectedSubmission.textAnswer}</p>
+                  <p className="text-xs font-bold text-gray-500 mb-2">إجابة الطالب النصية:</p>
+                  <p className="text-sm text-gray-800 leading-relaxed">{selectedSubmission.textAnswer}</p>
                 </div>
               )}
-              <div>
-                <label className="text-xs font-bold text-gray-500 block mb-1.5">الدرجة (من 100) *</label>
-                <input
-                  type="number" min="0" max="100"
-                  value={gradeData.grade}
-                  onChange={e => setGradeData(g => ({ ...g, grade: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-center font-black text-2xl focus:ring-2 focus:ring-orange-400 outline-none"
-                  placeholder="0 - 100"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-gray-500 block mb-1.5">تعليق (اختياري)</label>
-                <textarea
-                  value={gradeData.feedback}
-                  onChange={e => setGradeData(g => ({ ...g, feedback: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-orange-400 outline-none resize-none"
-                  rows={3}
-                  placeholder="أضف تعليقاً للطالب..."
-                />
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => handleGrade(selectedSubmission.id)}
-                  disabled={!!gradingId}
-                  className="flex-1 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-sm transition disabled:opacity-50"
-                >
-                  {gradingId ? 'جاري التسليم...' : 'تسليم التقييم'}
-                </button>
-                <button onClick={() => setSelectedSubmission(null)} className="px-5 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-200 transition">
-                  إلغاء
-                </button>
+
+              {/* Divider */}
+              <div className="border-t border-gray-100 pt-4">
+                <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <Star className="w-3.5 h-3.5 text-orange-500" />
+                  التقييم
+                </p>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 block mb-1.5">الدرجة (من 100) *</label>
+                    <input
+                      type="number" min="0" max="100"
+                      value={gradeData.grade}
+                      onChange={e => setGradeData(g => ({ ...g, grade: e.target.value }))}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-center font-black text-3xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 block mb-1.5">تعليق للطالب (اختياري)</label>
+                    <textarea
+                      value={gradeData.feedback}
+                      onChange={e => setGradeData(g => ({ ...g, feedback: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-orange-400 outline-none resize-none"
+                      rows={3}
+                      placeholder="أضف ملاحظات أو تعليق تفصيلي للطالب..."
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleGrade(selectedSubmission.id)}
+                      disabled={!!gradingId}
+                      className="flex-1 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-sm transition disabled:opacity-50 shadow-lg shadow-orange-200"
+                    >
+                      {gradingId ? 'جاري الحفظ...' : 'تسليم التقييم'}
+                    </button>
+                    <button onClick={() => setSelectedSubmission(null)} className="px-5 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-200 transition">
+                      إلغاء
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
