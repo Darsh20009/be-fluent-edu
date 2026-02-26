@@ -10,6 +10,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Badge from '@/components/ui/Badge'
 import { exportWordsToExcel } from '@/lib/utils/exportToExcel'
 import { toast } from 'react-hot-toast'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 
 interface Word {
   id: string
@@ -35,6 +36,7 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
   const [submitting, setSubmitting] = useState(false)
   const [translating, setTranslating] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; type: 'single' | 'bulk'; wordId?: string }>({ open: false, type: 'single' })
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -102,10 +104,13 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
   }
 
   async function handleDeleteWord(wordId: string) {
-    if (!confirm('Are you sure you want to delete this word?')) {
-      return
-    }
+    setConfirmModal({ open: true, type: 'single', wordId })
+  }
 
+  async function doDeleteWord() {
+    const wordId = confirmModal.wordId
+    if (!wordId) return
+    setConfirmModal({ open: false, type: 'single' })
     try {
       const response = await fetch(`/api/words/${wordId}`, {
         method: 'DELETE'
@@ -113,19 +118,22 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
 
       if (response.ok) {
         setWords(words.filter(w => w.id !== wordId))
+        toast.success('تم حذف الكلمة')
+      } else {
+        toast.error('فشل حذف الكلمة')
       }
     } catch (error) {
-      console.error('Error deleting word:', error)
+      toast.error('خطأ في الحذف')
     }
   }
 
   async function handleDeleteSelected() {
     if (selectedWords.size === 0) return
-    
-    if (!confirm(`Are you sure you want to delete ${selectedWords.size} word(s)?`)) {
-      return
-    }
+    setConfirmModal({ open: true, type: 'bulk' })
+  }
 
+  async function doDeleteSelected() {
+    setConfirmModal({ open: false, type: 'bulk' })
     try {
       const deletePromises = Array.from(selectedWords).map(wordId =>
         fetch(`/api/words/${wordId}`, { method: 'DELETE' })
@@ -458,6 +466,21 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
           إجمالي الكلمات: {words.length} | محفوظة: {words.filter(w => w.known).length}
         </p>
       </div>
+
+      <ConfirmModal
+        isOpen={confirmModal.open}
+        onClose={() => setConfirmModal({ open: false, type: 'single' })}
+        onConfirm={confirmModal.type === 'bulk' ? doDeleteSelected : doDeleteWord}
+        title="حذف الكلمة"
+        message={
+          confirmModal.type === 'bulk'
+            ? `هل أنت متأكد من حذف ${selectedWords.size} كلمة؟ لا يمكن التراجع عن هذا الإجراء.`
+            : 'هل أنت متأكد من حذف هذه الكلمة؟ لا يمكن التراجع عن هذا الإجراء.'
+        }
+        confirmText="حذف"
+        cancelText="إلغاء"
+        variant="danger"
+      />
     </div>
   )
 }

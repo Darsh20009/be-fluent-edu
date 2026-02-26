@@ -7,6 +7,7 @@ import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Modal from '@/components/ui/Modal'
+import toast from 'react-hot-toast'
 
 interface WritingTest {
   id: string

@@ -8,6 +8,7 @@ import {
   Download, Play, GripVertical, Pencil
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 
 /* ─── Types ─────────────────────────────────────────────── */
 type QType = 'TEXT' | 'MCQ' | 'VIDEO' | 'IMAGE' | 'FILE'
@@ -133,6 +134,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
   const [gradingId, setGradingId] = useState<string | null>(null)
   const [expandedAssignment, setExpandedAssignment] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string | null }>({ open: false, id: null })
   const [nextQId, setNextQId] = useState(1)
   const fileRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -168,7 +170,13 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('هل أنت متأكد من حذف هذا الواجب؟ سيتم حذف جميع التسليمات.')) return
+    setDeleteConfirm({ open: true, id })
+  }
+
+  async function doDelete() {
+    const id = deleteConfirm.id
+    if (!id) return
+    setDeleteConfirm({ open: false, id: null })
     setIsDeleting(id)
     try {
       const res = await fetch(`/api/teacher/assignments/${id}`, { method: 'DELETE' })
@@ -736,6 +744,16 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
           </div>
         </div>
       )}
+      <ConfirmModal
+        isOpen={deleteConfirm.open}
+        onClose={() => setDeleteConfirm({ open: false, id: null })}
+        onConfirm={doDelete}
+        title="حذف الواجب"
+        message="هل أنت متأكد من حذف هذا الواجب؟ سيتم حذف جميع التسليمات المرتبطة به."
+        confirmText="حذف"
+        cancelText="إلغاء"
+        variant="danger"
+      />
     </div>
   )
 }

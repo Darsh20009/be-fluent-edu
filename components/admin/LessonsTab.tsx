@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, Eye, EyeOff, BookOpen, Video, FileText, ChevronDown, ChevronUp, GripVertical } from 'lucide-react'
+import ConfirmModal from '@/components/ui/ConfirmModal'
+import toast from 'react-hot-toast'
 
 interface Lesson {
   id: string
@@ -53,6 +55,7 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [showExerciseForm, setShowExerciseForm] = useState(false)
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null)
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; type: 'lesson' | 'exercise'; id?: string }>({ open: false, type: 'lesson' })
 
   const [formData, setFormData] = useState({
     title: '',
@@ -143,18 +146,26 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا الدرس؟')) return
-    
+  const handleDelete = (id: string) => {
+    setConfirmModal({ open: true, type: 'lesson', id })
+  }
+
+  const doDeleteLesson = async () => {
+    const id = confirmModal.id
+    if (!id) return
+    setConfirmModal({ open: false, type: 'lesson' })
     try {
       const response = await fetch(`/api/admin/lessons/${id}`, {
         method: 'DELETE'
       })
       if (response.ok) {
+        toast.success('تم حذف الدرس')
         fetchLessons()
+      } else {
+        toast.error('فشل حذف الدرس')
       }
     } catch (error) {
-      console.error('Error deleting lesson:', error)
+      toast.error('خطأ في الحذف')
     }
   }
 
@@ -266,16 +277,23 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
     }
   }
 
-  const handleDeleteExercise = async (exerciseId: string) => {
-    if (!expandedLesson || !confirm('هل أنت متأكد من حذف هذا التمرين؟')) return
+  const handleDeleteExercise = (exerciseId: string) => {
+    if (!expandedLesson) return
+    setConfirmModal({ open: true, type: 'exercise', id: exerciseId })
+  }
 
+  const doDeleteExercise = async () => {
+    const exerciseId = confirmModal.id
+    if (!exerciseId || !expandedLesson) return
+    setConfirmModal({ open: false, type: 'exercise' })
     try {
       await fetch(`/api/admin/lessons/${expandedLesson}/exercises?exerciseId=${exerciseId}`, {
         method: 'DELETE'
       })
+      toast.success('تم حذف التمرين')
       fetchExercises(expandedLesson)
     } catch (error) {
-      console.error('Error deleting exercise:', error)
+      toast.error('خطأ في حذف التمرين')
     }
   }
 
@@ -870,6 +888,20 @@ export default function LessonsTab({ isActive }: LessonsTabProps) {
           ))
         )}
       </div>
+      <ConfirmModal
+        isOpen={confirmModal.open}
+        onClose={() => setConfirmModal({ open: false, type: confirmModal.type })}
+        onConfirm={confirmModal.type === 'exercise' ? doDeleteExercise : doDeleteLesson}
+        title={confirmModal.type === 'exercise' ? 'حذف التمرين' : 'حذف الدرس'}
+        message={
+          confirmModal.type === 'exercise'
+            ? 'هل أنت متأكد من حذف هذا التمرين؟ لا يمكن التراجع عن هذا الإجراء.'
+            : 'هل أنت متأكد من حذف هذا الدرس؟ سيتم حذف جميع التمارين المرتبطة به.'
+        }
+        confirmText="حذف"
+        cancelText="إلغاء"
+        variant="danger"
+      />
     </div>
   )
 }

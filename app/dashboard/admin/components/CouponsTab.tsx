@@ -7,11 +7,13 @@ import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Badge from '@/components/ui/Badge';
 import { toast } from 'react-hot-toast';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 export default function CouponsTab() {
   const [coupons, setCoupons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
   const [newCoupon, setNewCoupon] = useState({
     code: '',
     discount: '',
@@ -81,21 +83,26 @@ export default function CouponsTab() {
   };
 
   const handleDeleteCoupon = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this coupon?')) return;
+    setConfirmModal({ open: true, id });
+  };
 
+  const doDeleteCoupon = async () => {
+    const id = confirmModal.id;
+    if (!id) return;
+    setConfirmModal({ open: false, id: null });
     try {
       const response = await fetch(`/api/admin/coupons?id=${id}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        toast.success('Coupon deleted');
+        toast.success('تم حذف الكوبون');
         fetchCoupons();
       } else {
-        toast.error('Failed to delete coupon');
+        toast.error('فشل حذف الكوبون');
       }
     } catch (error) {
-      toast.error('An error occurred');
+      toast.error('حدث خطأ');
     }
   };
 
@@ -203,6 +210,16 @@ export default function CouponsTab() {
           ))
         )}
       </div>
+      <ConfirmModal
+        isOpen={confirmModal.open}
+        onClose={() => setConfirmModal({ open: false, id: null })}
+        onConfirm={doDeleteCoupon}
+        title="حذف الكوبون"
+        message="هل أنت متأكد من حذف هذا الكوبون؟ لا يمكن التراجع عن هذا الإجراء."
+        confirmText="حذف"
+        cancelText="إلغاء"
+        variant="danger"
+      />
     </div>
   );
 }

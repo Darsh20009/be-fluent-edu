@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import {
   Plus, Trash2, Pencil, ChevronDown, ChevronUp, Save, X, Send,
   CheckCircle, List, AlignLeft, Video, Image, Settings2, BookOpen,
@@ -57,6 +58,7 @@ export default function PlacementTestAdmin() {
   const [studentNameInput, setStudentNameInput] = useState('');
   const [emailLoading, setEmailLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [testStats, setTestStats] = useState<Record<string, number>>({});
@@ -197,13 +199,21 @@ export default function PlacementTestAdmin() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا السؤال؟')) return;
+  const handleDelete = (id: string) => {
+    setDeleteConfirm({ open: true, id });
+  };
+
+  const doDeleteQuestion = async () => {
+    const id = deleteConfirm.id;
+    if (!id) return;
+    setDeleteConfirm({ open: false, id: null });
     try {
       const res = await fetch(`/api/admin/placement-test/questions/${id}`, { method: 'DELETE' });
       if (res.ok) {
-        toast.success('تم الحذف');
+        toast.success('تم حذف السؤال');
         fetchQuestions();
+      } else {
+        toast.error('فشل حذف السؤال');
       }
     } catch {
       toast.error('خطأ في الحذف');
@@ -752,6 +762,16 @@ export default function PlacementTestAdmin() {
           )}
         </div>
       </div>
+      <ConfirmModal
+        isOpen={deleteConfirm.open}
+        onClose={() => setDeleteConfirm({ open: false, id: null })}
+        onConfirm={doDeleteQuestion}
+        title="حذف السؤال"
+        message="هل أنت متأكد من حذف هذا السؤال؟ لا يمكن التراجع عن هذا الإجراء."
+        confirmText="حذف"
+        cancelText="إلغاء"
+        variant="danger"
+      />
     </div>
   );
 }

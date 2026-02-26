@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 export default function PlacementTestPage() {
   const [questions, setQuestions] = useState<any[]>([]);
@@ -11,6 +12,7 @@ export default function PlacementTestPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -79,8 +81,14 @@ export default function PlacementTestPage() {
 
   const submitTest = async () => {
     if (Object.keys(answers).length < questions.length) {
-      if (!confirm('لم تقم بالإجابة على جميع الأسئلة. هل تريد الإرسال على أي حال؟')) return;
+      setShowSubmitConfirm(true);
+      return;
     }
+    await doSubmitTest();
+  };
+
+  const doSubmitTest = async () => {
+    setShowSubmitConfirm(false);
 
     setSubmitting(true);
     try {
@@ -213,6 +221,16 @@ export default function PlacementTestPage() {
       <div className="mt-6 text-center text-sm text-gray-400">
         نظام الحماية مفعل: النسخ واللصق معطل - مراقبة مغادرة الصفحة مفعلة
       </div>
+      <ConfirmModal
+        isOpen={showSubmitConfirm}
+        onClose={() => setShowSubmitConfirm(false)}
+        onConfirm={doSubmitTest}
+        title="إرسال الاختبار"
+        message={`لم تجب على ${questions.length - Object.keys(answers).length} سؤال. هل تريد الإرسال على أي حال؟`}
+        confirmText="إرسال الآن"
+        cancelText="متابعة الاختبار"
+        variant="warning"
+      />
     </div>
   );
 }
