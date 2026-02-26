@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { 
-  Home, Users, Calendar, BookOpen, MessageCircle, LogOut, Shield 
+  Home, Users, Calendar, BookOpen, MessageCircle, LogOut, Shield, FileText
 } from 'lucide-react'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
@@ -67,6 +67,7 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
     { id: 'students', label: 'Students / الطلاب', icon: Users },
     { id: 'sessions', label: 'Sessions / الحصص', icon: Calendar },
     { id: 'assignments', label: 'Assignments / الواجبات', icon: BookOpen },
+    { id: 'writing-tests', label: 'Writing Tests / اختبارات الكتابة', icon: FileText },
     { id: 'manuscripts', label: 'Manuscripts / المخطوطات', icon: BookOpen },
     { id: 'chat', label: 'Chat / الدردشة', icon: MessageCircle },
   ]
@@ -177,6 +178,7 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
             {activeTab === 'students' && user.teacherProfileId && <StudentsTab teacherProfileId={user.teacherProfileId} />}
             {activeTab === 'sessions' && user.teacherProfileId && <SessionsTab teacherProfileId={user.teacherProfileId} />}
             {activeTab === 'assignments' && user.teacherProfileId && <AssignmentsTab teacherProfileId={user.teacherProfileId} />}
+            {activeTab === 'writing-tests' && user.teacherProfileId && <WritingTestsTab teacherProfileId={user.teacherProfileId} />}
             {activeTab === 'manuscripts' && user.teacherProfileId && <ManuscriptsTab teacherProfileId={user.teacherProfileId} />}
             {activeTab === 'chat' && <ChatTab />}
           </div>
