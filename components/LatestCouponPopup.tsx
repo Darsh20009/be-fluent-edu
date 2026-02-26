@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Tag, Gift, Sparkles } from 'lucide-react'
 import Image from 'next/image'
+import { toast } from 'react-hot-toast'
 
 export default function LatestCouponPopup() {
   const [coupon, setCoupon] = useState<any>(null)
@@ -42,7 +43,7 @@ export default function LatestCouponPopup() {
   const copyCode = () => {
     if (coupon) {
       navigator.clipboard.writeText(coupon.code)
-      alert('تم نسخ الكود! / Code copied!')
+      toast.success('تم نسخ الكود! 🎉')
     }
   }
 

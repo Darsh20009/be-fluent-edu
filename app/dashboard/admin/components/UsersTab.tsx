@@ -9,6 +9,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Alert from '@/components/ui/Alert'
 import Modal from '@/components/ui/Modal'
 import Input from '@/components/ui/Input'
+import { toast } from 'react-hot-toast'
 
 interface User {
   id: string
@@ -60,10 +61,6 @@ export default function UsersTab() {
   }
 
   async function toggleUserStatus(userId: string, currentStatus: boolean) {
-    if (!confirm(`Are you sure you want to ${currentStatus ? 'deactivate' : 'activate'} this user?`)) {
-      return
-    }
-
     try {
       const response = await fetch(`/api/admin/users/${userId}/toggle`, {
         method: 'PATCH',
@@ -71,23 +68,21 @@ export default function UsersTab() {
       })
 
       if (response.ok) {
-        const updatedUser = await response.json()
-        console.log('User updated:', updatedUser)
         await fetchUsers()
-        alert('User status updated successfully / تم تحديث حالة المستخدم بنجاح')
+        toast.success('تم تحديث حالة المستخدم بنجاح / User status updated')
       } else {
         const errorData = await response.json().catch(() => ({}))
-        alert(`Failed to update user status: ${errorData.error || 'Unknown error'}`)
+        toast.error(`Failed to update user status: ${errorData.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error updating user status:', error)
-      alert('Error updating user status')
+      toast.error('Error updating user status')
     }
   }
 
   async function handleCreateTeacher() {
     if (!newTeacher.name || !newTeacher.email || !newTeacher.password) {
-      alert('Please fill in all required fields (name, email, password)')
+      toast.error('يرجى ملء جميع الحقول المطلوبة / Please fill in all required fields')
       return
     }
 
@@ -103,14 +98,14 @@ export default function UsersTab() {
         await fetchUsers()
         setNewTeacher({ name: '', email: '', password: '', phone: '', bio: '' })
         setShowCreateTeacher(false)
-        alert('Teacher account created successfully!')
+        toast.success('تم إنشاء حساب المدرس بنجاح! / Teacher account created!')
       } else {
         const data = await response.json()
-        alert(data.error || 'Failed to create teacher')
+        toast.error(data.error || 'Failed to create teacher')
       }
     } catch (error) {
       console.error('Error creating teacher:', error)
-      alert('Error creating teacher')
+      toast.error('Error creating teacher')
     } finally {
       setSubmitting(false)
     }

@@ -13,6 +13,7 @@ import Alert from '@/components/ui/Alert'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Modal from '@/components/ui/Modal'
 import GrammarErrorHighlighter from '@/components/GrammarErrorHighlighter'
+import { toast } from 'react-hot-toast'
 
 interface FreeWriting {
   id: string
@@ -106,14 +107,14 @@ export default function FreeWritingClient() {
         setTitle('')
         setContent('')
         setShowNewWriting(false)
-        alert('✓ Writing submitted successfully!\n\nتم إرسال الكتابة بنجاح!')
+        toast.success('تم إرسال الكتابة بنجاح!')
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to submit writing')
+        toast.error(error.error || 'فشل إرسال الكتابة')
       }
     } catch (error) {
       console.error('Error submitting writing:', error)
-      alert('An error occurred / حدث خطأ')
+      toast.error('حدث خطأ. يرجى المحاولة مرة أخرى.')
     } finally {
       setSubmitting(false)
     }

@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Alert from '@/components/ui/Alert'
 import Modal from '@/components/ui/Modal'
+import { toast } from 'react-hot-toast'
 
 interface Student {
   id: string
@@ -107,16 +108,16 @@ export default function StudentsManagementTab() {
       })
 
       if (res.ok) {
-        alert('✓ Certificate issued successfully! / تم إصدار الشهادة بنجاح!')
+        toast.success('تم إصدار الشهادة بنجاح! / Certificate issued successfully!')
         setCertModalStudent(null)
         setCertLevel('')
       } else {
         const data = await res.json()
-        alert(data.error || 'Failed to issue certificate')
+        toast.error(data.error || 'Failed to issue certificate')
       }
     } catch (error) {
       console.error('Error issuing certificate:', error)
-      alert('Error issuing certificate')
+      toast.error('Error issuing certificate')
     } finally {
       setIssuingCert(false)
     }
@@ -124,7 +125,7 @@ export default function StudentsManagementTab() {
 
   async function handleAssignTeacher() {
     if (!selectedStudent || !selectedTeacherId) {
-      alert('Please select a teacher')
+      toast.error('يرجى اختيار مدرس / Please select a teacher')
       return
     }
 
@@ -140,17 +141,17 @@ export default function StudentsManagementTab() {
       })
 
       if (response.ok) {
-        alert('✓ Teacher assigned successfully! / تم تعيين المدرس بنجاح!')
+        toast.success('تم تعيين المدرس بنجاح! / Teacher assigned successfully!')
         setSelectedStudent(null)
         setSelectedTeacherId('')
         await fetchData()
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to assign teacher')
+        toast.error(error.error || 'Failed to assign teacher')
       }
     } catch (error) {
       console.error('Error assigning teacher:', error)
-      alert('Error assigning teacher')
+      toast.error('Error assigning teacher')
     } finally {
       setProcessing(false)
     }

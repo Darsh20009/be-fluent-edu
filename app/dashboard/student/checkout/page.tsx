@@ -88,7 +88,7 @@ function CheckoutContent() {
         const data = await response.json()
         setPkg(data)
       } else {
-        alert('Package not found')
+        toast.error('الباقة غير موجودة / Package not found')
         router.push('/dashboard/student/cart')
       }
     } catch (error) {
@@ -101,7 +101,7 @@ function CheckoutContent() {
   async function handleCreateSubscription() {
     if (!paymentMethod || !pkg) return
     if (paymentMethod === 'E_WALLET' && !eWalletProvider) {
-      alert('Please select an e-wallet provider')
+      toast.error('يرجى اختيار مزود المحفظة الإلكترونية / Please select an e-wallet provider')
       return
     }
 
@@ -124,11 +124,11 @@ function CheckoutContent() {
         setStep('receipt')
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to create subscription')
+        toast.error(error.error || 'Failed to create subscription')
       }
     } catch (error) {
       console.error('Error creating subscription:', error)
-      alert('Error creating subscription')
+      toast.error('خطأ في إنشاء الاشتراك / Error creating subscription')
     } finally {
       setSubmitting(false)
     }
@@ -152,11 +152,11 @@ function CheckoutContent() {
         setStep('success')
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to upload receipt')
+        toast.error(error.error || 'Failed to upload receipt')
       }
     } catch (error) {
       console.error('Error uploading receipt:', error)
-      alert('Error uploading receipt')
+      toast.error('خطأ في رفع الإيصال / Error uploading receipt')
     } finally {
       setSubmitting(false)
     }

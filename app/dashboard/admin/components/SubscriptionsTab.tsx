@@ -7,6 +7,7 @@ import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Alert from '@/components/ui/Alert'
+import { toast } from 'react-hot-toast'
 
 type SubscriptionStatus = 'PENDING' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED'
 type PaymentMethod = 'BANK_TRANSFER' | 'E_WALLET'
@@ -97,7 +98,7 @@ export default function SubscriptionsTab() {
 
   async function handleApprove() {
     if (!selectedSub || !selectedTeacher) {
-      alert('Please select a teacher')
+      toast.error('يرجى اختيار مدرس / Please select a teacher')
       return
     }
 
@@ -118,43 +119,40 @@ export default function SubscriptionsTab() {
         setSelectedSub(null)
         setSelectedTeacher('')
         setAdminNotes('')
-        alert('✓ Subscription approved and teacher assigned!')
+        toast.success('تمت الموافقة على الاشتراك وتعيين المدرس! / Subscription approved!')
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to approve subscription')
+        toast.error(error.error || 'Failed to approve subscription')
       }
     } catch (error) {
       console.error('Error approving subscription:', error)
-      alert('Error approving subscription')
+      toast.error('Error approving subscription')
     } finally {
       setProcessing(null)
     }
   }
 
   async function handleReject(subscriptionId: string) {
-    const notes = prompt('Reason for rejection (optional):')
-    
     setProcessing(subscriptionId)
     try {
       const response = await fetch(`/api/admin/subscriptions/${subscriptionId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'reject',
-          adminNotes: notes || undefined
+          action: 'reject'
         })
       })
 
       if (response.ok) {
         await fetchData()
-        alert('Subscription rejected')
+        toast.success('تم رفض الاشتراك / Subscription rejected')
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to reject subscription')
+        toast.error(error.error || 'Failed to reject subscription')
       }
     } catch (error) {
       console.error('Error rejecting subscription:', error)
-      alert('Error rejecting subscription')
+      toast.error('Error rejecting subscription')
     } finally {
       setProcessing(null)
     }
@@ -169,8 +167,9 @@ export default function SubscriptionsTab() {
       })
       if (response.ok) {
         fetchData()
+        toast.success('تم تحديث الرصيد / Balance updated')
       } else {
-        alert('Failed to update balance')
+        toast.error('Failed to update balance')
       }
     } catch (err) {
       console.error('Error updating balance:', err)

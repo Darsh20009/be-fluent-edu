@@ -10,6 +10,7 @@ import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Modal from '@/components/ui/Modal'
 import Input from '@/components/ui/Input'
+import { toast } from 'react-hot-toast'
 import SessionPasswordDisplayModal from '../../../components/SessionPasswordDisplayModal'
 
 interface Session {
@@ -129,7 +130,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
       })
       if (res.ok) {
         fetchSessions()
-        alert('Status updated successfully / تم تحديث الحالة بنجاح')
+        toast.success('تم تحديث الحالة بنجاح')
       }
     } catch (err) {
       console.error('Error updating status:', err)
@@ -139,15 +140,15 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
   async function handleCreateSession() {
     // Validate all required fields
     if (!newSession.title || !newSession.title.trim()) {
-      alert('⚠️ Please enter session title / يرجى إدخال عنوان الحصة')
+      toast.error('يرجى إدخال عنوان الحصة')
       return
     }
     if (!newSession.startTime) {
-      alert('⚠️ Please select start time / يرجى اختيار وقت البداية')
+      toast.error('يرجى اختيار وقت البداية')
       return
     }
     if (!newSession.endTime) {
-      alert('⚠️ Please select end time / يرجى اختيار وقت النهاية')
+      toast.error('يرجى اختيار وقت النهاية')
       return
     }
 
@@ -156,15 +157,15 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
     const endDate = new Date(newSession.endTime)
     
     if (isNaN(startDate.getTime())) {
-      alert('⚠️ Invalid start time / وقت بداية غير صحيح')
+      toast.error('وقت بداية غير صحيح')
       return
     }
     if (isNaN(endDate.getTime())) {
-      alert('⚠️ Invalid end time / وقت نهاية غير صحيح')
+      toast.error('وقت نهاية غير صحيح')
       return
     }
     if (startDate >= endDate) {
-      alert('⚠️ Start time must be before end time / يجب أن يكون وقت البداية قبل وقت النهاية')
+      toast.error('يجب أن يكون وقت البداية قبل وقت النهاية')
       return
     }
 
@@ -208,11 +209,11 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
       } else {
         const error = await response.json()
         console.error('Session creation error:', error)
-        alert(`❌ Failed to create session: ${error.error || 'Unknown error'}`)
+        toast.error(`فشل إنشاء الحصة: ${error.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error creating session:', error)
-      alert(`❌ Error creating session: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      toast.error('خطأ في إنشاء الحصة')
     } finally {
       setSubmitting(false)
     }
@@ -220,19 +221,19 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
 
   async function handleUpdateSession() {
     if (!editingSessionId) {
-      alert('⚠️ No session selected / لم يتم اختيار حصة')
+      toast.error('لم يتم اختيار حصة')
       return
     }
     if (!newSession.title || !newSession.title.trim()) {
-      alert('⚠️ Please enter session title / يرجى إدخال عنوان الحصة')
+      toast.error('يرجى إدخال عنوان الحصة')
       return
     }
     if (!newSession.startTime) {
-      alert('⚠️ Please select start time / يرجى اختيار وقت البداية')
+      toast.error('يرجى اختيار وقت البداية')
       return
     }
     if (!newSession.endTime) {
-      alert('⚠️ Please select end time / يرجى اختيار وقت النهاية')
+      toast.error('يرجى اختيار وقت النهاية')
       return
     }
 
@@ -241,15 +242,15 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
     const endDate = new Date(newSession.endTime)
     
     if (isNaN(startDate.getTime())) {
-      alert('⚠️ Invalid start time / وقت بداية غير صحيح')
+      toast.error('وقت بداية غير صحيح')
       return
     }
     if (isNaN(endDate.getTime())) {
-      alert('⚠️ Invalid end time / وقت نهاية غير صحيح')
+      toast.error('وقت نهاية غير صحيح')
       return
     }
     if (startDate >= endDate) {
-      alert('⚠️ Start time must be before end time / يجب أن يكون وقت البداية قبل وقت النهاية')
+      toast.error('يجب أن يكون وقت البداية قبل وقت النهاية')
       return
     }
 
@@ -279,15 +280,15 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
         setNewSession({ title: '', startTime: '', endTime: '', selectedStudents: [], externalLink: '', externalLinkType: 'ZOOM' })
         setEditingSessionId(null)
         setShowEditForm(false)
-        alert('✅ Session updated successfully / تم تحديث الحصة بنجاح')
+        toast.success('تم تحديث الحصة بنجاح')
       } else {
         const error = await response.json()
         console.error('Session update error:', error)
-        alert(`❌ Failed to update session: ${error.error || 'Unknown error'}`)
+        toast.error(`فشل تحديث الحصة: ${error.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error updating session:', error)
-      alert(`❌ Error updating session: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      toast.error('خطأ في تحديث الحصة')
     } finally {
       setSubmitting(false)
     }
@@ -307,15 +308,15 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
         await fetchSessions()
         setDeletingSessionId(null)
         setShowDeleteConfirm(false)
-        alert('✅ Session canceled successfully / تم إلغاء الحصة بنجاح')
+        toast.success('تم إلغاء الحصة بنجاح')
       } else {
         const error = await response.json()
         console.error('Cancel session error:', error)
-        alert(`Failed to cancel session: ${error.error || 'Unknown error'}`)
+        toast.error(`فشل إلغاء الحصة: ${error.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error canceling session:', error)
-      alert('Error canceling session')
+      toast.error('خطأ في إلغاء الحصة')
     } finally {
       setSubmitting(false)
     }
@@ -341,16 +342,16 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
         setAttendanceStatuses({ ...attendanceStatuses, [studentId]: status })
         await fetchSessions()
         if (status === 'POSTPONED') {
-          alert(`✅ Lesson postponed / تم تأجيل الحصة`)
+          toast.success('تم تأجيل الحصة بنجاح')
         }
       } else {
         const error = await response.json()
         console.error('Attendance error:', error)
-        alert(`Failed to update attendance: ${error.error || 'Unknown error'}`)
+        toast.error(`فشل تحديث الحضور: ${error.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error setting attendance:', error)
-      alert('Error updating attendance')
+      toast.error('خطأ في تحديث الحضور')
     } finally {
       setSubmitting(false)
     }

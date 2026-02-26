@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Video, ArrowLeft, Loader2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import { toast } from 'react-hot-toast'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import SessionLoginModal from './SessionLoginModal'
 import SessionPasswordModal from './SessionPasswordModal'
@@ -101,12 +102,12 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
         setSession(data)
         setShowPasswordModal(false)
       } else {
-        alert('Session not found or you do not have access')
+        toast.error('الجلسة غير موجودة أو لا تملك صلاحية الوصول')
         router.push('/dashboard')
       }
     } catch (error) {
       console.error('Error fetching session:', error)
-      alert('Error loading session')
+      toast.error('خطأ في تحميل الجلسة')
       router.push('/dashboard')
     } finally {
       setLoading(false)

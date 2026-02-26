@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, X, Trophy, Brain, BookOpen, Keyboard, ArrowRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import { toast } from 'react-hot-toast'
 import Input from '@/components/ui/Input'
 
 interface Word {
@@ -44,7 +45,7 @@ export default function TestWordsPage() {
       const knownWords = data.words.filter((w: Word) => w.known)
 
       if (knownWords.length < 5) {
-        alert('تحتاج على الأقل 5 كلمات معروفة لبدء الاختبار')
+        toast.error('تحتاج على الأقل 5 كلمات معروفة لبدء الاختبار')
         setMode(null)
         setLoading(false)
         return
@@ -86,7 +87,7 @@ export default function TestWordsPage() {
       setTestComplete(false)
     } catch (error) {
       console.error('Error loading words:', error)
-      alert('حدث خطأ في تحميل الكلمات')
+      toast.error('حدث خطأ في تحميل الكلمات')
       setMode(null)
     }
     setLoading(false)

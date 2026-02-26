@@ -13,6 +13,7 @@ import {
   Pencil
 } from 'lucide-react'
 import Link from 'next/link'
+import { toast } from 'react-hot-toast'
 
 interface Question {
   id: string
@@ -67,7 +68,7 @@ export default function VocabularyTestPage() {
       const data = await res.json()
       
       if (data.error) {
-        alert(data.error)
+        toast.error(data.error || 'خطأ في تحميل البيانات')
         setLoading(false)
         return
       }

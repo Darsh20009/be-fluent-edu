@@ -9,6 +9,7 @@ import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import ClientSplashScreen from "@/components/ClientSplashScreen";
 import CouponBanner from "@/components/CouponBanner";
 import LatestCouponPopup from "@/components/LatestCouponPopup";
+import { Toaster } from "react-hot-toast";
 import { defaultMetadata, organizationJsonLd, courseJsonLd, faqJsonLd, websiteJsonLd } from "@/lib/seo";
 
 const geistSans = Geist({
@@ -75,6 +76,31 @@ export default function RootLayout({
         <ServiceWorkerRegister />
         <SessionProvider>
           <ThemeProvider>
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                duration: 3000,
+                style: {
+                  fontFamily: 'inherit',
+                  direction: 'rtl',
+                  textAlign: 'right',
+                },
+                success: {
+                  style: {
+                    background: '#f0fdf4',
+                    color: '#166534',
+                    border: '1px solid #bbf7d0',
+                  },
+                },
+                error: {
+                  style: {
+                    background: '#fef2f2',
+                    color: '#991b1b',
+                    border: '1px solid #fecaca',
+                  },
+                },
+              }}
+            />
             <ClientSplashScreen />
             <LatestCouponPopup />
             {children}

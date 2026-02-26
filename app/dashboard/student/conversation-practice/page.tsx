@@ -25,6 +25,7 @@ import {
   ChevronLeft
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
+import { toast } from 'react-hot-toast'
 import Button from '@/components/ui/Button'
 import Alert from '@/components/ui/Alert'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
@@ -185,7 +186,7 @@ export default function ConversationPracticePage() {
       }, 1000)
     } catch (error) {
       console.error('Error starting recording:', error)
-      alert('لا يمكن الوصول للميكروفون / Cannot access microphone')
+      toast.error('لا يمكن الوصول للميكروفون')
     }
   }
 

@@ -350,7 +350,7 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
               {activeTab === 'packages' && <PackagesTab isActive={isActive} onCartUpdate={fetchCartCount} />}
               {activeTab === 'chat' && isActive && <ChatTab />}
               
-              {!['home', 'sessions', 'mylearn', 'discover', 'test', 'homework', 'packages', 'chat'].includes(activeTab) && (
+              {!['home', 'sessions', 'certificates', 'mylearn', 'discover', 'test', 'homework', 'packages', 'chat'].includes(activeTab) && (
                 <div className="flex flex-col items-center justify-center py-32 text-center">
                   <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center mb-6">
                     <Layers className="w-10 h-10 text-gray-300" />

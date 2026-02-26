@@ -3,11 +3,12 @@
 import { Mail, Phone, MapPin, Send, MessageCircle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
+import { toast } from 'react-hot-toast'
 
 export default function ContactPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    alert('Thank you! We will get back to you soon.')
+    toast.success('شكراً لتواصلك! سنرد عليك قريباً. / Thank you! We will get back to you soon.')
   }
 
   return (

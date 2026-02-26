@@ -6,6 +6,7 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Alert from '@/components/ui/Alert'
+import { toast } from 'react-hot-toast'
 
 interface AuditLog {
   id: string
@@ -39,12 +40,6 @@ export default function SystemTab() {
   }
 
   async function handleCleanup(type: 'all' | 'logs' | 'sessions') {
-    const confirmMsg = type === 'all' 
-      ? 'هل أنت متأكد من مسح جميع البيانات؟ هذا الإجراء لا يمكن التراجع عنه.' 
-      : 'هل أنت متأكد؟'
-    
-    if (!confirm(confirmMsg)) return
-
     setCleaning(type)
     try {
       const response = await fetch('/api/admin/cleanup', {
@@ -53,13 +48,13 @@ export default function SystemTab() {
         body: JSON.stringify({ type })
       })
       if (response.ok) {
-        alert('تمت العملية بنجاح')
+        toast.success('تمت العملية بنجاح')
         if (type === 'logs') fetchLogs()
       } else {
-        alert('حدث خطأ أثناء العملية')
+        toast.error('حدث خطأ أثناء العملية')
       }
     } catch (error) {
-      alert('فشل الاتصال بالخادم')
+      toast.error('فشل الاتصال بالخادم')
     } finally {
       setCleaning(null)
     }

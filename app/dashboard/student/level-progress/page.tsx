@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'react-hot-toast'
 import Link from 'next/link'
 import { 
   ArrowUp, 
@@ -189,14 +190,14 @@ export default function LevelProgressPage() {
                   body: JSON.stringify({ level: progress.currentLevel })
                 })
                 if (res.ok) {
-                  alert('✓ تم إصدار الشهادة بنجاح! يمكنك العثور عليها في قسم "شهاداتي"')
+                  toast.success('تم إصدار الشهادة بنجاح! يمكنك العثور عليها في قسم "شهاداتي"')
                   window.location.href = '/dashboard/student'
                 } else {
                   const data = await res.json()
-                  alert(data.error || 'فشل إصدار الشهادة')
+                  toast.error(data.error || 'فشل إصدار الشهادة')
                 }
               } catch (e) {
-                alert('حدث خطأ أثناء إصدار الشهادة')
+                toast.error('حدث خطأ أثناء إصدار الشهادة')
               }
             }}
             className="bg-white text-emerald-600 px-8 py-3 rounded-xl font-bold hover:bg-emerald-50 transition-colors"

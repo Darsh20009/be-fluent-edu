@@ -9,6 +9,7 @@ import Alert from '@/components/ui/Alert'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Badge from '@/components/ui/Badge'
 import { exportWordsToExcel } from '@/lib/utils/exportToExcel'
+import { toast } from 'react-hot-toast'
 
 interface Word {
   id: string
@@ -135,7 +136,7 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
       setSelectedWords(new Set())
     } catch (error) {
       console.error('Error deleting words:', error)
-      alert('Error deleting some words. Please try again.')
+      toast.error('خطأ في حذف بعض الكلمات. يرجى المحاولة مرة أخرى.')
     }
   }
 
@@ -174,7 +175,7 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
       }
     } catch (error) {
       console.error('Translation error:', error)
-      alert('Translation failed')
+      toast.error('فشل الترجمة')
     } finally {
       setTranslating(false)
     }
@@ -203,13 +204,13 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
 
       if (response.ok) {
         const data = await response.json()
-        alert(`Successfully imported ${data.count} words!`)
+        toast.success(`تم استيراد ${data.count} كلمة بنجاح! `)
         fetchWords()
         setShowImportForm(false)
       }
     } catch (error) {
       console.error('Import error:', error)
-      alert('Failed to import words')
+      toast.error('فشل استيراد الكلمات')
     } finally {
       setImporting(false)
       if (fileInputRef.current) {

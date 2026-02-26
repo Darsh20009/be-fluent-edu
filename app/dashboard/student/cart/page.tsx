@@ -7,6 +7,7 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Alert from '@/components/ui/Alert'
+import { toast } from 'react-hot-toast'
 
 interface Package {
   id: string
@@ -61,11 +62,11 @@ export default function CartPage() {
       if (response.ok) {
         await fetchCart()
       } else {
-        alert('Failed to remove item from cart')
+        toast.error('فشل حذف العنصر / Failed to remove item from cart')
       }
     } catch (error) {
       console.error('Error removing item:', error)
-      alert('Error removing item from cart')
+      toast.error('خطأ في حذف العنصر / Error removing item from cart')
     } finally {
       setRemoving(null)
     }

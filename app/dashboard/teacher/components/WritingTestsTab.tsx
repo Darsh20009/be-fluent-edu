@@ -74,7 +74,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
 
   async function handleCreateTest() {
     if (!newTest.title) {
-      alert('Please enter a title')
+      toast.error('يرجى إدخال عنوان')
       return
     }
 
@@ -90,13 +90,13 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
         await fetchTests()
         setNewTest({ title: '', titleAr: '', instructions: '', instructionsAr: '', dueDate: '' })
         setShowCreateForm(false)
-        alert('✓ Writing test created successfully!')
+        toast.success('تم إنشاء اختبار الكتابة بنجاح!')
       } else {
-        alert('Failed to create writing test')
+        toast.error('فشل إنشاء اختبار الكتابة')
       }
     } catch (error) {
       console.error('Error creating test:', error)
-      alert('Error creating writing test')
+      toast.error('خطأ في إنشاء اختبار الكتابة')
     } finally {
       setSubmitting(false)
     }
@@ -104,13 +104,13 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
 
   async function handleGradeSubmission() {
     if (!gradingSubmission || !gradeData.grade) {
-      alert('Please enter a grade')
+      toast.error('يرجى إدخال الدرجة')
       return
     }
 
     const grade = parseFloat(gradeData.grade)
     if (isNaN(grade) || grade < 0 || grade > 100) {
-      alert('Please enter a valid grade between 0 and 100')
+      toast.error('يرجى إدخال درجة صحيحة بين 0 و 100')
       return
     }
 
@@ -130,13 +130,13 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
         await fetchTests()
         setGradingSubmission(null)
         setGradeData({ grade: '', feedback: '', grammarErrors: [] })
-        alert('✓ Submission graded successfully!')
+        toast.success('تم تصحيح الكتابة بنجاح!')
       } else {
-        alert('Failed to grade submission')
+        toast.error('فشل تصحيح الكتابة')
       }
     } catch (error) {
       console.error('Error grading submission:', error)
-      alert('Error grading submission')
+      toast.error('خطأ في تصحيح الكتابة')
     } finally {
       setSubmitting(false)
     }

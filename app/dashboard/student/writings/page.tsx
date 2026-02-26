@@ -7,6 +7,7 @@ import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Alert from '@/components/ui/Alert'
+import { toast } from 'react-hot-toast'
 
 interface WritingTest {
   id: string
@@ -52,18 +53,18 @@ export default function MyWritingsPage() {
         const testsData = await testsRes.json()
         setTests(testsData)
       } else {
-        alert('⚠️ Failed to load writing topics. Please try again.\n\nفشل تحميل مواضيع الكتابة. يرجى المحاولة مرة أخرى.')
+        toast.error('فشل تحميل مواضيع الكتابة. يرجى المحاولة مرة أخرى.')
       }
 
       if (submissionsRes.ok) {
         const subsData = await submissionsRes.json()
         setSubmissions(subsData)
       } else {
-        alert('⚠️ Failed to load your submissions. Please try again.\n\nفشل تحميل كتاباتك. يرجى المحاولة مرة أخرى.')
+        toast.error('فشل تحميل كتاباتك. يرجى المحاولة مرة أخرى.')
       }
     } catch (error) {
       console.error('Error fetching data:', error)
-      alert('⚠️ Network error. Please check your connection and try again.\n\nخطأ في الشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.')
+      toast.error('خطأ في الشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.')
     } finally {
       setLoading(false)
     }
@@ -71,7 +72,7 @@ export default function MyWritingsPage() {
 
   async function handleSubmit() {
     if (!selectedTest || !writingContent.trim()) {
-      alert('⚠️ Please write your content before submitting.\n\nيرجى كتابة المحتوى قبل الإرسال.')
+      toast.error('يرجى كتابة المحتوى قبل الإرسال.')
       return
     }
 
@@ -87,18 +88,17 @@ export default function MyWritingsPage() {
       })
 
       if (response.ok) {
-        alert('✓ كتابتك تم إرسالها للمدرس بنجاح!\n\nYour writing has been submitted to your teacher successfully!')
+        toast.success('تم إرسال كتابتك للمدرس بنجاح!')
         setSelectedTest(null)
         setWritingContent('')
         await fetchData()
       } else {
         const error = await response.json()
-        const errorMessage = error.error || 'Failed to submit writing'
-        alert(`⚠️ ${errorMessage}\n\nيرجى المحاولة مرة أخرى أو التواصل مع المدرس.`)
+        toast.error(error.error || 'فشل إرسال الكتابة. يرجى المحاولة مرة أخرى.')
       }
     } catch (error) {
       console.error('Error submitting writing:', error)
-      alert('⚠️ Network error. Your writing was not submitted. Please check your connection and try again.\n\nخطأ في الشبكة. لم يتم إرسال كتابتك. يرجى التحقق من اتصالك والمحاولة مرة أخرى.')
+      toast.error('خطأ في الشبكة. لم يتم إرسال كتابتك.')
     } finally {
       setSubmitting(false)
     }

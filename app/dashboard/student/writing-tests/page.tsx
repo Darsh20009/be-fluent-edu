@@ -8,6 +8,7 @@ import Alert from '@/components/ui/Alert'
 import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Modal from '@/components/ui/Modal'
+import { toast } from 'react-hot-toast'
 
 interface WritingTest {
   id: string
@@ -103,14 +104,14 @@ export default function WritingTestsPage() {
         setManuscriptFile(null)
         setManuscriptPreview(null)
         setSelectedTest(null)
-        alert('✓ Writing test submitted successfully!\n\nتم إرسال الاختبار بنجاح!')
+        toast.success('تم إرسال اختبار الكتابة بنجاح!')
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to submit test')
+        toast.error(error.error || 'فشل إرسال الاختبار')
       }
     } catch (error) {
       console.error('Error submitting test:', error)
-      alert('An error occurred')
+      toast.error('حدث خطأ. يرجى المحاولة مرة أخرى.')
     } finally {
       setSubmitting(false)
     }
