@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -238,7 +239,18 @@ export default function RegisterPage() {
         throw new Error(data.error || 'Registration failed')
       }
 
-      setCurrentStep('result')
+      const emailOrPhone = formData.email.trim().toLowerCase() || formData.phone.replace(/\s/g, '')
+      const result = await signIn('credentials', {
+        emailOrPhone,
+        password: formData.password,
+        redirect: false,
+      })
+
+      if (result?.ok) {
+        router.push('/placement-test?fromRegistration=true')
+      } else {
+        setCurrentStep('result')
+      }
     } catch (err: any) {
       setError(err.message)
     } finally {

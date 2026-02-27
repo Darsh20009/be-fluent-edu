@@ -64,10 +64,16 @@ export async function POST(request: Request) {
 
     // Only update profile level if it's a placement test
     if (testType === 'PLACEMENT') {
+      const existingProfile = await prisma.studentProfile.findUnique({
+        where: { userId: session.user.id },
+        select: { levelInitial: true }
+      });
+
       await prisma.studentProfile.update({
         where: { userId: session.user.id },
         data: { 
           levelCurrent: level,
+          levelInitial: existingProfile?.levelInitial || level,
           placementTestScore: score,
           placementTestPercentage: Math.round(percentage)
         }
