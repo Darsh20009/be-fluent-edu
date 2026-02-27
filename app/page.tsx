@@ -365,31 +365,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="py-20 bg-white relative overflow-hidden">
-          <div className="container mx-auto px-4 lg:px-8 relative z-10">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {[
-                { n: 1, defaultNum: "+500", defaultAr: "طالب نشط", defaultEn: "ACTIVE STUDENTS" },
-                { n: 2, defaultNum: "+50", defaultAr: "معلم محترف", defaultEn: "EXPERT TEACHERS" },
-                { n: 3, defaultNum: "98%", defaultAr: "نسبة رضا الطلاب", defaultEn: "SATISFACTION RATE" },
-                { n: 4, defaultNum: "+1000", defaultAr: "حصة مكتملة", defaultEn: "COMPLETED SESSIONS" },
-              ].map(({ n, defaultNum, defaultAr, defaultEn }) => {
-                const num = cms('stats', `stat${n}_num`, defaultNum);
-                const labelAr = cms('stats', `stat${n}_label_ar`, defaultAr);
-                const labelEn = cms('stats', `stat${n}_label_en`, defaultEn);
-                return (
-                  <div key={n} className="text-center group p-6 rounded-3xl hover:bg-emerald-50 transition-all duration-500 border border-transparent hover:border-emerald-100">
-                    <div className="text-4xl md:text-5xl font-black text-[#10B981] mb-2 group-hover:scale-110 transition-transform duration-500">{num}</div>
-                    <div className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-1">{labelEn}</div>
-                    <div className="text-lg font-bold text-gray-800">{labelAr}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
         {/* Features Section */}
         <section className="py-24 bg-gray-50/50">
           <div className="container mx-auto px-4 lg:px-8">
