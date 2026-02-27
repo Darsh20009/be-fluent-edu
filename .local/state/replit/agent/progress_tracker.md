@@ -82,3 +82,6 @@
 [x] 82. Re-install npm packages after latest environment migration - COMPLETED (Feb 27, 2026)
 [x] 83. Restart workflow and verify server running - COMPLETED (Feb 27, 2026)
 [x] 84. Complete project import to Replit environment - COMPLETED (Feb 27, 2026)
+[x] 85. Rebuild PageEditorTab with full homepage section controls (9 sections: Hero, Hero Images, Stats, Features, Learning Path, Showcase Steps, Packages, CTA, Contact) - COMPLETED (Feb 27, 2026)
+[x] 86. Rebuild PlacementTestTab with full question bank management (add/edit/delete questions, filters, settings panel, results view) - COMPLETED (Feb 27, 2026)
+[x] 87. Update homepage (app/page.tsx) to use CMS data for all new sections (hero images, showcase steps, packages, CTA) - COMPLETED (Feb 27, 2026)

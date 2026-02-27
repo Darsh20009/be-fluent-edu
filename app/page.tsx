@@ -9,7 +9,7 @@ import LearningPathMap from "@/components/learning-path/LearningPathMap";
 import FloatingContactButtons from "@/components/FloatingContactButtons";
 import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, ArrowRight, CheckCircle, Star, Zap, ChevronLeft, ChevronRight, Headphones, GraduationCap, Trophy, Menu, X, Play, ArrowDown, Map as MapIcon, Tag } from "lucide-react";
 
-const heroImages = [
+const defaultHeroImages = [
   { src: "/assets/hero-1.png", alt: "Why Us - Be Fluent" },
   { src: "/assets/hero-2.png", alt: "Live Sessions - Be Fluent" },
   { src: "/assets/hero-3.png", alt: "Interactive Learning - Be Fluent" },
@@ -25,6 +25,7 @@ export default function Home() {
   const [activeCoupons, setActiveCoupons] = useState<any[]>([]);
   const [siteSettings, setSiteSettings] = useState<any>(null);
   const [pageContent, setPageContent] = useState<Record<string, string>>({});
+  const [cmsHeroImages, setCmsHeroImages] = useState<{ src: string; alt: string }[]>([]);
 
   // Helper to get CMS content with fallback
   const cms = (section: string, field: string, fallback: string): string =>
@@ -55,6 +56,14 @@ export default function Home() {
           const map: Record<string, string> = {};
           items.forEach((item: any) => { map[`${item.section}.${item.field}`] = item.value; });
           setPageContent(map);
+          // Extract hero images from CMS
+          let imgs: { src: string; alt: string }[] = [];
+          let i = 1;
+          while (map[`hero_images.img${i}_src`]) {
+            imgs.push({ src: map[`hero_images.img${i}_src`], alt: map[`hero_images.img${i}_alt`] || '' });
+            i++;
+          }
+          if (imgs.length > 0) setCmsHeroImages(imgs);
         }
       })
       .catch(() => {});
@@ -62,6 +71,7 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const heroImages = cmsHeroImages.length > 0 ? cmsHeroImages : defaultHeroImages;
   const totalSlides = heroImages.length + activeCoupons.length;
 
   const nextSlide = useCallback(() => {
@@ -589,22 +599,31 @@ export default function Home() {
                 </p>
 
                 <div className="space-y-4 mb-8">
-                  {[
-                    { step: "1", title: "التسجيل والاشتراك", desc: "سجل حسابك واختر الباقة المناسبة" },
-                    { step: "2", title: "خطة تعلم مخصصة", desc: "منهج مصمم خصيصاً لمستواك" },
-                    { step: "3", title: "حصص تفاعلية يومية", desc: "تعلم مع معلمين محترفين" },
-                    { step: "4", title: "تقييم وتحسين مستمر", desc: "تتبع تقدمك وحسّن أداءك" },
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 hover:border-[#10B981]/30 transition-all duration-300 backdrop-blur-sm">
-                      <div className="w-12 h-12 shrink-0 rounded-xl bg-gradient-to-br from-[#10B981] to-emerald-600 flex items-center justify-center text-white font-black text-lg shadow-lg">
-                        {item.step}
+                  {Array.from({ length: 8 }).map((_, i) => {
+                    const n = i + 1;
+                    const stepTitle = cms('showcase', `step${n}_title`, '');
+                    const stepDesc = cms('showcase', `step${n}_desc`, '');
+                    const defaults = [
+                      { title: "التسجيل والاشتراك", desc: "سجل حسابك واختر الباقة المناسبة" },
+                      { title: "خطة تعلم مخصصة", desc: "منهج مصمم خصيصاً لمستواك" },
+                      { title: "حصص تفاعلية يومية", desc: "تعلم مع معلمين محترفين" },
+                      { title: "تقييم وتحسين مستمر", desc: "تتبع تقدمك وحسّن أداءك" },
+                    ];
+                    const title = stepTitle || defaults[i]?.title || '';
+                    const desc = stepDesc || defaults[i]?.desc || '';
+                    if (!title) return null;
+                    return (
+                      <div key={i} className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 hover:border-[#10B981]/30 transition-all duration-300 backdrop-blur-sm">
+                        <div className="w-12 h-12 shrink-0 rounded-xl bg-gradient-to-br from-[#10B981] to-emerald-600 flex items-center justify-center text-white font-black text-lg shadow-lg">
+                          {n}
+                        </div>
+                        <div className="text-right flex-1">
+                          <h4 className="font-bold text-white text-lg">{title}</h4>
+                          <p className="text-gray-400 text-sm">{desc}</p>
+                        </div>
                       </div>
-                      <div className="text-right flex-1">
-                        <h4 className="font-bold text-white text-lg">{item.title}</h4>
-                        <p className="text-gray-400 text-sm">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <Link href="/auth/register" className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#10B981] to-emerald-500 text-white rounded-2xl text-lg font-bold hover:shadow-2xl hover:shadow-emerald-500/30 transition-all duration-300">
@@ -633,48 +652,52 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
-              {[
-                { name: "الباقة الشهرية", price: "1500", lessons: "8", duration: "شهر واحد", popular: false },
-                { name: "الباقة الفصلية", price: "3500", lessons: "24", duration: "3 أشهر", popular: true },
-                { name: "الباقة النصف سنوية", price: "6000", lessons: "48", duration: "6 أشهر", popular: false },
-              ].map((pkg, index) => (
-                <div key={index} className={`relative rounded-3xl p-8 text-center transition-all duration-500 ${pkg.popular ? 'bg-gradient-to-br from-[#0f172a] to-[#1e293b] text-white shadow-2xl scale-100 lg:scale-105 border-2 border-[#10B981]' : 'bg-white border-2 border-gray-100 shadow-xl hover:shadow-2xl hover:border-[#10B981]/30'}`}>
-                  {pkg.popular && (
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <div className="bg-gradient-to-r from-[#10B981] to-emerald-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg flex items-center gap-2">
-                        <Star className="w-4 h-4 fill-white" />
-                        الأكثر طلباً
+              {Array.from({ length: 6 }).map((_, index) => {
+                const n = index + 1;
+                const defaults = [
+                  { name: "الباقة الشهرية", price: "1500", lessons: "8", duration: "شهر واحد", popular: false },
+                  { name: "الباقة الفصلية", price: "3500", lessons: "24", duration: "3 أشهر", popular: true },
+                  { name: "الباقة النصف سنوية", price: "6000", lessons: "48", duration: "6 أشهر", popular: false },
+                ];
+                const name = cms('packages', `pkg${n}_name`, defaults[index]?.name || '');
+                const price = cms('packages', `pkg${n}_price`, defaults[index]?.price || '');
+                const lessons = cms('packages', `pkg${n}_lessons`, defaults[index]?.lessons || '');
+                const duration = cms('packages', `pkg${n}_duration`, defaults[index]?.duration || '');
+                const popularStr = cms('packages', `pkg${n}_popular`, '');
+                const popular = popularStr === 'true' || (popularStr === '' && defaults[index]?.popular);
+                const badge = cms('packages', `pkg${n}_badge`, '');
+                if (!name) return null;
+                return (
+                  <div key={index} className={`relative rounded-3xl p-8 text-center transition-all duration-500 ${popular ? 'bg-gradient-to-br from-[#0f172a] to-[#1e293b] text-white shadow-2xl scale-100 lg:scale-105 border-2 border-[#10B981]' : 'bg-white border-2 border-gray-100 shadow-xl hover:shadow-2xl hover:border-[#10B981]/30'}`}>
+                    {popular && (
+                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <div className="bg-gradient-to-r from-[#10B981] to-emerald-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg flex items-center gap-2">
+                          <Star className="w-4 h-4 fill-white" />
+                          {badge || 'الأكثر طلباً'}
+                        </div>
+                      </div>
+                    )}
+                    <h3 className={`text-2xl font-bold mb-6 ${popular ? 'text-white' : 'text-[#1F2937]'}`}>{name}</h3>
+                    <div className="mb-8">
+                      <div className="flex items-end justify-center gap-1">
+                        <span className={`text-5xl font-black ${popular ? 'text-white' : 'text-[#10B981]'}`}>{price}</span>
+                        <span className={`text-xl font-bold pb-2 ${popular ? 'text-white/70' : 'text-gray-400'}`}>جنيه</span>
                       </div>
                     </div>
-                  )}
-
-                  <h3 className={`text-2xl font-bold mb-6 ${pkg.popular ? 'text-white' : 'text-[#1F2937]'}`}>{pkg.name}</h3>
-
-                  <div className="mb-8">
-                    <div className="flex items-end justify-center gap-1">
-                      <span className={`text-5xl font-black ${pkg.popular ? 'text-white' : 'text-[#10B981]'}`}>{pkg.price}</span>
-                      <span className={`text-xl font-bold pb-2 ${pkg.popular ? 'text-white/70' : 'text-gray-400'}`}>جنيه</span>
+                    <div className="space-y-4 mb-8">
+                      {[`${lessons} حصة`, duration, "دعم فني كامل"].map((feature, i) => (
+                        <div key={i} className={`flex items-center justify-center gap-3 ${popular ? 'text-white' : 'text-gray-600'}`}>
+                          <CheckCircle className="w-5 h-5 text-[#10B981]" />
+                          <span className="font-medium">{feature}</span>
+                        </div>
+                      ))}
                     </div>
+                    <Link href="/packages" className={`block w-full py-4 rounded-2xl font-bold text-lg transition-all duration-300 ${popular ? 'bg-gradient-to-r from-[#10B981] to-emerald-500 text-white hover:shadow-lg hover:shadow-emerald-500/30' : 'bg-[#10B981]/10 text-[#10B981] hover:bg-[#10B981] hover:text-white'}`}>
+                      اشترك الآن
+                    </Link>
                   </div>
-
-                  <div className="space-y-4 mb-8">
-                    {[
-                      `${pkg.lessons} حصة`,
-                      pkg.duration,
-                      "دعم فني كامل"
-                    ].map((feature, i) => (
-                      <div key={i} className={`flex items-center justify-center gap-3 ${pkg.popular ? 'text-white' : 'text-gray-600'}`}>
-                        <CheckCircle className="w-5 h-5 text-[#10B981]" />
-                        <span className="font-medium">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <Link href="/packages" className={`block w-full py-4 rounded-2xl font-bold text-lg transition-all duration-300 ${pkg.popular ? 'bg-gradient-to-r from-[#10B981] to-emerald-500 text-white hover:shadow-lg hover:shadow-emerald-500/30' : 'bg-[#10B981]/10 text-[#10B981] hover:bg-[#10B981] hover:text-white'}`}>
-                    اشترك الآن
-                  </Link>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="text-center mt-12">
@@ -692,14 +715,14 @@ export default function Home() {
           
           <div className="container mx-auto px-4 lg:px-8 text-center relative z-10">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black mb-6">
-              جاهز لبدء رحلتك؟
+              {cms('cta', 'title', 'جاهز لبدء رحلتك؟')}
             </h2>
             <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-              انضم لآلاف الطلاب الذين غيروا حياتهم مع Be Fluent واكتشف قدراتك الحقيقية
+              {cms('cta', 'subtitle', 'انضم لآلاف الطلاب الذين غيروا حياتهم مع Be Fluent واكتشف قدراتك الحقيقية')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/auth/register" className="px-10 py-4 bg-white text-[#10B981] rounded-2xl text-lg font-bold hover:bg-gray-100 hover:shadow-xl transition-all duration-300 shadow-lg">
-                سجل مجاناً الآن
+                {cms('cta', 'button_text', 'سجل مجاناً الآن')}
               </Link>
               <Link href="/packages" className="px-10 py-4 bg-white/20 border-2 border-white text-white rounded-2xl text-lg font-bold hover:bg-white hover:text-[#10B981] transition-all duration-300 backdrop-blur-sm">
                 تصفح الباقات
