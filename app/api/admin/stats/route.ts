@@ -96,12 +96,14 @@ export async function GET(request: NextRequest) {
       const monthSubs = await prisma.subscription.findMany({
         where: {
           status: 'APPROVED',
+          packageId: { not: null },
+          Package: { isNot: null },
           createdAt: {
             gte: startOfMonth,
             lte: endOfMonth
           }
         },
-        include: { Package: true }
+        include: { Package: { select: { price: true } } }
       })
 
       const revenue = monthSubs.reduce((acc, sub) => acc + ((sub as any).Package?.price || 0), 0)

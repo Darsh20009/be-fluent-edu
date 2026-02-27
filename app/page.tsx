@@ -4,8 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
-import LearningMap from "@/components/LearningMap";
-import LearningPathMap from "@/components/learning-path/LearningPathMap";
 import FloatingContactButtons from "@/components/FloatingContactButtons";
 import { BookOpen, Video, Users, Award, Globe, Sparkles, MessageCircle, Target, ArrowRight, CheckCircle, Star, Zap, ChevronLeft, ChevronRight, Headphones, GraduationCap, Trophy, Menu, X, Play, ArrowDown, Map as MapIcon, Tag } from "lucide-react";
 
@@ -371,13 +369,15 @@ export default function Home() {
         <section className="py-20 bg-white relative overflow-hidden">
           <div className="container mx-auto px-4 lg:px-8 relative z-10">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {[1, 2, 3, 4].map((n) => {
-                const num = cms('stats', `stat${n}_num`, '');
-                const labelAr = cms('stats', `stat${n}_label_ar`, '');
-                const labelEn = cms('stats', `stat${n}_label_en`, '');
-                
-                if (!num && !labelAr) return null;
-
+              {[
+                { n: 1, defaultNum: "+500", defaultAr: "طالب نشط", defaultEn: "ACTIVE STUDENTS" },
+                { n: 2, defaultNum: "+50", defaultAr: "معلم محترف", defaultEn: "EXPERT TEACHERS" },
+                { n: 3, defaultNum: "98%", defaultAr: "نسبة رضا الطلاب", defaultEn: "SATISFACTION RATE" },
+                { n: 4, defaultNum: "+1000", defaultAr: "حصة مكتملة", defaultEn: "COMPLETED SESSIONS" },
+              ].map(({ n, defaultNum, defaultAr, defaultEn }) => {
+                const num = cms('stats', `stat${n}_num`, defaultNum);
+                const labelAr = cms('stats', `stat${n}_label_ar`, defaultAr);
+                const labelEn = cms('stats', `stat${n}_label_en`, defaultEn);
                 return (
                   <div key={n} className="text-center group p-6 rounded-3xl hover:bg-emerald-50 transition-all duration-500 border border-transparent hover:border-emerald-100">
                     <div className="text-4xl md:text-5xl font-black text-[#10B981] mb-2 group-hover:scale-110 transition-transform duration-500">{num}</div>
@@ -398,15 +398,19 @@ export default function Home() {
               <p className="text-gray-600 text-lg">نحن نقدم تجربة تعليمية فريدة تركز على النتائج الحقيقية والتمكن الكامل من اللغة.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
-              {Array.from({ length: 6 }).map((_, i) => {
+              {[
+                { titleAr: "حصص تفاعلية مباشرة", titleEn: "LIVE SESSIONS", descAr: "تعلم مع معلمين محترفين في حصص حية تفاعلية مع طلاب من جميع أنحاء العالم." },
+                { titleAr: "محتوى تعليمي حصري", titleEn: "EXCLUSIVE CONTENT", descAr: "دروس وفيديوهات ومقالات تعليمية مصممة خصيصاً لتسريع رحلة تعلمك." },
+                { titleAr: "اختبارات وتقييمات", titleEn: "TESTS & ASSESSMENTS", descAr: "اختبارات دورية لقياس تقدمك مع تقارير مفصلة عن نقاط القوة والضعف." },
+                { titleAr: "مجتمع تفاعلي", titleEn: "COMMUNITY", descAr: "انضم لآلاف الطلاب في مجتمعنا التفاعلي للتدريب والتحفيز المتبادل." },
+                { titleAr: "شهادات معتمدة", titleEn: "CERTIFICATES", descAr: "احصل على شهادات معتمدة عند إتمام المستويات تؤهلك للعمل والدراسة." },
+                { titleAr: "دعم على مدار الساعة", titleEn: "24/7 SUPPORT", descAr: "فريق دعم متخصص لمساعدتك في أي وقت والإجابة على جميع استفساراتك." },
+              ].map((def, i) => {
                 const n = i + 1;
-                const titleAr = cms('features', `feat${n}_title_ar`, '');
-                const titleEn = cms('features', `feat${n}_title_en`, '');
-                const descAr = cms('features', `feat${n}_desc_ar`, '');
+                const titleAr = cms('features', `feat${n}_title_ar`, def.titleAr);
+                const titleEn = cms('features', `feat${n}_title_en`, def.titleEn);
+                const descAr = cms('features', `feat${n}_desc_ar`, def.descAr);
                 const icon = cms('features', `feat${n}_icon`, '');
-
-                if (!titleAr && !titleEn && !descAr) return null;
-
                 return (
                   <div key={i} className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-emerald-500/5 border border-gray-100 hover:border-[#10B981]/30 transition-all duration-500 group" dir="rtl">
                     <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mb-6 group-hover:bg-[#10B981] transition-colors duration-500 overflow-hidden">
@@ -428,10 +432,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Learning Path Section (Standalone Integration) */}
-        <section className="py-24 bg-gradient-to-b from-white to-emerald-50/30 overflow-hidden" id="learning-path">
+        {/* Learning Path Section */}
+        <section className="py-24 bg-gradient-to-b from-white to-emerald-50/30" id="learning-path">
           <div className="container mx-auto px-4 lg:px-8">
-            <div className="flex flex-col lg:flex-row items-center gap-16">
+            <div className="flex flex-col lg:flex-row items-start gap-16">
+              {/* Left: Title + Steps list */}
               <div className="lg:w-1/2" dir="rtl">
                 <div className="inline-flex items-center gap-2 bg-[#10B981]/10 px-4 py-2 rounded-full mb-6 border border-[#10B981]/20">
                   <MapIcon className="w-4 h-4 text-[#10B981]" />
@@ -441,16 +446,18 @@ export default function Home() {
                   نحن لا نعلمك الإنجليزية فحسب، <br />
                   <span className="text-[#10B981]">نحن نصمم لك طريقاً للنجاح</span>
                 </h2>
-                <div className="space-y-8">
-                  {Array.from({ length: 10 }).map((_, i) => {
+                <div className="space-y-6">
+                  {[
+                    { titleAr: "تحديد الهدف", desc: "نبدأ بتحليل مستواك وتحديد أهدافك بدقة (عمل، سفر، أو تطوير ذاتي)." },
+                    { titleAr: "الحصة التجريبية", desc: "تجربة حية مع أحد معلمينا لتقييم مهارات التحدث والاستماع." },
+                    { titleAr: "خطة مخصصة", desc: "نصمم لك منهجاً خاصاً يناسب وقتك وسرعة تعلمك." },
+                    { titleAr: "نظام المعلمين المزدوج", desc: "معلم أساسي للحصص، ومعلم متابع للدعم على مدار الساعة." },
+                    { titleAr: "اختبارات وقياس مستمر", desc: "اختبارات دورية لضمان انتقالك للمستوى التالي بثقة." },
+                  ].map((def, i) => {
                     const n = i + 1;
-                    const stepTitleAr = cms('learning_path', `step${n}_title_ar`, '');
-                    const stepTitleEn = cms('learning_path', `step${n}_title`, '');
-                    const stepDesc = cms('learning_path', `step${n}_desc`, '');
+                    const titleAr = cms('learning_path', `step${n}_title_ar`, def.titleAr);
+                    const desc = cms('learning_path', `step${n}_desc`, def.desc);
                     const stepIcon = cms('learning_path', `step${n}_icon`, '');
-                    
-                    if (!stepTitleAr && !stepTitleEn && !stepDesc) return null;
-
                     return (
                       <div key={i} className="flex gap-4 group">
                         <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-white shadow-lg border border-gray-100 flex items-center justify-center text-[#10B981] group-hover:bg-[#10B981] group-hover:text-white transition-all duration-300 overflow-hidden">
@@ -459,12 +466,12 @@ export default function Home() {
                               <Image src={stepIcon} fill className="object-contain" alt="" />
                             </div>
                           ) : (
-                            <Zap className="w-6 h-6" />
+                            <span className="font-black text-lg">{n}</span>
                           )}
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-gray-800 mb-1">{stepTitleAr || stepTitleEn}</h3>
-                          <p className="text-gray-600">{stepDesc}</p>
+                          <h3 className="text-xl font-bold text-gray-800 mb-1">{titleAr}</h3>
+                          <p className="text-gray-600">{desc}</p>
                         </div>
                       </div>
                     );
@@ -477,10 +484,33 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
-              <div className="lg:w-1/2 relative">
-                <div className="absolute inset-0 bg-emerald-500/10 blur-[100px] rounded-full"></div>
-                <div className="relative transform hover:scale-[1.02] transition-transform duration-700">
-                  <LearningPathMap />
+
+              {/* Right: Visual path cards */}
+              <div className="lg:w-1/2 relative" dir="rtl">
+                <div className="absolute -top-10 -right-10 w-64 h-64 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div className="grid grid-cols-1 gap-4 relative z-10">
+                  {[
+                    { titleAr: "تحديد الهدف", desc: "نبدأ بتحليل مستواك وتحديد أهدافك بدقة.", color: "border-blue-200 bg-blue-50", dot: "bg-blue-500" },
+                    { titleAr: "الحصة التجريبية", desc: "تجربة حية مع أحد معلمينا لتقييم مهاراتك.", color: "border-emerald-200 bg-emerald-50", dot: "bg-emerald-500" },
+                    { titleAr: "خطة مخصصة", desc: "نصمم لك منهجاً خاصاً يناسب وقتك.", color: "border-amber-200 bg-amber-50", dot: "bg-amber-500" },
+                    { titleAr: "نظام المعلمين المزدوج", desc: "معلم أساسي ومعلم متابع ودعم على مدار الساعة.", color: "border-purple-200 bg-purple-50", dot: "bg-purple-500" },
+                    { titleAr: "اختبارات وقياس مستمر", desc: "اختبارات دورية لضمان تقدمك للمستوى التالي.", color: "border-rose-200 bg-rose-50", dot: "bg-rose-500" },
+                  ].map((card, i) => {
+                    const n = i + 1;
+                    const title = cms('learning_path', `step${n}_title_ar`, card.titleAr);
+                    const desc = cms('learning_path', `step${n}_desc`, card.desc);
+                    return (
+                      <div key={i} className={`flex items-start gap-4 p-5 rounded-2xl border-2 ${card.color} hover:shadow-md transition-all duration-300`}>
+                        <div className={`flex-shrink-0 w-10 h-10 ${card.dot} rounded-xl flex items-center justify-center text-white font-black text-base shadow-lg`}>
+                          {n}
+                        </div>
+                        <div>
+                          <h4 className="font-black text-gray-900 text-lg mb-1">{title}</h4>
+                          <p className="text-gray-600 text-sm leading-relaxed">{desc}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -508,40 +538,27 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
               {[
-                { 
-                  title: cms('features', 'feat1_title_ar', "حصص تفاعلية مباشرة"), 
-                  desc: cms('features', 'feat1_desc_ar', "تعلم مع معلمين محترفين في حصص حية تفاعلية مع طلاب من جميع أنحاء العالم."), 
-                  icon: cms('features', 'feat1_icon', "") ? <Image src={cms('features', 'feat1_icon', "")} width={28} height={28} alt="" /> : <Video className="w-7 h-7" />, 
-                  gradient: "from-emerald-500 to-teal-600", 
-                  bg: "from-emerald-50 to-teal-50" 
-                },
-                { 
-                  title: cms('features', 'feat2_title_ar', "محتوى تعليمي حصري"), 
-                  desc: cms('features', 'feat2_desc_ar', "دروس وفيديوهات ومقالات تعليمية مصممة خصيصاً لتسريع رحلة تعلمك."), 
-                  icon: cms('features', 'feat2_icon', "") ? <Image src={cms('features', 'feat2_icon', "")} width={28} height={28} alt="" /> : <BookOpen className="w-7 h-7" />, 
-                  gradient: "from-blue-500 to-indigo-600", 
-                  bg: "from-blue-50 to-indigo-50" 
-                },
-                { 
-                  title: cms('features', 'feat3_title_ar', "اختبارات وتقييمات"), 
-                  desc: cms('features', 'feat3_desc_ar', "اختبارات دورية لقياس تقدمك مع تقارير مفصلة عن نقاط القوة والضعف."), 
-                  icon: cms('features', 'feat3_icon', "") ? <Image src={cms('features', 'feat3_icon', "")} width={28} height={28} alt="" /> : <Target className="w-7 h-7" />, 
-                  gradient: "from-orange-500 to-red-500", 
-                  bg: "from-orange-50 to-red-50" 
-                },
-                { title: "مجتمع تفاعلي", desc: "انضم لآلاف الطلاب في مجتمعنا التفاعلي للتدريب والتحفيز المتبادل.", icon: <Users className="w-7 h-7" />, gradient: "from-pink-500 to-rose-600", bg: "from-pink-50 to-rose-50" },
-                { title: "شهادات معتمدة", desc: "احصل على شهادات معتمدة عند إتمام المستويات تؤهلك للعمل والدراسة.", icon: <Award className="w-7 h-7" />, gradient: "from-amber-500 to-yellow-500", bg: "from-amber-50 to-yellow-50" },
-                { title: "دعم على مدار الساعة", desc: "فريق دعم متخصص لمساعدتك في أي وقت والإجابة على جميع استفساراتك.", icon: <MessageCircle className="w-7 h-7" />, gradient: "from-violet-500 to-purple-600", bg: "from-violet-50 to-purple-50" },
-              ].map((feature, i) => (
-                <div key={i} className="group relative p-8 rounded-3xl bg-white border border-gray-100 hover:border-transparent shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${feature.bg} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
-                  <div className={`relative w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center text-white mb-5 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300 overflow-hidden`}>
-                    {feature.icon}
+                { n: 1, defaultTitle: "حصص تفاعلية مباشرة", defaultDesc: "تعلم مع معلمين محترفين في حصص حية تفاعلية مع طلاب من جميع أنحاء العالم.", DefaultIcon: Video, gradient: "from-emerald-500 to-teal-600", bg: "from-emerald-50 to-teal-50" },
+                { n: 2, defaultTitle: "محتوى تعليمي حصري", defaultDesc: "دروس وفيديوهات ومقالات تعليمية مصممة خصيصاً لتسريع رحلة تعلمك.", DefaultIcon: BookOpen, gradient: "from-blue-500 to-indigo-600", bg: "from-blue-50 to-indigo-50" },
+                { n: 3, defaultTitle: "اختبارات وتقييمات", defaultDesc: "اختبارات دورية لقياس تقدمك مع تقارير مفصلة عن نقاط القوة والضعف.", DefaultIcon: Target, gradient: "from-orange-500 to-red-500", bg: "from-orange-50 to-red-50" },
+                { n: 4, defaultTitle: "مجتمع تفاعلي", defaultDesc: "انضم لآلاف الطلاب في مجتمعنا التفاعلي للتدريب والتحفيز المتبادل.", DefaultIcon: Users, gradient: "from-pink-500 to-rose-600", bg: "from-pink-50 to-rose-50" },
+                { n: 5, defaultTitle: "شهادات معتمدة", defaultDesc: "احصل على شهادات معتمدة عند إتمام المستويات تؤهلك للعمل والدراسة.", DefaultIcon: Award, gradient: "from-amber-500 to-yellow-500", bg: "from-amber-50 to-yellow-50" },
+                { n: 6, defaultTitle: "دعم على مدار الساعة", defaultDesc: "فريق دعم متخصص لمساعدتك في أي وقت والإجابة على جميع استفساراتك.", DefaultIcon: MessageCircle, gradient: "from-violet-500 to-purple-600", bg: "from-violet-50 to-purple-50" },
+              ].map(({ n, defaultTitle, defaultDesc, DefaultIcon, gradient, bg }) => {
+                const title = cms('features', `feat${n}_title_ar`, defaultTitle);
+                const desc = cms('features', `feat${n}_desc_ar`, defaultDesc);
+                const icon = cms('features', `feat${n}_icon`, '');
+                return (
+                  <div key={n} className="group relative p-8 rounded-3xl bg-white border border-gray-100 hover:border-transparent shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden" dir="rtl">
+                    <div className={`absolute inset-0 bg-gradient-to-br ${bg} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
+                    <div className={`relative w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white mb-5 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300 overflow-hidden`}>
+                      {icon ? <Image src={icon} width={28} height={28} alt="" /> : <DefaultIcon className="w-7 h-7" />}
+                    </div>
+                    <h3 className="relative text-xl font-bold text-[#1F2937] mb-3">{title}</h3>
+                    <p className="relative text-gray-600 leading-relaxed">{desc}</p>
                   </div>
-                  <h3 className="relative text-xl font-bold text-[#1F2937] mb-3">{feature.title}</h3>
-                  <p className="relative text-gray-600 leading-relaxed">{feature.desc}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
