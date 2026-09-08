@@ -13,6 +13,12 @@ Be Fluent is a bilingual (Arabic/English) online English learning platform desig
 ### System Architecture
 The platform utilizes a modern web stack: **Next.js 16 (App Router)** with **React 19**, **TypeScript**, and **Tailwind CSS v4** for a mobile-responsive frontend with dark mode support. The backend uses **Next.js API Routes** and a custom **Node.js server** for real-time functionalities.
 
+### Running on Replit
+- Install dependencies with `npm install` (the lockfile is committed).
+- Start the web app with `npm run dev`.
+- The `Be Fluent Server` workflow runs this command and exposes the custom Next.js/Socket.IO server on port 5000.
+- Core runtime configuration requires `MONGODB_URI` and `NEXTAUTH_SECRET`. AI and email features additionally use their provider-specific environment variables.
+
 **UI/UX Decisions (Updated January 2026):**
 - **New Creative Homepage Design:** Complete frontend redesign with modern, professional look inspired by Edugate style.
 - **Hero Image Carousel:** Automatic sliding carousel with 4 Be Fluent branded images, navigation arrows, touch swipe support for mobile, and dot indicators.
@@ -79,11 +85,11 @@ The platform utilizes a modern web stack: **Next.js 16 (App Router)** with **Rea
 - CMS: PageContent model (page/section/field/value) → `/api/admin/page-content`
 
 ### External Dependencies
-- **Database:** PostgreSQL (hosted on AWS)
+- **Database:** MongoDB
 - **ORM:** Prisma
 - **Authentication:** NextAuth.js
 - **Real-time Communication:** Socket.IO
 - **Video Conferencing:** befluent-meet & ZegoCloud
 - **Translation Services:** Google Translate API
 - **Communication:** WhatsApp API
-- **Current Database:** MongoDB (for gamification, lessons, listening, conversation models)
+- **Current Database:** MongoDB through Prisma
