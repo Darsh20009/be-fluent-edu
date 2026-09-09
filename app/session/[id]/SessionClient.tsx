@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Video, ArrowLeft, Loader2 } from 'lucide-react'
+import { Video, ArrowLeft, Circle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { toast } from 'react-hot-toast'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import SessionLoginModal from './SessionLoginModal'
 import SessionPasswordModal from './SessionPasswordModal'
 
@@ -146,8 +145,12 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
 
   if (loading || refreshing) {
     return (
-      <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center">
-        <LoadingSpinner />
+      <div className="min-h-[100dvh] bg-[#f4f1e8] flex items-center justify-center p-6" dir="rtl">
+        <div className="w-full max-w-md border border-[#d9d6c8] bg-[#fbfaf5] p-8 text-center shadow-[0_20px_60px_rgba(25,52,43,.08)]">
+          <div className="mx-auto mb-5 h-10 w-10 border-2 border-[#174c3c]/20 border-t-[#174c3c] rounded-full animate-spin" />
+          <p className="text-sm font-medium text-[#19372d]">يتم تجهيز مساحة التعلّم</p>
+          <p className="mt-1 text-xs text-[#6b756d]">Preparing your learning space</p>
+        </div>
       </div>
     )
   }
@@ -157,62 +160,62 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
   }
 
   return (
-    <div className="fixed inset-0 bg-black flex flex-col">
+    <div className="fixed inset-0 bg-[#18211d] flex flex-col" dir="rtl">
       {/* Header */}
-      <div className="bg-black/80 border-b border-neutral-700 px-4 py-3 flex items-center justify-between z-50 backdrop-blur-sm">
-        <div className="flex items-center gap-4">
+      <div className="bg-[#f7f5ed] border-b border-[#d6d2c3] px-4 sm:px-7 py-3 flex items-center justify-between z-50">
+        <div className="flex items-center gap-3 sm:gap-5 min-w-0">
           <Button
             variant="outline"
             size="sm"
             onClick={() => router.push('/dashboard')}
-            className="bg-neutral-800 text-white hover:bg-neutral-700 border-neutral-600"
+            className="bg-transparent text-[#19372d] hover:bg-[#e8eee7] border-[#bfc8bd] rounded-none shrink-0"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Exit / خروج
+            <ArrowLeft className="h-4 w-4 ml-2" />
+            <span className="hidden sm:inline">الخروج</span>
           </Button>
-          <div>
-            <h1 className="text-lg font-bold text-white">
+          <div className="min-w-0">
+            <p className="text-[10px] tracking-[.22em] uppercase text-[#718075] mb-0.5">Be Fluent / Live room</p>
+            <h1 className="text-base sm:text-lg font-bold text-[#17352c] truncate">
               {session.title}
             </h1>
-            <p className="text-xs text-neutral-400">
-              {session.teacher.name} • {new Date(session.startTime).toLocaleTimeString('ar-EG', { 
+            <p className="text-xs text-[#637168]">
+              {session.teacher.name} <span className="mx-1">·</span> {new Date(session.startTime).toLocaleTimeString('ar-EG', { 
                 hour: '2-digit', 
                 minute: '2-digit' 
               })}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {user?.role === 'TEACHER' && session.sessionPassword && (
-            <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg px-3 py-2">
-              <p className="text-xs text-blue-300 font-medium">Password</p>
-              <p className="text-lg font-bold text-blue-400 tracking-widest">{session.sessionPassword}</p>
+            <div className="hidden sm:block bg-[#edf1e9] border border-[#cbd5c8] px-3 py-1.5 text-left" dir="ltr">
+              <p className="text-[10px] text-[#657466] font-medium">ROOM PASSCODE</p>
+              <p className="text-sm font-bold text-[#174c3c] tracking-[.18em]">{session.sessionPassword}</p>
             </div>
           )}
-          <div className="flex items-center gap-2">
-            <Video className="h-5 w-5 text-red-500 animate-pulse" />
-            <span className="text-sm font-medium text-red-500">Live</span>
+          <div className="flex items-center gap-2 text-[#174c3c]">
+            <Circle className="h-2.5 w-2.5 fill-[#b54c39] text-[#b54c39] animate-pulse" />
+            <span className="text-xs font-bold tracking-wide">مباشر</span>
           </div>
         </div>
       </div>
 
       {/* Meet Video Container */}
-      <div className="flex-1 w-full bg-black relative">
+      <div className="flex-1 w-full bg-[#18211d] relative">
         {!canJoinSession() ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-            <div className="bg-neutral-800/50 backdrop-blur-xl border border-neutral-700 rounded-3xl p-8 max-w-lg w-full text-center shadow-2xl">
-              <div className="w-20 h-20 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Video className="h-10 w-10 text-blue-500" />
+            <div className="bg-[#f7f5ed] border border-[#d6d2c3] p-8 sm:p-10 max-w-lg w-full text-center shadow-[0_24px_80px_rgba(0,0,0,.22)]">
+              <div className="w-16 h-16 bg-[#e6eee7] border border-[#c8d3c7] flex items-center justify-center mx-auto mb-6">
+                <Video className="h-8 w-8 text-[#174c3c]" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-3">
-                الحصة لم تبدأ بعد / Session Not Started
+              <h2 className="text-2xl font-bold text-[#19372d] mb-3">
+                لم تبدأ الحصة بعد
               </h2>
-              <p className="text-neutral-400 mb-4 leading-relaxed">
-                يمكنك الانضمام قبل موعد الحصة بـ 10 دقائق.
-                <br />
-                You can join 10 minutes before the scheduled time.
+              <p className="text-[#667268] mb-5 leading-relaxed">
+                يمكنك الانضمام قبل موعد الحصة بعشر دقائق.
+                <span className="block mt-1 text-sm" dir="ltr">You can join 10 minutes before the scheduled time.</span>
               </p>
-              <div className="text-[#10B981] font-mono text-xl bg-neutral-900/50 p-4 rounded-xl border border-neutral-700">
+              <div className="text-[#174c3c] font-mono text-xl bg-[#edf1e9] p-4 border border-[#c8d3c7]" dir="ltr">
                 {new Date(session.startTime).toLocaleTimeString('ar-EG', { 
                   hour: '2-digit', 
                   minute: '2-digit' 
@@ -222,40 +225,38 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
           </div>
         ) : session.externalLink ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-            <div className="bg-neutral-800/50 backdrop-blur-xl border border-neutral-700 rounded-3xl p-8 max-w-lg w-full text-center shadow-2xl">
-              <div className="w-20 h-20 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Video className="h-10 w-10 text-emerald-500" />
+            <div className="bg-[#f7f5ed] border border-[#d6d2c3] p-8 sm:p-10 max-w-lg w-full text-center shadow-[0_24px_80px_rgba(0,0,0,.22)]">
+              <div className="w-16 h-16 bg-[#e6eee7] border border-[#c8d3c7] flex items-center justify-center mx-auto mb-6">
+                <Video className="h-8 w-8 text-[#174c3c]" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-3">
-                {session.externalLinkType || 'جلسة خارجية'} / External Session
+              <h2 className="text-2xl font-bold text-[#19372d] mb-3">
+                {session.externalLinkType || 'جلسة خارجية'}
               </h2>
-              <p className="text-neutral-400 mb-8 leading-relaxed">
-                هذه الحصة تقام عبر منصة خارجية. اضغط على الزر أدناه للانتقال للاجتماع.
-                <br />
-                This session is hosted on an external platform. Click below to join.
+              <p className="text-[#667268] mb-8 leading-relaxed">
+                تقام هذه الحصة عبر منصة خارجية. اضغط أدناه للانتقال إلى الاجتماع.
+                <span className="block mt-1 text-sm" dir="ltr">This session is hosted on an external platform.</span>
               </p>
               <Button
                 size="lg"
-                className="w-full bg-[#10B981] hover:bg-[#059669] text-white py-6 text-lg font-bold rounded-2xl shadow-xl shadow-emerald-500/20"
+                className="w-full bg-[#174c3c] hover:bg-[#0f392c] text-[#f7f5ed] py-6 text-lg font-bold rounded-none"
                 onClick={() => window.open(session.externalLink, '_blank')}
               >
-                Join Meeting / دخول الحصة
+                دخول الحصة
               </Button>
             </div>
           </div>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-             <div className="bg-neutral-800/50 backdrop-blur-xl border border-neutral-700 rounded-3xl p-8 max-w-lg w-full text-center shadow-2xl">
-              <div className="w-20 h-20 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Video className="h-10 w-10 text-red-500" />
+             <div className="bg-[#f7f5ed] border border-[#d6d2c3] p-8 sm:p-10 max-w-lg w-full text-center shadow-[0_24px_80px_rgba(0,0,0,.22)]">
+               <div className="w-16 h-16 bg-[#f1e8df] border border-[#dfcabc] flex items-center justify-center mx-auto mb-6">
+                 <Video className="h-8 w-8 text-[#a65b45]" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-3">
-                No Link Provided / لا يوجد رابط
+               <h2 className="text-2xl font-bold text-[#19372d] mb-3">
+                 لا يوجد رابط للحصة
               </h2>
-              <p className="text-neutral-400 mb-4 leading-relaxed">
-                لم يتم توفير رابط لهذه الحصة بعد. يرجى التواصل مع المعلم.
-                <br />
-                No meeting link has been provided for this session yet. Please contact the teacher.
+               <p className="text-[#667268] mb-4 leading-relaxed">
+                 لم يتم توفير رابط لهذه الحصة بعد. يرجى التواصل مع المعلم.
+                 <span className="block mt-1 text-sm" dir="ltr">No meeting link has been provided for this session yet.</span>
               </p>
             </div>
           </div>

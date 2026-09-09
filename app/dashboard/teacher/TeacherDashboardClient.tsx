@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { 
-  Home, Users, Calendar, BookOpen, MessageCircle, LogOut, Shield, FileText
+  Home, Users, Calendar, BookOpen, MessageCircle, LogOut, Shield, FileText, Menu, X
 } from 'lucide-react'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
@@ -73,35 +73,39 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F5F5DC] to-white">
-      <header className="bg-[#10B981] text-white shadow-lg">
-        <div className="container mx-auto px-4 py-3 sm:py-4">
+    <div className="min-h-screen bg-[#f4f1e9] text-[#1f2924] [&_button]:rounded-none [&_input]:rounded-none [&_select]:rounded-none [&_textarea]:rounded-none" dir="rtl">
+      <header className="sticky top-0 z-30 border-b border-[#d7d4ca] bg-[#f8f6f0]/95 backdrop-blur">
+        <div className="mx-auto max-w-[1600px] px-4 py-3 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-4">
               <button
-                className="lg:hidden p-2 hover:bg-white/10 rounded-lg"
+                aria-label="فتح القائمة"
+                className="lg:hidden grid h-9 w-9 place-items-center border border-[#c9c7bc] bg-[#f8f6f0] text-[#174d3a] transition-colors hover:bg-[#e8eee8]"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+                <Menu className="h-5 w-5" />
               </button>
-              <h1 className="text-xl sm:text-2xl font-bold">Be Fluent</h1>
-              <Link href="/dashboard/admin" className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-colors">
+              <div className="border-r-2 border-[#174d3a] pr-3 leading-none">
+                <h1 className="text-lg font-black tracking-[-0.06em] text-[#174d3a] sm:text-xl">Be Fluent</h1>
+                <span className="mt-1 block text-[9px] font-bold tracking-[0.16em] text-[#758178]">TEACHER DESK</span>
+              </div>
+              <Link href="/dashboard/admin" className="hidden items-center gap-2 border border-[#b8c8ba] bg-[#e8eee8] px-3 py-2 text-xs font-bold text-[#174d3a] transition-colors hover:bg-[#d8e5d9] sm:flex">
                 <Shield className="h-4 w-4" />
                 <span className="text-xs font-bold">لوحة الأدمن</span>
               </Link>
-              <span className="text-xs sm:text-sm bg-white/20 px-2 sm:px-3 py-1 rounded-full hidden sm:inline">Teacher Portal</span>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
-              <span className="text-xs sm:text-sm hidden sm:block">{user.name}</span>
+              <div className="hidden text-left sm:block">
+                <span className="block text-xs font-bold text-[#1f2924]">{user.name}</span>
+                <span className="text-[10px] font-medium text-[#758178]">المساحة التعليمية</span>
+              </div>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleSignOut}
-                className="text-white border-white hover:bg-white hover:text-[#10B981] text-xs sm:text-sm px-2 sm:px-4"
+                className="!rounded-none !border-[#9c4437] !bg-transparent !px-2 !text-xs !text-[#9c4437] hover:!bg-[#f6e8e2] sm:!px-4"
               >
-                <LogOut className="h-4 w-4 sm:mr-2" />
+                <LogOut className="h-4 w-4 sm:ml-2" />
                 <span className="hidden sm:inline">Logout / خروج</span>
               </Button>
             </div>
@@ -109,8 +113,8 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-4 sm:py-6">
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+      <div className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6 sm:py-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
           {/* Mobile Sidebar Overlay */}
           {sidebarOpen && (
             <div 
@@ -121,34 +125,32 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
 
           {/* Sidebar */}
           <div className={`
-            fixed lg:static inset-y-0 left-0 z-50 lg:z-auto
-            w-64 lg:w-auto lg:flex-none
+             fixed lg:static inset-y-0 right-0 z-50 lg:z-auto
+             w-72 lg:w-64 lg:flex-none
             transform lg:transform-none transition-transform duration-300
-            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+             ${sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
           `}>
-            <Card variant="elevated" padding="none" className="h-full lg:h-auto bg-[#F9FAFB] border border-[#E5E7EB]">
-              <div className="p-4 border-b border-gray-200">
+            <Card variant="elevated" padding="none" className="h-full !rounded-none !border-[#d7d4ca] !bg-[#f8f6f0] !shadow-none lg:h-auto">
+              <div className="border-b border-[#d7d4ca] p-4">
                 <div className="flex items-center justify-between lg:justify-start gap-3">
                   <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#10B981] rounded-full flex items-center justify-center text-white text-lg sm:text-xl font-bold">
+                    <div className="flex h-10 w-10 items-center justify-center bg-[#174d3a] text-lg font-bold text-[#f8f6f0] sm:h-12 sm:w-12 sm:text-xl">
                       {user.name?.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm sm:text-base">{user.name}</p>
-                      <p className="text-xs sm:text-sm text-gray-600">Teacher / مدرس</p>
+                      <p className="text-sm font-bold text-[#1f2924] sm:text-base">{user.name}</p>
+                      <p className="text-xs text-[#758178] sm:text-sm">Teacher / مدرس</p>
                     </div>
                   </div>
                   <button 
                     className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
                     onClick={() => setSidebarOpen(false)}
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X className="h-5 w-5" />
                   </button>
                 </div>
               </div>
-              <nav className="p-2">
+            <nav className="p-2" aria-label="Teacher navigation">
                 {menuItems.map((item) => {
                   const Icon = item.icon
                   return (
@@ -158,10 +160,10 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
                         setActiveTab(item.id)
                         setSidebarOpen(false)
                       }}
-                      className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors mb-1 ${
+                       className={`mb-1 flex w-full items-center gap-3 border-r-2 px-3 py-2.5 text-right transition-colors sm:px-4 ${
                         activeTab === item.id
-                          ? 'bg-[#10B981] text-white'
-                          : 'text-gray-700 hover:bg-gray-100'
+                           ? 'border-[#174d3a] bg-[#dce9dc] font-bold text-[#174d3a]'
+                           : 'border-transparent text-[#4c5750] hover:bg-[#eeece5] hover:text-[#174d3a]'
                       }`}
                     >
                       <Icon className="h-5 w-5" />
@@ -173,7 +175,7 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
             </Card>
           </div>
 
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             {activeTab === 'home' && user.teacherProfileId && <HomeTab teacherProfileId={user.teacherProfileId} />}
             {activeTab === 'students' && user.teacherProfileId && <StudentsTab teacherProfileId={user.teacherProfileId} />}
             {activeTab === 'sessions' && user.teacherProfileId && <SessionsTab teacherProfileId={user.teacherProfileId} />}
@@ -284,7 +286,7 @@ function ChatTab() {
                 onClick={() => setShowNewChatModal(false)}
                 className="hover:bg-white/20 rounded-full p-1 transition-colors"
               >
-                ✕
+                  <X className="h-5 w-5" />
               </button>
             </div>
             <div className="p-4 overflow-y-auto max-h-[60vh]">

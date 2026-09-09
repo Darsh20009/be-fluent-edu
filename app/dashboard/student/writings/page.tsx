@@ -280,7 +280,7 @@ export default function MyWritingsPage() {
 
                       {test.dueDate && (
                         <p className="text-sm text-gray-500 mb-3">
-                          📅 Due: {new Date(test.dueDate).toLocaleDateString('ar-EG')}
+                          الموعد: {new Date(test.dueDate).toLocaleDateString('ar-EG')}
                         </p>
                       )}
 

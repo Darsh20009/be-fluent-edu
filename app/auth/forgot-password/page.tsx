@@ -96,18 +96,18 @@ export default function ForgotPasswordPage() {
 
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] flex flex-col">
+    <div dir="rtl" className="min-h-[100dvh] bg-[#f4f6f0] flex flex-col">
       <AppHeader variant="marketing">
         <Link
           href="/auth/login"
-          className="px-4 py-2 sm:px-6 sm:py-2 rounded-lg border-2 border-[#10B981] text-[#10B981] hover:bg-[#10B981] hover:text-white transition-colors text-sm sm:text-base"
+          className="border border-[#147050] px-4 py-2 text-[11px] font-bold text-[#147050] hover:bg-[#147050] hover:text-white transition-colors"
         >
           تسجيل الدخول / Login
         </Link>
       </AppHeader>
 
       <div className="flex-1 flex items-center justify-center p-3 sm:p-4 md:p-6">
-        <Card className="w-full max-w-md shadow-2xl bg-[#F9FAFB] border-2 border-[#E5E7EB]">
+        <Card className="w-full max-w-md border border-[#dbe3dc] bg-[#fffefa] p-6 shadow-none sm:p-8">
           <div className="flex justify-between items-center mb-4">
             <Link href="/auth/login">
               <Button variant="ghost" size="sm" className="gap-2">
@@ -130,7 +130,7 @@ export default function ForgotPasswordPage() {
             </div>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold text-center mb-2 text-black">
+           <h1 className="mb-2 text-center text-2xl font-bold text-[#1e2b29] sm:text-3xl">
             {step === 1 && 'نسيت كلمة المرور / Forgot Password'}
             {step === 2 && 'تعيين كلمة مرور جديدة / Reset Password'}
             {step === 3 && 'تم بنجاح / Success'}
@@ -169,7 +169,7 @@ export default function ForgotPasswordPage() {
                 fullWidth
                 size="lg"
                 loading={loading}
-                className="font-semibold bg-[#10B981] hover:bg-[#003A6B] text-white"
+                 className="bg-[#147050] font-semibold text-white hover:bg-[#0e5940]"
               >
                 {loading ? 'جاري التحقق...' : 'التحقق / Verify'}
               </Button>
@@ -220,7 +220,7 @@ export default function ForgotPasswordPage() {
                   fullWidth
                   size="lg"
                   loading={loading}
-                  className="font-semibold bg-[#10B981] hover:bg-[#003A6B] text-white"
+                 className="bg-[#147050] font-semibold text-white hover:bg-[#0e5940]"
                 >
                   {loading ? 'جاري التحديث...' : 'تحديث كلمة المرور / Update Password'}
                 </Button>
@@ -243,7 +243,7 @@ export default function ForgotPasswordPage() {
                 <Button
                   fullWidth
                   size="lg"
-                  className="font-semibold bg-[#10B981] hover:bg-[#003A6B] text-white"
+                   className="bg-[#147050] font-semibold text-white hover:bg-[#0e5940]"
                 >
                   العودة لتسجيل الدخول / Back to Login
                 </Button>
@@ -253,8 +253,8 @@ export default function ForgotPasswordPage() {
         </Card>
       </div>
 
-      <footer className="w-full py-4 sm:py-6 text-center text-sm sm:text-base text-black bg-[#F9FAFB] border-t-2 border-[#E5E7EB] mt-auto">
-        <p className="px-4">Made with ❤️ by MA3K Company</p>
+       <footer className="mt-auto w-full border-t border-[#dfe5dd] bg-[#fdfcf8] py-4 text-center text-[10px] text-[#68756f]">
+         <p className="px-4">Be Fluent Academy</p>
       </footer>
     </div>
   )

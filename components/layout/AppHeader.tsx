@@ -23,17 +23,17 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   return (
     <header
       className={cn(
-        'shadow-lg',
-        isMarketing ? 'bg-[#F9FAFB]' : 'bg-[#10B981] text-white',
+        'border-b border-[#dfe5dd]',
+        isMarketing ? 'bg-[#fdfcf8]' : 'bg-[#10B981] text-white',
         className
       )}
     >
-      <div className="container mx-auto px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6">
+      <div className="mx-auto max-w-[1130px] px-4 py-3">
         <div
           className={cn(
-            'flex items-center justify-between rounded-xl sm:rounded-2xl px-3 xs:px-4 sm:px-6 py-3 sm:py-4 shadow-lg',
+            'flex items-center justify-between px-1 py-1',
             isMarketing
-              ? 'backdrop-blur-sm bg-white/30 border-2 border-gray-200'
+              ? ''
               : 'bg-transparent'
           )}
         >
@@ -49,7 +49,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                     priority
                     className={cn(
                       'relative',
-                      isMarketing ? 'w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-14 md:h-14' : 'w-8 h-8 sm:w-10 sm:h-10 rounded-lg'
+              isMarketing ? 'w-9 h-9 sm:w-11 sm:h-11' : 'w-8 h-8 sm:w-10 sm:h-10 rounded-lg'
                     )}
                     style={{ width: 'auto', height: 'auto' }}
                   />
@@ -59,14 +59,14 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                     <span
                       className={cn(
                         'text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold block truncate',
-                        isMarketing ? 'text-[#1F2937]' : 'text-white'
+                         isMarketing ? 'text-[#1e2b29]' : 'text-white'
                       )}
                     >
                       Be Fluent
                     </span>
                   </Link>
                   {isMarketing && (
-                    <p className="text-[10px] xs:text-xs text-gray-600 truncate">Fluency Comes First</p>
+                     <p className="text-[9px] text-[#68756f] truncate">FLUENCY COMES FIRST</p>
                   )}
                 </div>
               </>

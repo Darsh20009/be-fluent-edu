@@ -93,16 +93,17 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8" dir="rtl">
-      <div className="flex items-center justify-between mb-8">
+    <div className="mx-auto max-w-5xl space-y-6 bg-[#f4f1e9] p-4 text-[#1f2924] [&_button]:rounded-none [&_input]:rounded-none [&_select]:rounded-none [&_textarea]:rounded-none sm:p-8" dir="rtl">
+      <div className="mb-6 flex items-center justify-between border-b border-[#d7d4ca] pb-5">
         <div>
-          <h1 className="text-3xl font-black text-gray-900">إعدادات المنصة</h1>
-          <p className="text-gray-500">إدارة معلومات التواصل ومحتوى الصفحة الرئيسية</p>
+          <p className="mb-1 text-[10px] font-bold tracking-[0.18em] text-[#758178]">PLATFORM CONTROL</p>
+          <h1 className="text-3xl font-black tracking-tight text-[#174d3a]">إعدادات المنصة</h1>
+          <p className="text-sm text-[#667168]">إدارة معلومات التواصل ومحتوى الصفحة الرئيسية</p>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-3 bg-[#10B981] text-white rounded-xl font-bold hover:bg-[#059669] transition-all disabled:opacity-50"
+          className="flex items-center gap-2 bg-[#174d3a] px-5 py-3 text-sm font-bold text-[#f8f6f0] transition-colors hover:bg-[#123c2d] disabled:opacity-50"
         >
           {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
           حفظ التغييرات
@@ -111,8 +112,8 @@ export default function SettingsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Contact Settings */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
-          <div className="flex items-center gap-2 text-[#10B981] mb-4">
+        <div className="space-y-4 border border-[#d7d4ca] bg-[#f8f6f0] p-5 shadow-sm">
+          <div className="mb-4 flex items-center gap-2 text-[#174d3a]">
             <Phone className="w-5 h-5" />
             <h2 className="font-bold text-lg">معلومات التواصل</h2>
           </div>
@@ -150,8 +151,8 @@ export default function SettingsPage() {
         </div>
 
         {/* Social Media */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
-          <div className="flex items-center gap-2 text-[#10B981] mb-4">
+        <div className="space-y-4 border border-[#d7d4ca] bg-[#f8f6f0] p-5 shadow-sm">
+          <div className="mb-4 flex items-center gap-2 text-[#174d3a]">
             <Layout className="w-5 h-5" />
             <h2 className="font-bold text-lg">روابط التواصل الاجتماعي</h2>
           </div>
@@ -182,8 +183,8 @@ export default function SettingsPage() {
         </div>
 
         {/* Hero Content */}
-        <div className="md:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
-          <div className="flex items-center gap-2 text-[#10B981] mb-4">
+        <div className="md:col-span-2 space-y-4 border border-[#d7d4ca] bg-[#f8f6f0] p-5 shadow-sm">
+          <div className="mb-4 flex items-center gap-2 text-[#174d3a]">
             <Layout className="w-5 h-5" />
             <h2 className="font-bold text-lg">محتوى الصفحة الرئيسية</h2>
           </div>
@@ -211,23 +212,23 @@ export default function SettingsPage() {
         </div>
 
         {/* Learning Path Management */}
-        <div className="md:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+        <div className="md:col-span-2 space-y-6 border border-[#d7d4ca] bg-[#f8f6f0] p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2 text-[#10B981]">
+            <div className="flex items-center gap-2 text-[#174d3a]">
               <MapIcon className="w-5 h-5" />
               <h2 className="font-bold text-lg">إدارة خطة التعلم (Learning Path)</h2>
             </div>
             <button
               onClick={addStep}
-              className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-lg font-bold hover:bg-emerald-100 transition-colors flex items-center gap-2"
+              className="flex items-center gap-2 border border-[#b8c8ba] bg-[#e8eee8] px-4 py-2 text-sm font-bold text-[#174d3a] transition-colors hover:bg-[#d8e5d9]"
             >
-              + إضافة خطوة
+              إضافة خطوة
             </button>
           </div>
 
           <div className="space-y-4">
             {pathSteps.map((step, index) => (
-              <div key={step.id} className="p-4 border border-gray-100 rounded-xl bg-gray-50/50 space-y-4 relative group">
+              <div key={step.id} className="group relative space-y-4 border border-[#d7d4ca] bg-[#f4f1e9] p-4">
                 <button 
                   onClick={() => removeStep(step.id)}
                   className="absolute top-4 left-4 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"

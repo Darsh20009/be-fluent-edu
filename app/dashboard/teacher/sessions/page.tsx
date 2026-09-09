@@ -97,12 +97,13 @@ export default function TeacherSessionsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-primary-600 dark:text-primary-300 mb-2">
+    <div className="mx-auto max-w-6xl space-y-5 bg-[#f4f1e9] p-4 text-[#1f2924] sm:p-6" dir="rtl">
+      <div className="border-b border-[#d7d4ca] pb-5">
+        <p className="mb-1 text-[10px] font-bold tracking-[0.18em] text-[#758178]">TEACHING OPERATIONS</p>
+        <h1 className="mb-2 text-3xl font-black tracking-tight text-[#174d3a]">
           My Sessions / حصصي
         </h1>
-        <p className="text-neutral-600 dark:text-neutral-400">
+        <p className="text-sm text-[#667168]">
           Manage your sessions - edit, delete, or schedule new ones
         </p>
       </div>
@@ -118,13 +119,13 @@ export default function TeacherSessionsPage() {
       ) : (
         <div className="grid gap-4">
           {sessions.map(session => (
-            <Card key={session.id} variant="elevated">
+            <Card key={session.id} variant="elevated" className="!rounded-none !border-[#d7d4ca] !bg-[#f8f6f0] !shadow-none">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-primary-600 dark:text-primary-300 mb-2">
+                  <h3 className="mb-3 text-lg font-bold text-[#174d3a]">
                     {session.title}
                   </h3>
-                  <div className="space-y-2 text-sm text-neutral-600 dark:text-neutral-400">
+                  <div className="space-y-2 text-sm text-[#667168]">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
                       <span>{new Date(session.startTime).toLocaleDateString('ar-EG')}</span>
@@ -161,7 +162,7 @@ export default function TeacherSessionsPage() {
                               const msg = `مرحباً ${s.User.name}، نذكركم بموعد حصة: ${session.title} الآن.`
                               window.open(`https://wa.me/${s.User.phone || ''}?text=${encodeURIComponent(msg)}`, '_blank')
                             }}
-                            className="text-xs py-1 h-auto border-green-500 text-green-600 hover:bg-green-50"
+                             className="h-auto !rounded-none !border-[#8ba98e] !py-1 text-xs !text-[#174d3a] hover:!bg-[#e8eee8]"
                           >
                             WhatsApp {s.User.name}
                           </Button>
@@ -176,7 +177,7 @@ export default function TeacherSessionsPage() {
                       variant="primary"
                       size="sm"
                       onClick={() => window.open(session.externalLink!, '_blank')}
-                      className="bg-blue-600 hover:bg-blue-700"
+                       className="!rounded-none !bg-[#174d3a] hover:!bg-[#123c2d]"
                     >
                       Join External / انضمام خارجي
                     </Button>
@@ -216,19 +217,19 @@ export default function TeacherSessionsPage() {
                       placeholder="Session Title"
                       value={editData.title}
                       onChange={e => setEditData({ ...editData, title: e.target.value })}
-                      className="w-full p-2 border rounded dark:bg-neutral-800 dark:text-neutral-100"
+                       className="w-full border border-[#c9c7bc] bg-[#f8f6f0] p-2 text-[#1f2924] outline-none focus:border-[#174d3a]"
                     />
                     <input
                       type="datetime-local"
                       value={editData.startTime}
                       onChange={e => setEditData({ ...editData, startTime: e.target.value })}
-                      className="w-full p-2 border rounded dark:bg-neutral-800 dark:text-neutral-100"
+                       className="w-full border border-[#c9c7bc] bg-[#f8f6f0] p-2 text-[#1f2924] outline-none focus:border-[#174d3a]"
                     />
                     <input
                       type="datetime-local"
                       value={editData.endTime}
                       onChange={e => setEditData({ ...editData, endTime: e.target.value })}
-                      className="w-full p-2 border rounded dark:bg-neutral-800 dark:text-neutral-100"
+                       className="w-full border border-[#c9c7bc] bg-[#f8f6f0] p-2 text-[#1f2924] outline-none focus:border-[#174d3a]"
                     />
                     <div className="space-y-2">
                       <label className="text-sm font-medium">External Meeting Link (Optional)</label>
@@ -237,7 +238,7 @@ export default function TeacherSessionsPage() {
                         placeholder="https://zoom.us/j/..."
                         value={editData.externalLink || ''}
                         onChange={e => setEditData({ ...editData, externalLink: e.target.value })}
-                        className="w-full p-2 border rounded dark:bg-neutral-800 dark:text-neutral-100"
+                       className="w-full border border-[#c9c7bc] bg-[#f8f6f0] p-2 text-[#1f2924] outline-none focus:border-[#174d3a]"
                       />
                     </div>
                     <div className="space-y-2">
@@ -245,7 +246,7 @@ export default function TeacherSessionsPage() {
                       <select
                         value={editData.externalLinkType || 'OTHER'}
                         onChange={e => setEditData({ ...editData, externalLinkType: e.target.value })}
-                        className="w-full p-2 border rounded dark:bg-neutral-800 dark:text-neutral-100"
+                         className="w-full border border-[#c9c7bc] bg-[#f8f6f0] p-2 text-[#1f2924] outline-none focus:border-[#174d3a]"
                       >
                         <option value="ZOOM">Zoom</option>
                         <option value="GOOGLE_MEET">Google Meet</option>

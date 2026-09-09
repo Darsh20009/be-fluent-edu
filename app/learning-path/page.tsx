@@ -3,8 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Target, Coffee, ClipboardList, Users, ShieldCheck, Zap, Clock, UserPlus } from 'lucide-react';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import { MarketingFrame } from '@/components/marketing/MarketingFrame';
 
 const pathSteps = [
   { 
@@ -59,21 +58,21 @@ const pathSteps = [
 
 export default function LearningPathPage() {
   return (
-    <main className="min-h-screen bg-white font-sans overflow-x-hidden" dir="rtl">
-      <Navbar />
+    <MarketingFrame>
       
       {/* Hero Section */}
-      <section className="relative pt-32 pb-16 bg-gradient-to-b from-emerald-50/50 to-white">
+      <section className="relative border-b border-[#dfe5dd] bg-[#f4f6f0] py-16 sm:py-20">
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl md:text-6xl font-black text-gray-900 mb-6 leading-tight">
-              خريطة <span className="text-[#10B981]">التعلم الذكية</span>
+            <p className="text-[10px] font-bold tracking-[.2em] text-[#147050]">THE LEARNING PATH</p>
+            <h1 className="mt-3 text-4xl font-black text-[#1e2b29] mb-6 leading-tight md:text-5xl">
+              خريطة <span className="text-[#147050]">التعلم العملية</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="max-w-3xl mx-auto leading-8 text-[#66736e]">
               لماذا تختار Be Fluent؟ لأننا لا نقدم مجرد دروس، بل نبني لك طريقاً متكاملاً نحو الطلاقة يبدأ من تحديد أهدافك وحتى الاحتراف.
             </p>
           </motion.div>
@@ -81,7 +80,7 @@ export default function LearningPathPage() {
       </section>
 
       {/* Interactive Map Section */}
-      <section className="py-20 relative overflow-hidden">
+      <section className="relative overflow-hidden py-16">
         <div className="container mx-auto px-4">
           <div className="relative h-[800px] md:h-[600px] w-full max-w-6xl mx-auto">
             {/* SVG Path */}
@@ -102,7 +101,7 @@ export default function LearningPathPage() {
               {pathSteps.map((step, index) => (
                 <motion.div
                   key={step.id}
-                  className="mb-8 md:mb-0 md:absolute bg-white p-6 rounded-3xl shadow-xl border border-gray-100 hover:border-[#10B981] transition-all group z-10 w-full md:w-64"
+                  className="mb-5 border border-[#dbe3dc] bg-[#fffefa] p-5 transition-all hover:border-[#147050] md:absolute md:mb-0 md:w-64"
                   style={{ 
                     left: `${step.x - 10}%`, 
                     top: `${step.y}%` 
@@ -114,15 +113,14 @@ export default function LearningPathPage() {
                 >
                   <div className="flex items-center gap-4 mb-3">
                     <div 
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform"
-                      style={{ backgroundColor: step.color }}
+                      className="flex h-11 w-11 items-center justify-center bg-[#147050] text-white transition-transform"
                     >
                       {step.icon}
                     </div>
-                    <span className="text-4xl font-black text-gray-100 group-hover:text-gray-200 transition-colors">0{step.id}</span>
+                    <span className="font-mono text-3xl font-black text-[#dbe3dc]">0{step.id}</span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">{step.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{step.description}</p>
+                  <h3 className="mb-2 text-lg font-bold text-[#1e2b29]">{step.title}</h3>
+                  <p className="text-sm leading-relaxed text-[#68756f]">{step.description}</p>
                 </motion.div>
               ))}
             </div>
@@ -131,40 +129,39 @@ export default function LearningPathPage() {
       </section>
 
       {/* Special Features Section */}
-      <section className="py-24 bg-gray-50">
+      <section className="border-y border-[#dfe5dd] bg-[#f4f6f0] py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-4">مميزات حصرية لضمان نجاحك</h2>
-            <p className="text-gray-600">نظام تعليمي مرن يتكيف مع احتياجاتك الخاصة</p>
+            <h2 className="mb-4 text-3xl font-black text-[#1e2b29] md:text-4xl">نظام يناسب التزامك</h2>
+            <p className="text-[#68756f]">طريقتان واضحتان للتعلم، بنفس المتابعة الجادة.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             {/* Private Classes */}
             <motion.div 
               whileHover={{ y: -10 }}
-              className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100 relative overflow-hidden"
+              className="relative overflow-hidden border border-[#dbe3dc] bg-[#fffefa] p-7"
             >
-              <div className="absolute top-0 left-0 w-24 h-24 bg-emerald-500/10 rounded-br-[4rem] -ml-6 -mt-6"></div>
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-2xl bg-[#10B981] flex items-center justify-center text-white">
+                <div className="flex h-14 w-14 items-center justify-center bg-[#147050] text-white">
                   <Clock className="w-8 h-8" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900">الدروس الخاصة (Private)</h3>
-                  <span className="text-[#10B981] font-bold">دعم فردي كامل</span>
+                  <h3 className="text-2xl font-bold text-[#1e2b29]">الدروس الخاصة</h3>
+                  <span className="text-sm font-bold text-[#147050]">دعم فردي كامل</span>
                 </div>
               </div>
               <ul className="space-y-4">
-                <li className="flex items-center gap-3 text-gray-700">
-                  <div className="w-2 h-2 rounded-full bg-[#10B981]"></div>
+                <li className="flex items-center gap-3 text-[#53615c]">
+                  <div className="h-1.5 w-1.5 bg-[#147050]"></div>
                   <span>مرونة تامة في اختيار وتعديل أوقات الحصص</span>
                 </li>
-                <li className="flex items-center gap-3 text-gray-700">
-                  <div className="w-2 h-2 rounded-full bg-[#10B981]"></div>
+                <li className="flex items-center gap-3 text-[#53615c]">
+                  <div className="h-1.5 w-1.5 bg-[#147050]"></div>
                   <span>دعم مباشر 24/7 من المعلم الأساسي والمساعد</span>
                 </li>
-                <li className="flex items-center gap-3 text-gray-700">
-                  <div className="w-2 h-2 rounded-full bg-[#10B981]"></div>
+                <li className="flex items-center gap-3 text-[#53615c]">
+                  <div className="h-1.5 w-1.5 bg-[#147050]"></div>
                   <span>تعديل الخطة الدراسية بناءً على سرعتك الشخصية</span>
                 </li>
               </ul>
@@ -173,29 +170,28 @@ export default function LearningPathPage() {
             {/* Group Classes */}
             <motion.div 
               whileHover={{ y: -10 }}
-              className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100 relative overflow-hidden"
+              className="relative overflow-hidden border border-[#dbe3dc] bg-[#fffefa] p-7"
             >
-              <div className="absolute top-0 left-0 w-24 h-24 bg-blue-500/10 rounded-br-[4rem] -ml-6 -mt-6"></div>
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-2xl bg-blue-500 flex items-center justify-center text-white">
+                <div className="flex h-14 w-14 items-center justify-center bg-[#1e2b29] text-white">
                   <UserPlus className="w-8 h-8" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900">الحصص الجماعية</h3>
-                  <span className="text-blue-500 font-bold">تفاعل اجتماعي محفز</span>
+                  <h3 className="text-2xl font-bold text-[#1e2b29]">الحصص الجماعية</h3>
+                  <span className="text-sm font-bold text-[#147050]">تفاعل اجتماعي محفز</span>
                 </div>
               </div>
               <ul className="space-y-4">
-                <li className="flex items-center gap-3 text-gray-700">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                <li className="flex items-center gap-3 text-[#53615c]">
+                  <div className="h-1.5 w-1.5 bg-[#147050]"></div>
                   <span>مجموعات صغيرة جداً (بحد أقصى 3 طلاب فقط) لضمان المشاركة</span>
                 </li>
-                <li className="flex items-center gap-3 text-gray-700">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                <li className="flex items-center gap-3 text-[#53615c]">
+                  <div className="h-1.5 w-1.5 bg-[#147050]"></div>
                   <span>بيئة تنافسية ودية تساعد على كسر حاجز الخوف من التحدث</span>
                 </li>
-                <li className="flex items-center gap-3 text-gray-700">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                <li className="flex items-center gap-3 text-[#53615c]">
+                  <div className="h-1.5 w-1.5 bg-[#147050]"></div>
                   <span>تكلفة اقتصادية مع الحفاظ على جودة التعليم العالية</span>
                 </li>
               </ul>
@@ -204,7 +200,6 @@ export default function LearningPathPage() {
         </div>
       </section>
 
-      <Footer />
-    </main>
+    </MarketingFrame>
   );
 }

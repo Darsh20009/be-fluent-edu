@@ -232,7 +232,7 @@ export default function PlacementTestAdmin() {
       });
       const data = await res.json();
       if (res.ok) {
-        toast.success(`تم إرسال الرابط إلى ${emailInput} ✓`);
+        toast.success(`تم إرسال الرابط إلى ${emailInput}`);
         setEmailInput('');
         setStudentNameInput('');
       } else {
@@ -249,30 +249,30 @@ export default function PlacementTestAdmin() {
   const selectedQType = QUESTION_TYPES.find(t => t.id === form.questionType);
 
   return (
-    <div className="min-h-screen bg-gray-50" dir="rtl">
+    <div className="min-h-screen bg-[#f4f1e9] text-[#1f2924] [&_button]:rounded-none [&_input]:rounded-none [&_select]:rounded-none [&_textarea]:rounded-none" dir="rtl">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="sticky top-0 z-30 border-b border-[#d7d4ca] bg-[#f8f6f0]/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard/admin" className="p-2 hover:bg-gray-100 rounded-xl transition">
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            <Link href="/dashboard/admin" className="border border-[#c9c7bc] p-2 text-[#174d3a] transition hover:bg-[#e8eee8]">
+              <ArrowLeft className="h-5 w-5" />
             </Link>
             <div>
-              <h1 className="text-xl font-black text-gray-900">إدارة الاختبارات والأسئلة</h1>
-              <p className="text-sm text-gray-500">تحكم كامل في بنوك الأسئلة وإعدادات الاختبار</p>
+              <h1 className="text-xl font-black tracking-tight text-[#174d3a]">إدارة الاختبارات والأسئلة</h1>
+              <p className="text-sm text-[#667168]">تحكم كامل في بنوك الأسئلة وإعدادات الاختبار</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-bold text-gray-700 transition"
+              className="hidden items-center gap-2 border border-[#c9c7bc] bg-[#eeece5] px-4 py-2 text-sm font-bold text-[#1f2924] transition hover:bg-[#e4e1d8] sm:flex"
             >
               <Settings2 className="w-4 h-4" />
               إعدادات الاختبار
             </button>
             <button
               onClick={() => { setShowForm(true); setEditingId(null); setForm({ ...emptyQuestion, testType: activeTestType }); }}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-sm font-bold text-white transition shadow-lg shadow-emerald-200"
+              className="flex items-center gap-2 bg-[#174d3a] px-4 py-2 text-sm font-bold text-[#f8f6f0] transition hover:bg-[#123c2d]"
             >
               <Plus className="w-4 h-4" />
               إضافة سؤال
@@ -281,18 +281,18 @@ export default function PlacementTestAdmin() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      <div className="mx-auto max-w-7xl space-y-5 px-4 py-5 sm:px-6 sm:py-7">
 
         {/* Test Type Tabs */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-2 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1 border border-[#d7d4ca] bg-[#f8f6f0] p-2">
           {TEST_TYPES.map(type => (
             <button
               key={type.id}
               onClick={() => { setActiveTestType(type.id); setShowForm(false); }}
               className={`flex-1 min-w-fit px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
                 activeTestType === type.id
-                  ? 'bg-emerald-600 text-white shadow-md'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'bg-[#174d3a] text-[#f8f6f0]'
+                  : 'text-[#667168] hover:bg-[#eeece5]'
               }`}
             >
               {type.name}

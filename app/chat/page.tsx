@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import ChatBox from '@/components/ChatBox'
 import ConversationsList from '@/components/ConversationsList'
-import { MessageCircle, ArrowRight, Plus, X, Send } from 'lucide-react'
+import { MessageCircle, ArrowRight, Plus, X, Send, Users } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -26,10 +26,10 @@ export default function ChatPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#10B981] to-[#059669]">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-[#f4f1e8]">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white text-lg">جاري التحميل...</p>
+          <div className="w-11 h-11 border-2 border-[#174c3c]/20 border-t-[#174c3c] rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[#19372d] text-sm font-medium">جاري تحميل مساحة المحادثة...</p>
         </div>
       </div>
     )
@@ -67,48 +67,49 @@ export default function ChatPage() {
 
   function getRoleBadge(role: string) {
     switch (role) {
-      case 'TEACHER': return { text: 'مدرس', icon: '👨‍🏫', color: 'bg-purple-500/20 text-purple-700 border border-purple-300' }
-      case 'STUDENT': return { text: 'طالب', icon: '👨‍🎓', color: 'bg-blue-500/20 text-blue-700 border border-blue-300' }
-      case 'ADMIN': return { text: 'مدير', icon: '👨‍💼', color: 'bg-red-500/20 text-red-700 border border-red-300' }
-      default: return { text: 'مستخدم', icon: '👤', color: 'bg-gray-500/20 text-gray-700 border border-gray-300' }
+      case 'TEACHER': return { text: 'مدرس', color: 'bg-[#e8eee7] text-[#174c3c] border border-[#bed0bf]' }
+      case 'STUDENT': return { text: 'طالب', color: 'bg-[#f1eee4] text-[#585c4f] border border-[#d6d0bd]' }
+      case 'ADMIN': return { text: 'مدير', color: 'bg-[#f1e8df] text-[#8a513e] border border-[#dfcabc]' }
+      default: return { text: 'مستخدم', color: 'bg-[#f1eee4] text-[#585c4f] border border-[#d6d0bd]' }
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-[100dvh] bg-[#f4f1e8] text-[#19372d]" dir="rtl">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-4 sm:p-6 shadow-2xl border-b-4 border-[#003B6F]">
-        <div className="container mx-auto flex items-center justify-between">
+      <div className="bg-[#f7f5ed] border-b border-[#d6d2c3] p-4 sm:px-8">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push('/')}
-              className="hover:bg-white/20 p-2 rounded-lg transition-all duration-200 hover:scale-110"
+              className="hover:bg-[#e8eee7] p-2 transition-colors"
             >
-              <ArrowRight className="h-6 w-6" />
+              <ArrowRight className="h-5 w-5" />
             </button>
             <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold flex items-center gap-2">
-                💬 المحادثات الفورية
+              <p className="text-[10px] tracking-[.2em] text-[#718075] uppercase mb-1">Be Fluent / Messages</p>
+              <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+                المحادثات
               </h1>
-              <p className="text-sm text-gray-200 mt-1">تواصل مع المدرسين والطلاب بسهولة</p>
+              <p className="text-sm text-[#69756c] mt-1">مساحة خاصة للتواصل مع معلّمك وفريق التعلّم</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto h-[calc(100vh-120px)] p-4 flex gap-4">
+      <div className="max-w-7xl mx-auto min-h-[calc(100dvh-112px)] p-3 sm:p-5 flex gap-4">
         {/* Left Sidebar - Conversations List */}
         <div className="hidden lg:flex lg:w-80 flex-col gap-4">
-          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col h-full border-2 border-slate-200">
+          <div className="bg-[#fbfaf5] border border-[#d6d2c3] overflow-hidden flex flex-col h-full">
             {/* Sidebar Header */}
-            <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-4 flex items-center justify-between flex-shrink-0">
+            <div className="bg-[#e8eee7] border-b border-[#d6d2c3] p-4 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5" />
-                <h2 className="font-bold text-lg">محادثاتك</h2>
+                <MessageCircle className="h-5 w-5 text-[#174c3c]" />
+                <h2 className="font-bold text-base">محادثاتك</h2>
               </div>
               <button
                 onClick={() => setShowNewChatModal(true)}
-                className="bg-white text-[#10B981] hover:bg-gray-100 p-2 rounded-lg transition-all duration-200 hover:scale-110 font-bold"
+                className="bg-[#174c3c] text-[#f7f5ed] hover:bg-[#0f392c] p-2 transition-colors font-bold"
                 title="محادثة جديدة"
               >
                 <Plus className="h-5 w-5" />
@@ -128,14 +129,14 @@ export default function ChatPage() {
         <div className="flex-1 flex flex-col gap-4">
           {/* Mobile Header - Show selected user */}
           {selectedUser && (
-            <div className="lg:hidden bg-gradient-to-r from-[#10B981] to-[#059669] text-white rounded-2xl p-4 flex items-center justify-between shadow-lg">
+            <div className="lg:hidden bg-[#174c3c] text-[#f7f5ed] p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold text-lg">
+                <div className="w-10 h-10 bg-[#e8eee7] text-[#174c3c] rounded-full flex items-center justify-center font-bold text-lg">
                   {selectedUser.name?.charAt(0).toUpperCase()}
                 </div>
                 <div>
                   <p className="font-bold">{selectedUser.name}</p>
-                  <p className="text-xs text-gray-200">{selectedUser.email}</p>
+                  <p className="text-xs text-[#d8e0d7]">{selectedUser.email}</p>
                 </div>
               </div>
               <button
@@ -150,35 +151,25 @@ export default function ChatPage() {
           {selectedUser ? (
             <ChatBox otherUser={selectedUser} onClose={() => setSelectedUser(null)} />
           ) : (
-            <div className="flex-1 bg-white rounded-2xl shadow-2xl flex flex-col items-center justify-center text-center border-2 border-slate-200 p-6 lg:p-12">
-              <div className="mb-6 p-8 bg-gradient-to-br from-[#10B981]/10 to-[#059669]/10 rounded-full">
-                <Send className="w-16 h-16 text-[#10B981]" />
+            <div className="flex-1 bg-[#fbfaf5] border border-[#d6d2c3] flex flex-col items-center justify-center text-center p-6 lg:p-12">
+              <div className="mb-6 p-6 bg-[#e8eee7] border border-[#ccd6ca]">
+                <Send className="w-12 h-12 text-[#174c3c]" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">لا توجد محادثة نشطة</h2>
-              <p className="text-gray-600 mb-8 text-base max-w-md">اختر محادثة من القائمة أو ابدأ محادثة جديدة للتواصل</p>
+              <h2 className="text-2xl font-bold text-[#19372d] mb-3">ابدأ من حيث يهم</h2>
+              <p className="text-[#69756c] mb-8 text-base max-w-md">اختر محادثة من القائمة أو ابدأ محادثة جديدة للتواصل المباشر.</p>
               
               <button
                 onClick={() => setShowNewChatModal(true)}
-                className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white px-8 py-4 rounded-xl hover:shadow-lg transition-all duration-200 hover:scale-105 flex items-center gap-3 font-bold text-lg"
+                className="bg-[#174c3c] text-[#f7f5ed] px-7 py-3 hover:bg-[#0f392c] transition-colors flex items-center gap-3 font-bold"
               >
                 <Plus className="h-6 w-6" />
                 ابدأ محادثة جديدة
               </button>
 
               {/* Quick Info */}
-              <div className="mt-12 grid grid-cols-3 gap-4 w-full max-w-sm">
-                <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
-                  <p className="text-2xl font-bold text-blue-600">💬</p>
-                  <p className="text-xs text-gray-600 mt-2">محادثات فورية</p>
-                </div>
-                <div className="bg-purple-50 p-4 rounded-lg border-2 border-purple-200">
-                  <p className="text-2xl font-bold text-purple-600">🔐</p>
-                  <p className="text-xs text-gray-600 mt-2">آمنة وخاصة</p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200">
-                  <p className="text-2xl font-bold text-green-600">⚡</p>
-                  <p className="text-xs text-gray-600 mt-2">سريعة</p>
-                </div>
+              <div className="mt-12 flex items-center gap-3 text-xs text-[#69756c]">
+                <Users className="h-4 w-4 text-[#174c3c]" />
+                <span>المراسلات خاصة ومتصلة بحسابك في الأكاديمية</span>
               </div>
             </div>
           )}
@@ -188,12 +179,12 @@ export default function ChatPage() {
       {/* New Chat Modal */}
       {showNewChatModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border-2 border-slate-200">
+          <div className="bg-[#fbfaf5] max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-[#d6d2c3]">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-6 flex items-center justify-between flex-shrink-0">
+            <div className="bg-[#174c3c] text-[#f7f5ed] p-6 flex items-center justify-between flex-shrink-0">
               <div>
                 <h2 className="text-2xl font-bold">اختر محادثة جديدة</h2>
-                <p className="text-sm text-gray-200 mt-1">اختر الشخص الذي تريد التحدث معه</p>
+                <p className="text-sm text-[#d8e0d7] mt-1">اختر الشخص الذي تريد التحدث معه</p>
               </div>
               <button
                 onClick={() => setShowNewChatModal(false)}
@@ -207,13 +198,13 @@ export default function ChatPage() {
             <div className="flex-1 overflow-y-auto p-6">
               {loadingContacts ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="w-12 h-12 border-4 border-[#10B981] border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-10 h-10 border-2 border-[#174c3c]/20 border-t-[#174c3c] rounded-full animate-spin"></div>
                 </div>
               ) : availableContacts.length === 0 ? (
                 <div className="text-center py-12">
-                  <MessageCircle className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-600 font-semibold text-lg">لا توجد جهات اتصال متاحة</p>
-                  <p className="text-sm text-gray-500 mt-2">تأكد من أنك تملك اشتراكًا نشطًا</p>
+                  <MessageCircle className="h-16 w-16 text-[#b6c3b6] mx-auto mb-4" />
+                  <p className="text-[#19372d] font-semibold text-lg">لا توجد جهات اتصال متاحة</p>
+                  <p className="text-sm text-[#69756c] mt-2">تأكد من أن اشتراكك نشط.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -223,24 +214,24 @@ export default function ChatPage() {
                       <button
                         key={contact.id}
                         onClick={() => handleSelectContact(contact)}
-                        className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-gray-200 rounded-xl hover:from-blue-50 hover:to-blue-100 hover:border-[#10B981] transition-all duration-200 text-left hover:shadow-md group"
+                        className="w-full p-4 bg-[#f7f5ed] border border-[#ded9ca] hover:bg-[#edf1e9] hover:border-[#8fa493] transition-colors text-right group"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 bg-gradient-to-br from-[#10B981] to-[#059669] rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0 group-hover:scale-110 transition-transform">
+                          <div className="w-14 h-14 bg-[#174c3c] rounded-full flex items-center justify-center text-[#f7f5ed] text-lg font-bold flex-shrink-0 group-hover:scale-105 transition-transform">
                             {contact.name?.charAt(0).toUpperCase()}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-bold text-gray-900 truncate text-base">
+                              <h4 className="font-bold text-[#19372d] truncate text-base">
                                 {contact.name}
                               </h4>
                               <span className={`px-3 py-1 text-xs font-bold rounded-full whitespace-nowrap ${badge.color}`}>
-                                {badge.icon} {badge.text}
+                                {badge.text}
                               </span>
                             </div>
-                            <p className="text-sm text-gray-600 truncate">{contact.email}</p>
+                            <p className="text-sm text-[#69756c] truncate" dir="ltr">{contact.email}</p>
                           </div>
-                          <div className="text-[#10B981] text-xl group-hover:translate-x-1 transition-transform">→</div>
+                          <ArrowRight className="text-[#174c3c] h-5 w-5 group-hover:-translate-x-1 transition-transform" />
                         </div>
                       </button>
                     )

@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import Input from '@/components/ui/Input'
 import { useRouter } from 'next/navigation'
+import { MarketingFrame } from '@/components/marketing/MarketingFrame'
 
 export default function GrammarPage() {
   const router = useRouter()
@@ -26,31 +27,31 @@ export default function GrammarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F9FAFB] via-white to-[#F9FAFB]">
-      <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-6 shadow-2xl">
-        <div className="container mx-auto">
+    <MarketingFrame>
+      <div className="border-b border-[#dfe5dd] bg-[#1c332e] p-6 text-white">
+        <div className="mx-auto max-w-[1130px]">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <BookOpen className="h-8 w-8" />
               <div>
-                <h1 className="text-3xl font-bold">Grammar Rules / قواعد اللغة</h1>
-                <p className="text-sm text-gray-200 mt-1">دليلك الشامل لقواعد اللغة الإنجليزية</p>
+              <h1 className="text-3xl font-bold">قواعد اللغة الإنجليزية</h1>
+              <p className="mt-1 text-sm text-white/65">دليل عملي للقاعدة التي تحتاجها الآن.</p>
               </div>
             </div>
             <Button
               variant="ghost"
               onClick={() => router.push('/')}
-              className="text-white hover:bg-white/20"
+              className="border border-white/30 text-white hover:bg-white/10"
             >
-              <Home className="h-5 w-5 mr-2" />
-              Home / الرئيسية
+              <Home className="ml-2 h-5 w-5" />
+              الرئيسية
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <Card variant="elevated" className="mb-6 bg-white">
+      <div className="mx-auto max-w-[1130px] px-5 py-10">
+        <Card variant="elevated" className="mb-6 border border-[#dbe3dc] bg-[#fffefa] shadow-none">
           <div className="space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -103,20 +104,20 @@ export default function GrammarPage() {
               <Card
                 key={rule.id}
                 variant="elevated"
-                className="overflow-hidden transition-all duration-300 hover:shadow-2xl bg-white border-2 border-gray-100"
+                className="overflow-hidden border border-[#dbe3dc] bg-[#fffefa] shadow-none transition-colors hover:border-[#147050]"
               >
                 <button
                   onClick={() => toggleRule(rule.id)}
-                  className="w-full text-left p-6 hover:bg-gray-50 transition-colors"
+                  className="w-full p-6 text-right transition-colors hover:bg-[#f6f8f3]"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <span className="px-3 py-1 bg-[#10B981] text-white text-xs font-semibold rounded-full">
+                          <span className="bg-[#147050] px-3 py-1 text-xs font-semibold text-white">
                           {rule.category} / {rule.categoryAr}
                         </span>
                       </div>
-                      <h3 className="text-xl font-bold text-[#10B981] mb-1">
+                      <h3 className="mb-1 text-xl font-bold text-[#147050]">
                         {rule.title}
                       </h3>
                       <h4 className="text-lg font-semibold text-gray-700 mb-3">
@@ -127,27 +128,27 @@ export default function GrammarPage() {
                     </div>
                     <div className="flex-shrink-0">
                       {expandedRule === rule.id ? (
-                        <ChevronUp className="h-6 w-6 text-[#10B981]" />
+                          <ChevronUp className="h-6 w-6 text-[#147050]" />
                       ) : (
-                        <ChevronDown className="h-6 w-6 text-[#10B981]" />
+                          <ChevronDown className="h-6 w-6 text-[#147050]" />
                       )}
                     </div>
                   </div>
                 </button>
 
                 {expandedRule === rule.id && (
-                  <div className="px-6 pb-6 border-t border-gray-200 pt-4 bg-gradient-to-b from-white to-gray-50">
+                   <div className="border-t border-[#dfe5dd] bg-[#f6f8f3] px-6 pb-6 pt-4">
                     <div className="space-y-4">
                       <div>
-                        <h4 className="font-bold text-[#10B981] mb-3 text-lg flex items-center gap-2">
-                          <span className="w-2 h-2 bg-[#10B981] rounded-full"></span>
+                         <h4 className="mb-3 flex items-center gap-2 text-lg font-bold text-[#147050]">
+                           <span className="h-2 w-2 bg-[#147050]"></span>
                           Examples / أمثلة
                         </h4>
                         <div className="space-y-3">
                           {rule.examples.map((example, index) => (
                             <div
                               key={index}
-                              className="bg-white p-4 rounded-lg border-l-4 border-[#10B981] shadow-sm hover:shadow-md transition-shadow"
+                               className="border-r-4 border-[#147050] bg-[#fffefa] p-4"
                             >
                               <p className="text-gray-800 font-medium mb-1">{example.en}</p>
                               <p className="text-gray-600">{example.ar}</p>
@@ -157,9 +158,8 @@ export default function GrammarPage() {
                       </div>
 
                       {rule.notes && (
-                        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
-                          <h4 className="font-bold text-yellow-800 mb-2 flex items-center gap-2">
-                            <span className="text-lg">💡</span>
+                         <div className="border-r-4 border-[#b78732] bg-[#f8f1df] p-4">
+                           <h4 className="mb-2 flex items-center gap-2 font-bold text-[#795b20]">
                             Important Notes / ملاحظات مهمة
                           </h4>
                           <p className="text-gray-800 mb-1">{rule.notes}</p>
@@ -175,7 +175,7 @@ export default function GrammarPage() {
         )}
 
         <div className="mt-8 text-center">
-          <Card variant="elevated" className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white">
+           <Card variant="elevated" className="bg-[#1c332e] text-white shadow-none">
             <div className="p-6">
               <h3 className="text-2xl font-bold mb-2">Total Grammar Rules / إجمالي القواعد</h3>
               <p className="text-4xl font-bold">{grammarRules.length}</p>
@@ -186,6 +186,6 @@ export default function GrammarPage() {
           </Card>
         </div>
       </div>
-    </div>
+    </MarketingFrame>
   )
 }

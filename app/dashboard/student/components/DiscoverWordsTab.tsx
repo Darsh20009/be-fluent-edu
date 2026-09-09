@@ -261,8 +261,8 @@ export default function DiscoverWordsTab({ isActive }: DiscoverWordsTabProps) {
 
                 {/* Tips */}
                 <div className="mt-8 text-sm text-gray-900 bg-blue-50 p-4 rounded-xl border border-blue-200">
-                  <p>💡 <strong>جميع الكلمات</strong> ستُضاف تلقائياً لقائمة "كلماتي" - الكلمات التي تعرفها ستُعلم كـ "معروفة" ✅</p>
-                  <p className="mt-2">📚 الكلمات التي لا تعرفها ستُحفظ كـ "غير معروفة" ❌ لمراجعتها لاحقاً</p>
+                  <p><strong>جميع الكلمات</strong> ستُضاف تلقائياً لقائمة "كلماتي" - الكلمات التي تعرفها ستُعلم كـ "معروفة"</p>
+                  <p className="mt-2">الكلمات التي لا تعرفها ستُحفظ كـ "غير معروفة" لمراجعتها لاحقاً</p>
                 </div>
               </motion.div>
             </motion.div>

@@ -364,7 +364,7 @@ export default function WritingTestsPage() {
                     </div>
                   ) : (
                     <div>
-                      <p className="text-gray-600">📎 Upload handwritten answer</p>
+                      <p className="text-gray-600">Upload handwritten answer</p>
                       <p className="text-xs text-gray-500 mt-1">Images or PDF</p>
                     </div>
                   )}
@@ -442,7 +442,7 @@ export default function WritingTestsPage() {
                     rel="noopener noreferrer"
                     className="text-[#10B981] hover:underline"
                   >
-                    📎 View Manuscript
+                    View Manuscript
                   </a>
                 )}
               </div>

@@ -191,7 +191,7 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
       })
 
       if (res.ok) {
-        toast.success('تم تسليم الواجب! 🎉')
+        toast.success('تم تسليم الواجب بنجاح')
         setOpenAssignment(null)
         setAnswers({})
         fetchAssignments()
@@ -591,7 +591,7 @@ export default function HomeworkTab({ isActive }: { isActive: boolean }) {
                 <div className="flex gap-3 pb-2">
                   <button onClick={handleSubmit} disabled={submitting || totalAnswered < questions.length}
                     className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-base transition disabled:opacity-50 shadow-xl shadow-emerald-200">
-                    {submitting ? 'جاري التسليم...' : totalAnswered < questions.length ? `أجب على ${questions.length - totalAnswered} سؤال متبقي` : 'تسليم الواجب 🎉'}
+                    {submitting ? 'جاري التسليم...' : totalAnswered < questions.length ? `أجب على ${questions.length - totalAnswered} سؤال متبقي` : 'تسليم الواجب'}
                   </button>
                   <button onClick={() => setOpenAssignment(null)} className="px-5 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold hover:bg-gray-200 transition">
                     إلغاء

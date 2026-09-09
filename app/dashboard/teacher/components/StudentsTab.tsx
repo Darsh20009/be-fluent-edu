@@ -117,7 +117,7 @@ export default function StudentsTab({ teacherProfileId }: { teacherProfileId: st
                     {student.activeSubscription && (
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
                         <div className="text-xs font-semibold text-blue-900 mb-1">
-                          📦 {student.activeSubscription.packageTitle}
+                          {student.activeSubscription.packageTitle}
                         </div>
                         <div className="text-xs text-blue-700">
                           حصص متبقية: {student.activeSubscription.lessonsRemaining} | 

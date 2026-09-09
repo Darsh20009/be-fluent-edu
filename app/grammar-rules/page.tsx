@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { BookOpen, ArrowLeft, CheckCircle } from 'lucide-react'
-import AppHeader from '@/components/layout/AppHeader'
+import { BookOpen, CheckCircle } from 'lucide-react'
 import FloatingContactButtons from '@/components/FloatingContactButtons'
+import { MarketingFrame } from '@/components/marketing/MarketingFrame'
 
 export default function GrammarRulesPage() {
   const grammarRules = [
@@ -126,34 +126,17 @@ export default function GrammarRulesPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB]">
-      <AppHeader variant="marketing">
-        <Link
-          href="/"
-          className="px-4 py-2 sm:px-6 sm:py-2 rounded-lg border-2 border-[#10B981] text-[#10B981] hover:bg-[#10B981] hover:text-white transition-colors flex items-center gap-2 text-sm sm:text-base"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Back to Home / العودة للرئيسية</span>
-          <span className="sm:hidden">Back / عودة</span>
-        </Link>
-        <Link
-          href="/auth/login"
-          className="px-4 py-2 sm:px-6 sm:py-2 rounded-lg bg-[#10B981] text-white hover:bg-[#003A6B] transition-colors text-sm sm:text-base"
-        >
-          Login / تسجيل الدخول
-        </Link>
-      </AppHeader>
-
-      <main className="container mx-auto px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12">
+    <MarketingFrame>
+      <main className="mx-auto max-w-[1130px] px-5 py-12 sm:py-16">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-10 md:mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 text-[#10B981]" />
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#10B981]">
+            <BookOpen className="h-9 w-9 text-[#147050]" />
+            <h1 className="text-3xl font-bold text-[#1e2b29] sm:text-4xl">
               English Grammar Rules
             </h1>
           </div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#10B981] mb-3" dir="rtl">
+          <h2 className="mb-3 text-2xl font-bold text-[#147050] sm:text-3xl" dir="rtl">
             قواعد اللغة الإنجليزية
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-gray-700 max-w-3xl mx-auto px-4">
@@ -169,11 +152,11 @@ export default function GrammarRulesPage() {
           {grammarRules.map((section) => (
             <div
               key={section.id}
-              className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-[#10B981]/20"
+               className="overflow-hidden border border-[#dbe3dc] bg-[#fffefa]"
             >
-              <div className="bg-gradient-to-r from-[#10B981] to-[#059669] p-4 sm:p-6">
-                <h3 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-                  <span className="bg-white text-[#10B981] w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
+               <div className="border-b border-[#dbe3dc] bg-[#edf6ef] p-4 sm:p-5">
+                 <h3 className="flex items-center gap-2 text-xl font-bold text-[#1e2b29] sm:text-2xl">
+                   <span className="flex h-8 w-8 items-center justify-center bg-[#147050] text-sm font-bold text-white">
                     {section.id}
                   </span>
                   {section.title}
@@ -185,12 +168,12 @@ export default function GrammarRulesPage() {
                   {section.rules.map((rule, index) => (
                     <div
                       key={index}
-                      className="bg-[#F9FAFB] rounded-lg p-4 hover:shadow-md transition-shadow"
+                       className="border border-[#edf0ed] bg-[#f7f8f4] p-4 transition-colors hover:bg-[#edf6ef]"
                     >
                       <div className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-1" />
+                         <CheckCircle className="mt-1 h-5 w-5 shrink-0 text-[#147050]" />
                         <div className="flex-1">
-                          <h4 className="font-bold text-[#10B981] mb-2 text-base sm:text-lg">
+                           <h4 className="mb-2 text-base font-bold text-[#147050] sm:text-lg">
                             {rule.name}
                           </h4>
                           <div className="space-y-1 text-sm sm:text-base">
@@ -213,8 +196,8 @@ export default function GrammarRulesPage() {
 
         {/* Call to Action */}
         <div className="mt-12 text-center">
-          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-2xl mx-auto border-2 border-[#10B981]/20">
-            <h3 className="text-2xl sm:text-3xl font-bold text-[#10B981] mb-4">
+           <div className="mx-auto max-w-2xl border border-[#dbe3dc] bg-[#edf6ef] p-6 sm:p-8">
+             <h3 className="mb-4 text-2xl font-bold text-[#147050] sm:text-3xl">
               Ready to Practice?
             </h3>
             <p className="text-lg text-gray-700 mb-2" dir="rtl">
@@ -226,13 +209,13 @@ export default function GrammarRulesPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/packages"
-                className="px-6 py-3 rounded-lg bg-[#10B981] text-white hover:bg-[#003A6B] transition-colors font-semibold"
+                 className="bg-[#147050] px-6 py-3 text-[11px] font-semibold text-white transition-colors hover:bg-[#0e5940]"
               >
                 View Packages / الباقات
               </Link>
               <Link
                 href="/auth/register"
-                className="px-6 py-3 rounded-lg border-2 border-[#10B981] text-[#10B981] hover:bg-[#10B981] hover:text-white transition-colors font-semibold"
+                 className="border border-[#147050] px-6 py-3 text-[11px] font-semibold text-[#147050] transition-colors hover:bg-[#147050] hover:text-white"
               >
                 Register Now / سجل الآن
               </Link>
@@ -242,6 +225,6 @@ export default function GrammarRulesPage() {
       </main>
 
       <FloatingContactButtons />
-    </div>
+    </MarketingFrame>
   )
 }

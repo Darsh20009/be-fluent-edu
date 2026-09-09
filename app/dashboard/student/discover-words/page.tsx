@@ -151,7 +151,7 @@ export default function DiscoverWordsPage() {
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Trophy className="h-10 w-10 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">أحسنت! 🎉</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">أحسنت</h2>
           <p className="text-gray-600 mb-6">
             لقد راجعت جميع الكلمات المتاحة في هذا المستوى
             {category !== 'all' && ` وهذه الفئة (${getCategoryName(category)})`}!
@@ -232,9 +232,9 @@ export default function DiscoverWordsPage() {
                     : 'bg-white text-gray-700 border border-gray-200 hover:border-blue-300 hover:bg-blue-50'
                 }`}
               >
-                {lvl === 'beginner' && '🌱 مبتدئ'}
-                {lvl === 'intermediate' && '📚 متوسط'}
-                {lvl === 'advanced' && '🎓 متقدم'}
+                {lvl === 'beginner' && 'مبتدئ'}
+                {lvl === 'intermediate' && 'متوسط'}
+                {lvl === 'advanced' && 'متقدم'}
               </button>
             ))}
           </div>
@@ -270,7 +270,7 @@ export default function DiscoverWordsPage() {
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
                     >
-                      📋 جميع الفئات
+                      جميع الفئات
                     </button>
                     {categories.map((cat) => (
                       <button
@@ -466,7 +466,7 @@ export default function DiscoverWordsPage() {
             transition={{ delay: 0.3 }}
             className="mt-6 text-center text-sm text-gray-500 bg-white/50 rounded-xl p-4"
           >
-            <p>💡 جميع الكلمات تُضاف تلقائياً لقائمة "كلماتي" للمراجعة لاحقاً</p>
+            <p>جميع الكلمات تُضاف تلقائياً لقائمة "كلماتي" للمراجعة لاحقاً</p>
           </motion.div>
         </div>
       </div>

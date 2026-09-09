@@ -77,19 +77,18 @@ export default function HomeTab({ isActive }: HomeTabProps) {
   return (
     <div className="space-y-8" dir="rtl">
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-[2.5rem] bg-[#10B981] p-8 sm:p-10 text-white shadow-2xl shadow-[#10B981]/20">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full translate-x-20 -translate-y-20 blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -translate-x-10 translate-y-10 blur-2xl" />
+      <div className="relative overflow-hidden rounded-none bg-[#0e4c3a] p-8 sm:p-10 text-[#fffdf7] border border-[#08372a]">
+        <div className="absolute top-0 right-0 h-full w-1/3 border-r border-white/10" />
         
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm">
-              <Sparkles className="w-4 h-4 text-amber-300" />
-              <span className="text-xs font-bold uppercase tracking-wider">{greeting} يا بطل!</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 border border-white/25 text-[#e8f0e7]">
+              <Sparkles className="w-4 h-4 text-[#d5c28b]" />
+              <span className="text-xs font-bold tracking-wider">{greeting}</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-black leading-tight">
               جاهز لتطوير لغتك <br />
-              <span className="text-[#D1FAE5]">اليوم؟</span>
+              <span className="text-[#d5c28b]">اليوم؟</span>
             </h1>
             <p className="text-emerald-50/80 text-sm sm:text-base max-w-md font-medium leading-relaxed">
               استمر في التقدم، كل كلمة تتعلمها اليوم تقربك أكثر من الطلاقة التي تطمح إليها.
@@ -97,11 +96,11 @@ export default function HomeTab({ isActive }: HomeTabProps) {
           </div>
           <div className="flex-shrink-0 flex items-center justify-center">
             <div className="relative">
-              <div className="w-32 h-32 sm:w-40 sm:h-40 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md border border-white/20">
-                <Trophy className="w-16 h-16 sm:w-20 sm:h-20 text-amber-300 drop-shadow-lg" />
+              <div className="w-32 h-32 sm:w-40 sm:h-40 bg-white/5 flex items-center justify-center border border-white/20">
+                <Trophy className="w-16 h-16 sm:w-20 sm:h-20 text-[#d5c28b]" />
               </div>
-              <div className="absolute -top-2 -right-2 w-12 h-12 bg-amber-400 rounded-2xl rotate-12 flex items-center justify-center shadow-lg">
-                <Flame className="w-7 h-7 text-white" />
+              <div className="absolute -top-2 -right-2 w-12 h-12 bg-[#d5c28b] flex items-center justify-center">
+                <Flame className="w-7 h-7 text-[#0e4c3a]" />
               </div>
             </div>
           </div>
@@ -116,8 +115,8 @@ export default function HomeTab({ isActive }: HomeTabProps) {
           { label: 'XP الأسبوع', value: '450', icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50' },
           { label: 'أيام الحماس', value: '5', icon: Flame, color: 'text-rose-600', bg: 'bg-rose-50' },
         ].map((item, i) => (
-          <div key={i} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
-            <div className={`w-12 h-12 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+          <div key={i} className="bg-white p-5 rounded-none border border-gray-100 hover:border-[#0e4c3a] transition-all group">
+            <div className={`w-12 h-12 ${item.bg} ${item.color} rounded-none flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
               <item.icon className="w-6 h-6" />
             </div>
             <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{item.label}</p>
@@ -240,8 +239,8 @@ export default function HomeTab({ isActive }: HomeTabProps) {
               
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="relative">
-                  <div className="w-24 h-24 bg-gray-100 rounded-[2rem] overflow-hidden border-4 border-white shadow-xl">
-                    <img src="https://ui-avatars.com/api/?name=Ahmed+Mohamed&background=10B981&color=fff&size=128" alt="Teacher" />
+                    <div className="w-24 h-24 bg-[#dfe9df] text-[#0e4c3a] rounded-full overflow-hidden border-4 border-white shadow-xl grid place-items-center font-black text-3xl">
+                      أ
                   </div>
                   <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white p-1.5 rounded-xl shadow-lg border-2 border-white">
                     <MessageCircle className="w-4 h-4" />

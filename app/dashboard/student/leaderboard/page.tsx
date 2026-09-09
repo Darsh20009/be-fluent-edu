@@ -145,7 +145,7 @@ export default function LeaderboardPage() {
               </div>
               {userRank > 1 && (
                 <p className="text-sm text-gray-500">
-                  استمر للوصول إلى المركز الأول! 💪
+                  استمر للوصول إلى المركز الأول.
                 </p>
               )}
             </div>

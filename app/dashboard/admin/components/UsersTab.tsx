@@ -219,7 +219,7 @@ export default function UsersTab() {
                     {user.Subscription && user.Subscription[0] && (
                       <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-100">
                         <p className="text-xs font-bold text-blue-700">
-                          📦 {user.Subscription[0].Package.titleAr} ({user.Subscription[0].status})
+                          {user.Subscription[0].Package.titleAr} ({user.Subscription[0].status})
                         </p>
                       </div>
                     )}

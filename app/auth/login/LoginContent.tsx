@@ -88,25 +88,25 @@ export default function LoginContent() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-[#F9FAFB] flex flex-col items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#10B981]"></div>
+      <div className="min-h-[100dvh] bg-[#f4f6f0] flex flex-col items-center justify-center">
+        <div className="h-12 w-48 animate-pulse border border-[#cfd8d1] bg-[#fffefa]"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] flex flex-col">
+    <div dir="rtl" className="min-h-[100dvh] bg-[#f4f6f0] flex flex-col">
       <AppHeader variant="marketing">
         <Link
           href="/auth/register"
-          className="px-4 py-2 sm:px-6 sm:py-2 rounded-lg border-2 border-[#10B981] text-[#10B981] hover:bg-[#10B981] hover:text-white transition-colors text-sm sm:text-base"
+          className="border border-[#147050] px-4 py-2 text-[11px] font-bold text-[#147050] hover:bg-[#147050] hover:text-white transition-colors"
         >
           {t('register')}
         </Link>
       </AppHeader>
 
       <div className="flex-1 flex items-center justify-center p-3 sm:p-4 md:p-6">
-        <Card className="w-full max-w-md shadow-2xl bg-[#F9FAFB] border-2 border-[#E5E7EB]">
+        <Card className="w-full max-w-md border border-[#dbe3dc] bg-[#fffefa] p-6 shadow-none sm:p-8">
           <div className="flex justify-between items-center mb-4">
             <Link href="/">
               <Button variant="ghost" size="sm" className="gap-2">
@@ -129,10 +129,10 @@ export default function LoginContent() {
             </div>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-2 sm:mb-3 bg-gradient-to-r from-[#10B981] to-[#059669] bg-clip-text text-transparent">
+            <h1 className="mb-2 text-center text-2xl font-bold text-[#1e2b29] sm:text-3xl">
             {t('welcomeBack')}
           </h1>
-          <p className="text-center text-gray-600 mb-6 sm:mb-8 text-sm sm:text-base">
+            <p className="mb-6 text-center text-sm text-[#68756f] sm:mb-8">
             {t('signIn')}
           </p>
 
@@ -163,6 +163,7 @@ export default function LoginContent() {
             <Input
               label={t('password')}
               type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
               placeholder="••••••••"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -192,20 +193,20 @@ export default function LoginContent() {
               size="lg"
               loading={loading}
               disabled={loading}
-              className="font-semibold bg-[#10B981] hover:bg-[#003A6B] text-white text-base sm:text-lg py-3 sm:py-4"
+               className="bg-[#147050] py-3 text-base font-semibold text-white hover:bg-[#0e5940] sm:py-4"
             >
               {loading ? t('loading') : t('login')}
             </Button>
 
             <p className="text-center text-gray-600 mt-4 text-xs sm:text-sm">
               Don't have an account?{' '}
-              <Link href="/auth/register" className="text-[#10B981] hover:text-[#003A6A] font-semibold">
+              <Link href="/auth/register" className="font-semibold text-[#147050] hover:text-[#0e5940]">
                 {t('register')}
               </Link>
             </p>
 
             <p className="text-center text-gray-600 mt-2 text-xs sm:text-sm">
-              <Link href="/auth/forgot-password" className="text-[#10B981] hover:text-[#003A6A] font-semibold">
+              <Link href="/auth/forgot-password" className="font-semibold text-[#147050] hover:text-[#0e5940]">
                 نسيت كلمة المرور / Forgot Password?
               </Link>
             </p>
@@ -213,8 +214,8 @@ export default function LoginContent() {
         </Card>
       </div>
 
-      <footer className="w-full py-4 sm:py-6 text-center text-sm sm:text-base text-black bg-[#F9FAFB] border-t-2 border-[#E5E7EB] mt-auto">
-        <p className="px-4">Made with ❤️ by MA3K Company</p>
+      <footer className="mt-auto w-full border-t border-[#dfe5dd] bg-[#fdfcf8] py-4 text-center text-[10px] text-[#68756f]">
+        <p className="px-4">Be Fluent Academy</p>
       </footer>
     </div>
   )

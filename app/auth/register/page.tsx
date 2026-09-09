@@ -282,7 +282,7 @@ export default function RegisterPage() {
               >
                 <User className="w-10 h-10 text-white" />
               </motion.div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">مرحباً بك! 👋</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">مرحباً بك</h2>
               <p className="text-gray-600">لنبدأ بالتعرف عليك</p>
             </div>
             
@@ -318,7 +318,7 @@ export default function RegisterPage() {
               >
                 <Mail className="w-10 h-10 text-white" />
               </motion.div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">أهلاً {formData.name.split(' ')[0]}! ✨</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">أهلاً {formData.name.split(' ')[0]}</h2>
               <p className="text-gray-600">كيف يمكننا التواصل معك؟</p>
             </div>
             
@@ -373,7 +373,7 @@ export default function RegisterPage() {
               >
                 <Lock className="w-10 h-10 text-white" />
               </motion.div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">حماية حسابك 🔐</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">حماية حسابك</h2>
               <p className="text-gray-600">أنشئ كلمة مرور قوية</p>
             </div>
             
@@ -420,7 +420,7 @@ export default function RegisterPage() {
               >
                 <Target className="w-10 h-10 text-white" />
               </motion.div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">أخبرنا المزيد عنك 📝</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">أخبرنا المزيد عنك</h2>
               <p className="text-gray-600">لتخصيص تجربة التعلم</p>
             </div>
             
@@ -457,10 +457,10 @@ export default function RegisterPage() {
               </label>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { value: 'morning', label: 'صباحاً', emoji: '🌅' },
-                  { value: 'afternoon', label: 'ظهراً', emoji: '☀️' },
-                  { value: 'evening', label: 'مساءً', emoji: '🌆' },
-                  { value: 'flexible', label: 'مرن', emoji: '🔄' }
+                  { value: 'morning', label: 'صباحاً' },
+                  { value: 'afternoon', label: 'ظهراً' },
+                  { value: 'evening', label: 'مساءً' },
+                  { value: 'flexible', label: 'مرن' }
                 ].map(option => (
                   <button
                     key={option.value}
@@ -472,7 +472,6 @@ export default function RegisterPage() {
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <span className="text-2xl mb-1 block">{option.emoji}</span>
                     <span className="font-medium">{option.label}</span>
                   </button>
                 ))}
@@ -491,7 +490,7 @@ export default function RegisterPage() {
             className="space-y-6"
           >
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">اختر باقتك 💎</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">اختر باقتك</h2>
               <p className="text-gray-600">اختر الخطة المناسبة لاحتياجاتك</p>
             </div>
             <div className="grid gap-4">
@@ -529,7 +528,7 @@ export default function RegisterPage() {
             className="space-y-6"
           >
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">الدفع 💳</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">الدفع</h2>
               <p className="text-gray-600">حول المبلغ إلى الرقم التالي: <span className="font-bold text-emerald-600">+20 10 91515594</span></p>
               <div className="flex justify-center gap-4 mt-4">
                 <span className="text-xs bg-gray-100 px-2 py-1 rounded">Vodafone Cash</span>
@@ -632,19 +631,19 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F9FAFB] via-[#F3F4F6] to-[#F9FAFB] flex flex-col">
+    <div dir="rtl" className="min-h-[100dvh] bg-[#f4f6f0] flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-6">
         <div className="w-full max-w-lg">
           <div className="flex items-center justify-between mb-6">
             {currentStep !== 'name' && currentStep !== 'result' ? (
               <button
                 onClick={handleBack}
-                className="p-2 hover:bg-white/50 rounded-lg transition-colors"
+                className="border border-transparent p-2 transition-colors hover:border-[#cfd8d1]"
               >
                 <ArrowRight className="w-5 h-5 text-gray-600" />
               </button>
             ) : (
-              <Link href="/" className="p-2 hover:bg-white/50 rounded-lg transition-colors">
+              <Link href="/" className="border border-transparent p-2 transition-colors hover:border-[#cfd8d1]">
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </Link>
             )}
@@ -663,17 +662,17 @@ export default function RegisterPage() {
                 <span>الخطوة {currentStepIndex + 1} من {STEPS.length - 1}</span>
                 <span>{Math.round(progress)}%</span>
               </div>
-              <div className="w-full bg-white/50 rounded-full h-2">
+               <div className="h-1.5 w-full bg-[#dfe5dd]">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
-                  className="bg-gradient-to-r from-[#10B981] to-[#059669] h-2 rounded-full"
+                   className="h-1.5 bg-[#147050]"
                 />
               </div>
             </div>
           )}
 
-          <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8">
+           <div className="border border-[#dbe3dc] bg-[#fffefa] p-6 shadow-none sm:p-8">
             {error && currentStep !== 'result' && (
               <Alert
                 variant="error"
@@ -695,7 +694,7 @@ export default function RegisterPage() {
                   onClick={handleNext}
                   fullWidth
                   size="lg"
-                  className="font-semibold bg-gradient-to-r from-[#10B981] to-[#059669] hover:from-[#003A6B] hover:to-[#10B981] text-white"
+                   className="bg-[#147050] font-semibold text-white hover:bg-[#0e5940]"
                 >
                   التالي
                   <ArrowLeft className="w-5 h-5 mr-2" />
@@ -706,15 +705,15 @@ export default function RegisterPage() {
 
           <p className="mt-6 text-center text-gray-600 text-sm">
             لديك حساب بالفعل؟{' '}
-            <Link href="/auth/login" className="text-[#10B981] hover:text-[#003A6B] font-semibold">
+             <Link href="/auth/login" className="font-semibold text-[#147050] hover:text-[#0e5940]">
               تسجيل الدخول
             </Link>
           </p>
         </div>
       </div>
 
-      <footer className="py-4 text-center text-sm text-gray-600">
-        <p>Made with ❤️ by MA3K Company</p>
+       <footer className="border-t border-[#dfe5dd] bg-[#fdfcf8] py-4 text-center text-[10px] text-[#68756f]">
+         <p>Be Fluent Academy</p>
       </footer>
     </div>
   )

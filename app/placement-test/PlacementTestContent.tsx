@@ -5,12 +5,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, Clock, Trophy, ArrowLeft, Loader2, ChevronLeft } from 'lucide-react';
 
-const LEVEL_INFO: Record<string, { label: string; color: string; bg: string; border: string; desc: string; emoji: string }> = {
-  A1: { emoji: '🌱', label: 'مبتدئ', color: 'text-gray-700', bg: 'bg-gray-50', border: 'border-gray-200', desc: 'أنت في البداية — وهذا رائع! سنبني معك أساساً قوياً خطوة بخطوة.' },
-  A2: { emoji: '🌿', label: 'مبتدئ متقدم', color: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-200', desc: 'لديك قاعدة جيدة وستتطور بسرعة مع منهجنا المصمم لمستواك.' },
-  B1: { emoji: '🌳', label: 'متوسط', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200', desc: 'مستواك جيد جداً! يمكنك التواصل في مواقف كثيرة وستصل للطلاقة قريباً.' },
-  B2: { emoji: '⭐', label: 'متوسط متقدم', color: 'text-teal-700', bg: 'bg-teal-50', border: 'border-teal-200', desc: 'مستواك متقدم ومميز. أنت تتواصل بثقة وستصل للاحترافية قريباً.' },
-  C1: { emoji: '🏆', label: 'متقدم', color: 'text-purple-700', bg: 'bg-purple-50', border: 'border-purple-200', desc: 'مستواك ممتاز! أنت قادر على التعبير بطلاقة في معظم المواقف.' },
+const LEVEL_INFO: Record<string, { label: string; color: string; bg: string; border: string; desc: string }> = {
+  A1: { label: 'مبتدئ', color: 'text-[#1e2b29]', bg: 'bg-[#f4f6f0]', border: 'border-[#dbe3dc]', desc: 'أنت في البداية — وهذا رائع! سنبني معك أساساً قوياً خطوة بخطوة.' },
+  A2: { label: 'مبتدئ متقدم', color: 'text-[#147050]', bg: 'bg-[#edf6ef]', border: 'border-[#b8d4c5]', desc: 'لديك قاعدة جيدة وستتطور بسرعة مع منهجنا المصمم لمستواك.' },
+  B1: { label: 'متوسط', color: 'text-[#147050]', bg: 'bg-[#edf6ef]', border: 'border-[#b8d4c5]', desc: 'مستواك جيد جداً! يمكنك التواصل في مواقف كثيرة وستصل للطلاقة قريباً.' },
+  B2: { label: 'متوسط متقدم', color: 'text-[#147050]', bg: 'bg-[#edf6ef]', border: 'border-[#b8d4c5]', desc: 'مستواك متقدم ومميز. أنت تتواصل بثقة وستصل للاحترافية قريباً.' },
+  C1: { label: 'متقدم', color: 'text-[#1e2b29]', bg: 'bg-[#f4f6f0]', border: 'border-[#dbe3dc]', desc: 'مستواك ممتاز! أنت قادر على التعبير بطلاقة في معظم المواقف.' },
 };
 
 interface AnswerRecord {
@@ -133,35 +133,32 @@ export default function PlacementTestContent() {
 
   if (phase === 'intro') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex items-center justify-center p-4" dir="rtl">
-        <div className="bg-white rounded-3xl shadow-xl p-8 sm:p-12 max-w-lg w-full text-center">
-          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="text-4xl">📝</span>
+      <div className="min-h-[100dvh] bg-[#f4f6f0] flex items-center justify-center p-4" dir="rtl">
+        <div className="w-full max-w-lg border border-[#dbe3dc] bg-[#fffefa] p-8 text-center sm:p-12">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center bg-[#147050] text-xl font-bold text-white">
+            BF
           </div>
           <h1 className="text-3xl font-black text-gray-900 mb-3">اختبار تحديد المستوى</h1>
           <p className="text-gray-500 text-lg mb-8 leading-relaxed">
             {TOTAL} أسئلة بسيطة لنعرف مستواك في الإنجليزية ونضع لك خطة مثالية
           </p>
           <div className="grid grid-cols-3 gap-4 mb-8 text-center">
-            <div className="bg-gray-50 rounded-2xl p-4">
-              <div className="text-2xl mb-1">⏱</div>
+            <div className="border border-[#e0e6df] bg-[#f6f8f3] p-4">
               <div className="text-sm font-bold text-gray-700">١٠ دقائق</div>
               <div className="text-xs text-gray-400">مدة الاختبار</div>
             </div>
-            <div className="bg-gray-50 rounded-2xl p-4">
-              <div className="text-2xl mb-1">📊</div>
+            <div className="border border-[#e0e6df] bg-[#f6f8f3] p-4">
               <div className="text-sm font-bold text-gray-700">{TOTAL} أسئلة</div>
               <div className="text-xs text-gray-400">اختيار من متعدد</div>
             </div>
-            <div className="bg-gray-50 rounded-2xl p-4">
-              <div className="text-2xl mb-1">🎯</div>
+            <div className="border border-[#e0e6df] bg-[#f6f8f3] p-4">
               <div className="text-sm font-bold text-gray-700">فوري</div>
               <div className="text-xs text-gray-400">ظهور النتيجة</div>
             </div>
           </div>
           <button
             onClick={startTest}
-            className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold text-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 mb-4"
+            className="mb-4 w-full bg-[#147050] py-4 text-xl font-bold text-white transition-colors hover:bg-[#0e5940]"
           >
             ابدأ الاختبار الآن
           </button>
@@ -175,7 +172,7 @@ export default function PlacementTestContent() {
 
   if (phase === 'loading') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center" dir="rtl">
+      <div className="min-h-[100dvh] bg-[#f4f6f0] flex items-center justify-center" dir="rtl">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-6" />
           <p className="text-gray-600 font-medium text-lg">جاري تحضير اختبارك...</p>
@@ -188,9 +185,9 @@ export default function PlacementTestContent() {
   if (phase === 'result' && result) {
     const info = LEVEL_INFO[result.level] || LEVEL_INFO['A1'];
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex items-center justify-center p-4" dir="rtl">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 sm:p-12 max-w-lg w-full text-center">
-          <div className="text-6xl mb-4">{info.emoji}</div>
+      <div className="min-h-[100dvh] bg-[#f4f6f0] flex items-center justify-center p-4" dir="rtl">
+        <div className="w-full max-w-lg border border-[#dbe3dc] bg-[#fffefa] p-8 text-center sm:p-12">
+          <div className="mb-4 font-mono text-4xl font-black text-[#147050]">{result.level}</div>
           <h1 className="text-3xl font-black text-gray-900 mb-2">تم تحديد مستواك!</h1>
           <p className="text-gray-500 mb-8">إليك نتيجة اختبارك</p>
 

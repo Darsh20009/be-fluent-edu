@@ -9,7 +9,6 @@ import {
   Bell, Settings, BarChart3, Globe, Layers, ChevronDown, PhoneCall
 } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 import HomeTab from './components/HomeTab'
 import UsersTab from './components/UsersTab'
 import SubscriptionsTab from './components/SubscriptionsTab'
@@ -84,22 +83,22 @@ export default function AdminDashboardClient({ user }: Props) {
   const activeLabel = MENU_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || 'لوحة التحكم'
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]" dir="rtl">
+    <div className="min-h-screen bg-[#f4f1e9] text-[#1f2924] [&_button]:rounded-none [&_input]:rounded-none [&_select]:rounded-none [&_textarea]:rounded-none" dir="rtl">
       {/* Sidebar */}
       <aside className={`
-        fixed top-0 right-0 h-full z-50 w-72 bg-white border-l border-slate-200 shadow-2xl
+         fixed top-0 right-0 h-full z-50 w-72 border-l border-[#cfcfc4] bg-[#f8f6f0] shadow-2xl shadow-[#1f2924]/10
         flex flex-col transition-all duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
       `}>
         {/* Logo */}
-        <div className="px-6 py-8 border-b border-slate-50 flex items-center justify-between">
+          <div className="flex items-center justify-between border-b border-[#d7d4ca] px-6 py-6">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-200 group-hover:scale-105 transition-transform">
-              <Shield className="w-6 h-6 text-white" />
+             <div className="grid h-11 w-11 place-items-center bg-[#174d3a] text-[#f8f6f0] transition-transform group-hover:scale-105">
+               <Shield className="w-5 h-5" />
             </div>
             <div>
-              <p className="font-black text-slate-900 text-lg tracking-tight leading-none">Be Fluent</p>
-              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-1">لوحة الإدارة / Admin</p>
+               <p className="text-lg font-black leading-none tracking-[-0.06em] text-[#174d3a]">Be Fluent</p>
+               <p className="mt-1 text-[10px] font-bold tracking-[0.12em] text-[#758178]">لوحة الإدارة / ADMIN DESK</p>
             </div>
           </Link>
           <button className="lg:hidden p-2 hover:bg-slate-100 rounded-xl transition-colors" onClick={() => setSidebarOpen(false)}>
@@ -108,23 +107,23 @@ export default function AdminDashboardClient({ user }: Props) {
         </div>
 
         {/* User Card */}
-        <div className="mx-4 my-6 p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+         <div className="mx-4 my-5 border border-[#d7d4ca] bg-[#eeece5] p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-md shadow-emerald-100">
+             <div className="flex h-10 w-10 items-center justify-center bg-[#174d3a] text-sm font-black text-[#f8f6f0]">
               {user.name?.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-slate-900 text-sm truncate">{user.name}</p>
-              <p className="text-[10px] text-emerald-600 font-black uppercase tracking-tighter">{user.role === 'ADMIN' ? 'المدير العام / Super Admin' : 'مساعد / Assistant'}</p>
+               <p className="truncate text-sm font-bold text-[#1f2924]">{user.name}</p>
+               <p className="text-[10px] font-black tracking-tight text-[#32654b]">{user.role === 'ADMIN' ? 'المدير العام / Super Admin' : 'مساعد / Assistant'}</p>
             </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-4 pb-6 space-y-8 custom-scrollbar">
+         <nav className="custom-scrollbar flex-1 space-y-6 overflow-y-auto px-4 pb-6">
           {MENU_GROUPS.map(group => (
             <div key={group.label} className="space-y-2">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-3">{group.label}</p>
+               <p className="px-3 text-[10px] font-black tracking-[0.16em] text-[#758178]">{group.label}</p>
               <div className="space-y-1">
                 {group.items.map(item => {
                   const Icon = item.icon
@@ -133,13 +132,13 @@ export default function AdminDashboardClient({ user }: Props) {
                     <button
                       key={item.id}
                       onClick={() => { setActiveTab(item.id); setSidebarOpen(false) }}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-bold ${
+                       className={`flex w-full items-center gap-3 border-r-2 px-4 py-2.5 text-right text-sm font-bold transition-colors ${
                         isActive
-                          ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100 translate-x-[-4px]'
-                          : 'text-slate-600 hover:bg-slate-50 hover:text-emerald-600'
+                           ? 'border-[#174d3a] bg-[#dce9dc] text-[#174d3a]'
+                           : 'border-transparent text-[#4c5750] hover:bg-[#eeece5] hover:text-[#174d3a]'
                       }`}
                     >
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                       <Icon className={`h-5 w-5 ${isActive ? 'text-[#174d3a]' : 'text-[#758178]'}`} />
                       {item.label}
                     </button>
                   )
@@ -150,10 +149,10 @@ export default function AdminDashboardClient({ user }: Props) {
         </nav>
 
         {/* Bottom Actions */}
-        <div className="p-4 border-t border-slate-100 space-y-2">
+         <div className="space-y-2 border-t border-[#d7d4ca] p-4">
           <Link
             href="/dashboard/teacher"
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-emerald-600 transition-all"
+             className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#4c5750] transition-colors hover:bg-[#eeece5] hover:text-[#174d3a]"
           >
             <GraduationCap className="w-5 h-5 text-slate-400" />
             لوحة المعلم
@@ -178,11 +177,11 @@ export default function AdminDashboardClient({ user }: Props) {
       {/* Main Content */}
       <div className="lg:pr-72 min-h-screen flex flex-col">
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
-          <div className="px-8 py-4 flex items-center justify-between">
+         <header className="sticky top-0 z-30 border-b border-[#d7d4ca] bg-[#f8f6f0]/95 backdrop-blur">
+           <div className="flex items-center justify-between px-4 py-3 sm:px-8">
             <div className="flex items-center gap-4">
-              <button className="lg:hidden p-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all" onClick={() => setSidebarOpen(true)}>
-                <Menu className="w-6 h-6 text-slate-600" />
+                 <button className="lg:hidden border border-[#c9c7bc] bg-[#f8f6f0] p-2 transition-all hover:bg-[#eeece5]" onClick={() => setSidebarOpen(true)}>
+                 <Menu className="h-5 w-5 text-[#174d3a]" />
               </button>
               <div>
                 <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">
@@ -190,7 +189,7 @@ export default function AdminDashboardClient({ user }: Props) {
                   <ChevronRight className="w-3 h-3" />
                   <span className="text-emerald-600">{activeLabel}</span>
                 </div>
-                <h1 className="font-black text-slate-900 text-xl tracking-tight">{activeLabel}</h1>
+                 <h1 className="text-xl font-black tracking-tight text-[#1f2924]">{activeLabel}</h1>
               </div>
             </div>
 
@@ -232,8 +231,8 @@ export default function AdminDashboardClient({ user }: Props) {
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto">
+         <main className="flex-1 p-4 sm:p-6">
+           <div className="mx-auto max-w-7xl">
             {activeTab === 'home'          && <HomeTab setActiveTab={setActiveTab} />}
             {activeTab === 'leads'         && <LeadsTab />}
             {activeTab === 'users'         && <UsersTab />}

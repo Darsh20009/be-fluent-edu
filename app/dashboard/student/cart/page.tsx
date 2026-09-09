@@ -120,8 +120,8 @@ export default function CartPage() {
                       {item.Package.title} / {item.Package.titleAr}
                     </h3>
                     <div className="text-gray-700 space-y-1">
-                      <p>📚 {item.Package.lessonsCount} lessons / حصة</p>
-                      <p>⏱️ {Math.ceil(item.Package.durationDays / 30)} month(s) / شهر</p>
+                      <p>{item.Package.lessonsCount} lessons / حصة</p>
+                      <p>{Math.ceil(item.Package.durationDays / 30)} month(s) / شهر</p>
                     </div>
                   </div>
                   <div className="text-right space-y-3">

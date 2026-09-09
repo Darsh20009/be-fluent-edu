@@ -130,19 +130,19 @@ export default function AIAssistantPage() {
     const welcomeMessage: Message = {
       id: 'welcome',
       role: 'assistant',
-      content: `مرحباً! 🎓 أنا Be Fluent AI، مساعدك الذكي المجاني لتعلم اللغة الإنجليزية!
+      content: `مرحباً! أنا Be Fluent AI، مساعدك الذكي المجاني لتعلم اللغة الإنجليزية!
 
 Hello! I'm Be Fluent AI, your FREE smart English learning assistant!
 
-🎤 يمكنني التحدث معك بالصوت! اضغط على أيقونة السماعة لسماعي.
-🎙️ يمكنك التحدث معي! اضغط على أيقونة المايكروفون.
+يمكنني التحدث معك بالصوت. اضغط على أيقونة السماعة لسماعي.
+يمكنك التحدث معي. اضغط على أيقونة المايكروفون.
 
 كيف يمكنني مساعدتك اليوم؟ أستطيع:
-✅ شرح قواعد اللغة الإنجليزية
-✅ تصحيح الأخطاء اللغوية  
-✅ مساعدتك في الترجمة
-✅ تعليمك كلمات جديدة
-✅ التدرب على المحادثة
+- شرح قواعد اللغة الإنجليزية
+- تصحيح الأخطاء اللغوية  
+- مساعدتك في الترجمة
+- تعليمك كلمات جديدة
+- التدرب على المحادثة
 
 How can I help you today?`,
       timestamp: new Date()
@@ -193,7 +193,6 @@ How can I help you today?`,
     
     // Clean text for speech (remove emojis, markdown, etc.)
     const cleanText = text
-      .replace(/[🎓📚✨🌟💡✅❌🎤🎙️🔊]/g, '')
       .replace(/\*\*/g, '')
       .replace(/\n+/g, '. ')
       .slice(0, 500) // Limit length
@@ -271,7 +270,7 @@ IMPORTANT RULES:
 3. Use simple, clear language for beginners
 4. Provide practical examples from daily life
 5. Correct mistakes gently and explain why
-6. Use emojis to make learning fun 🎓📚✨
+6. Keep formatting clean and do not use emojis
 
 YOUR CAPABILITIES:
 - Explain English grammar rules with Arabic translations
@@ -281,16 +280,16 @@ YOUR CAPABILITIES:
 - Help with writing and speaking skills
 
 RESPONSE FORMAT EXAMPLE:
-"Great question! 🌟
+"Great question!
 **In English:** The word 'beautiful' means very pretty.
 **بالعربي:** كلمة 'beautiful' تعني جميل جداً.
 
 **Example:** She has beautiful eyes.
 **مثال:** لديها عيون جميلة.
 
-💡 **Pronunciation:** BYOO-tih-ful
+**Pronunciation:** BYOO-tih-ful
 
-Keep practicing! استمر في التدريب! 💪"`
+Keep practicing! استمر في التدريب."`
 
       const conversationHistory = messages.slice(-10).map(m => ({
         role: m.role,
@@ -369,7 +368,7 @@ Keep practicing! استمر في التدريب! 💪"`
     setMessages([{
       id: 'welcome',
       role: 'assistant',
-      content: `مرحباً! 🎓 أنا جاهز لمساعدتك في تعلم الإنجليزية!
+      content: `مرحباً! أنا جاهز لمساعدتك في تعلم الإنجليزية!
 
 Hello! I'm ready to help you learn English!
 
@@ -429,7 +428,7 @@ Hello! I'm ready to help you learn English!
                   Be Fluent AI
                   <span className="text-xs bg-green-500 px-2 py-0.5 rounded-full">مجاني FREE</span>
                 </h1>
-                <p className="text-xs text-white/80">مساعدك الذكي للتعلم • يتكلم ويسمع 🎤</p>
+                <p className="text-xs text-white/80">مساعدك الذكي للتعلم • يتكلم ويسمع</p>
               </div>
             </div>
           </div>
@@ -585,7 +584,7 @@ Hello! I'm ready to help you learn English!
                 <div className="bg-white rounded-2xl px-4 py-3 border border-gray-200 shadow-sm">
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin text-[#10B981]" />
-                    <span className="text-gray-500">جاري التفكير... 🤔</span>
+                    <span className="text-gray-500">جاري التفكير...</span>
                   </div>
                 </div>
               </div>
@@ -649,7 +648,7 @@ Hello! I'm ready to help you learn English!
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={isListening ? '🎤 جاري الاستماع...' : 'اكتب سؤالك هنا... / Type your question...'}
+              placeholder={isListening ? 'جاري الاستماع...' : 'اكتب سؤالك هنا... / Type your question...'}
               className="flex-1 px-4 py-3 border-2 border-gray-300 bg-white text-black placeholder:text-gray-500 rounded-full focus:ring-2 focus:ring-[#10B981] focus:border-transparent text-right"
               dir="auto"
               disabled={loading || !puterReady}
@@ -671,12 +670,12 @@ Hello! I'm ready to help you learn English!
             )}
             {speechSupported && (
               <span className="text-blue-600 flex items-center gap-1">
-                🔊 الصوت متاح
+                الصوت متاح
               </span>
             )}
             {recognitionSupported && (
               <span className="text-purple-600 flex items-center gap-1">
-                🎤 التحدث متاح
+                التحدث متاح
               </span>
             )}
           </div>

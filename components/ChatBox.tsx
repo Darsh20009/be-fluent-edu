@@ -144,15 +144,6 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
     }
   }
 
-  const getRoleColor = (role?: string) => {
-    switch (role) {
-      case 'TEACHER': return 'text-purple-600'
-      case 'STUDENT': return 'text-blue-600'
-      case 'ADMIN': return 'text-red-600'
-      default: return 'text-gray-600'
-    }
-  }
-
   const getRoleBadge = (role?: string) => {
     switch (role) {
       case 'TEACHER': return 'مدرس'
@@ -163,12 +154,12 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-xl border-2 border-gray-300 overflow-hidden">
+    <div className="flex flex-col h-full bg-[#fbfaf5] border border-[#d6d2c3] overflow-hidden">
       {/* Header */}
-      <div className="bg-[#10B981] p-4 text-white">
+      <div className="bg-[#174c3c] p-4 text-[#f7f5ed]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white dark:bg-neutral-200 rounded-full flex items-center justify-center text-primary-600 dark:text-primary-700 font-bold">
+            <div className="w-10 h-10 bg-[#e8eee7] rounded-full flex items-center justify-center text-[#174c3c] font-bold">
               {otherUser.profilePhoto ? (
                 <img src={otherUser.profilePhoto} alt={otherUser.name} className="w-full h-full rounded-full object-cover" />
               ) : (
@@ -178,7 +169,7 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
             <div>
               <h3 className="font-bold text-lg">{otherUser.name}</h3>
               {otherUser.role && (
-                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                <span className="text-xs bg-[#f7f5ed]/15 px-2 py-0.5 rounded-full">
                   {getRoleBadge(otherUser.role)}
                 </span>
               )}
@@ -196,16 +187,16 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 bg-[#f7f5ed]">
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <Loader2 className="w-8 h-8 animate-spin text-primary-600 dark:text-primary-400" />
+            <Loader2 className="w-8 h-8 animate-spin text-[#174c3c]" />
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-neutral-400 dark:text-neutral-500">
-            <MessageCircle className="w-16 h-16 mb-2" />
-            <p>لا توجد رسائل بعد</p>
-            <p className="text-sm">ابدأ المحادثة الآن!</p>
+          <div className="flex flex-col items-center justify-center h-full text-[#718075]">
+            <MessageCircle className="w-14 h-14 mb-3 text-[#afbdaf]" />
+            <p className="font-medium">لا توجد رسائل بعد</p>
+            <p className="text-sm">ابدأ المحادثة عندما تكون جاهزاً.</p>
           </div>
         ) : (
           messages.map((message) => {
@@ -218,14 +209,14 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
                 <div
                   className={`max-w-[70%] rounded-2xl px-4 py-2 ${
                     isOwn
-                      ? 'bg-[#10B981] text-white rounded-br-sm'
-                      : 'bg-gray-100 text-black border-2 border-gray-300 rounded-bl-sm'
+                      ? 'bg-[#174c3c] text-[#f7f5ed] rounded-br-sm'
+                      : 'bg-[#eceae0] text-[#19372d] border border-[#d8d5c7] rounded-bl-sm'
                   }`}
                 >
-                  <p className="whitespace-pre-wrap break-words text-right" dir="rtl">
+                    <p className="whitespace-pre-wrap break-words text-right" dir="auto">
                     {message.content}
                   </p>
-                  <p className={`text-xs mt-1 ${isOwn ? 'text-white/70' : 'text-neutral-400 dark:text-neutral-500'}`}>
+                    <p className={`text-xs mt-1 ${isOwn ? 'text-[#d8e0d7]' : 'text-[#7b867d]'}`}>
                     {new Date(message.createdAt).toLocaleTimeString('ar-EG', {
                       hour: '2-digit',
                       minute: '2-digit'
@@ -240,12 +231,12 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
       </div>
 
       {/* Input */}
-      <div className="p-4 bg-white border-t-2 border-gray-300">
+      <div className="p-4 bg-[#fbfaf5] border-t border-[#d6d2c3]">
         <div className="flex gap-2">
           <button
             onClick={handleSend}
             disabled={!newMessage.trim() || sending}
-            className="bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-500 dark:to-primary-600 text-white p-3 rounded-full hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+            className="bg-[#174c3c] text-[#f7f5ed] p-3 rounded-full hover:bg-[#0f392c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
           >
             {sending ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -259,7 +250,7 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="اكتب رسالتك..."
-            className="flex-1 px-4 py-3 border-2 border-gray-300 bg-white text-black placeholder:text-gray-500 rounded-full focus:ring-2 focus:ring-[#10B981] focus:border-transparent text-right"
+            className="flex-1 px-4 py-3 border border-[#c9c8ba] bg-[#fdfcf7] text-[#19372d] placeholder:text-[#7b867d] rounded-full focus:outline-none focus:ring-2 focus:ring-[#174c3c]/20 focus:border-[#174c3c] text-right"
             dir="rtl"
             disabled={sending}
           />

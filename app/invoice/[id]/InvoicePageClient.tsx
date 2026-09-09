@@ -86,17 +86,20 @@ export default function InvoicePageClient({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <LoadingSpinner size="lg" />
+      <div className="min-h-[100dvh] bg-[#f4f1e8] flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-10 w-10 mx-auto mb-4 rounded-full border-2 border-[#174c3c]/20 border-t-[#174c3c] animate-spin" />
+          <p className="text-sm font-medium text-[#19372d]">يتم إعداد الفاتورة...</p>
+        </div>
       </div>
     )
   }
 
   if (error || !subscription) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+      <div className="min-h-[100dvh] bg-[#f4f1e8] flex items-center justify-center p-5" dir="rtl">
+        <div className="text-center bg-[#fbfaf5] border border-[#d6d2c3] p-10 max-w-md">
+          <h1 className="text-2xl font-bold text-[#19372d] mb-2">
             {error || 'Invoice Not Found / الفاتورة غير موجودة'}
           </h1>
           <Link href="/dashboard/student/my-orders">
@@ -122,9 +125,9 @@ export default function InvoicePageClient({
       })
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-[100dvh] bg-[#f4f1e8]" dir="rtl">
       {/* Header Toolbar - Only visible on screen, not printed */}
-      <div className="print:hidden bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+      <div className="print:hidden bg-[#f7f5ed] border-b border-[#d6d2c3] sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Link href="/dashboard/student/my-orders">
@@ -133,7 +136,7 @@ export default function InvoicePageClient({
                 العودة / Back
               </Button>
             </Link>
-            <h1 className="text-xl font-bold text-gray-900">Invoice / الفاتورة</h1>
+            <h1 className="text-xl font-bold text-[#19372d]">الفاتورة <span className="text-sm font-normal text-[#718075]" dir="ltr">/ Invoice</span></h1>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={handlePrint}>
@@ -149,46 +152,46 @@ export default function InvoicePageClient({
       </div>
 
       {/* Invoice Content */}
-      <div id="invoice-content" className="max-w-4xl mx-auto">
+      <div id="invoice-content" className="max-w-4xl mx-auto bg-[#fbfaf5] shadow-[0_18px_50px_rgba(25,52,43,.08)]">
         {/* HEADER */}
-        <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-12 mb-8">
+        <div className="bg-[#174c3c] text-[#f7f5ed] p-8 sm:p-12 mb-8 border-b-4 border-[#a3b7a4]">
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-5xl font-bold mb-2">Be Fluent</h1>
-              <p className="text-blue-100 text-lg">Fluency Comes First</p>
+              <p className="text-[#d8e0d7] text-lg">Fluency Comes First</p>
             </div>
             <div className="text-right">
               <div className="text-6xl font-bold opacity-20 mb-2">INVOICE</div>
-              <div className="text-3xl font-bold text-blue-100">فاتورة</div>
+              <div className="text-3xl font-bold text-[#d8e0d7]">فاتورة</div>
             </div>
           </div>
         </div>
 
-        <div className="px-12 space-y-8 pb-12">
+        <div className="px-5 sm:px-12 space-y-8 pb-12">
           {/* INVOICE INFO */}
-          <div className="grid grid-cols-4 gap-8 pb-8 border-b-2 border-gray-300">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-8 border-b border-[#d6d2c3]">
             <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide font-bold mb-2">Invoice Number</p>
-              <p className="text-2xl font-bold text-gray-900">#{subscription.id.slice(0, 8).toUpperCase()}</p>
+              <p className="text-[#718075] text-xs uppercase tracking-wide font-bold mb-2">Invoice Number</p>
+              <p className="text-xl font-bold text-[#19372d]">#{subscription.id.slice(0, 8).toUpperCase()}</p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide font-bold mb-2">Invoice Date</p>
-              <p className="text-2xl font-bold text-gray-900">{invoiceDate}</p>
+              <p className="text-[#718075] text-xs uppercase tracking-wide font-bold mb-2">Invoice Date</p>
+              <p className="text-xl font-bold text-[#19372d]">{invoiceDate}</p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide font-bold mb-2">Status</p>
-              <p className="text-2xl font-bold text-green-600">PAID ✓</p>
+              <p className="text-[#718075] text-xs uppercase tracking-wide font-bold mb-2">Status</p>
+              <p className="text-xl font-bold text-[#174c3c]">PAID</p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide font-bold mb-2">Payment Method</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-[#718075] text-xs uppercase tracking-wide font-bold mb-2">Payment Method</p>
+              <p className="text-xl font-bold text-[#19372d]">
                 {subscription.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer' : subscription.eWalletProvider || 'E-Wallet'}
               </p>
             </div>
           </div>
 
           {/* BILL TO - CUSTOMER INFO */}
-          <div className="grid grid-cols-2 gap-12 pb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12 pb-8">
             <div>
               <p className="text-gray-500 text-xs uppercase tracking-wide font-bold mb-4">Bill To</p>
               <div className="text-gray-900">
@@ -210,7 +213,7 @@ export default function InvoicePageClient({
           <div className="pb-8">
             <table className="w-full">
               <thead>
-                <tr className="bg-gray-200 border-y-2 border-gray-400">
+                <tr className="bg-[#e8eee7] border-y border-[#bacaba]">
                   <th className="px-6 py-4 text-left text-base font-bold text-gray-900">Description / الوصف</th>
                   <th className="px-6 py-4 text-center text-base font-bold text-gray-900">Qty</th>
                   <th className="px-6 py-4 text-right text-base font-bold text-gray-900">Unit Price</th>
@@ -223,8 +226,8 @@ export default function InvoicePageClient({
                     <p className="font-bold text-gray-900 text-lg">{subscription.Package.titleAr || subscription.Package.title}</p>
                     <p className="text-base text-gray-700 mt-2">{subscription.Package.descriptionAr || subscription.Package.description}</p>
                     <div className="text-sm text-gray-600 mt-3 space-y-1">
-                      <p>• Lessons / الحصص: {subscription.Package.lessonsCount}</p>
-                      <p>• Duration / المدة: {subscription.Package.durationDays} days</p>
+                      <p>Lessons / الحصص: {subscription.Package.lessonsCount}</p>
+                      <p>Duration / المدة: {subscription.Package.durationDays} days</p>
                     </div>
                   </td>
                   <td className="px-6 py-6 text-center text-gray-900 font-bold text-lg">1</td>
@@ -246,7 +249,7 @@ export default function InvoicePageClient({
                 <span className="font-bold">Tax / الضريبة:</span>
                 <span className="font-bold">0.00 SAR</span>
               </div>
-              <div className="flex justify-between bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-6 rounded-lg">
+              <div className="flex justify-between bg-[#174c3c] text-[#f7f5ed] p-6">
                 <span className="font-bold text-xl">Total Amount / الإجمالي:</span>
                 <span className="font-bold text-3xl">{subscription.Package.price} SAR</span>
               </div>
@@ -255,7 +258,7 @@ export default function InvoicePageClient({
 
           {/* SUBSCRIPTION DETAILS */}
           {subscription.startDate && subscription.endDate && (
-            <div className="grid grid-cols-2 gap-8 pb-8 bg-blue-50 p-6 rounded-lg border-2 border-blue-300">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pb-8 bg-[#edf1e9] p-6 border border-[#c8d3c7]">
               <div>
                 <p className="text-gray-700 text-sm font-bold mb-2">Subscription Start / بدء الاشتراك:</p>
                 <p className="text-gray-900 font-bold text-lg">{new Date(subscription.startDate).toLocaleDateString('ar-EG')}</p>
@@ -269,7 +272,7 @@ export default function InvoicePageClient({
 
           {/* PAYMENT REFERENCE */}
           {subscription.paymentReference && (
-            <div className="bg-gray-100 p-6 rounded-lg border-2 border-gray-300">
+            <div className="bg-[#f1eee4] p-6 border border-[#d6d0bd]">
               <p className="text-gray-700 text-sm font-bold mb-3">Payment Reference / مرجع الدفع:</p>
               <p className="font-mono text-gray-900 font-bold text-lg tracking-wider">{subscription.paymentReference}</p>
             </div>

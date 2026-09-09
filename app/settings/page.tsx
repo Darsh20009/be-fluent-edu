@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTheme } from '@/lib/contexts/ThemeContext'
-import { Settings, Sun, Moon, Globe, Palette, Save, ArrowRight } from 'lucide-react'
+import { Settings, Sun, Moon, Globe, Palette, ArrowRight, Languages } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import Alert from '@/components/ui/Alert'
@@ -69,24 +69,26 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] p-4 md:p-8">
+    <div className="min-h-[100dvh] bg-[#f4f1e8] p-4 md:p-8 text-[#19372d]" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <div className="mb-8">
+      <div className="max-w-3xl mx-auto">
+      <div className="mb-8 border-b border-[#d6d2c3] pb-6">
         <div className="flex items-center gap-4 mb-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.back()}
-            className="text-white hover:bg-white/20 p-2"
+            className="text-[#19372d] hover:bg-[#e8eee7] p-2 rounded-none"
           >
-            <ArrowRight className="h-8 w-8 text-black" />
+            <ArrowRight className="h-5 w-5" />
           </Button>
-          <div className="bg-[#10B981] p-3 rounded-xl">
-            <Settings className="h-8 w-8 text-white" />
+          <div className="bg-[#174c3c] p-3">
+            <Settings className="h-6 w-6 text-[#f7f5ed]" />
           </div>
           <div>
-            <h1 className="text-4xl font-bold text-black">{text.title}</h1>
-            <p className="text-black opacity-70">{text.subtitle}</p>
+            <p className="text-[10px] tracking-[.18em] uppercase text-[#718075] mb-1">Be Fluent / preferences</p>
+            <h1 className="text-3xl font-bold">{text.title}</h1>
+            <p className="text-[#69756c] text-sm">{text.subtitle}</p>
           </div>
         </div>
       </div>
@@ -98,12 +100,12 @@ export default function SettingsPage() {
       )}
 
       {/* Theme Settings */}
-      <Card variant="elevated" padding="lg" className="mb-6 bg-[var(--card-bg)] border-2 border-[var(--border)]">
+      <Card variant="elevated" padding="lg" className="mb-5 bg-[#fbfaf5] border border-[#d6d2c3] shadow-none rounded-none">
         <div className="flex items-center gap-3 mb-6">
-          <Palette className="h-6 w-6 text-blue-600" />
+          <Palette className="h-5 w-5 text-[#174c3c]" />
           <div>
-            <h2 className="text-2xl font-bold text-[var(--foreground)]">{text.themeSection}</h2>
-            <p className="text-sm text-[var(--foreground)] opacity-70">{text.themeDesc}</p>
+            <h2 className="text-xl font-bold">{text.themeSection}</h2>
+            <p className="text-sm text-[#69756c]">{text.themeDesc}</p>
           </div>
         </div>
 
@@ -115,11 +117,11 @@ export default function SettingsPage() {
             }}
             className={`p-6 rounded-xl border-2 transition-all ${
               theme === 'light'
-                ? 'bg-blue-600 border-blue-600 text-white shadow-lg scale-105'
-                : 'bg-[var(--card-bg)] border-[var(--border)] text-[var(--foreground)] hover:border-blue-600'
+                ? 'bg-[#174c3c] border-[#174c3c] text-[#f7f5ed]'
+                : 'bg-[#f7f5ed] border-[#d6d2c3] text-[#19372d] hover:border-[#74927a]'
             }`}
           >
-            <Sun className={`h-12 w-12 mx-auto mb-3 ${theme === 'light' ? 'text-white' : 'text-blue-600'}`} />
+            <Sun className={`h-10 w-10 mx-auto mb-3 ${theme === 'light' ? 'text-[#f7f5ed]' : 'text-[#174c3c]'}`} />
             <div className="text-xl font-bold">{text.lightMode}</div>
           </button>
 
@@ -130,23 +132,23 @@ export default function SettingsPage() {
             }}
             className={`p-6 rounded-xl border-2 transition-all ${
               theme === 'dark'
-                ? 'bg-blue-600 border-blue-600 text-white shadow-lg scale-105'
-                : 'bg-[var(--card-bg)] border-[var(--border)] text-[var(--foreground)] hover:border-blue-600'
+                ? 'bg-[#174c3c] border-[#174c3c] text-[#f7f5ed]'
+                : 'bg-[#f7f5ed] border-[#d6d2c3] text-[#19372d] hover:border-[#74927a]'
             }`}
           >
-            <Moon className={`h-12 w-12 mx-auto mb-3 ${theme === 'dark' ? 'text-white' : 'text-blue-600'}`} />
+            <Moon className={`h-10 w-10 mx-auto mb-3 ${theme === 'light' ? 'text-[#f7f5ed]' : 'text-[#174c3c]'}`} />
             <div className="text-xl font-bold">{text.darkMode}</div>
           </button>
         </div>
       </Card>
 
       {/* Language Settings */}
-      <Card variant="elevated" padding="lg" className="mb-6 bg-[var(--card-bg)] border-2 border-[var(--border)]">
+      <Card variant="elevated" padding="lg" className="mb-5 bg-[#fbfaf5] border border-[#d6d2c3] shadow-none rounded-none">
         <div className="flex items-center gap-3 mb-6">
-          <Globe className="h-6 w-6 text-blue-600" />
+          <Globe className="h-5 w-5 text-[#174c3c]" />
           <div>
-            <h2 className="text-2xl font-bold text-[var(--foreground)]">{text.languageSection}</h2>
-            <p className="text-sm text-[var(--foreground)] opacity-70">{text.languageDesc}</p>
+            <h2 className="text-xl font-bold">{text.languageSection}</h2>
+            <p className="text-sm text-[#69756c]">{text.languageDesc}</p>
           </div>
         </div>
 
@@ -158,11 +160,11 @@ export default function SettingsPage() {
             }}
             className={`p-6 rounded-xl border-2 transition-all ${
               language === 'ar'
-                ? 'bg-blue-600 border-blue-600 text-white shadow-lg scale-105'
-                : 'bg-[var(--card-bg)] border-[var(--border)] text-[var(--foreground)] hover:border-blue-600'
+                ? 'bg-[#174c3c] border-[#174c3c] text-[#f7f5ed]'
+                : 'bg-[#f7f5ed] border-[#d6d2c3] text-[#19372d] hover:border-[#74927a]'
             }`}
           >
-            <div className="text-6xl mb-3">🇸🇦</div>
+            <Languages className="h-10 w-10 mx-auto mb-3" />
             <div className="text-xl font-bold">{text.arabic}</div>
           </button>
 
@@ -173,23 +175,23 @@ export default function SettingsPage() {
             }}
             className={`p-6 rounded-xl border-2 transition-all ${
               language === 'en'
-                ? 'bg-blue-600 border-blue-600 text-white shadow-lg scale-105'
-                : 'bg-[var(--card-bg)] border-[var(--border)] text-[var(--foreground)] hover:border-blue-600'
+                ? 'bg-[#174c3c] border-[#174c3c] text-[#f7f5ed]'
+                : 'bg-[#f7f5ed] border-[#d6d2c3] text-[#19372d] hover:border-[#74927a]'
             }`}
           >
-            <div className="text-6xl mb-3">🇬🇧</div>
+            <Languages className="h-10 w-10 mx-auto mb-3" />
             <div className="text-xl font-bold">{text.english}</div>
           </button>
         </div>
       </Card>
 
       {/* Preview Section */}
-      <Card variant="elevated" padding="lg" className="bg-[var(--card-bg)] border-2 border-[var(--border)]">
-        <h3 className="text-xl font-bold text-[var(--foreground)] mb-4">
+      <Card variant="elevated" padding="lg" className="bg-[#fbfaf5] border border-[#d6d2c3] shadow-none rounded-none">
+        <h3 className="text-xl font-bold mb-4">
           {language === 'ar' ? 'معاينة' : 'Preview'}
         </h3>
-        <div className="bg-[var(--background)] p-6 rounded-xl border-2 border-[var(--border)]">
-          <p className="text-[var(--foreground)] text-lg mb-2">
+        <div className="bg-[#edf1e9] p-6 border border-[#c8d3c7]">
+          <p className="text-[#19372d] text-lg mb-2">
             {language === 'ar'
               ? 'هذا مثال على كيفية ظهور النصوص في الموقع'
               : 'This is an example of how text will appear on the site'}
@@ -205,9 +207,10 @@ export default function SettingsPage() {
         </div>
       </Card>
 
-      <footer className="mt-8 text-center text-sm text-black pb-4">
-        Made with ❤️ by MA3K Company
+      <footer className="mt-8 text-center text-xs text-[#718075] pb-4">
+        Be Fluent Academy · English made present
       </footer>
+      </div>
     </div>
   )
 }
