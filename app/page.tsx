@@ -53,15 +53,15 @@ export default function HomePage() {
       <section className="relative isolate mx-auto min-h-[360px] max-w-[1130px] overflow-hidden border-x border-[#e5e9e5] md:min-h-[405px]">
         <Image src={deskImage} alt="مساحة تعلم الإنجليزية" fill priority sizes="100vw" className="-z-20 hero-image-mobile-blur object-cover object-center"/>
         <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[#102927]/45 md:hidden"/>
-        <div dir={isArabic ? 'rtl' : 'ltr'} className={`flex min-h-[360px] w-full flex-col justify-center px-7 py-12 md:min-h-[405px] md:w-[56%] md:px-14 ${isArabic ? 'md:mr-auto' : 'md:mr-auto'}`}>
-          <p className="mb-5 font-['DM_Sans'] text-[9px] font-bold tracking-[.24em] text-[#16835f]">LEARN ENGLISH. BE ANYWHERE.</p>
+        <div dir={isArabic ? 'rtl' : 'ltr'} className={`flex min-h-[360px] w-full flex-col justify-center px-7 py-12 text-white md:min-h-[405px] md:w-[56%] md:px-14 md:text-[#1d2927] ${isArabic ? 'md:mr-auto' : 'md:mr-auto'}`}>
+          <p className="mb-5 font-['DM_Sans'] text-[9px] font-bold tracking-[.24em] text-[#a5e4c5] md:text-[#16835f]">LEARN ENGLISH. BE ANYWHERE.</p>
           <h1 className="max-w-md text-[31px] font-extrabold leading-[1.55] tracking-tight md:text-[38px]">{tr('من أول كلمة','From your first word')}<br/>{tr('إلى طلاقة حقيقية','to real fluency')}</h1>
-          <p className="mt-5 max-w-md text-[11px] leading-7 text-[#65736f]">{tr('برنامج عملي ومنظم يساعدك تتعلم الإنجليزية خطوة بخطوة، وتتحدث بثقة في حياتك وشغلك.','A practical, structured program that helps you learn English step by step and speak confidently in life and at work.')}</p>
+          <p className="mt-5 max-w-md text-[11px] leading-7 text-white/80 md:text-[#65736f]">{tr('برنامج عملي ومنظم يساعدك تتعلم الإنجليزية خطوة بخطوة، وتتحدث بثقة في حياتك وشغلك.','A practical, structured program that helps you learn English step by step and speak confidently in life and at work.')}</p>
           <div className="mt-7 flex flex-wrap items-center gap-4">
             <Link href="/auth/register" className="inline-flex items-center gap-2 bg-[#16835f] px-5 py-3 text-[11px] font-bold text-white transition hover:bg-[#106a4d]">{tr('ابدأ رحلتك معنا','Start your journey')} <ArrowLeft size={14}/></Link>
-            <Link href="/placement-test" className="inline-flex items-center gap-2 text-[11px] font-bold text-[#31403d]"><span className="flex h-5 w-5 items-center justify-center rounded-full border border-[#aeb9b5]"><BarChart3 size={11}/></span>{tr('اعرف مستواك مجاناً','Take the free level test')}</Link>
+            <Link href="/placement-test" className="inline-flex items-center gap-2 text-[11px] font-bold text-white md:text-[#31403d]"><span className="flex h-5 w-5 items-center justify-center rounded-full border border-white/60 md:border-[#aeb9b5]"><BarChart3 size={11}/></span>{tr('اعرف مستواك مجاناً','Take the free level test')}</Link>
           </div>
-          <div className="mt-8 flex gap-6 text-[9px] text-[#74817e]"><span className="flex items-center gap-1"><Clock3 size={12}/>{tr('مرونة 24/7','24/7 flexibility')}</span><span className="flex items-center gap-1"><UserRound size={12}/>{tr('مدرسون محترفون','Expert tutors')}</span><span className="flex items-center gap-1"><ShieldCheck size={12}/>{tr('متابعة حقيقية','Real follow-up')}</span></div>
+          <div className="mt-8 flex gap-6 text-[9px] text-white/75 md:text-[#74817e]"><span className="flex items-center gap-1"><Clock3 size={12}/>{tr('مرونة 24/7','24/7 flexibility')}</span><span className="flex items-center gap-1"><UserRound size={12}/>{tr('مدرسون محترفون','Expert tutors')}</span><span className="flex items-center gap-1"><ShieldCheck size={12}/>{tr('متابعة حقيقية','Real follow-up')}</span></div>
         </div>
       </section>
 
