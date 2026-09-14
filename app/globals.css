@@ -1,6 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
+.hero-image-mobile-blur {
+  transform: scale(1);
+  filter: none;
+}
+
+@media (max-width: 767px) {
+  .hero-image-mobile-blur {
+    transform: scale(1.04);
+    filter: blur(4px);
+  }
+}
+
 :root {
   --background: #fdfdfb;
   --foreground: #1e2927;

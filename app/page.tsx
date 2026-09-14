@@ -51,7 +51,8 @@ export default function HomePage() {
       </header>
 
       <section className="relative isolate mx-auto min-h-[360px] max-w-[1130px] overflow-hidden border-x border-[#e5e9e5] md:min-h-[405px]">
-        <Image src={deskImage} alt="مساحة تعلم الإنجليزية" fill priority sizes="100vw" className="-z-10 object-cover object-center"/>
+        <Image src={deskImage} alt="مساحة تعلم الإنجليزية" fill priority sizes="100vw" className="-z-20 hero-image-mobile-blur object-cover object-center"/>
+        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[#102927]/45 md:hidden"/>
         <div dir={isArabic ? 'rtl' : 'ltr'} className={`flex min-h-[360px] w-full flex-col justify-center px-7 py-12 md:min-h-[405px] md:w-[56%] md:px-14 ${isArabic ? 'md:mr-auto' : 'md:mr-auto'}`}>
           <p className="mb-5 font-['DM_Sans'] text-[9px] font-bold tracking-[.24em] text-[#16835f]">LEARN ENGLISH. BE ANYWHERE.</p>
           <h1 className="max-w-md text-[31px] font-extrabold leading-[1.55] tracking-tight md:text-[38px]">{tr('من أول كلمة','From your first word')}<br/>{tr('إلى طلاقة حقيقية','to real fluency')}</h1>
