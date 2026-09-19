@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { ArrowLeft, BarChart3, BookOpen, Check, ChevronDown, Clock3, Headphones, Menu, MessageCircle, ShieldCheck, UserRound, X } from 'lucide-react';
 import { useTheme } from '@/lib/contexts/ThemeContext';
-import deskImage from '@/attached_assets/Screenshot_1448-03-26_at_6.59.10_PM_1788883183026.png';
-import mountainImage from '@/attached_assets/Screenshot_1448-03-26_at_6.59.18_PM_1788883183031.png';
-import travelImage from '@/attached_assets/Screenshot_1448-03-26_at_6.59.26_PM_1788883183031.png';
+const deskImage = '/assets/hero-1.png';
+const mountainImage = '/assets/hero-2.png';
+const travelImage = '/assets/hero-3.png';
 
 const packages = [
   { name: 'أساسيات اللغة', level: 'A1', price: '349', note: 'لبداية صحيحة وواثقة', featured: false },
