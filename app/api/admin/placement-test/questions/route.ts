@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { isNextResponse, requireAdmin } from '@/lib/auth-helpers';
 
 export async function GET(request: Request) {
   try {
+    const session = await requireAdmin();
+    if (isNextResponse(session)) return session;
     const { searchParams } = new URL(request.url);
     const testType = searchParams.get('testType') || 'PLACEMENT';
 
@@ -18,6 +21,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const session = await requireAdmin();
+    if (isNextResponse(session)) return session;
     const body = await request.json();
     const {
       question, questionAr, questionType = 'MCQ',

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { requestOtp, OtpServiceError } from '@/lib/auth/otp-service'
 
 const forgotPasswordSchema = z.object({
   emailOrPhone: z.string().min(1, 'Email or phone is required'),
@@ -12,31 +12,16 @@ export async function POST(request: Request) {
     const validatedData = forgotPasswordSchema.parse(body)
 
     const isEmail = validatedData.emailOrPhone.includes('@')
-
-    const user = await prisma.user.findFirst({
-      where: isEmail
-        ? { email: validatedData.emailOrPhone }
-        : { phone: validatedData.emailOrPhone },
-      include: {
-        StudentProfile: true,
-      },
+    await requestOtp({
+      email: isEmail ? validatedData.emailOrPhone : undefined,
+      phone: isEmail ? undefined : validatedData.emailOrPhone,
+      intent: 'LOGIN',
+      channel: isEmail ? 'EMAIL' : 'WHATSAPP',
     })
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found / المستخدم غير موجود' },
-        { status: 404 }
-      )
-    }
-
     return NextResponse.json({
-      message: 'User verified successfully',
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-      },
+      ok: true,
+      message: 'If the identity can be verified, a verification code will be sent.',
     })
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -46,9 +31,15 @@ export async function POST(request: Request) {
       )
     }
 
-    console.error('Forgot password error:', error)
+    if (error instanceof OtpServiceError && error.code === 'RATE_LIMITED') {
+      return NextResponse.json(
+        { ok: false, error: 'Please wait before requesting another code.' },
+        { status: 429 },
+      )
+    }
+
     return NextResponse.json(
-      { error: 'An error occurred / حدث خطأ' },
+      { error: 'Unable to process the request / تعذر تنفيذ الطلب' },
       { status: 500 }
     )
   }

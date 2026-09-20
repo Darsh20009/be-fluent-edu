@@ -1,6 +1,6 @@
 export async function sendEmail({ to, subject, html, attachments }: { to: string, subject: string, html: string, attachments?: Array<{ filename: string, fileblob: string, content_type: string }> }) {
   const apiKey = process.env.SMTP2GO_API_KEY;
-  const fromEmail = process.env.SMTP2GO_FROM_EMAIL || 'befluent2026@outlook.com';
+  const fromEmail = process.env.SMTP2GO_FROM_EMAIL || 'befluent@qirox.online';
   const fromName = process.env.SMTP2GO_FROM_NAME || 'Be Fluent Academy';
   
   try {

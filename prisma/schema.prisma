@@ -278,9 +278,56 @@ model User {
   assignedWhatsAppConversations WhatsAppConversation[]  @relation("WhatsAppConversationStaff")
   aiRecommendations          AIRecommendation[]
   aiInteractions             AIInteraction[]
+  otpChallenges              AuthOtpChallenge[]
+  authRateLimits             AuthRateLimit[]          @relation("AuthRateLimitUser")
 
   @@index([normalizedPhone])
   @@index([role, status])
+}
+
+model AuthOtpChallenge {
+  id                String   @id @default(uuid()) @map("_id")
+  normalizedPhone   String?
+  email             String?
+  name              String?
+  intent            String   @default("LOGIN")
+  channel           String
+  codeHash          String
+  expiresAt         DateTime
+  attempts          Int      @default(0)
+  maxAttempts       Int      @default(5)
+  resendCount       Int      @default(0)
+  requestedAt       DateTime @default(now())
+  lastSentAt        DateTime @default(now())
+  consumedAt        DateTime?
+  invalidatedAt     DateTime?
+  requestIpHash     String?
+  userAgentHash     String?
+  userId            String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now()) @updatedAt
+  user              User?    @relation(fields: [userId], references: [id])
+
+  @@index([normalizedPhone, intent, createdAt])
+  @@index([email, intent, createdAt])
+  @@index([userId, intent, createdAt])
+}
+
+model AuthRateLimit {
+  id               String   @id @default(uuid()) @map("_id")
+  key              String
+  kind             String
+  windowStartedAt  DateTime
+  count            Int      @default(0)
+  blockedUntil     DateTime?
+  userId           String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now()) @updatedAt
+  user             User?    @relation("AuthRateLimitUser", fields: [userId], references: [id])
+
+  @@unique([key, kind])
+  @@index([blockedUntil])
+  @@index([userId, kind])
 }
 
 model Word {

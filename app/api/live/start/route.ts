@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { isNextResponse, requireTeacher } from '@/lib/auth-helpers';
 
 export async function POST(req: Request) {
   try {
-    const { sessionId, teacherId } = await req.json();
+    const session = await requireTeacher();
+    if (isNextResponse(session)) return session;
+    const { sessionId } = await req.json();
 
-    if (!sessionId || !teacherId) {
+    if (!sessionId) {
       return NextResponse.json({ error: 'Missing sessionId or teacherId' }, { status: 400 });
     }
 
@@ -15,11 +18,11 @@ export async function POST(req: Request) {
     if (existing) {
       liveSession = await prisma.liveSession.update({
         where: { id: existing.id },
-        data: { teacherId, status: 'live', startedAt: new Date() }
+        data: { teacherId: session.teacherProfileId, status: 'live', startedAt: new Date() }
       });
     } else {
       liveSession = await prisma.liveSession.create({
-        data: { sessionId, teacherId, status: 'live', startedAt: new Date() }
+        data: { sessionId, teacherId: session.teacherProfileId, status: 'live', startedAt: new Date() }
       });
     }
 

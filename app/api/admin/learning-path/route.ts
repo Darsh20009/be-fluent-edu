@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { isNextResponse, requireAdmin } from '@/lib/auth-helpers';
 
 export async function GET() {
   try {
+    const session = await requireAdmin();
+    if (isNextResponse(session)) return session;
     const settings = await prisma.siteSettings.findFirst();
     const learningPath = settings?.learningPath ? JSON.parse(settings.learningPath) : [];
     return NextResponse.json(learningPath);
@@ -13,6 +16,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const session = await requireAdmin();
+    if (isNextResponse(session)) return session;
     const pathData = await req.json();
     const settings = await prisma.siteSettings.findFirst();
 

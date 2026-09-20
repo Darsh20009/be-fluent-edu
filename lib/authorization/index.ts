@@ -7,6 +7,7 @@ export interface AuthorizationContext {
   userId: string
   role: string
   resourceOwnerId?: string
+  permissions?: readonly string[]
 }
 
 export function hasPermission(
@@ -15,6 +16,10 @@ export function hasPermission(
 ): boolean {
   const role = normalizeRole(context.role)
   if (!role) return false
+
+  if (role === 'STAFF') {
+    return context.permissions?.includes(permission) ?? false
+  }
 
   if (
     context.resourceOwnerId &&
@@ -63,5 +68,6 @@ export function roleHasPermission(
   permission: Permission,
 ): boolean {
   const normalizedRole = normalizeRole(role)
+  if (normalizedRole === 'STAFF') return false
   return normalizedRole ? ROLE_PERMISSIONS[normalizedRole].includes(permission) : false
 }

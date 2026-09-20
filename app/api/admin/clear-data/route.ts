@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { isNextResponse, requireAdmin } from '@/lib/auth-helpers'
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
+    const session = await requireAdmin()
+    if (isNextResponse(session)) return session
+
     // Security: Only allow in development
     const isDev = process.env.NODE_ENV !== 'production'
     if (!isDev) {

@@ -4,8 +4,12 @@ export function normalizePhone(value: string, defaultCountryCode = '20'): string
   const compact = value.trim().replace(/[()\s-]/g, '')
   if (!compact) throw new Error('Phone number is required')
 
+  if (!/^(?:\+|00)?\d+$/.test(compact)) {
+    throw new Error('Invalid phone number')
+  }
+
   if (compact.startsWith('00')) return `+${compact.slice(2)}`
-  if (compact.startsWith('+')) return `+${compact.slice(1).replace(/\D/g, '')}`
+  if (compact.startsWith('+')) return `+${compact.slice(1)}`
   if (compact.startsWith(defaultCountryCode)) return `+${compact}`
   if (compact.startsWith('0')) return `+${defaultCountryCode}${compact.slice(1)}`
 
@@ -16,7 +20,15 @@ export const phoneSchema = z
   .string()
   .min(1, 'Phone number is required')
   .transform((value) => normalizePhone(value))
-  .pipe(z.string().regex(/^\+[1-9]\d{7,14}$/, 'Invalid phone number'))
+  .pipe(
+    z
+      .string()
+      .regex(/^\+[1-9]\d{7,14}$/, 'Invalid phone number')
+      .refine(
+        (value) => !value.startsWith('+20') || /^\+20(?:10|11|12|15)\d{8}$/.test(value),
+        'Invalid Egyptian mobile number',
+      ),
+  )
 
 export const emailSchema = z.string().trim().email('Invalid email address')
 

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { normalizePhone } from '@/lib/validation'
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -22,6 +23,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
     const validatedData = registerSchema.parse(body)
+    const normalizedPhone = validatedData.phone
+      ? normalizePhone(validatedData.phone)
+      : undefined
 
     if (validatedData.email) {
       const existingUser = await prisma.user.findUnique({
@@ -38,7 +42,13 @@ export async function POST(request: Request) {
 
     if (validatedData.phone) {
       const existingUserByPhone = await prisma.user.findFirst({
-        where: { phone: validatedData.phone },
+        where: {
+          OR: [
+            { normalizedPhone },
+            { phone: normalizedPhone },
+            { phone: validatedData.phone },
+          ],
+        },
       })
 
       if (existingUserByPhone) {
@@ -51,16 +61,20 @@ export async function POST(request: Request) {
 
     const hashedPassword = await bcrypt.hash(validatedData.password, 10)
 
-    const uniqueEmail = validatedData.email || `${validatedData.phone}@phone.befluent.com`
+    const uniqueEmail =
+      validatedData.email?.trim().toLowerCase() ||
+      `${normalizedPhone?.replace(/\D/g, '')}@phone.befluent.com`
 
     const user = await prisma.user.create({
       data: {
         name: validatedData.name,
         email: uniqueEmail,
         passwordHash: hashedPassword,
-        phone: validatedData.phone || null,
+        phone: normalizedPhone || null,
+        normalizedPhone: normalizedPhone || null,
         role: 'STUDENT',
         isActive: false,
+        status: 'PENDING',
         StudentProfile: {
           create: {
             age: validatedData.age,
@@ -83,7 +97,7 @@ export async function POST(request: Request) {
       include: {
         StudentProfile: true,
       },
-    }) as any
+    })
 
     // Send Welcome Email
     if (validatedData.email) {

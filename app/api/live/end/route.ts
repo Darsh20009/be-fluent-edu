@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { isNextResponse, requireTeacher } from '@/lib/auth-helpers';
 
 export async function POST(req: Request) {
   try {
+    const session = await requireTeacher();
+    if (isNextResponse(session)) return session;
     const { sessionId } = await req.json();
 
     if (!sessionId) {

@@ -9,7 +9,10 @@ export const OTP_POLICY = {
   expiresInSeconds: 5 * 60,
   maxAttempts: 5,
   maxResends: 3,
+  resendCooldownSeconds: 60,
   resendWindowSeconds: 10 * 60,
+  requestLimit: 5,
+  verificationLimit: 10,
 } as const
 
 export interface OtpChallenge {
@@ -20,9 +23,12 @@ export interface OtpChallenge {
 }
 
 function secretFromEnvironment(): string {
-  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
+  const secret =
+    process.env.AUTH_SECRET ||
+    process.env.NEXTAUTH_SECRET ||
+    process.env.SESSION_SECRET
   if (!secret) {
-    throw new Error('AUTH_SECRET or NEXTAUTH_SECRET is required for OTP hashing')
+    throw new Error('An auth secret is required for OTP hashing')
   }
   return secret
 }
@@ -78,6 +84,9 @@ export function canResendOtp(
 ): boolean {
   return (
     challenge.resendCount < OTP_POLICY.maxResends &&
-    now.getTime() - requestedAt.getTime() >= 0
+    now.getTime() - requestedAt.getTime() >=
+      OTP_POLICY.resendCooldownSeconds * 1000 &&
+    now.getTime() - requestedAt.getTime() <=
+      OTP_POLICY.resendWindowSeconds * 1000
   )
 }

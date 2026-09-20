@@ -7,6 +7,8 @@ declare module 'next-auth' {
     name: string
     role: string
     isActive: boolean
+    status: string
+    revoked?: boolean
   }
 
   interface Session {
@@ -16,6 +18,8 @@ declare module 'next-auth' {
       name: string
       role: string
       isActive: boolean
+      status: string
+      revoked?: boolean
     }
   }
 }
@@ -25,5 +29,7 @@ declare module 'next-auth/jwt' {
     id: string
     role: string
     isActive: boolean
+    status: string
+    revoked?: boolean
   }
 }

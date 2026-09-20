@@ -24,6 +24,7 @@ export const PERMISSIONS = [
   'admin.manageUsers',
   'admin.manageRoles',
   'admin.manageSystem',
+  'manager.manageUsers',
 ] as const
 
 export type Permission = (typeof PERMISSIONS)[number]
@@ -57,7 +58,7 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'staff.approveSubscription',
     'staff.manageWhatsApp',
     'staff.manageSystem',
-    'admin.manageUsers',
+    'manager.manageUsers',
   ],
   ADMIN: ALL_PERMISSIONS,
 }
