@@ -4,6 +4,7 @@ const next = require('next');
 const { Server } = require('socket.io');
 
 const dev = process.env.NODE_ENV !== 'production';
+const port = parseInt(process.env.PORT || '5000', 10);
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
@@ -127,9 +128,9 @@ app.prepare().then(() => {
     });
   });
 
-  server.listen(5000, '0.0.0.0', (err) => {
+  server.listen(port, '0.0.0.0', (err) => {
     if (err) throw err;
-    console.log('> Ready on http://0.0.0.0:5000');
+    console.log(`> Ready on http://0.0.0.0:${port}`);
     console.log('> Socket.IO server running on path: /api/socket/io');
   });
 });
