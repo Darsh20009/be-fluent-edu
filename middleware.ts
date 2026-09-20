@@ -12,6 +12,7 @@ const PUBLIC_PAGE_PREFIXES = [
 function isPublicApi(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
   if (pathname.startsWith('/api/auth/')) return true
+  if (pathname === '/api/health') return request.method === 'GET'
   if (pathname === '/api/packages' || pathname.startsWith('/api/packages/')) {
     return request.method === 'GET'
   }

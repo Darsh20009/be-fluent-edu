@@ -11,6 +11,7 @@
     "test:foundation": "tsx --test tests/foundation.test.ts",
     "test:phase2": "tsx --test tests/phase2-schema.test.ts",
     "test:phase3": "tsx --test tests/phase3-auth.test.ts",
+    "test:phase4": "tsx --test tests/phase4-core.test.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

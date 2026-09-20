@@ -27,6 +27,11 @@ export type AuditAction =
   | 'WHATSAPP_OPERATION'
   | 'AI_CONFIGURATION_CHANGE'
   | 'ADMIN_ACTION'
+  | 'PERMISSION_CHANGE'
+  | 'STUDENT_PROFILE_CHANGE'
+  | 'TEACHER_PROFILE_CHANGE'
+  | 'LEVEL_RECOMMENDATION'
+  | 'HEALTH_CHECK'
 
 export interface AuditEvent {
   action: AuditAction

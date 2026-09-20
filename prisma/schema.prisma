@@ -138,6 +138,7 @@ model StudentProfile {
   recommendedLevel        Level?   @relation("StudentRecommendedLevel", fields: [recommendedLevelId], references: [id])
   recommendedStage        LevelStage? @relation("StudentRecommendedStage", fields: [recommendedStageId], references: [id])
   learningProfile         StudentLearningProfile?
+  levelRecommendations    StudentLevelRecommendation[]
 
   @@index([officialLevelId, officialStageId])
   @@index([recommendedLevelId, recommendedStageId])
@@ -281,6 +282,7 @@ model User {
   otpChallenges              AuthOtpChallenge[]
   authRateLimits             AuthRateLimit[]          @relation("AuthRateLimitUser")
   levelRecommendations       StudentLevelRecommendation[] @relation("LevelRecommendationTeacher")
+  receivedLevelRecommendations StudentLevelRecommendation[] @relation("LevelRecommendationStudent")
 
   @@index([normalizedPhone])
   @@index([role, status])
@@ -993,6 +995,7 @@ model Level {
   learningProgress            LearningProgress[]        @relation("LearningProgressLevel")
   speakingRooms               SpeakingRoom[]            @relation("SpeakingRoomLevel")
   aiRecommendations            AIRecommendation[]        @relation("AIRecommendationLevel")
+  levelRecommendations         StudentLevelRecommendation[] @relation("RecommendationLevel")
 
   @@index([isActive, order])
 }
@@ -1018,6 +1021,7 @@ model LevelStage {
   learningProgress            LearningProgress[]        @relation("LearningProgressStage")
   speakingRooms               SpeakingRoom[]            @relation("SpeakingRoomStage")
   aiRecommendations            AIRecommendation[]        @relation("AIRecommendationStage")
+  levelRecommendations         StudentLevelRecommendation[] @relation("RecommendationStage")
 
   @@unique([levelId, code])
   @@index([levelId, isActive, order])

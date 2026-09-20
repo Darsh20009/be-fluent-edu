@@ -1,3 +1,20 @@
+# Phase 4 boundary update
+
+The new Phase 4 foundation uses the existing authentication system and Phase 2
+models for people, levels, stages, profiles, and learning profiles. New
+primary foundation pages are separate from legacy learning systems.
+
+Legacy systems remain reachable by direct URL but are not part of the Phase 4
+primary navigation:
+
+- placement tests and exam flows
+- writing tests
+- leaderboard, achievements, and XP
+- subscriptions, packages, and groups
+- homework, feedback, QMeet, WhatsApp CRM, Baileys, and Speaking Rooms
+
+Do not add new dependencies from the Phase 4 people/profile/level APIs into
+those legacy domains.
 # Legacy System Boundary
 
 Phase 1 does not delete legacy routes, components, models, or user data.

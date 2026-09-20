@@ -24,7 +24,16 @@ export const PERMISSIONS = [
   'admin.manageUsers',
   'admin.manageRoles',
   'admin.manageSystem',
+  'admin.viewPeople',
+  'admin.manageLevels',
+  'admin.manageStaffPermissions',
+  'admin.changeStudentLevel',
   'manager.manageUsers',
+  'manager.viewPeople',
+  'teacher.viewStudents',
+  'teacher.recommendLevel',
+  'student.editProfile',
+  'student.editGoals',
 ] as const
 
 export type Permission = (typeof PERMISSIONS)[number]
@@ -36,6 +45,8 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'student.joinSession',
     'student.submitHomework',
     'student.joinSpeakingRoom',
+    'student.editProfile',
+    'student.editGoals',
   ],
   TEACHER: [
     'student.joinSession',
@@ -43,6 +54,8 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'teacher.editFeedback',
     'teacher.publishFeedback',
     'teacher.manageHomework',
+    'teacher.viewStudents',
+    'teacher.recommendLevel',
   ],
   STAFF: [
     'staff.addStudentToGroup',
@@ -59,6 +72,12 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'staff.manageWhatsApp',
     'staff.manageSystem',
     'manager.manageUsers',
+    'admin.viewPeople',
+    'admin.manageLevels',
+    'admin.changeStudentLevel',
+    'manager.viewPeople',
   ],
   ADMIN: ALL_PERMISSIONS,
+  // The additional capabilities above are intentionally not inherited by
+  // STAFF; their permissions must be granted explicitly in StaffPermission.
 }
