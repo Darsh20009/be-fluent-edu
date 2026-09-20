@@ -4,13 +4,12 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-const databaseUrl = process.env.DATABASE_URL
+const mongoUrl = process.env.MONGODB_URI
 
-if (!databaseUrl) {
-  console.error('❌ DATABASE_URL is not set!')
+if (!mongoUrl) {
+  console.error('❌ MONGODB_URI is not set!')
 } else {
-  const dbType = databaseUrl.includes('mongodb') ? 'MongoDB' : 'PostgreSQL'
-  console.log(`✅ ${dbType} database configured from DATABASE_URL`)
+  console.log('✅ MongoDB configured from MONGODB_URI')
 }
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient()

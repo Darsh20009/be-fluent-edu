@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { ArrowLeft, BarChart3, BookOpen, Check, ChevronDown, Clock3, Headphones, Menu, MessageCircle, ShieldCheck, UserRound, X } from 'lucide-react';
 import { useTheme } from '@/lib/contexts/ThemeContext';
-const deskImage = '/assets/hero-1.png';
-const mountainImage = '/assets/hero-2.png';
-const travelImage = '/assets/hero-3.png';
+const deskImage = '/assets/home-hero-desk.png';
+const mountainImage = '/assets/home-levels.png';
+const travelImage = '/assets/home-cta.png';
 
 const packages = [
   { name: 'أساسيات اللغة', level: 'A1', price: '349', note: 'لبداية صحيحة وواثقة', featured: false },
@@ -51,7 +51,7 @@ export default function HomePage() {
       </header>
 
       <section className="relative isolate mx-auto min-h-[360px] max-w-[1130px] overflow-hidden border-x border-[#e5e9e5] md:min-h-[405px]">
-        <Image src={deskImage} alt="مساحة تعلم الإنجليزية" fill priority sizes="100vw" className="-z-20 hero-image-mobile-blur object-cover object-center"/>
+        <Image src={deskImage} alt="مساحة تعلم الإنجليزية" fill priority sizes="100vw" className="-z-20 object-cover object-center"/>
         <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[#102927]/45 md:hidden"/>
         <div dir={isArabic ? 'rtl' : 'ltr'} className={`flex min-h-[360px] w-full flex-col justify-center px-7 py-12 text-white md:min-h-[405px] md:w-[56%] md:px-14 md:text-[#1d2927] ${isArabic ? 'md:mr-auto' : 'md:mr-auto'}`}>
           <p className="mb-5 font-['DM_Sans'] text-[9px] font-bold tracking-[.24em] text-[#a5e4c5] md:text-[#16835f]">LEARN ENGLISH. BE ANYWHERE.</p>

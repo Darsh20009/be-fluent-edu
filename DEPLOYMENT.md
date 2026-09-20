@@ -6,20 +6,10 @@ When deploying to Render (or any production environment), make sure to set the f
 
 ### Database Configuration
 
-You have two options for database configuration:
+MongoDB is the only supported application database:
 
-#### Option 1: Using DATABASE_URL (Recommended for Render)
 ```
-DATABASE_URL=postgresql://username:password@host:port/database?schema=befluent_exercisein
-```
-
-#### Option 2: Using AWS Database Credentials (Alternative)
-```
-AWS_DB_HOST=your-db-host.region.rds.amazonaws.com
-AWS_DB_PORT=5432
-AWS_DB_NAME=your-database-name
-AWS_DB_USER=your-username
-AWS_DB_PASSWORD=your-password
+MONGODB_URI=mongodb+srv://username:password@host/database
 ```
 
 ### NextAuth Configuration
@@ -40,7 +30,8 @@ NODE_ENV=production
 2. **Set Environment Variables** in Render Dashboard:
    - Go to your service settings
    - Navigate to "Environment" tab
-   - Add all required environment variables listed above
+    - Add `MONGODB_URI`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, and the email/AI
+      provider variables required by the enabled features.
 
 3. **Build Command:**
    ```
@@ -53,9 +44,8 @@ NODE_ENV=production
    ```
 
 5. **Important Notes:**
-   - The `lib/prisma.ts` file is configured to handle missing DATABASE_URL during build
-   - Make sure your database schema `befluent_exercisein` exists before deployment
-   - Run `prisma db push` locally first to ensure schema is up to date
+   - The active Prisma datasource is MongoDB and reads `MONGODB_URI`.
+   - Do not run destructive schema commands against production.
 
 ## Test Accounts
 
@@ -67,14 +57,12 @@ After deployment, you can test with these accounts:
 
 ## Troubleshooting
 
-### Build fails with "DATABASE_URL undefined"
-- Make sure DATABASE_URL is set in environment variables
-- Or ensure all AWS_DB_* variables are set correctly
+### Build fails with "MONGODB_URI undefined"
+- Make sure `MONGODB_URI` is set in the deployment environment.
 
 ### Database connection fails
-- Verify your database allows connections from Render's IP addresses
-- Check that your database credentials are correct
-- Ensure the schema `befluent_exercisein` exists
+- Verify that MongoDB allows connections from Render's network
+- Check that the MongoDB connection string is correct
 
 ### NextAuth errors
 - Verify NEXTAUTH_SECRET is set and is at least 32 characters

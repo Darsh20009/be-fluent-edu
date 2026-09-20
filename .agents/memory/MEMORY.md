@@ -1,0 +1,1 @@
+- [Phase 1 architecture freeze](phase1-architecture-freeze.md) — keep MongoDB-only and additive until target-domain mappings are approved.

@@ -8,10 +8,7 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 console.log('🔍 Checking environment variables...');
-if (process.env.MONGODB_URI) {
-  process.env.DATABASE_URL = process.env.MONGODB_URI;
-  console.log('✅ DATABASE_URL set from MONGODB_URI');
-}
+console.log(process.env.MONGODB_URI ? '✅ MongoDB environment configured' : '⚠️ MONGODB_URI is not set');
 
 app.prepare().then(() => {
   const server = createServer((req, res) => {

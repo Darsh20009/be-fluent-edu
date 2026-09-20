@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
 
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
       })
     ])
 
-    const placementTestCounts = placementTestCountsRaw.reduce((acc: any, curr: any) => {
+    const placementTestCounts = placementTestCountsRaw.reduce<Record<string, number>>((acc, curr) => {
       acc[curr.testType] = curr._count;
       return acc;
     }, {});
@@ -96,8 +96,6 @@ export async function GET(request: NextRequest) {
       const monthSubs = await prisma.subscription.findMany({
         where: {
           status: 'APPROVED',
-          packageId: { not: null },
-          Package: { isNot: null },
           createdAt: {
             gte: startOfMonth,
             lte: endOfMonth
@@ -106,7 +104,7 @@ export async function GET(request: NextRequest) {
         include: { Package: { select: { price: true } } }
       })
 
-      const revenue = monthSubs.reduce((acc, sub) => acc + ((sub as any).Package?.price || 0), 0)
+      const revenue = monthSubs.reduce((acc, sub) => acc + sub.Package.price, 0)
       monthlyRevenue.push({ month, revenue })
     }
 
