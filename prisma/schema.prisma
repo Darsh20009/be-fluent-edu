@@ -280,6 +280,7 @@ model User {
   aiInteractions             AIInteraction[]
   otpChallenges              AuthOtpChallenge[]
   authRateLimits             AuthRateLimit[]          @relation("AuthRateLimitUser")
+  levelRecommendations       StudentLevelRecommendation[] @relation("LevelRecommendationTeacher")
 
   @@index([normalizedPhone])
   @@index([role, status])
@@ -1118,6 +1119,25 @@ model StudentLearningProfile {
 
   @@index([officialLevelId, officialStageId])
   @@index([recommendedLevelId, recommendedStageId])
+}
+
+model StudentLevelRecommendation {
+  id                String      @id @default(uuid()) @map("_id")
+  teacherId         String
+  studentId         String
+  studentProfileId  String
+  recommendedLevelId String
+  recommendedStageId String?
+  reason            String?
+  createdAt         DateTime    @default(now())
+  teacher           User        @relation("LevelRecommendationTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  student           User        @relation("LevelRecommendationStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  studentProfile    StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  recommendedLevel  Level       @relation("RecommendationLevel", fields: [recommendedLevelId], references: [id])
+  recommendedStage  LevelStage? @relation("RecommendationStage", fields: [recommendedStageId], references: [id])
+
+  @@index([studentId, createdAt])
+  @@index([teacherId, createdAt])
 }
 
 model Enrollment {
