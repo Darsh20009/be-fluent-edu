@@ -1,2 +1,3 @@
 - [Phase 1 architecture freeze](phase1-architecture-freeze.md) — keep MongoDB-only and additive until target-domain mappings are approved.
 - [Static image cache busting](static-image-cache-busting.md) — use a new public asset filename when replacing an image that Next Image may still serve from its optimized cache.
+- [Environment readiness](environment-readiness.md) — MongoDB and auth secrets belong only in runtime environment, never client-exposed Next.js config.
