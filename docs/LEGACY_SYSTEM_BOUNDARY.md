@@ -18,3 +18,22 @@ Phase 1 does not delete legacy routes, components, models, or user data.
 
 Each item remains available until all route, API, model, and data consumers are
 mapped and a rollback/export plan is approved.
+
+## Phase 2 dependency notes
+
+The Phase 2 model map confirmed these dependencies that must remain protected:
+
+- `SessionStudent` currently combines session membership and attendance. It
+  cannot be removed until rows are reconciled into `SessionParticipant` and
+  `Attendance`.
+- `Assignment` and `Submission` overlap with the target homework workflow.
+  Existing grades and feedback must remain until a source-aware projection is
+  approved.
+- `StudentProfile` placement fields and placement-attempt collections remain
+  historical evidence. They are not silently replaced by level recommendations.
+- `LiveSession`, `LiveParticipant`, and `Chat` use scalar or legacy semantics;
+  they must not be reclassified as QMeet or Speaking Room records without
+  provider, ownership, and retention mapping.
+- `WritingTest`, `WritingTestSubmission`, `FreeWriting`, and gamification
+  records remain readable while the target homework, feedback, and progress
+  domains are introduced additively.

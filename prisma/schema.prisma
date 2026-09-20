@@ -29,7 +29,14 @@ model AuditLog {
   action    String
   userId    String?  
   details   String?
+  entityType String?
+  entityId   String?
+  metadataJson String?
+  success    Boolean?
   createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
 }
 
 model Chat {
@@ -59,6 +66,7 @@ model Package {
   updatedAt     DateTime       @default(now()) @updatedAt
   CartItem      CartItem[]
   Subscription  Subscription[]
+  Enrollment    Enrollment[]
 }
 
 model Session {
@@ -79,6 +87,17 @@ model Session {
   Assignment       Assignment[]
   TeacherProfile   TeacherProfile   @relation(fields: [teacherId], references: [id])
   SessionStudent   SessionStudent[]
+  levelId          String?
+  level            Level?            @relation("SessionLevel", fields: [levelId], references: [id])
+  stageId          String?
+  stage            LevelStage?       @relation("SessionStage", fields: [stageId], references: [id])
+  groupId          String?
+  group            LearningGroup?    @relation("GroupSessions", fields: [groupId], references: [id])
+  participants     SessionParticipant[]
+  attendances      Attendance[]
+  qmeetMeeting     QMeetMeeting?
+  feedback         SessionFeedback[]
+  homework         Homework[]        @relation("SessionHomework")
 }
 
 model SessionStudent {
@@ -107,9 +126,21 @@ model StudentProfile {
   packageId               String?
   receiptUrl              String?
   isVerified              Boolean  @default(false)
+  officialLevelId         String?
+  officialStageId         String?
+  recommendedLevelId      String?
+  recommendedStageId      String?
   createdAt               DateTime @default(now())
   updatedAt               DateTime @default(now()) @updatedAt
   User                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  officialLevel           Level?   @relation("StudentOfficialLevel", fields: [officialLevelId], references: [id])
+  officialStage           LevelStage? @relation("StudentOfficialStage", fields: [officialStageId], references: [id])
+  recommendedLevel        Level?   @relation("StudentRecommendedLevel", fields: [recommendedLevelId], references: [id])
+  recommendedStage        LevelStage? @relation("StudentRecommendedStage", fields: [recommendedStageId], references: [id])
+  learningProfile         StudentLearningProfile?
+
+  @@index([officialLevelId, officialStageId])
+  @@index([recommendedLevelId, recommendedStageId])
 }
 
 model Submission {
@@ -153,6 +184,10 @@ model Subscription {
   AssignedTeacher   TeacherProfile?    @relation("AssignedSubscriptions", fields: [assignedTeacherId], references: [id])
   Package           Package            @relation(fields: [packageId], references: [id])
   User              User               @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  Enrollment        Enrollment[]
+
+  @@index([studentId, status])
+  @@index([assignedTeacherId, status])
 }
 
 model TeacherProfile {
@@ -167,6 +202,9 @@ model TeacherProfile {
   AssignedSubscriptions Subscription[] @relation("AssignedSubscriptions")
   User                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   WritingTest           WritingTest[]
+  learningGroups        LearningGroup[]
+  groupSchedules        GroupSchedule[]
+  enrollments           Enrollment[] @relation("EnrollmentTeacher")
 }
 
 model Certificate {
@@ -214,6 +252,35 @@ model User {
   certificates               Certificate[]             @relation("UserCertificates")
   PlacementTestAttempt       PlacementTestAttempt[]
   TestAttempt                TestAttempt[]
+  normalizedPhone            String?
+  status                     String                    @default("PENDING")
+  phoneVerifiedAt            DateTime?
+  lastSeenAt                 DateTime?
+  staffPermissions           StaffPermission[]
+  learningProfile            StudentLearningProfile?
+  learningProgress           LearningProgress[]
+  enrollments                Enrollment[]              @relation("EnrollmentStudent")
+  groupMemberships           GroupMember[]
+  sessionParticipants        SessionParticipant[]
+  attendances                Attendance[]
+  studentFeedback            SessionFeedback[]         @relation("FeedbackStudent")
+  teacherFeedback            SessionFeedback[]         @relation("FeedbackTeacher")
+  createdHomework            Homework[]                @relation("HomeworkCreator")
+  assignedHomework           Homework[]                @relation("HomeworkStudent")
+  homeworkSubmissions        HomeworkSubmission[]
+  homeworkReviews            HomeworkReview[]          @relation("HomeworkReviewer")
+  speakingRoomMemberships    SpeakingRoomMember[]
+  speakingRoomMessages       SpeakingRoomMessage[]
+  notifications              Notification[]
+  whatsappAccounts           WhatsAppAccount[]          @relation("WhatsAppAccountOwner")
+  whatsappContacts           WhatsAppContact[]          @relation("WhatsAppContactUser")
+  whatsappConversations      WhatsAppConversation[]     @relation("WhatsAppConversationStudent")
+  assignedWhatsAppConversations WhatsAppConversation[]  @relation("WhatsAppConversationStaff")
+  aiRecommendations          AIRecommendation[]
+  aiInteractions             AIInteraction[]
+
+  @@index([normalizedPhone])
+  @@index([role, status])
 }
 
 model Word {
@@ -839,4 +906,659 @@ model TrialBooking {
   notes     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+}
+
+// Phase 2 target-domain models follow.
+
+model StaffPermission {
+  id         String   @id @default(uuid()) @map("_id")
+  userId     String
+  permission String
+  scope      String?
+  granted    Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, permission])
+}
+
+model Level {
+  id                          String                    @id @default(uuid()) @map("_id")
+  code                        String                    @unique
+  name                        String
+  nameAr                      String?
+  description                 String?
+  descriptionAr               String?
+  order                       Int                       @default(0)
+  isActive                    Boolean                   @default(true)
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime                  @default(now()) @updatedAt
+  stages                      LevelStage[]              @relation("LevelStages")
+  resources                   Resource[]                @relation("ResourceLevel")
+  officialStudents            StudentProfile[]          @relation("StudentOfficialLevel")
+  recommendedStudents         StudentProfile[]          @relation("StudentRecommendedLevel")
+  officialLearningProfiles    StudentLearningProfile[]  @relation("LearningProfileOfficialLevel")
+  recommendedLearningProfiles StudentLearningProfile[]  @relation("LearningProfileRecommendedLevel")
+  groups                      LearningGroup[]           @relation("LearningGroupLevel")
+  sessions                    Session[]                 @relation("SessionLevel")
+  learningProgress            LearningProgress[]        @relation("LearningProgressLevel")
+  speakingRooms               SpeakingRoom[]            @relation("SpeakingRoomLevel")
+  aiRecommendations            AIRecommendation[]        @relation("AIRecommendationLevel")
+
+  @@index([isActive, order])
+}
+
+model LevelStage {
+  id                          String                    @id @default(uuid()) @map("_id")
+  levelId                     String
+  code                        String
+  name                        String
+  nameAr                      String?
+  order                       Int                       @default(0)
+  isActive                    Boolean                   @default(true)
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime                  @default(now()) @updatedAt
+  level                       Level                     @relation("LevelStages", fields: [levelId], references: [id], onDelete: Cascade)
+  resources                   Resource[]                @relation("ResourceStage")
+  officialStudents            StudentProfile[]          @relation("StudentOfficialStage")
+  recommendedStudents         StudentProfile[]          @relation("StudentRecommendedStage")
+  officialLearningProfiles    StudentLearningProfile[]  @relation("LearningProfileOfficialStage")
+  recommendedLearningProfiles StudentLearningProfile[]  @relation("LearningProfileRecommendedStage")
+  groups                      LearningGroup[]           @relation("LearningGroupStage")
+  sessions                    Session[]                 @relation("SessionStage")
+  learningProgress            LearningProgress[]        @relation("LearningProgressStage")
+  speakingRooms               SpeakingRoom[]            @relation("SpeakingRoomStage")
+  aiRecommendations            AIRecommendation[]        @relation("AIRecommendationStage")
+
+  @@unique([levelId, code])
+  @@index([levelId, isActive, order])
+}
+
+model Skill {
+  id               String             @id @default(uuid()) @map("_id")
+  code             String             @unique
+  name             String
+  nameAr           String?
+  description      String?
+  descriptionAr    String?
+  isActive         Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
+  resources        Resource[]         @relation("ResourceSkill")
+  learningProgress LearningProgress[] @relation("LearningProgressSkill")
+}
+
+model Resource {
+  id            String             @id @default(uuid()) @map("_id")
+  resourceType  String
+  title         String
+  titleAr       String?
+  description   String?
+  descriptionAr String?
+  contentRef    String?
+  legacyModel   String?
+  legacyId      String?
+  levelId       String?
+  stageId       String?
+  skillId       String?
+  order         Int                @default(0)
+  isPublished   Boolean            @default(false)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @default(now()) @updatedAt
+  level         Level?             @relation("ResourceLevel", fields: [levelId], references: [id])
+  stage         LevelStage?        @relation("ResourceStage", fields: [stageId], references: [id])
+  skill         Skill?             @relation("ResourceSkill", fields: [skillId], references: [id])
+  progress      LearningProgress[] @relation("ResourceProgress")
+
+  @@index([resourceType, isPublished])
+  @@index([levelId, stageId, order])
+  @@index([legacyModel, legacyId])
+}
+
+model LearningProgress {
+  id           String      @id @default(uuid()) @map("_id")
+  userId       String
+  resourceId   String?
+  skillId      String?
+  levelId      String?
+  stageId      String?
+  status       String      @default("NOT_STARTED")
+  score        Float?
+  metadataJson String?
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @default(now()) @updatedAt
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resource     Resource?   @relation("ResourceProgress", fields: [resourceId], references: [id])
+  skill        Skill?      @relation("LearningProgressSkill", fields: [skillId], references: [id])
+  level        Level?      @relation("LearningProgressLevel", fields: [levelId], references: [id])
+  stage        LevelStage? @relation("LearningProgressStage", fields: [stageId], references: [id])
+
+  @@index([userId, status])
+  @@index([userId, resourceId])
+  @@index([levelId, stageId])
+}
+
+model StudentLearningProfile {
+  id                  String         @id @default(uuid()) @map("_id")
+  userId              String         @unique
+  studentProfileId    String         @unique
+  officialLevelId     String?
+  officialStageId     String?
+  recommendedLevelId  String?
+  recommendedStageId  String?
+  goalsJson           String?
+  strengthsJson       String?
+  weaknessesJson      String?
+  recentFeedbackJson  String?
+  commonMistakesJson  String?
+  vocabularyJson      String?
+  pronunciationJson   String?
+  homeworkHistoryJson String?
+  learningHistoryJson String?
+  recommendationsJson String?
+  lastReviewedAt      DateTime?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @default(now()) @updatedAt
+  user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentProfile      StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  officialLevel       Level?         @relation("LearningProfileOfficialLevel", fields: [officialLevelId], references: [id])
+  officialStage       LevelStage?    @relation("LearningProfileOfficialStage", fields: [officialStageId], references: [id])
+  recommendedLevel    Level?         @relation("LearningProfileRecommendedLevel", fields: [recommendedLevelId], references: [id])
+  recommendedStage    LevelStage?    @relation("LearningProfileRecommendedStage", fields: [recommendedStageId], references: [id])
+
+  @@index([officialLevelId, officialStageId])
+  @@index([recommendedLevelId, recommendedStageId])
+}
+
+model Enrollment {
+  id               String         @id @default(uuid()) @map("_id")
+  studentId        String
+  subscriptionId   String?
+  packageId        String?
+  groupId          String?
+  teacherProfileId String?
+  subscriptionType SubscriptionType
+  status           String         @default("PENDING")
+  startsAt         DateTime?
+  endsAt           DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @default(now()) @updatedAt
+  student          User           @relation("EnrollmentStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  subscription     Subscription?  @relation(fields: [subscriptionId], references: [id])
+  package          Package?       @relation(fields: [packageId], references: [id])
+  group            LearningGroup? @relation("EnrollmentGroup", fields: [groupId], references: [id])
+  teacher          TeacherProfile? @relation("EnrollmentTeacher", fields: [teacherProfileId], references: [id])
+
+  @@index([studentId, status])
+  @@index([groupId, status])
+  @@index([subscriptionType, status])
+}
+
+model LearningGroup {
+  id               String          @id @default(uuid()) @map("_id")
+  name             String
+  nameAr           String?
+  levelId          String?
+  stageId          String?
+  subscriptionType SubscriptionType
+  teacherProfileId String?
+  capacity         Int?
+  timezone         String?
+  status           String          @default("DRAFT")
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @default(now()) @updatedAt
+  level            Level?          @relation("LearningGroupLevel", fields: [levelId], references: [id])
+  stage            LevelStage?     @relation("LearningGroupStage", fields: [stageId], references: [id])
+  teacher          TeacherProfile? @relation(fields: [teacherProfileId], references: [id])
+  members          GroupMember[]   @relation("GroupMembers")
+  schedules        GroupSchedule[]
+  enrollments      Enrollment[]    @relation("EnrollmentGroup")
+  sessions         Session[]       @relation("GroupSessions")
+  homework         Homework[]      @relation("GroupHomework")
+
+  @@index([levelId, stageId, status])
+  @@index([teacherProfileId, status])
+}
+
+model GroupMember {
+  id           String        @id @default(uuid()) @map("_id")
+  groupId      String
+  userId       String
+  enrollmentId String?
+  role         String        @default("STUDENT")
+  status       String        @default("ACTIVE")
+  joinedAt     DateTime      @default(now())
+  leftAt       DateTime?
+  group        LearningGroup @relation("GroupMembers", fields: [groupId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([userId, status])
+}
+
+model GroupSchedule {
+  id               String          @id @default(uuid()) @map("_id")
+  groupId          String
+  teacherProfileId String?
+  dayOfWeek        Int
+  startMinute      Int
+  durationMinutes  Int
+  timezone         String
+  status           String          @default("ACTIVE")
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @default(now()) @updatedAt
+  group            LearningGroup   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  teacher          TeacherProfile? @relation(fields: [teacherProfileId], references: [id])
+
+  @@index([groupId, status])
+  @@index([teacherProfileId, dayOfWeek, startMinute])
+}
+
+model SessionParticipant {
+  id        String   @id @default(uuid()) @map("_id")
+  sessionId String
+  userId    String
+  role      String   @default("STUDENT")
+  joinedAt  DateTime?
+  leftAt    DateTime?
+  createdAt DateTime @default(now())
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, userId])
+  @@index([userId, createdAt])
+}
+
+model Attendance {
+  id              String   @id @default(uuid()) @map("_id")
+  sessionId       String
+  userId          String
+  status          String   @default("PENDING")
+  joinedAt        DateTime?
+  leftAt          DateTime?
+  durationSeconds Int?
+  note            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
+  session         Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, userId])
+  @@index([userId, status])
+}
+
+model QMeetMeeting {
+  id                String   @id @default(uuid()) @map("_id")
+  sessionId         String   @unique
+  providerMeetingId String?
+  provider          String   @default("QMEET")
+  joinUrl           String?
+  hostUrl           String?
+  status            String   @default("CREATED")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now()) @updatedAt
+  session           Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([providerMeetingId])
+  @@index([status, createdAt])
+}
+
+model SessionFeedback {
+  id             String                  @id @default(uuid()) @map("_id")
+  sessionId      String
+  studentId      String
+  teacherId      String
+  summary        String?
+  teacherNotes   String?
+  status         String                  @default("DRAFT")
+  publishedAt    DateTime?
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @default(now()) @updatedAt
+  session        Session                 @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student        User                    @relation("FeedbackStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  teacher        User                    @relation("FeedbackTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  expressions    FeedbackExpression[]
+  mistakes       FeedbackMistake[]
+  pronunciation  FeedbackPronunciation[]
+  ebi            FeedbackEBI[]
+
+  @@unique([sessionId, studentId])
+  @@index([studentId, status])
+  @@index([teacherId, status])
+}
+
+model FeedbackExpression {
+  id         String          @id @default(uuid()) @map("_id")
+  feedbackId String
+  expression String
+  meaning    String?
+  example    String?
+  category   String?
+  createdAt  DateTime        @default(now())
+  feedback   SessionFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+}
+
+model FeedbackMistake {
+  id          String          @id @default(uuid()) @map("_id")
+  feedbackId  String
+  original    String
+  correction  String
+  explanation String?
+  createdAt   DateTime        @default(now())
+  feedback    SessionFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+}
+
+model FeedbackPronunciation {
+  id         String          @id @default(uuid()) @map("_id")
+  feedbackId String
+  target     String
+  actual     String?
+  guidance   String?
+  audioRef   String?
+  createdAt  DateTime        @default(now())
+  feedback   SessionFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+}
+
+model FeedbackEBI {
+  id               String          @id @default(uuid()) @map("_id")
+  feedbackId       String
+  betterExpression String
+  explanation      String?
+  priority         String          @default("NORMAL")
+  createdAt        DateTime        @default(now())
+  feedback         SessionFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+}
+
+model Homework {
+  id          String               @id @default(uuid()) @map("_id")
+  createdById String
+  studentId   String?
+  groupId     String?
+  sessionId   String?
+  title       String
+  description String?
+  status      String               @default("DRAFT")
+  dueAt       DateTime?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @default(now()) @updatedAt
+  creator     User                 @relation("HomeworkCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  student     User?                @relation("HomeworkStudent", fields: [studentId], references: [id])
+  group       LearningGroup?       @relation("GroupHomework", fields: [groupId], references: [id])
+  session     Session?             @relation("SessionHomework", fields: [sessionId], references: [id])
+  items       HomeworkItem[]
+  submissions HomeworkSubmission[]
+
+  @@index([createdById, status])
+  @@index([studentId, status, dueAt])
+  @@index([groupId, status])
+}
+
+model HomeworkItem {
+  id          String              @id @default(uuid()) @map("_id")
+  homeworkId  String
+  itemType    String
+  prompt      String?
+  contentRef  String?
+  isRequired  Boolean             @default(true)
+  order       Int                 @default(0)
+  createdAt   DateTime            @default(now())
+  homework    Homework            @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  submissions HomeworkSubmission[] @relation("HomeworkItemSubmissions")
+
+  @@index([homeworkId, order])
+}
+
+model HomeworkSubmission {
+  id          String        @id @default(uuid()) @map("_id")
+  homeworkId  String
+  itemId     String?
+  studentId  String
+  attempt    Int           @default(1)
+  contentType String
+  contentText String?
+  contentRef String?
+  status     String        @default("SUBMITTED")
+  submittedAt DateTime      @default(now())
+  updatedAt   DateTime      @default(now()) @updatedAt
+  homework   Homework      @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  item       HomeworkItem? @relation("HomeworkItemSubmissions", fields: [itemId], references: [id])
+  student    User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  reviews    HomeworkReview[]
+
+  @@index([homeworkId, studentId, status])
+  @@index([studentId, submittedAt])
+}
+
+model HomeworkReview {
+  id           String             @id @default(uuid()) @map("_id")
+  submissionId String
+  teacherId    String
+  score        Float?
+  feedback     String?
+  status       String             @default("REVIEWED")
+  reviewedAt   DateTime           @default(now())
+  submission   HomeworkSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  teacher      User               @relation("HomeworkReviewer", fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId, status])
+  @@index([teacherId, reviewedAt])
+}
+
+model SpeakingRoom {
+  id          String               @id @default(uuid()) @map("_id")
+  levelId     String?
+  stageId     String?
+  topic       String
+  prompt      String?
+  status      String               @default("OPEN")
+  maxMembers  Int?
+  createdById String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @default(now()) @updatedAt
+  level       Level?               @relation("SpeakingRoomLevel", fields: [levelId], references: [id])
+  stage       LevelStage?          @relation("SpeakingRoomStage", fields: [stageId], references: [id])
+  members     SpeakingRoomMember[]
+  messages    SpeakingRoomMessage[]
+
+  @@index([levelId, stageId, status])
+}
+
+model SpeakingRoomMember {
+  id        String        @id @default(uuid()) @map("_id")
+  roomId    String
+  userId    String
+  role      String        @default("MEMBER")
+  status    String        @default("ACTIVE")
+  muted     Boolean       @default(false)
+  joinedAt  DateTime      @default(now())
+  leftAt    DateTime?
+  room      SpeakingRoom  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([userId, status])
+}
+
+model SpeakingRoomMessage {
+  id          String       @id @default(uuid()) @map("_id")
+  roomId      String
+  senderId    String
+  messageType String       @default("TEXT")
+  text        String?
+  voiceRef    String?
+  status      String       @default("VISIBLE")
+  createdAt   DateTime     @default(now())
+  room        SpeakingRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender      User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, createdAt])
+  @@index([senderId, createdAt])
+}
+
+model Notification {
+  id             String   @id @default(uuid()) @map("_id")
+  userId         String
+  eventType      String
+  channel        String
+  title          String?
+  body           String?
+  payloadJson    String?
+  deliveryStatus String   @default("PENDING")
+  idempotencyKey String?
+  sentAt         DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, deliveryStatus, createdAt])
+  @@index([eventType, channel])
+  @@index([idempotencyKey])
+}
+
+model WhatsAppAccount {
+  id              String                @id @default(uuid()) @map("_id")
+  userId          String?
+  provider        String
+  phoneNumber     String
+  normalizedPhone String?
+  status          String                @default("DISCONNECTED")
+  metadataJson    String?
+  lastConnectedAt DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @default(now()) @updatedAt
+  owner           User?                 @relation("WhatsAppAccountOwner", fields: [userId], references: [id])
+  contacts        WhatsAppContact[]
+  conversations   WhatsAppConversation[]
+  queues          WhatsAppQueue[]
+
+  @@index([normalizedPhone])
+  @@index([provider, status])
+}
+
+model WhatsAppContact {
+  id              String                @id @default(uuid()) @map("_id")
+  accountId       String
+  userId          String?
+  phoneNumber     String
+  normalizedPhone String?
+  displayName     String?
+  status          String                @default("ACTIVE")
+  metadataJson    String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @default(now()) @updatedAt
+  account         WhatsAppAccount       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  user            User?                 @relation("WhatsAppContactUser", fields: [userId], references: [id])
+  conversations   WhatsAppConversation[]
+
+  @@index([accountId, normalizedPhone])
+  @@index([userId, status])
+}
+
+model WhatsAppConversation {
+  id             String               @id @default(uuid()) @map("_id")
+  accountId      String
+  contactId      String
+  studentId      String?
+  assignedStaffId String?
+  status         String               @default("OPEN")
+  lastMessageAt  DateTime?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @default(now()) @updatedAt
+  account        WhatsAppAccount      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  contact        WhatsAppContact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  student        User?                @relation("WhatsAppConversationStudent", fields: [studentId], references: [id])
+  assignedStaff  User?                @relation("WhatsAppConversationStaff", fields: [assignedStaffId], references: [id])
+  messages       WhatsAppMessage[]
+  queues         WhatsAppQueue[]
+
+  @@index([accountId, status, lastMessageAt])
+  @@index([contactId, status])
+  @@index([studentId, status])
+}
+
+model WhatsAppMessage {
+  id                String               @id @default(uuid()) @map("_id")
+  conversationId    String
+  direction         String
+  mode              String               @default("MANUAL")
+  body              String?
+  providerMessageId String?
+  deliveryStatus    String               @default("PENDING")
+  idempotencyKey    String?
+  sentAt            DateTime?
+  receivedAt        DateTime?
+  createdAt         DateTime             @default(now())
+  conversation      WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  queueItems        WhatsAppQueue[]
+
+  @@index([conversationId, createdAt])
+  @@index([providerMessageId])
+  @@index([idempotencyKey])
+}
+
+model WhatsAppQueue {
+  id             String                @id @default(uuid()) @map("_id")
+  accountId      String?
+  conversationId String?
+  messageId      String?
+  status         String                @default("PENDING")
+  availableAt    DateTime              @default(now())
+  attempts       Int                   @default(0)
+  lockedAt       DateTime?
+  lastError      String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @default(now()) @updatedAt
+  account        WhatsAppAccount?      @relation(fields: [accountId], references: [id])
+  conversation   WhatsAppConversation? @relation(fields: [conversationId], references: [id])
+  message        WhatsAppMessage?      @relation(fields: [messageId], references: [id])
+
+  @@index([status, availableAt])
+  @@index([accountId, status, availableAt])
+}
+
+model AIRecommendation {
+  id          String      @id @default(uuid()) @map("_id")
+  studentId   String
+  levelId     String?
+  stageId     String?
+  type        String
+  title       String?
+  payloadJson String?
+  status      String      @default("PENDING")
+  expiresAt   DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @default(now()) @updatedAt
+  student     User        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  level       Level?      @relation("AIRecommendationLevel", fields: [levelId], references: [id])
+  stage       LevelStage? @relation("AIRecommendationStage", fields: [stageId], references: [id])
+
+  @@index([studentId, status, createdAt])
+  @@index([levelId, stageId])
+}
+
+model AIInteraction {
+  id         String   @id @default(uuid()) @map("_id")
+  userId     String?
+  studentId  String?
+  feature    String
+  inputHash  String?
+  inputJson  String?
+  outputJson String?
+  model      String?
+  status     String   @default("COMPLETED")
+  createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([studentId, feature, createdAt])
+}
+
+enum SubscriptionType {
+  GROUP
+  DUO
+  PRIVATE
+  SMALL_GROUP
 }

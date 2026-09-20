@@ -9,6 +9,7 @@
     "start": "node start-server.js",
     "lint": "eslint",
     "test:foundation": "tsx --test tests/foundation.test.ts",
+    "test:phase2": "tsx --test tests/phase2-schema.test.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
