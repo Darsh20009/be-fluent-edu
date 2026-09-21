@@ -8,9 +8,8 @@ When deploying to Render (or any production environment), make sure to set the f
 
 MongoDB is the only supported application database:
 
-```
-MONGODB_URI=mongodb+srv://username:password@host/database
-```
+Configure the secret `MONGODB_URI` in the deployment environment's secure
+secret settings. Never place its value in source code or documentation.
 
 ### NextAuth Configuration
 ```

@@ -159,12 +159,13 @@ types, groups, sessions, QMeet, feedback, and homework relationships.
 
 ## 13. Prisma and build
 
-- `MONGODB_URI=<non-connected local placeholder> npx prisma validate --schema prisma/schema.prisma` — passed.
-- `MONGODB_URI=<non-connected local placeholder> npx prisma generate --schema prisma/schema.prisma` — passed.
+- `npx prisma validate --schema prisma/schema.prisma` with a non-credentialed
+  validation environment — passed.
+- `npx prisma generate --schema prisma/schema.prisma` with a non-credentialed
+  validation environment — passed.
 - `npm run build` — passed.
 
-The placeholder URI was used only because the current environment did not
-provide `MONGODB_URI`; it was not used to connect to a database.
+No database URI was committed or used to connect to a database.
 
 ## 14. Known issues
 
