@@ -1313,6 +1313,9 @@ model SessionFeedback {
   teacherNotes   String?
   status         String                  @default("DRAFT")
   publishedAt    DateTime?
+  publishedById  String?
+  publicationVersion Int                     @default(0)
+  editAfterPublishAllowed Boolean             @default(false)
   createdAt      DateTime                @default(now())
   updatedAt      DateTime                @default(now()) @updatedAt
   session        Session                 @relation(fields: [sessionId], references: [id], onDelete: Cascade)
@@ -1322,10 +1325,25 @@ model SessionFeedback {
   mistakes       FeedbackMistake[]
   pronunciation  FeedbackPronunciation[]
   ebi            FeedbackEBI[]
+  revisions      FeedbackRevision[]
 
   @@unique([sessionId, studentId])
   @@index([studentId, status])
   @@index([teacherId, status])
+}
+
+model FeedbackRevision {
+  id           String          @id @default(uuid()) @map("_id")
+  feedbackId   String
+  version      Int
+  snapshotJson String
+  changedById  String
+  reason       String?
+  createdAt    DateTime        @default(now())
+  feedback     SessionFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  @@unique([feedbackId, version])
+  @@index([changedById, createdAt])
 }
 
 model FeedbackExpression {
@@ -1345,6 +1363,7 @@ model FeedbackMistake {
   original    String
   correction  String
   explanation String?
+  templateId  String?
   createdAt   DateTime        @default(now())
   feedback    SessionFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
 }
@@ -1355,6 +1374,8 @@ model FeedbackPronunciation {
   target     String
   actual     String?
   guidance   String?
+  phonetic   String?
+  teacherNote String?
   audioRef   String?
   createdAt  DateTime        @default(now())
   feedback   SessionFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
@@ -1366,8 +1387,42 @@ model FeedbackEBI {
   betterExpression String
   explanation      String?
   priority         String          @default("NORMAL")
+  libraryItemId    String?
   createdAt        DateTime        @default(now())
   feedback         SessionFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+}
+
+model EBILibraryItem {
+  id          String   @id @default(uuid()) @map("_id")
+  category    String
+  title       String
+  description String?
+  levelId     String?
+  stageId     String?
+  status      String   @default("ACTIVE")
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  @@index([status, category])
+  @@index([levelId, stageId])
+}
+
+model MistakeTemplate {
+  id                  String   @id @default(uuid()) @map("_id")
+  category            String
+  incorrectExpression String
+  correctedExpression String
+  explanation         String?
+  levelId             String?
+  stageId             String?
+  status              String   @default("ACTIVE")
+  createdById         String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @default(now()) @updatedAt
+
+  @@index([status, category])
+  @@index([levelId, stageId])
 }
 
 model Homework {
@@ -1426,6 +1481,7 @@ model HomeworkSubmission {
   student    User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
   reviews    HomeworkReview[]
 
+  @@unique([homeworkId, itemId, studentId, attempt])
   @@index([homeworkId, studentId, status])
   @@index([studentId, submittedAt])
 }
@@ -1438,10 +1494,13 @@ model HomeworkReview {
   feedback     String?
   status       String             @default("REVIEWED")
   reviewedAt   DateTime           @default(now())
+  corrections  String?
+  nextSteps    String?
+  completedAt  DateTime?
   submission   HomeworkSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   teacher      User               @relation("HomeworkReviewer", fields: [teacherId], references: [id], onDelete: Cascade)
 
-  @@index([submissionId, status])
+  @@unique([submissionId])
   @@index([teacherId, reviewedAt])
 }
 
@@ -1506,6 +1565,7 @@ model Notification {
   payloadJson    String?
   deliveryStatus String   @default("PENDING")
   idempotencyKey String?
+  dedupeKey      String   @unique @default(uuid())
   sentAt         DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now()) @updatedAt
