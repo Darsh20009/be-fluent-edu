@@ -22,6 +22,12 @@ added to `.env.example`.
 The secret-store presence alone does not prove that the running workflow has
 received the variable.
 
+An official workflow configuration attempt was made using the validated
+`[run]` and `[run.env]` mechanism with a variable reference only. The file
+validated, but the restarted workflow still reported `MONGODB_URI is not set`.
+That ineffective configuration was removed; no workaround or hardcoded value
+was retained.
+
 ## Prisma result
 
 - `prisma validate`: **passed**
@@ -93,4 +99,5 @@ is resolved and `/api/health` reports `application: healthy` with
 `database: healthy`, Prisma connection success and safe MongoDB read
 connectivity cannot be verified.
 
-Phase 5 was not started.
+Phase 5 was not started. Per the stop condition, no further workflow
+workarounds were attempted.
