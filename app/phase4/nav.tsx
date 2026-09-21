@@ -4,6 +4,7 @@ import styles from './phase4.module.css'
 export function Phase4Nav({ area }: { area: 'admin' | 'teacher' | 'student' }) {
   const links = area === 'admin'
     ? [
+        ['/dashboard/admin/commerce', 'Control center'],
         ['/dashboard/admin/people', 'People'],
         ['/dashboard/admin/levels', 'Levels'],
         ['/dashboard/admin', 'Legacy overview'],

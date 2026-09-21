@@ -61,12 +61,22 @@ model Package {
   discountPrice Float?         // السعر بعد الخصم المباشر
   lessonsCount  Int
   durationDays  Int
+  subscriptionType SubscriptionType?
+  levelId       String?
+  stageId       String?
+  capacity      Int?
+  featuresJson  String?
   isActive      Boolean        @default(true)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @default(now()) @updatedAt
   CartItem      CartItem[]
   Subscription  Subscription[]
   Enrollment    Enrollment[]
+  level         Level?         @relation("PackageLevel", fields: [levelId], references: [id])
+  stage         LevelStage?    @relation("PackageStage", fields: [stageId], references: [id])
+
+  @@index([subscriptionType, isActive])
+  @@index([levelId, stageId])
 }
 
 model Session {
@@ -164,6 +174,9 @@ model Subscription {
   id                String             @id @default(uuid()) @map("_id")
   studentId         String             
   packageId         String             
+  subscriptionType  SubscriptionType?
+  capacity          Int?
+  groupId           String?
   status            SubscriptionStatus @default(PENDING)
   paid              Boolean            @default(false)
   paymentMethod     PaymentMethod?
@@ -186,9 +199,11 @@ model Subscription {
   Package           Package            @relation(fields: [packageId], references: [id])
   User              User               @relation(fields: [studentId], references: [id], onDelete: Cascade)
   Enrollment        Enrollment[]
+  group             LearningGroup?     @relation("SubscriptionGroup", fields: [groupId], references: [id])
 
   @@index([studentId, status])
   @@index([assignedTeacherId, status])
+  @@index([groupId, status])
 }
 
 model TeacherProfile {
@@ -991,6 +1006,7 @@ model Level {
   officialLearningProfiles    StudentLearningProfile[]  @relation("LearningProfileOfficialLevel")
   recommendedLearningProfiles StudentLearningProfile[]  @relation("LearningProfileRecommendedLevel")
   groups                      LearningGroup[]           @relation("LearningGroupLevel")
+  packages                    Package[]                 @relation("PackageLevel")
   sessions                    Session[]                 @relation("SessionLevel")
   learningProgress            LearningProgress[]        @relation("LearningProgressLevel")
   speakingRooms               SpeakingRoom[]            @relation("SpeakingRoomLevel")
@@ -1017,6 +1033,7 @@ model LevelStage {
   officialLearningProfiles    StudentLearningProfile[]  @relation("LearningProfileOfficialStage")
   recommendedLearningProfiles StudentLearningProfile[]  @relation("LearningProfileRecommendedStage")
   groups                      LearningGroup[]           @relation("LearningGroupStage")
+  packages                    Package[]                 @relation("PackageStage")
   sessions                    Session[]                 @relation("SessionStage")
   learningProgress            LearningProgress[]        @relation("LearningProgressStage")
   speakingRooms               SpeakingRoom[]            @relation("SpeakingRoomStage")
@@ -1187,6 +1204,7 @@ model LearningGroup {
   members          GroupMember[]   @relation("GroupMembers")
   schedules        GroupSchedule[]
   enrollments      Enrollment[]    @relation("EnrollmentGroup")
+  subscriptions    Subscription[]  @relation("SubscriptionGroup")
   sessions         Session[]       @relation("GroupSessions")
   homework         Homework[]      @relation("GroupHomework")
 

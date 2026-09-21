@@ -32,6 +32,11 @@ export type AuditAction =
   | 'TEACHER_PROFILE_CHANGE'
   | 'LEVEL_RECOMMENDATION'
   | 'HEALTH_CHECK'
+  | 'PACKAGE_CHANGE'
+  | 'ENROLLMENT_CHANGE'
+  | 'GROUP_CHANGE'
+  | 'GROUP_SCHEDULE_CHANGE'
+  | 'GROUP_MATCH_OVERRIDE'
 
 export interface AuditEvent {
   action: AuditAction
