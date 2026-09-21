@@ -17,6 +17,9 @@ function isPublicApi(request: NextRequest) {
     '/api/admin/groups',
     '/api/student/commercial',
     '/api/teacher/groups',
+    '/api/admin/classes',
+    '/api/teacher/classes',
+    '/api/student/classes',
   ]
   // Phase 5 handlers apply the database gate before their own auth checks so
   // blocked infrastructure is reported truthfully without weakening RBAC.

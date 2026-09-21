@@ -140,6 +140,76 @@
   padding: 12px;
 }
 
+.sectionNav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+}
+
+.sectionNav button {
+  border: 1px solid #dbe3ea;
+  border-radius: 10px;
+  background: #fff;
+  color: #475569;
+  padding: 10px 14px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sectionNav button[aria-selected="true"] {
+  border-color: #0f766e;
+  background: #f0fdfa;
+  color: #0f766e;
+  font-weight: 700;
+}
+
+.notice {
+  border: 1px solid #dbe3ea;
+  border-radius: 12px;
+  background: #fff;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.blocked {
+  border-color: #f4c7a1;
+  background: #fffaf5;
+  color: #9a3412;
+}
+
+.skeleton {
+  height: 86px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #eef2f7 25%, #f8fafc 50%, #eef2f7 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+
+.metric {
+  font-size: 1.65rem;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  color: #0f766e;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: .48;
+}
+
 @media (max-width: 760px) {
   .container { width: min(100% - 22px, 680px); padding-top: 18px; }
   .header { display: block; }

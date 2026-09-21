@@ -37,6 +37,9 @@ export type AuditAction =
   | 'GROUP_CHANGE'
   | 'GROUP_SCHEDULE_CHANGE'
   | 'GROUP_MATCH_OVERRIDE'
+  | 'SESSION_CHANGE'
+  | 'SESSION_PARTICIPANT_CHANGE'
+  | 'ATTENDANCE_CHANGE'
 
 export interface AuditEvent {
   action: AuditAction

@@ -103,11 +103,17 @@ model Session {
   stage            LevelStage?       @relation("SessionStage", fields: [stageId], references: [id])
   groupId          String?
   group            LearningGroup?    @relation("GroupSessions", fields: [groupId], references: [id])
+  groupScheduleId  String?
+  groupSchedule    GroupSchedule?    @relation("ScheduledSessions", fields: [groupScheduleId], references: [id])
   participants     SessionParticipant[]
   attendances      Attendance[]
   qmeetMeeting     QMeetMeeting?
   feedback         SessionFeedback[]
   homework         Homework[]        @relation("SessionHomework")
+
+  @@index([status, startTime])
+  @@index([teacherId, startTime])
+  @@index([groupId, startTime])
 }
 
 model SessionStudent {
@@ -1241,6 +1247,7 @@ model GroupSchedule {
   updatedAt        DateTime        @default(now()) @updatedAt
   group            LearningGroup   @relation(fields: [groupId], references: [id], onDelete: Cascade)
   teacher          TeacherProfile? @relation(fields: [teacherProfileId], references: [id])
+  sessions         Session[]       @relation("ScheduledSessions")
 
   @@index([groupId, status])
   @@index([teacherProfileId, dayOfWeek, startMinute])
@@ -1251,6 +1258,7 @@ model SessionParticipant {
   sessionId String
   userId    String
   role      String   @default("STUDENT")
+  status    String   @default("SCHEDULED")
   joinedAt  DateTime?
   leftAt    DateTime?
   createdAt DateTime @default(now())
@@ -1258,6 +1266,7 @@ model SessionParticipant {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([sessionId, userId])
+  @@index([sessionId, status])
   @@index([userId, createdAt])
 }
 

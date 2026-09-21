@@ -13,6 +13,7 @@
     "test:phase3": "tsx --test tests/phase3-auth.test.ts",
     "test:phase4": "tsx --test tests/phase4-core.test.ts",
     "test:phase5": "tsx --test tests/phase5-core.test.ts",
+    "test:phase6": "tsx --test tests/phase6-core.test.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
