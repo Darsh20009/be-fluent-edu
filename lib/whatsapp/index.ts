@@ -1,6 +1,6 @@
 export interface WhatsAppAccount {
   id: string
-  status: 'DISCONNECTED' | 'CONNECTING' | 'CONNECTED'
+  status: 'DISCONNECTED' | 'QR_REQUIRED' | 'CONNECTING' | 'CONNECTED' | 'RECONNECTING' | 'LOGGED_OUT' | 'ERROR'
   phoneNumber?: string
 }
 
@@ -32,7 +32,7 @@ export interface WhatsAppQueue {
 }
 
 /**
- * Baileys is intentionally not imported here. This boundary lets the future
- * provider be added without coupling CRM authorization to student sessions.
+ * Baileys is intentionally lazy-loaded only after a persistent auth store has
+ * been configured. This boundary keeps CRM authorization separate from auth.
  */
 export const WHATSAPP_MIN_OUTGOING_INTERVAL_MS = 3000

@@ -227,6 +227,7 @@ model TeacherProfile {
   learningGroups        LearningGroup[]
   groupSchedules        GroupSchedule[]
   enrollments           Enrollment[] @relation("EnrollmentTeacher")
+  moderatedSpeakingRooms SpeakingRoom[] @relation("SpeakingRoomModerator")
 }
 
 model Certificate {
@@ -293,6 +294,10 @@ model User {
   homeworkReviews            HomeworkReview[]          @relation("HomeworkReviewer")
   speakingRoomMemberships    SpeakingRoomMember[]
   speakingRoomMessages       SpeakingRoomMessage[]
+  speakingRoomReports        SpeakingRoomReport[]      @relation("SpeakingRoomReportReporter")
+  speakingRoomTargetReports   SpeakingRoomReport[]      @relation("SpeakingRoomReportTarget")
+  resolvedSpeakingRoomReports SpeakingRoomReport[]     @relation("SpeakingRoomReportResolver")
+  speakingRoomContent         SpeakingRoomContent[]     @relation("SpeakingRoomContentCreator")
   notifications              Notification[]
   whatsappAccounts           WhatsAppAccount[]          @relation("WhatsAppAccountOwner")
   whatsappContacts           WhatsAppContact[]          @relation("WhatsAppContactUser")
@@ -1506,19 +1511,27 @@ model HomeworkReview {
 
 model SpeakingRoom {
   id          String               @id @default(uuid()) @map("_id")
+  name        String?
+  description String?
   levelId     String?
   stageId     String?
   topic       String
   prompt      String?
+  vocabularyJson String?
   status      String               @default("OPEN")
   maxMembers  Int?
   createdById String?
+  moderatorTeacherProfileId String?
+  activeMemberCount Int       @default(0)
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @default(now()) @updatedAt
   level       Level?               @relation("SpeakingRoomLevel", fields: [levelId], references: [id])
   stage       LevelStage?          @relation("SpeakingRoomStage", fields: [stageId], references: [id])
+  moderatorTeacherProfile TeacherProfile? @relation("SpeakingRoomModerator", fields: [moderatorTeacherProfileId], references: [id])
   members     SpeakingRoomMember[]
   messages    SpeakingRoomMessage[]
+  reports     SpeakingRoomReport[]
+  content     SpeakingRoomContent[]
 
   @@index([levelId, stageId, status])
 }
@@ -1550,9 +1563,47 @@ model SpeakingRoomMessage {
   createdAt   DateTime     @default(now())
   room        SpeakingRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
   sender      User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  reports     SpeakingRoomReport[]
 
   @@index([roomId, createdAt])
   @@index([senderId, createdAt])
+}
+
+model SpeakingRoomReport {
+  id             String              @id @default(uuid()) @map("_id")
+  roomId         String
+  reporterId     String
+  targetUserId   String?
+  messageId      String?
+  reason         String
+  status         String              @default("OPEN")
+  resolutionNote String?
+  resolvedById   String?
+  createdAt      DateTime            @default(now())
+  resolvedAt     DateTime?
+  room           SpeakingRoom        @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  reporter       User                @relation("SpeakingRoomReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetUser     User?               @relation("SpeakingRoomReportTarget", fields: [targetUserId], references: [id])
+  message        SpeakingRoomMessage? @relation(fields: [messageId], references: [id])
+  resolvedBy     User?               @relation("SpeakingRoomReportResolver", fields: [resolvedById], references: [id])
+
+  @@index([roomId, status, createdAt])
+  @@index([reporterId, createdAt])
+}
+
+model SpeakingRoomContent {
+  id          String       @id @default(uuid()) @map("_id")
+  roomId      String?
+  contentType String
+  text        String
+  status      String       @default("ACTIVE")
+  createdById String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now()) @updatedAt
+  room        SpeakingRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  createdBy   User         @relation("SpeakingRoomContentCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([roomId, contentType, status])
 }
 
 model Notification {
@@ -1583,6 +1634,12 @@ model WhatsAppAccount {
   phoneNumber     String
   normalizedPhone String?
   status          String                @default("DISCONNECTED")
+  authPersistenceStatus String           @default("PERSISTENCE_UNAVAILABLE")
+  reconnectAttempts Int                 @default(0)
+  lastError       String?
+  workerLockToken String?
+  workerLockedAt  DateTime?
+  lastMessageSentAt DateTime?
   metadataJson    String?
   lastConnectedAt DateTime?
   createdAt       DateTime              @default(now())
@@ -1604,6 +1661,8 @@ model WhatsAppContact {
   normalizedPhone String?
   displayName     String?
   status          String                @default("ACTIVE")
+  isGroup         Boolean               @default(false)
+  lastInteractionAt DateTime?
   metadataJson    String?
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @default(now()) @updatedAt
@@ -1611,7 +1670,7 @@ model WhatsAppContact {
   user            User?                 @relation("WhatsAppContactUser", fields: [userId], references: [id])
   conversations   WhatsAppConversation[]
 
-  @@index([accountId, normalizedPhone])
+  @@unique([accountId, normalizedPhone])
   @@index([userId, status])
 }
 
@@ -1622,6 +1681,7 @@ model WhatsAppConversation {
   studentId      String?
   assignedStaffId String?
   status         String               @default("OPEN")
+  unreadCount    Int                  @default(0)
   lastMessageAt  DateTime?
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @default(now()) @updatedAt
@@ -1645,6 +1705,7 @@ model WhatsAppMessage {
   body              String?
   providerMessageId String?
   deliveryStatus    String               @default("PENDING")
+  metadataJson      String?
   idempotencyKey    String?
   sentAt            DateTime?
   receivedAt        DateTime?
@@ -1662,9 +1723,15 @@ model WhatsAppQueue {
   accountId      String?
   conversationId String?
   messageId      String?
+  notificationId String?
+  recipientPhone String?
   status         String                @default("PENDING")
+  dedupeKey      String                @unique
   availableAt    DateTime              @default(now())
   attempts       Int                   @default(0)
+  maxAttempts    Int                   @default(3)
+  nextAttemptAt  DateTime              @default(now())
+  lastAttemptAt  DateTime?
   lockedAt       DateTime?
   lastError      String?
   createdAt      DateTime              @default(now())
