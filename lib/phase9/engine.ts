@@ -131,6 +131,15 @@ export const speakingActivitySignalInputSchema = z.object({
   difficultyReported: z.boolean().default(false),
 })
 
+export const explicitAbsenceSignalInputSchema = z.object({
+  studentId: boundedId,
+  attendanceId: boundedId,
+  sessionId: boundedId,
+  status: z.literal('ABSENT'),
+  revision: z.number().int().min(1).default(1),
+  occurredAt: z.coerce.date(),
+})
+
 export function phase9DatabaseGuard() {
   if (process.env.PHASE5_DATABASE_ENABLED === 'true') return null
   return NextResponse.json(
@@ -242,7 +251,9 @@ export function normalizeSpeakingActivitySignal(input: unknown): NormalizedLearn
 export function normalizeStudentGoalSignal(input: {
   studentId: string
   goalId: string
+  goalSlot: 'overallGoal' | 'monthlyGoal' | 'weeklyFocus'
   goal: string
+  revision: number
   occurredAt: Date
   targetSkillCode?: string | null
 }): NormalizedLearningSignal {
@@ -250,9 +261,26 @@ export function normalizeStudentGoalSignal(input: {
   return normalizedSignalSchema.parse({
     studentId: input.studentId, type: 'STUDENT_GOAL', source: 'GOAL',
     sourceEntityType: 'StudentGoal', sourceEntityId: input.goalId,
-    dedupeKey: `goal:${input.goalId}:${topicKey}`,
+    sourceItemKey: input.goalSlot,
+    dedupeKey: `goal:${input.goalId}:${input.goalSlot}:${topicKey}:${input.revision}`,
     skillCode: input.targetSkillCode || null, topicKey, strength: 2,
     occurredAt: input.occurredAt, evidence: { goal: input.goal },
+  })
+}
+
+export function normalizeExplicitAbsenceSignal(input: unknown): NormalizedLearningSignal {
+  const absence = explicitAbsenceSignalInputSchema.parse(input)
+  return normalizedSignalSchema.parse({
+    studentId: absence.studentId,
+    type: 'ATTENDANCE_ABSENCE',
+    source: 'ATTENDANCE',
+    sourceEntityType: 'Attendance',
+    sourceEntityId: absence.attendanceId,
+    sourceItemKey: absence.sessionId,
+    dedupeKey: `attendance:${absence.attendanceId}:absence:${absence.revision}`,
+    strength: 3,
+    occurredAt: absence.occurredAt,
+    evidence: { status: 'ABSENT' },
   })
 }
 

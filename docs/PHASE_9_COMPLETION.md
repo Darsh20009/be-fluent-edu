@@ -6,8 +6,8 @@ Phase 9 implementation files provide a deterministic learning-intelligence found
 
 ## Implemented
 
-- Deterministic signal normalization for published student-visible feedback, scored homework reviews, and speaking activity.
-- Idempotent source-event signal persistence helpers with a fail-closed database gate.
+- Deterministic signal normalization for published student-visible feedback, scored homework reviews, speaking activity, saved student goals, and explicit ABSENT attendance.
+- Idempotent source-event signal persistence helpers with a fail-closed database gate; goal and attendance corrections supersede active state signals without deleting history.
 - Evidence-based profile mastery calculated from at least three completed scored progress records as a rounded arithmetic mean.
 - Deterministic recommendation classification, explanation, priority scoring, active deduplication, expiry, and student accept/dismiss transitions.
 - Recommendation history renewal keyed by evidence cycles, preserving old terminal records while allowing a new cycle after new evidence; schema uniqueness is `(studentId, dedupeKey, dedupeCycle)`.
@@ -20,7 +20,7 @@ Phase 9 implementation files provide a deterministic learning-intelligence found
 
 ## Known scope differences and limitations
 
-- Signal enum values for attendance, sessions, resources, progress, and goals do not all have active ingestion. Goal normalization exists without a persistence hook; attendance-to-recovery and upcoming-class integrations are not wired.
+- Signal enum values for sessions, resources, progress, and other categories do not all have active ingestion. Upcoming-class relevance is not wired.
 - Current speaking ingestion records activity and room topic; it does not create reported-difficulty signals or assess speech quality.
 - The priority function supports upcoming-class and mastery factors, but the active refresh only supplies goals and applies the mastery penalty to strong-homework signals. It does not pass upcoming-class relevance or broadly classify mastery from profile evidence.
 - Plan generation uses its default 15-minute preference in the service. It requires a published matching resource; lack of recommendations/resources is surfaced, not replaced with synthetic exercises.
@@ -45,11 +45,11 @@ See [Phase 9 API](PHASE_9_API.md) for exact routes and response shapes and [Phas
 The configured `test:phase9` script runs domain tests, signal-pipeline tests, staff-service authorization tests, and the dashboard UI contract test:
 
 - `tests/phase9-domain.test.ts`
-- `tests/phase9-pipeline.test.ts`
+- `tests/phase9-pipeline.test.ts` (including goal revision/deduplication and explicit absence/correction coverage)
 - `tests/phase9-staff-service.test.ts`
 - `app/dashboard/phase9/intelligence.contract.test.ts`
 
-Reported validation is complete: Foundation and Phase 2–9 test suites passed; Prisma validate and generate, TypeScript, ESLint, and production build passed. The production build required a CSS fix, which was applied before the passing build. The existing workflow remained running; `GET /` returned HTTP 200, and representative Phase 9 routes returned HTTP 503 `DATABASE_UNAVAILABLE` with the database gate disabled. A screenshot request redirected to the login page as expected for an unauthenticated preview; it was not treated as a rendering failure. These checks do not establish MongoDB integration or persisted writes.
+Validation for the Phase 9 goal and attendance integration is being rerun; results are recorded after completion below. Previously verified Foundation and Phase 2–9 suites, Prisma validate/generate, TypeScript, ESLint, production build, and the running homepage remain separate from MongoDB integration evidence. Representative Phase 9 routes return HTTP 503 `DATABASE_UNAVAILABLE` with the database gate disabled. A screenshot request redirected to login as expected for an unauthenticated preview. These checks do not establish MongoDB integration or persisted writes.
 
 ## UI
 

@@ -219,7 +219,7 @@ export async function getTeacherStudentIntelligence(
       },
     }),
     prisma.learningSignal.findMany({
-      where: { studentId },
+      where: { studentId, OR: [{ expiresAt: null }, { expiresAt: { gt: checkedAt } }] },
       select: { id: true, type: true, source: true, skillId: true, topicKey: true, strength: true, occurredAt: true, evidenceJson: true },
       orderBy: { occurredAt: 'desc' },
       take: 50,

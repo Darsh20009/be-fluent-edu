@@ -4,6 +4,8 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const source = readFileSync(join(process.cwd(), 'app/dashboard/phase9/IntelligenceClient.tsx'), 'utf8')
+const studentPage = readFileSync(join(process.cwd(), 'app/dashboard/student/learning/page.tsx'), 'utf8')
+const studentNavigation = readFileSync(join(process.cwd(), 'app/phase4/nav.tsx'), 'utf8')
 
 test('teacher suggestion UI keeps every displayed type on its allowed draft keys', () => {
   assert.match(source, /FEEDBACK_EXPRESSION: \['expression', 'meaning', 'example', 'category'\]/)
@@ -33,4 +35,13 @@ test('today contract client renders plan status and snapshot step metadata', () 
   assert.match(source, /step\.skillCode/)
   assert.match(source, /step\.resourceId/)
   assert.match(source, /step\.durationMinutes/)
+})
+
+test('student learning route preserves the canonical component, navigation, and all existing sections', () => {
+  assert.match(studentPage, /import \{ StudentLearning \} from '@\/app\/dashboard\/phase9\/IntelligenceClient'/)
+  assert.match(source, /export function StudentLearning\(\)/)
+  assert.match(studentNavigation, /\/dashboard\/student\/learning/)
+  for (const section of ['Today', 'Recommendations', 'Progress', 'Goals', 'Learning Profile']) {
+    assert.ok(source.includes(`'${section}'`), `Missing student learning section: ${section}`)
+  }
 })

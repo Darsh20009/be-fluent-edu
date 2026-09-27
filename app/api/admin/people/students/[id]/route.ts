@@ -4,6 +4,8 @@ import { isNextResponse, requirePermission } from '@/lib/auth-helpers'
 import { normalizePhone } from '@/lib/validation'
 import { profilePatchSchema } from '@/lib/phase4'
 import { recordAuditEvent } from '@/lib/audit'
+import { phase9DatabaseGuard } from '@/lib/phase9/engine'
+import { persistSavedStudentGoals } from '@/lib/phase9/pipeline'
 import { z } from 'zod'
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -36,6 +38,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const body = profilePatchSchema.extend({
     status: z.enum(['ACTIVE', 'SUSPENDED', 'DISABLED', 'PENDING']).optional(),
   }).parse(await request.json())
+  if (body.goal !== undefined) {
+    const blocked = phase9DatabaseGuard()
+    if (blocked) return blocked
+  }
   const data: Record<string, unknown> = {}
   for (const key of ['name', 'email', 'profilePhoto', 'status', 'age', 'goal'] as const) {
     if (body[key] !== undefined) data[key] = body[key]
@@ -54,6 +60,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         update: profileData,
       })
     }
+    if (body.goal !== undefined) await persistSavedStudentGoals(tx, id)
     return user
   })
   await recordAuditEvent({ action: 'STUDENT_PROFILE_CHANGE', userId: access.userId, details: { studentId: id, fields: Object.keys(data) } }).catch(() => undefined)

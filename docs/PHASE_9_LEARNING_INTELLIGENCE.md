@@ -17,11 +17,12 @@ Implemented normalization/persistence hooks:
 | Published feedback | Converts student-visible mistakes, pronunciation guidance, EBI improvement opportunities, and expressions categorized as VOCABULARY, IDIOM, SLANG, or CHUNK. Draft feedback is rejected. Private `teacherNotes` and internal metadata are not passed to the normalizer. |
 | Reviewed homework | A scored review becomes `HOMEWORK_WEAK` below 60, or `HOMEWORK_STRONG` at 60 and above. An unscored review creates no signal. The actual score is retained as evidence. |
 | Speaking room | A persisted message records `SPEAKING_ACTIVITY` and the server-owned room topic. Difficulty signals are supported by the normalizer when difficulty is reported, but the current message pipeline always sets `difficultyReported: false`. This is not speech-quality analysis. |
-| Student goal | A deterministic goal normalizer exists. A goal-signal persistence hook is not currently wired into the pipeline. |
+| Student goal | Saved `StudentProfile.goal` and saved monthly/weekly goals in `StudentLearningProfile.goalsJson` create slot-specific `STUDENT_GOAL` signals. Student edits, authorized admin edits, and registration call the reconciler in the source transaction. Equivalent active goals do not duplicate; changed or removed goals expire the prior signal while retaining its evidence. |
+| Explicit attendance absence | Only a persisted `Attendance` row whose status is exactly `ABSENT` creates `ATTENDANCE_ABSENCE`. Teacher/admin attendance writes reconcile the signal in the same transaction. Any correction expires the active signal; later explicit absence creates a new historical revision. No activity or missing-event inference is used. |
 
-The type/source enums also include attendance, session, resource, progress and other signal categories. Their presence in the data model does not mean corresponding ingestion hooks are implemented. In particular, no current attendance-to-recovery pipeline or upcoming-class signal integration was found.
+The type/source enums also include session, resource, progress and other signal categories. Their presence in the data model does not mean corresponding ingestion hooks are implemented. In particular, upcoming-class signal integration is not wired.
 
-Signal keys are source-specific and unique per student. The persistence helper upserts with an empty update, making a replay of the same source event a no-op and preserving the original signal evidence. When database writes are enabled, source-event integrations call the helper inside the source transaction, so a failure can abort that transaction.
+Signal keys are source-specific and unique per student. Immutable source events upsert with an empty update, making a replay a no-op. Goal and attendance state signals use source-slot or attendance-row identity plus a revision; superseded rows retain their evidence with `expiresAt` set to the correction time. When database writes are enabled, each integration runs inside the source transaction, so a failed signal write aborts the source update too.
 
 ## Profile and mastery
 
@@ -40,7 +41,7 @@ Recommendations require at least one eligible signal; unsupported signal types a
 | Vocabulary need | `LEARN` for a single item; `PRACTICE` when repeated. |
 | Weak reviewed homework | `RECOVERY_CHECK`. |
 | Strong reviewed homework | `MASTERY_CHECK` (a confirmation check, not a mastery assertion). |
-| Attendance absence | `RECOVERY_CHECK` if such a signal is present; the current event pipeline does not create it. |
+| Attendance absence | `RECOVERY_CHECK` only for an explicit, active `ABSENT` attendance signal. |
 | Reported speaking-topic difficulty | Targeted `PRACTICE`; current speaking ingestion records activity rather than reported difficulty. |
 | Published EBI | `PRACTICE` to apply the improvement. |
 

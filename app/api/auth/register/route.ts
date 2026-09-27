@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { normalizePhone } from '@/lib/validation'
+import { phase9DatabaseGuard } from '@/lib/phase9/engine'
+import { persistSavedStudentGoals } from '@/lib/phase9/pipeline'
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -20,6 +22,8 @@ const registerSchema = z.object({
 })
 
 export async function POST(request: Request) {
+  const blocked = phase9DatabaseGuard()
+  if (blocked) return blocked
   try {
     const body = await request.json()
     const validatedData = registerSchema.parse(body)
@@ -65,38 +69,42 @@ export async function POST(request: Request) {
       validatedData.email?.trim().toLowerCase() ||
       `${normalizedPhone?.replace(/\D/g, '')}@phone.befluent.com`
 
-    const user = await prisma.user.create({
-      data: {
-        name: validatedData.name,
-        email: uniqueEmail,
-        passwordHash: hashedPassword,
-        phone: normalizedPhone || null,
-        normalizedPhone: normalizedPhone || null,
-        role: 'STUDENT',
-        isActive: false,
-        status: 'PENDING',
-        StudentProfile: {
-          create: {
-            age: validatedData.age,
-            goal: validatedData.goal,
-            preferredTime: validatedData.preferredTime,
-            packageId: validatedData.packageId,
-            receiptUrl: validatedData.receiptUrl || null,
+    const user = await prisma.$transaction(async (tx) => {
+      const created = await tx.user.create({
+        data: {
+          name: validatedData.name,
+          email: uniqueEmail,
+          passwordHash: hashedPassword,
+          phone: normalizedPhone || null,
+          normalizedPhone: normalizedPhone || null,
+          role: 'STUDENT',
+          isActive: false,
+          status: 'PENDING',
+          StudentProfile: {
+            create: {
+              age: validatedData.age,
+              goal: validatedData.goal,
+              preferredTime: validatedData.preferredTime,
+              packageId: validatedData.packageId,
+              receiptUrl: validatedData.receiptUrl || null,
+            },
+          },
+          Subscription: {
+            create: {
+              packageId: validatedData.packageId,
+              status: 'PENDING',
+              receiptUrl: validatedData.receiptUrl || null,
+              paymentMethod: 'E_WALLET',
+              paid: false,
+            },
           },
         },
-        Subscription: {
-          create: {
-            packageId: validatedData.packageId,
-            status: 'PENDING',
-            receiptUrl: validatedData.receiptUrl || null,
-            paymentMethod: 'E_WALLET',
-            paid: false,
-          }
-        }
-      },
-      include: {
-        StudentProfile: true,
-      },
+        include: {
+          StudentProfile: true,
+        },
+      })
+      await persistSavedStudentGoals(tx, created.id)
+      return created
     })
 
     // Send Welcome Email

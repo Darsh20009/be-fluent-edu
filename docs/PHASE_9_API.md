@@ -73,7 +73,7 @@ Malformed admin query values return the shared validation error response.
 
 ## Source-event hooks (not HTTP APIs)
 
-Published teacher/admin feedback transitions, reviewed homework submissions, and speaking-room message creation call the normalized signal pipeline. These are source-event integrations rather than additional public Phase 9 routes. They are guarded by the same database flag and use the caller's source-event transaction. Current pipeline coverage and omissions are documented in [Learning Intelligence](PHASE_9_LEARNING_INTELLIGENCE.md).
+Published teacher/admin feedback transitions, reviewed homework submissions, speaking-room message creation, saved student goal changes, and explicit attendance writes call the normalized signal pipeline. Goal writes reconcile only persisted profile goals; attendance creates evidence only for an `Attendance` record saved as `ABSENT`. Corrections supersede the active state signal without deleting its history. These are source-event integrations rather than additional public Phase 9 routes. They are guarded by the same database flag and use the caller's source-event transaction. Current pipeline coverage and omissions are documented in [Learning Intelligence](PHASE_9_LEARNING_INTELLIGENCE.md).
 
 ## UI entrypoints
 

@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { isNextResponse, requirePermission } from '@/lib/auth-helpers'
 import { normalizePhone } from '@/lib/validation'
 import { profilePatchSchema } from '@/lib/phase4'
+import { phase9DatabaseGuard } from '@/lib/phase9/engine'
+import { persistSavedStudentGoals } from '@/lib/phase9/pipeline'
 
 async function studentId() {
   const access = await requirePermission('student.editProfile')
@@ -26,11 +28,28 @@ export async function PATCH(request: NextRequest) {
   const access = await studentId()
   if (isNextResponse(access)) return access
   const body = profilePatchSchema.parse(await request.json())
+  if (body.goal !== undefined) {
+    const blocked = phase9DatabaseGuard()
+    if (blocked) return blocked
+  }
   const userData: Record<string, unknown> = {}
   for (const key of ['name', 'email', 'profilePhoto'] as const) if (body[key] !== undefined) userData[key] = body[key]
   if (body.phone !== undefined) userData.phone = body.phone ? normalizePhone(body.phone) : null
   const profileData: Record<string, unknown> = {}
   for (const key of ['age', 'goal'] as const) if (body[key] !== undefined) profileData[key] = body[key]
+  if (body.goal !== undefined) {
+    const updated = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.update({ where: { id: access.userId }, data: userData })
+      await tx.studentProfile.upsert({
+        where: { userId: access.userId },
+        create: { userId: access.userId, ...profileData },
+        update: profileData,
+      })
+      await persistSavedStudentGoals(tx, access.userId)
+      return user
+    })
+    return NextResponse.json(updated)
+  }
   const updated = await prisma.user.update({ where: { id: access.userId }, data: userData })
   if (Object.keys(profileData).length) {
     await prisma.studentProfile.upsert({
