@@ -1,0 +1,28 @@
+.shell{min-height:100dvh;background:#f4f7f6;color:#203331}
+.wrap{width:min(1120px,calc(100% - 28px));margin:auto;padding:28px 0 64px}
+.top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:24px}
+.kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:#607b77;font-weight:700}
+.shell h1{font:600 clamp(1.7rem,4vw,2.5rem)/1.1 Georgia,serif;letter-spacing:-.03em;margin:7px 0}
+.shell h2,.shell h3{margin:0 0 8px;font-weight:650}
+.muted{color:#66807b;line-height:1.55}
+.tabs{display:flex;gap:7px;overflow:auto;margin-bottom:18px}
+.tabs button,.button{border:1px solid #cbdad6;border-radius:9px;background:#fbfdfc;color:#31544e;padding:10px 13px;cursor:pointer;font:inherit;font-size:.88rem;white-space:nowrap}
+.tabs button[aria-current=page],.button.primary{background:#1f6860;border-color:#1f6860;color:#fff}
+.button:disabled{opacity:.45;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.card{grid-column:span 6;background:#fbfdfc;border:1px solid #dce7e3;border-radius:14px;padding:18px}
+.wide{grid-column:1/-1}.third{grid-column:span 4}
+.metric{font-size:1.85rem;color:#1f6860;font-weight:700}
+.row{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.tag{display:inline-block;background:#e5f0ed;color:#32635c;border-radius:999px;padding:4px 9px;font-size:.74rem;margin:3px 4px 0 0}
+.notice{border:1px solid #d8e5e1;background:#edf5f2;border-radius:12px;padding:14px;margin-bottom:16px}
+.blocked{background:#fff8ed;border-color:#ecd8b6;color:#875b2b}
+.error{background:#fff0ef;border:1px solid #e8c5c1;color:#8d4138;border-radius:10px;padding:12px;margin-bottom:15px}
+.empty{border:1px dashed #bfd0cb;border-radius:12px;padding:24px;text-align:center;color:#6b8580}
+.skeleton{height:105px;border-radius:12px;background:#e3ece9}
+.list{display:grid;gap:10px}.item{padding:13px;border:1px solid #e0e9e6;border-radius:10px;background:#fff}
+.shell input,.shell select,.shell textarea{width:100%;border:1px solid #c9dad5;background:#fff;border-radius:8px;padding:10px;color:#203331;font:inherit}
+.shell textarea{min-height:84px;resize:vertical}.field{display:grid;gap:5px;margin:10px 0}.field label{font-size:.8rem;color:#607b77;font-weight:650}
+.table{width:100%;border-collapse:collapse}.table th,.table td{text-align:start;padding:11px 8px;border-bottom:1px solid #e4ece9;font-size:.88rem}.table th{color:#66807b;font-size:.75rem}
+@media(max-width:700px){.wrap{padding-top:18px}.top{display:block}.card,.third{grid-column:1/-1}.grid{gap:11px}.card{padding:15px}}

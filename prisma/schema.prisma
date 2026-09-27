@@ -305,6 +305,11 @@ model User {
   assignedWhatsAppConversations WhatsAppConversation[]  @relation("WhatsAppConversationStaff")
   aiRecommendations          AIRecommendation[]
   aiInteractions             AIInteraction[]
+  learningSignals            LearningSignal[]
+  dailyLearningSessions      DailyLearningSession[]
+  teacherIntelligenceSuggestionsAsTeacher TeacherIntelligenceSuggestion[] @relation("IntelligenceSuggestionTeacher")
+  teacherIntelligenceSuggestionsAsStudent TeacherIntelligenceSuggestion[] @relation("IntelligenceSuggestionStudent")
+  teacherIntelligenceSuggestionsApproved TeacherIntelligenceSuggestion[] @relation("IntelligenceSuggestionApprover")
   otpChallenges              AuthOtpChallenge[]
   authRateLimits             AuthRateLimit[]          @relation("AuthRateLimitUser")
   levelRecommendations       StudentLevelRecommendation[] @relation("LevelRecommendationTeacher")
@@ -1067,6 +1072,8 @@ model Skill {
   updatedAt        DateTime           @default(now()) @updatedAt
   resources        Resource[]         @relation("ResourceSkill")
   learningProgress LearningProgress[] @relation("LearningProgressSkill")
+  learningSignals  LearningSignal[]
+  aiRecommendations AIRecommendation[]
 }
 
 model Resource {
@@ -1090,6 +1097,8 @@ model Resource {
   stage         LevelStage?        @relation("ResourceStage", fields: [stageId], references: [id])
   skill         Skill?             @relation("ResourceSkill", fields: [skillId], references: [id])
   progress      LearningProgress[] @relation("ResourceProgress")
+  aiRecommendations AIRecommendation[]
+  learningSignals LearningSignal[]
 
   @@index([resourceType, isPublished])
   @@index([levelId, stageId, order])
@@ -1139,6 +1148,9 @@ model StudentLearningProfile {
   homeworkHistoryJson String?
   learningHistoryJson String?
   recommendationsJson String?
+  targetSkillsJson    String?
+  speakingNeedsJson   String?
+  engagementJson      String?
   lastReviewedAt      DateTime?
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @default(now()) @updatedAt
@@ -1751,6 +1763,14 @@ model AIRecommendation {
   stageId     String?
   type        String
   title       String?
+  reason      String?
+  priority    Int         @default(50)
+  skillId     String?
+  resourceId  String?
+  dedupeKey   String
+  evidenceCycleKey String   @default("LEGACY")
+  dedupeCycle Int          @default(1)
+  sourceSignalKeysJson String?
   payloadJson String?
   status      String      @default("PENDING")
   expiresAt   DateTime?
@@ -1759,9 +1779,107 @@ model AIRecommendation {
   student     User        @relation(fields: [studentId], references: [id], onDelete: Cascade)
   level       Level?      @relation("AIRecommendationLevel", fields: [levelId], references: [id])
   stage       LevelStage? @relation("AIRecommendationStage", fields: [stageId], references: [id])
+  skill       Skill?      @relation(fields: [skillId], references: [id])
+  resource    Resource?   @relation(fields: [resourceId], references: [id])
+  dailySteps  DailyLearningSessionStep[]
+
+  @@unique([studentId, dedupeKey, dedupeCycle])
+  @@index([studentId, dedupeKey, evidenceCycleKey])
+  @@index([studentId, status, createdAt])
+  @@index([studentId, priority, status])
+  @@index([levelId, stageId])
+}
+
+model LearningSignal {
+  id             String   @id @default(uuid()) @map("_id")
+  studentId      String
+  type           String
+  source         String
+  sourceEntityType String?
+  sourceEntityId String?
+  sourceItemKey  String?
+  dedupeKey      String
+  skillId        String?
+  levelId        String?
+  stageId        String?
+  topicKey       String?
+  strength       Float    @default(1)
+  occurredAt     DateTime
+  expiresAt      DateTime?
+  evidenceJson   String?
+  createdAt      DateTime @default(now())
+  student        User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  skill          Skill?   @relation(fields: [skillId], references: [id])
+  resource       Resource? @relation(fields: [resourceId], references: [id])
+  resourceId     String?
+
+  @@unique([studentId, dedupeKey])
+  @@index([studentId, type, occurredAt])
+  @@index([studentId, skillId, occurredAt])
+  @@index([sourceEntityType, sourceEntityId])
+}
+
+model DailyLearningSession {
+  id                String                    @id @default(uuid()) @map("_id")
+  studentId         String
+  dailyKey          String
+  status            String                    @default("NOT_STARTED")
+  planSnapshotJson  String
+  totalMinutes      Int
+  currentStepIndex  Int                       @default(0)
+  progressJson      String?
+  startedAt         DateTime?
+  pausedAt          DateTime?
+  completedAt       DateTime?
+  abandonedAt       DateTime?
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @default(now()) @updatedAt
+  student           User                      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  steps             DailyLearningSessionStep[]
+
+  @@unique([studentId, dailyKey])
+  @@index([studentId, status, dailyKey])
+}
+
+model DailyLearningSessionStep {
+  id               String               @id @default(uuid()) @map("_id")
+  sessionId        String
+  stepIndex        Int
+  type             String
+  status           String               @default("PENDING")
+  recommendationId String?
+  resourceId       String?
+  durationMinutes  Int
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @default(now()) @updatedAt
+  session          DailyLearningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  recommendation   AIRecommendation?    @relation(fields: [recommendationId], references: [id])
+
+  @@unique([sessionId, stepIndex])
+  @@index([sessionId, status])
+}
+
+model TeacherIntelligenceSuggestion {
+  id           String   @id @default(uuid()) @map("_id")
+  teacherId    String
+  studentId    String
+  type         String
+  draftJson    String
+  reason       String
+  status       String   @default("DRAFT")
+  approvedById String?
+  approvedAt   DateTime?
+  expiresAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+  teacher      User     @relation("IntelligenceSuggestionTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  student      User     @relation("IntelligenceSuggestionStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  approvedBy   User?    @relation("IntelligenceSuggestionApprover", fields: [approvedById], references: [id])
 
   @@index([studentId, status, createdAt])
-  @@index([levelId, stageId])
+  @@index([teacherId, status, createdAt])
 }
 
 model AIInteraction {

@@ -7,6 +7,7 @@ const { getToken } = require('next-auth/jwt');
 const { PrismaClient } = require('@prisma/client');
 const { transitionSpeakingRoomMember } = require('./lib/phase8-speaking-membership.js');
 const { startWhatsAppWorkerRunner } = require('./server/whatsapp-worker-runner.cjs');
+const { persistSpeakingActivitySignal } = require('./lib/phase9/speaking-socket.cjs');
 
 const dev = process.env.NODE_ENV !== 'production';
 const port = parseInt(process.env.PORT || '5000', 10);
@@ -83,7 +84,11 @@ app.prepare().then(() => {
       if (!roomId || (messageType === 'TEXT' && (!text || text.length > 4000)) || (messageType === 'VOICE' && !voiceRef)) return done({ ok: false, code: 'INVALID_MESSAGE' });
       const member = await realtimePrisma.speakingRoomMember.findUnique({ where: { roomId_userId: { roomId, userId: socket.userId } } }).catch(() => null);
       if (!member || member.status !== 'ACTIVE' || member.muted) return done({ ok: false, code: 'MEMBERSHIP_REQUIRED' });
-      const message = await realtimePrisma.speakingRoomMessage.create({ data: { roomId, senderId: socket.userId, messageType, text: text || undefined, voiceRef: voiceRef || undefined } }).catch(() => null);
+      const message = await realtimePrisma.$transaction(async (tx) => {
+        const created = await tx.speakingRoomMessage.create({ data: { roomId, senderId: socket.userId, messageType, text: text || undefined, voiceRef: voiceRef || undefined } });
+        await persistSpeakingActivitySignal(tx, { studentId: socket.userId, roomId, messageId: created.id, createdAt: created.createdAt });
+        return created;
+      }).catch(() => null);
       if (!message) return done({ ok: false, code: 'MESSAGE_FAILED' });
       io.to(`speaking:${roomId}`).emit('speaking:message-created', { id: message.id, roomId, senderId: socket.userId, messageType, text: message.text, voiceRef: message.voiceRef, createdAt: message.createdAt });
       done({ ok: true, messageId: message.id });

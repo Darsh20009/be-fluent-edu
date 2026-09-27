@@ -4,6 +4,7 @@ import { isNextResponse, requirePermission } from '@/lib/auth-helpers'
 import { validationError } from '@/lib/phase5'
 import { phase8SpeakingDatabaseGuard, speakingMessageSchema, speakingRoomAudit } from '@/lib/phase8-speaking'
 import { storageProviderStatus } from '@/lib/storage'
+import { persistSpeakingActivitySignal } from '@/lib/phase9/pipeline'
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const blocked = phase8SpeakingDatabaseGuard(); if (blocked) return blocked
@@ -25,7 +26,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const parsed = speakingMessageSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return validationError(parsed.error)
   if (parsed.data.messageType === 'VOICE' && !storageProviderStatus().configured) return NextResponse.json({ ok: false, error: { code: 'PROVIDER_UNAVAILABLE', message: 'Voice storage is unavailable.' } }, { status: 503 })
-  const message = await prisma.speakingRoomMessage.create({ data: { roomId: id, senderId: access.userId, messageType: parsed.data.messageType, text: parsed.data.text, voiceRef: parsed.data.voiceRef } })
+  const message = await prisma.$transaction(async (tx) => {
+    const created = await tx.speakingRoomMessage.create({ data: { roomId: id, senderId: access.userId, messageType: parsed.data.messageType, text: parsed.data.text, voiceRef: parsed.data.voiceRef } })
+    await persistSpeakingActivitySignal(tx, {
+      studentId: access.userId,
+      roomId: id,
+      messageId: created.id,
+      createdAt: created.createdAt,
+    })
+    return created
+  })
   await speakingRoomAudit(access.userId, 'MESSAGE_CREATED', id, { messageId: message.id, messageType: message.messageType })
   return NextResponse.json(message, { status: 201 })
 }

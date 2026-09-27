@@ -5,6 +5,7 @@ import { homeworkReviewSchema, nextAggregateHomeworkReviewStatus, phase7Database
 import { validationError } from '@/lib/phase5'
 import { queuePhase7Notifications } from '@/lib/phase7-notifications'
 import { recordAuditEvent } from '@/lib/audit'
+import { persistReviewedHomeworkSignal } from '@/lib/phase9/pipeline'
 
 export async function POST(request:NextRequest,{params}:{params:Promise<{id:string}>}) {
   const blocked=phase7DatabaseGuard();if(blocked)return blocked
@@ -18,6 +19,13 @@ export async function POST(request:NextRequest,{params}:{params:Promise<{id:stri
   const review=await prisma.$transaction(async (tx) => {
     const created = await tx.homeworkReview.create({data:{submissionId:id,teacherId:access.userId,score:parsed.data.score,feedback:parsed.data.feedback,corrections:parsed.data.corrections,nextSteps:parsed.data.nextSteps,completedAt:parsed.data.complete?new Date():undefined}})
     await tx.homeworkSubmission.update({where:{id},data:{status:'REVIEWED'}})
+    await persistReviewedHomeworkSignal(tx, {
+      submissionId: id,
+      homeworkId: submission.homeworkId,
+      studentId: submission.studentId,
+      reviewedAt: created.reviewedAt,
+      score: created.score,
+    })
     if (submission.homework.studentId === submission.studentId) {
       const requiredIds = submission.homework.items.filter((item) => item.isRequired).map((item) => item.id)
       const submitted = await tx.homeworkSubmission.findMany({

@@ -37,6 +37,9 @@ function isPublicApi(request: NextRequest) {
     '/api/student/speaking',
     '/api/admin/whatsapp',
     '/api/whatsapp/provider-status',
+    '/api/teacher/intelligence',
+    '/api/admin/intelligence',
+    '/api/student/learning',
   ]
   // Phase 5 handlers apply the database gate before their own auth checks so
   // blocked infrastructure is reported truthfully without weakening RBAC.

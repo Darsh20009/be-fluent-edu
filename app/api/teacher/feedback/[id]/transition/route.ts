@@ -5,6 +5,7 @@ import { phase7DatabaseGuard, feedbackTransitionSchema, canTransitionFeedback } 
 import { validationError } from '@/lib/phase5'
 import { auditFeedback } from '@/lib/phase7-routes'
 import { queuePhase7Notifications } from '@/lib/phase7-notifications'
+import { persistPublishedFeedbackSignals } from '@/lib/phase9/pipeline'
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const blocked = phase7DatabaseGuard(); if (blocked) return blocked
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const updated = await tx.sessionFeedback.update({ where: { id }, data: { status: parsed.data.status, publishedAt: parsed.data.status === 'PUBLISHED' ? new Date() : undefined, publishedById: parsed.data.status === 'PUBLISHED' ? access.userId : undefined, publicationVersion: parsed.data.status === 'PUBLISHED' ? { increment: 1 } : undefined } })
     if (parsed.data.status === 'PUBLISHED') {
       await queuePhase7Notifications({ event: 'feedback.published', entityId: id, recipientUserId: existing.studentId, title: 'Class feedback published', body: existing.summary || 'Your teacher published feedback for your class.' }, tx)
+      await persistPublishedFeedbackSignals(tx, id, updated.publishedAt ?? new Date())
     }
     return updated
   })
