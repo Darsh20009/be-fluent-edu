@@ -71,19 +71,21 @@ export default function ScheduleSessionsContent() {
         })
       })
 
+      const data = await response.json().catch(() => ({}))
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to schedule sessions')
+        const code = String(data?.error?.code || data?.code || '')
+        setError(code === 'DATABASE_UNAVAILABLE'
+          ? 'Scheduling is temporarily unavailable. Please try again later.'
+          : 'Sessions could not be scheduled. Please review your choices and try again.')
+        return
       }
-
-      const data = await response.json()
       setSuccess(true)
 
       setTimeout(() => {
         router.push('/dashboard/student')
       }, 2000)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+    } catch {
+      setError('Sessions could not be scheduled. Please try again.')
     } finally {
       setLoading(false)
     }

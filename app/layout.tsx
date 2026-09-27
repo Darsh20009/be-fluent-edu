@@ -55,7 +55,7 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#10B981" />
         <meta name="msapplication-TileImage" content="/logo.png" />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#F9FAFB]`} suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#faf9f6]`} suppressHydrationWarning>
         <Script
           id="organization-jsonld"
           type="application/ld+json"

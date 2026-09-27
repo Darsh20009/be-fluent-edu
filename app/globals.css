@@ -2,19 +2,24 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fdfdfb;
-  --foreground: #1e2927;
-  --primary: #16835f;
+  --background: #faf9f6;
+  --foreground: #292635;
+  --primary: #12805e;
   --primary-foreground: #ffffff;
-  --accent: #1e2927;
+  --accent: #4b3a70;
   --accent-foreground: #ffffff;
-  --border: #e5e9e5;
-  --radius: .25rem;
+  --border: #e5e3e9;
+  --radius: .625rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
   --font-sans: "Noto Kufi Arabic", "DM Sans", sans-serif;
 }
 
@@ -22,3 +27,16 @@
 html { background: var(--background); scroll-behavior: smooth; }
 body { margin: 0; background: var(--background); color: var(--foreground); font-family: "Noto Kufi Arabic", "DM Sans", sans-serif; }
 button, a { -webkit-tap-highlight-color: transparent; }
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

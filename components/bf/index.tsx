@@ -8,7 +8,7 @@ import type {
 } from 'react'
 
 const baseControl =
-  'rounded-lg border border-[#dfe6e1] bg-white text-[#1e2927] outline-none transition focus:border-[#16835f] focus:ring-2 focus:ring-[#16835f]/15 disabled:cursor-not-allowed disabled:opacity-60'
+  'min-h-11 w-full rounded-lg border border-[#e1dfe7] bg-white px-3 py-2 text-[#252238] outline-none transition focus-visible:border-[#12805e] focus-visible:ring-2 focus-visible:ring-[#12805e]/20 aria-[invalid=true]:border-[#a43c42] aria-[invalid=true]:focus-visible:ring-[#a43c42]/20 disabled:cursor-not-allowed disabled:opacity-60'
 
 export function BFButton({
   variant = 'primary',
@@ -18,15 +18,15 @@ export function BFButton({
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
 }) {
   const variants = {
-    primary: 'bg-[#16835f] text-white hover:bg-[#116b4d]',
-    secondary: 'bg-[#f1f5f2] text-[#174536] hover:bg-[#e7eeea]',
-    ghost: 'bg-transparent text-[#174536] hover:bg-[#f1f5f2]',
-    danger: 'bg-[#b53d3d] text-white hover:bg-[#983333]',
+    primary: 'bg-[#12805e] text-white hover:bg-[#0e6a4e]',
+    secondary: 'border border-[#e1dfe7] bg-[#f4f1f8] text-[#4b3a70] hover:bg-[#ebe6f2]',
+    ghost: 'bg-transparent text-[#4b3a70] hover:bg-[#f4f1f8]',
+    danger: 'bg-[#a43c42] text-white hover:bg-[#873238]',
   }
 
   return (
     <button
-      className={`inline-flex min-h-10 items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition ${variants[variant]} ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12805e] disabled:cursor-not-allowed disabled:opacity-55 ${variants[variant]} ${className}`}
       {...props}
     />
   )
@@ -38,7 +38,7 @@ export function BFCard({
 }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`rounded-xl border border-[#e5e9e5] bg-white p-5 ${className}`}
+      className={`rounded-xl border border-[#e5e3e9] bg-white p-5 ${className}`}
       {...props}
     />
   )
@@ -64,12 +64,16 @@ export function BFModal({
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose?.()
       }}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') onClose?.()
+      }}
     >
       <section
         aria-modal="true"
         aria-labelledby="bf-modal-title"
-        className="w-full max-w-lg rounded-xl border border-[#e5e9e5] bg-white p-6 shadow-xl"
+        className="w-full max-w-lg rounded-xl border border-[#e5e3e9] bg-white p-6"
         role="dialog"
+        tabIndex={-1}
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <h2 id="bf-modal-title" className="text-lg font-bold text-[#1e2927]">
@@ -97,14 +101,14 @@ export function BFInput({
   className = '',
   ...props
 }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input className={`${baseControl} w-full px-3 py-2 ${className}`} {...props} />
+  return <input className={`${baseControl} ${className}`} {...props} />
 }
 
 export function BFSelect({
   className = '',
   ...props
 }: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select className={`${baseControl} w-full px-3 py-2 ${className}`} {...props} />
+  return <select className={`${baseControl} ${className}`} {...props} />
 }
 
 export function BFBadge({
@@ -115,10 +119,10 @@ export function BFBadge({
   tone?: 'neutral' | 'success' | 'warning' | 'danger'
 }) {
   const tones = {
-    neutral: 'bg-[#f1f5f2] text-[#40564e]',
-    success: 'bg-[#e7f5ed] text-[#17623f]',
-    warning: 'bg-[#fff4d9] text-[#785719]',
-    danger: 'bg-[#fdeaea] text-[#8c2f2f]',
+    neutral: 'bg-[#f1eff4] text-[#514b62]',
+    success: 'bg-[#e8f5ef] text-[#116b4f]',
+    warning: 'bg-[#fbf2dd] text-[#715620]',
+    danger: 'bg-[#fbebea] text-[#8f3338]',
   }
   return (
     <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${tones[tone]}`}>
@@ -132,7 +136,7 @@ export function BFTable({
   ...props
 }: TableHTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-[#e5e9e5]">
+    <div className="max-w-full overflow-x-auto rounded-xl border border-[#e5e3e9]">
       <table className={`w-full min-w-[36rem] border-collapse text-sm ${className}`} {...props} />
     </div>
   )
@@ -146,7 +150,7 @@ export function BFTabs({
   label?: string
 }) {
   return (
-    <div aria-label={label} className="flex flex-wrap gap-1 rounded-lg bg-[#f1f5f2] p-1" role="tablist">
+    <div aria-label={label} className="flex max-w-full flex-wrap gap-1 rounded-lg bg-[#f1eff4] p-1" role="tablist">
       {children}
     </div>
   )
@@ -165,10 +169,22 @@ export function BFDrawer({
 }) {
   if (!open) return null
   return (
-    <div className="fixed inset-0 z-40 bg-[#14231f]/30" role="presentation">
+    <div
+      className="fixed inset-0 z-40 bg-[#252238]/30"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose?.()
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') onClose?.()
+      }}
+    >
       <aside
         aria-label={title}
-        className="absolute inset-y-0 end-0 w-full max-w-md overflow-y-auto border-s border-[#e5e9e5] bg-white p-6 shadow-xl"
+        aria-modal="true"
+        className="absolute inset-y-0 end-0 w-full max-w-md overflow-y-auto border-s border-[#e5e3e9] bg-white p-6"
+        role="dialog"
+        tabIndex={-1}
       >
         <div className="mb-5 flex items-center justify-between gap-4">
           <h2 className="text-lg font-bold">{title}</h2>
@@ -192,7 +208,7 @@ export function BFToast({
   tone?: 'neutral' | 'success' | 'warning' | 'danger'
 }) {
   return (
-    <div aria-live="polite" className="rounded-lg border border-[#e5e9e5] bg-white px-4 py-3 text-sm shadow-sm">
+    <div aria-live="polite" className="rounded-lg border border-[#e5e3e9] bg-white px-4 py-3 text-sm" role={tone === 'danger' ? 'alert' : 'status'}>
       <BFBadge tone={tone}>{children}</BFBadge>
     </div>
   )
@@ -226,9 +242,9 @@ export function BFEmptyState({
   action?: ReactNode
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-[#cddbd3] bg-[#fbfdfb] p-8 text-center">
-      <h3 className="font-semibold text-[#1e2927]">{title}</h3>
-      {description ? <p className="mt-2 text-sm text-[#66756f]">{description}</p> : null}
+    <div className="rounded-xl border border-dashed border-[#d6d3dc] bg-[#fcfbfd] p-8 text-center">
+      <h3 className="font-semibold text-[#252238]">{title}</h3>
+      {description ? <p className="mt-2 text-sm text-[#687080]">{description}</p> : null}
       {action ? <div className="mt-4">{action}</div> : null}
     </div>
   )
@@ -244,8 +260,8 @@ export function BFErrorState({
   action?: ReactNode
 }) {
   return (
-    <div className="rounded-xl border border-[#f0cccc] bg-[#fffafa] p-6">
-      <h3 className="font-semibold text-[#8c2f2f]">{title}</h3>
+    <div className="rounded-xl border border-[#f0d3d4] bg-[#fff8f7] p-6" role="alert">
+      <h3 className="font-semibold text-[#8f3338]">{title}</h3>
       {description ? <p className="mt-2 text-sm text-[#6c4a4a]">{description}</p> : null}
       {action ? <div className="mt-4">{action}</div> : null}
     </div>
@@ -262,12 +278,12 @@ export function BFPageHeader({
   actions?: ReactNode
 }) {
   return (
-    <header className="flex flex-col justify-between gap-4 border-b border-[#e5e9e5] pb-5 sm:flex-row sm:items-end">
+    <header className="flex flex-col justify-between gap-4 border-b border-[#e5e3e9] pb-5 sm:flex-row sm:items-end">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#1e2927]">{title}</h1>
-        {description ? <p className="mt-2 max-w-2xl text-sm text-[#66756f]">{description}</p> : null}
+        <h1 className="text-2xl font-bold text-[#252238]">{title}</h1>
+        {description ? <p className="mt-2 max-w-2xl text-sm text-[#687080]">{description}</p> : null}
       </div>
-      {actions ? <div className="flex shrink-0 gap-2">{actions}</div> : null}
+      {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
     </header>
   )
 }
@@ -281,12 +297,14 @@ export function BFProgress({
   max?: number
   label?: string
 }) {
-  const percentage = Math.min(100, Math.max(0, (value / max) * 100))
+  const safeMax = Number.isFinite(max) && max > 0 ? max : 100
+  const safeValue = Number.isFinite(value) ? Math.min(safeMax, Math.max(0, value)) : 0
+  const percentage = (safeValue / safeMax) * 100
   return (
     <div>
-      {label ? <div className="mb-1 text-xs text-[#66756f]">{label}</div> : null}
-      <div aria-label={label} aria-valuemax={max} aria-valuemin={0} aria-valuenow={value} className="h-2 overflow-hidden rounded-full bg-[#e8eee9]" role="progressbar">
-        <div className="h-full rounded-full bg-[#16835f] transition-[width]" style={{ width: `${percentage}%` }} />
+      {label ? <div className="mb-1 text-xs text-[#687080]">{label}</div> : null}
+      <div aria-label={label || 'Progress'} aria-valuemax={safeMax} aria-valuemin={0} aria-valuenow={safeValue} className="h-2 overflow-hidden rounded-full bg-[#ecebf0]" role="progressbar">
+        <div className="h-full rounded-full bg-[#12805e] transition-[width]" style={{ width: `${percentage}%` }} />
       </div>
     </div>
   )
@@ -310,7 +328,7 @@ export function BFAvatar({
     // eslint-disable-next-line @next/next/no-img-element
     <img alt={name} className="h-10 w-10 rounded-full object-cover" src={src} />
   ) : (
-    <span aria-label={name} className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#e7f5ed] text-sm font-bold text-[#17623f]">
+    <span aria-label={name} className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#e8f5ef] text-sm font-bold text-[#116b4f]" role="img">
       {initials || '?'}
     </span>
   )

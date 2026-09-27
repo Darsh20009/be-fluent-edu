@@ -10,13 +10,40 @@ export function Phase4Nav({ area }: { area: 'admin' | 'teacher' | 'student' }) {
         ['/dashboard/admin/commerce', 'Control center'],
         ['/dashboard/admin/people', 'People'],
         ['/dashboard/admin/levels', 'Levels'],
-        ['/dashboard/admin/intelligence', 'Learning intelligence'], ['/dashboard/admin', 'Legacy overview'],
+        ['/dashboard/admin/intelligence', 'Learning intelligence'],
+        ['/dashboard/admin/speaking', 'Community'],
+        ['/dashboard/admin/whatsapp', 'Communication'],
+        ['/dashboard/admin', 'Legacy overview'],
       ]
     : area === 'teacher'
-       ? [['/dashboard/teacher/classes', 'My classes'], ['/dashboard/teacher/feedback', 'Feedback'], ['/dashboard/teacher/homework', 'Homework'], ['/dashboard/teacher/students', 'My students'], ['/dashboard/teacher/intelligence', 'Learning intelligence'], ['/dashboard/teacher', 'Legacy dashboard']]
-        : [['/dashboard/student/classes', 'My classes'], ['/dashboard/student/feedback', 'Feedback'], ['/dashboard/student/homework', 'Homework'], ['/dashboard/student/profile', 'My profile'], ['/dashboard/student/learning', 'My learning'], ['/dashboard/student', 'Legacy dashboard']]
+       ? [
+           ['/dashboard/teacher/classes', 'My classes'],
+           ['/dashboard/teacher/classes?view=QMeet', 'QMeet'],
+           ['/dashboard/teacher/feedback', 'Feedback'],
+           ['/dashboard/teacher/homework', 'Homework'],
+           ['/dashboard/teacher/students', 'My students'],
+           ['/dashboard/teacher/intelligence', 'Learning intelligence'],
+           ['/dashboard/teacher/speaking', 'Speaking'],
+           ['/dashboard/teacher', 'Legacy dashboard'],
+         ]
+        : [
+            ['/dashboard/student', 'Home'],
+            ['/dashboard/student/classes', 'My classes'],
+            ['/dashboard/student/learning', 'My learning'],
+            ['/dashboard/student/learning?view=Goals', 'Goals'],
+            ['/dashboard/student/homework', 'Homework'],
+            ['/dashboard/student/feedback', 'Feedback'],
+            ['/dashboard/student/speaking', 'Speaking rooms'],
+            ['/dashboard/student/profile', 'Profile'],
+          ]
 
-  return <nav className={styles.nav} aria-label="Phase 4 navigation">
+  const labels = {
+    admin: 'Admin navigation',
+    teacher: 'Teacher navigation',
+    student: 'Student navigation',
+  }
+
+  return <nav className={styles.nav} aria-label={labels[area]}>
     {links.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}
   </nav>
 }

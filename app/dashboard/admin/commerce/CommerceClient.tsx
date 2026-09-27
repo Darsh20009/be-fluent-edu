@@ -37,28 +37,31 @@ export default function CommerceClient() {
       if (response.status === 503 && body?.error?.code === 'DATABASE_UNAVAILABLE') {
         setItems([])
         setState('blocked')
-        setMessage('MongoDB is currently unavailable. No records are shown and no changes can be submitted.')
+        setMessage('Records are temporarily unavailable. No records are shown and no changes can be submitted.')
         return
       }
-      if (!response.ok) throw new Error(body?.error?.message || 'Unable to load this section')
+      if (!response.ok) throw new Error('Unable to load this section')
       const nextItems = Array.isArray(body) ? body : body.items || []
       setItems(nextItems)
       setState('ready')
-    } catch (error) {
+    } catch {
       setItems([])
       setState('error')
-      setMessage(error instanceof Error ? error.message : 'Unable to load this section')
+      setMessage('This section could not be loaded. Please try again.')
     }
   }, [section])
 
-  useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void load() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [load])
 
   return <section>
     <div className={styles.tabs} role="tablist" aria-label="Commercial operations">
       {sections.map((item) => <button
         className={item.id === section ? styles.activeTab : styles.tab}
         key={item.id}
-        onClick={() => setSection(item.id)}
+        onClick={() => { setItems([]); setState('loading'); setSection(item.id) }}
         role="tab"
         aria-selected={item.id === section}
       >{item.label}</button>)}

@@ -2,87 +2,470 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
-import { ArrowLeft, BarChart3, BookOpen, Check, ChevronDown, Clock3, Headphones, Menu, MessageCircle, ShieldCheck, UserRound, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  BookOpen,
+  Check,
+  ChevronDown,
+  Headphones,
+  Menu,
+  MessageCircle,
+  Mic2,
+  X,
+} from 'lucide-react';
 import { useTheme } from '@/lib/contexts/ThemeContext';
-const deskImage = '/assets/home-hero-desk.png';
-const mountainImage = '/assets/home-levels.png';
-const travelImage = '/assets/home-cta.png';
 
-const packages = [
-  { name: 'أساسيات اللغة', level: 'A1', price: '349', note: 'لبداية صحيحة وواثقة', featured: false },
-  { name: 'تطوير المهارات', level: 'B1 - B2', price: '599', note: 'للتحدث بطلاقة أكثر', featured: true },
-  { name: 'إتقان متقدم', level: 'C1', price: '999', note: 'للمستوى المهني والأكاديمي', featured: false },
-];
+type PackageItem = {
+  id: string | number;
+  title: string;
+  titleAr: string;
+  price: string | number;
+};
 
-const faqs = ['ما الذي يميز Be Fluent عن أي كورس آخر؟', 'هل يناسبني البرنامج إذا كنت مبتدئاً؟', 'كيف أعرف مستواي الحالي؟', 'هل الحصص أونلاين؟', 'هل يوجد متابعة بين الحصص؟', 'ماذا لو لم يناسبني الوقت؟'];
+type PackageState =
+  | { status: 'loading' }
+  | { status: 'ready'; packages: PackageItem[] }
+  | { status: 'empty' }
+  | { status: 'error' }
+  | { status: 'unavailable' };
+
+const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+const packageEndpoint = '/api/packages';
 
 export default function HomePage() {
   const { language, toggleLanguage } = useTheme();
   const isArabic = language === 'ar';
   const tr = (arabic: string, english: string) => isArabic ? arabic : english;
-  const localizedPackages = isArabic ? packages : [
-    { name: 'English Foundations', level: 'A1', price: '349', note: 'For a confident, correct start', featured: false },
-    { name: 'Skill Development', level: 'B1 - B2', price: '599', note: 'To speak with greater fluency', featured: true },
-    { name: 'Advanced Mastery', level: 'C1', price: '999', note: 'For professional and academic goals', featured: false },
-  ];
-  const localizedFaqs = isArabic ? faqs : ['What makes Be Fluent different?', 'Is the program suitable for beginners?', 'How do I know my current level?', 'Are the classes online?', 'Is there follow-up between classes?', 'What if the schedule does not suit me?'];
   const [menuOpen, setMenuOpen] = useState(false);
   const [level, setLevel] = useState('B1');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [packageState, setPackageState] = useState<PackageState>({ status: 'loading' });
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadPackages() {
+      try {
+        const response = await fetch(packageEndpoint, {
+          signal: controller.signal,
+          headers: { Accept: 'application/json' },
+        });
+        const body: unknown = await response.json().catch(() => null);
+        const error = body && typeof body === 'object' && 'error' in body
+          ? (body as { error: unknown }).error
+          : undefined;
+        const errorCode = error && typeof error === 'object' && 'code' in error
+          ? String((error as { code: unknown }).code)
+          : typeof error === 'string'
+            ? error
+            : '';
+
+        if (response.status === 503 || errorCode === 'DATABASE_UNAVAILABLE') {
+          setPackageState({ status: 'unavailable' });
+          return;
+        }
+        if (!response.ok || !Array.isArray(body)) {
+          setPackageState({ status: 'error' });
+          return;
+        }
+
+        const items = body.filter((item): item is PackageItem => {
+          if (!item || typeof item !== 'object') return false;
+          const candidate = item as Record<string, unknown>;
+          return (typeof candidate.id === 'string' || typeof candidate.id === 'number')
+            && typeof candidate.title === 'string'
+            && typeof candidate.titleAr === 'string'
+            && (typeof candidate.price === 'number' || typeof candidate.price === 'string');
+        });
+
+        setPackageState(items.length ? { status: 'ready', packages: items } : { status: 'empty' });
+      } catch {
+        if (!controller.signal.aborted) setPackageState({ status: 'error' });
+      }
+    }
+
+    void loadPackages();
+    return () => controller.abort();
+  }, [retryCount]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [menuOpen]);
+
+  const levelDescription: Record<string, [string, string]> = {
+    A1: ['البدء بالعبارات اليومية والتعريف بنفسك.', 'Start with everyday phrases and introducing yourself.'],
+    A2: ['التعامل مع المواقف المألوفة بلغة بسيطة.', 'Handle familiar situations with simple language.'],
+    B1: ['التعبير عن أفكارك في مواقف الحياة والعمل.', 'Share your ideas in everyday and work situations.'],
+    B2: ['المشاركة بثقة في نقاشات أكثر تنوعاً.', 'Take part in a wider range of conversations with confidence.'],
+    C1: ['استخدام اللغة بمرونة في سياقات متقدمة.', 'Use English flexibly in more demanding contexts.'],
+    C2: ['التعبير بدقة وطلاقة في سياقات متعددة.', 'Express yourself precisely and fluently across contexts.'],
+  };
+
+  const faqItems = isArabic
+    ? [
+        ['كيف تبدو طريقة التعلم؟', 'مسار منظم يجمع بين الحصص المباشرة والممارسة، مع واجبات وملاحظات من المدرس وخطوات تالية واضحة.'],
+        ['هل يوجد تدريب على المحادثة؟', 'نعم، تتضمن الرحلة ممارسة للتحدث إلى جانب الاستماع والمهارات الأخرى.'],
+        ['كيف أختار المستوى المناسب؟', 'تعرّف على مستويات A1 إلى C2 ومسارات التعلم، ثم تواصل معنا لمناقشة نقطة البداية المناسبة لأهدافك.'],
+        ['هل أحصل على ملاحظات من المدرس؟', 'تتضمن الرحلة ملاحظات من المدرس ومتابعة للواجبات لمساعدتك على معرفة ما تتدرب عليه بعد ذلك.'],
+      ]
+    : [
+        ['What does learning look like?', 'A structured path that brings together live classes and practice, with homework, teacher feedback, and clear next steps.'],
+        ['Will I practise speaking?', 'Yes. Speaking practice is part of the learning journey, alongside listening and other language skills.'],
+        ['How do I choose a level?', 'Explore levels A1 to C2 and the learning paths, then contact us to discuss a starting point that fits your goals.'],
+        ['Will my teacher give me feedback?', 'The learning journey includes teacher feedback and homework follow-up to help you know what to practise next.'],
+      ];
+
+  const closeMenu = () => setMenuOpen(false);
+
   return (
-    <main dir={isArabic ? 'rtl' : 'ltr'} className="overflow-hidden bg-[#fdfdfb] text-[#1d2927]">
-      <header className="h-[70px] border-b border-[#e5e9e5] bg-white">
-        <div dir="ltr" className="mx-auto flex h-full max-w-[1130px] items-center justify-between px-5">
-          <Link href="/" className="relative h-[38px] w-[126px] overflow-hidden" aria-label="Be Fluent">
-            <Image src="/logo.png" alt="Be Fluent" width={126} height={115} className="absolute left-0 top-1/2 h-auto w-full -translate-y-1/2"/>
+    <main dir={isArabic ? 'rtl' : 'ltr'} className="min-h-[100dvh] overflow-x-clip bg-[#faf9f6] text-[#292635]">
+      <header className="relative z-30 border-b border-[#e9e6e2] bg-[#faf9f6]">
+        <div dir="ltr" className="mx-auto flex h-[72px] max-w-[1200px] items-center justify-between px-5 sm:px-8">
+          <Link href="/" className="relative h-[43px] w-[127px] shrink-0 overflow-hidden" aria-label="Be Fluent home">
+            <Image src="/logo.png" alt="Be Fluent" width={127} height={116} className="absolute left-0 top-1/2 h-auto w-full -translate-y-1/2" priority />
           </Link>
-          <nav className="hidden items-center gap-6 text-[11px] font-semibold text-[#53615e] md:flex">
-            <a href="#how">{tr('كيف نبدأ','How it works')}</a><a href="#levels">{tr('المستويات','Levels')}</a><a href="#packages">{tr('الباقات','Plans')}</a><a href="#stories">{tr('قصص النجاح','Success stories')}</a>
+
+          <nav className="hidden items-center gap-7 text-[12px] font-semibold text-[#5f5b67] lg:flex" aria-label={tr('التنقل الرئيسي', 'Main navigation')}>
+            <Link href="/about-path" className="transition-colors hover:text-[#4c2f79]">{tr('عن المنهج', 'Our approach')}</Link>
+            <Link href="/learning-path" className="transition-colors hover:text-[#4c2f79]">{tr('مسار التعلم', 'Learning path')}</Link>
+            <Link href="/packages" className="transition-colors hover:text-[#4c2f79]">{tr('الباقات', 'Packages')}</Link>
+            <Link href="/contact" className="transition-colors hover:text-[#4c2f79]">{tr('تواصل معنا', 'Contact')}</Link>
           </nav>
-          <div className="hidden items-center gap-2 md:flex">
-            <button onClick={toggleLanguage} className="px-3 py-2 text-[11px] font-semibold text-[#4c5a57]" aria-label={tr('عرض الموقع بالإنجليزية','View website in Arabic')}>{isArabic ? 'EN' : 'عربي'}</button>
-            <Link href="/auth/login" className="border border-[#dce3df] px-4 py-2 text-[11px] font-bold transition hover:border-[#16835f]">{tr('دخول','Login')}</Link>
-            <Link href="/auth/register" className="bg-[#16835f] px-4 py-2 text-[11px] font-bold text-white transition hover:bg-[#106a4d]">{tr('ابدأ معنا','Get started')}</Link>
+
+          <div className="hidden items-center gap-2 lg:flex">
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="rounded-sm px-3 py-2 text-[12px] font-semibold text-[#5f5b67] outline-none transition-colors hover:bg-[#f0edf3] focus-visible:ring-2 focus-visible:ring-[#4c2f79]"
+              aria-label={tr('عرض الموقع بالإنجليزية', 'View website in Arabic')}
+            >
+              {isArabic ? 'EN' : 'العربية'}
+            </button>
+            <Link href="/auth/login" className="rounded-sm border border-[#d9d4de] px-4 py-[10px] text-[12px] font-bold text-[#403b49] transition-colors hover:border-[#4c2f79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4c2f79]">
+              {tr('دخول', 'Log in')}
+            </Link>
+            <Link href="/auth/register" className="rounded-sm bg-[#4b3175] px-4 py-[11px] text-[12px] font-bold text-white transition-colors hover:bg-[#39245f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#4b3175]">
+              {tr('ابدأ التعلم', 'Start learning')}
+            </Link>
           </div>
-          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden" aria-label={tr('القائمة','Menu')}>{menuOpen ? <X size={20}/> : <Menu size={20}/>}</button>
+
+          <div className="flex items-center gap-2 lg:hidden">
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="rounded-sm px-2 py-2 text-[12px] font-semibold text-[#5f5b67] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4c2f79]"
+              aria-label={tr('عرض الموقع بالإنجليزية', 'View website in Arabic')}
+            >
+              {isArabic ? 'EN' : 'العربية'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMenuOpen((open) => !open)}
+              className="flex h-10 w-10 items-center justify-center rounded-sm text-[#393543] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4c2f79]"
+              aria-label={menuOpen ? tr('إغلاق القائمة', 'Close menu') : tr('فتح القائمة', 'Open menu')}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-navigation"
+            >
+              {menuOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
+            </button>
+          </div>
         </div>
-        {menuOpen && <div className="absolute z-20 w-full border-b border-[#e5e9e5] bg-white p-4 md:hidden"><div className="mx-auto flex max-w-[1130px] flex-col gap-3 text-sm"><button onClick={toggleLanguage} className="text-start font-bold">{isArabic ? 'English' : 'العربية'}</button><a href="#how" onClick={() => setMenuOpen(false)}>{tr('كيف نبدأ','How it works')}</a><a href="#packages" onClick={() => setMenuOpen(false)}>{tr('الباقات','Plans')}</a><Link href="/auth/login">{tr('دخول','Login')}</Link><Link href="/auth/register" className="bg-[#16835f] px-4 py-3 text-center text-white">{tr('ابدأ معنا','Get started')}</Link></div></div>}
+        {menuOpen && (
+          <nav id="mobile-navigation" className="absolute inset-x-0 top-full border-b border-[#e9e6e2] bg-[#faf9f6] px-5 py-5 lg:hidden" aria-label={tr('التنقل الرئيسي', 'Main navigation')}>
+            <div className="mx-auto flex max-w-[1200px] flex-col items-stretch gap-1">
+              <Link href="/about-path" onClick={closeMenu} className="rounded px-3 py-3 text-sm font-semibold hover:bg-[#f0edf3]">{tr('عن المنهج', 'Our approach')}</Link>
+              <Link href="/learning-path" onClick={closeMenu} className="rounded px-3 py-3 text-sm font-semibold hover:bg-[#f0edf3]">{tr('مسار التعلم', 'Learning path')}</Link>
+              <Link href="/packages" onClick={closeMenu} className="rounded px-3 py-3 text-sm font-semibold hover:bg-[#f0edf3]">{tr('الباقات', 'Packages')}</Link>
+              <Link href="/contact" onClick={closeMenu} className="rounded px-3 py-3 text-sm font-semibold hover:bg-[#f0edf3]">{tr('تواصل معنا', 'Contact')}</Link>
+              <div className="mt-2 grid grid-cols-2 gap-2 border-t border-[#e9e6e2] pt-4">
+                <Link href="/auth/login" onClick={closeMenu} className="rounded-sm border border-[#d9d4de] px-3 py-3 text-center text-xs font-bold">{tr('دخول', 'Log in')}</Link>
+                <Link href="/auth/register" onClick={closeMenu} className="rounded-sm bg-[#4b3175] px-3 py-3 text-center text-xs font-bold text-white">{tr('ابدأ التعلم', 'Start learning')}</Link>
+              </div>
+            </div>
+          </nav>
+        )}
       </header>
 
-      <section className="relative isolate mx-auto min-h-[360px] max-w-[1130px] overflow-hidden border-x border-[#e5e9e5] md:min-h-[405px]">
-        <Image src={deskImage} alt="مساحة تعلم الإنجليزية" fill priority sizes="100vw" className="-z-20 object-cover object-center"/>
-        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[#102927]/45 md:hidden"/>
-        <div dir={isArabic ? 'rtl' : 'ltr'} className={`flex min-h-[360px] w-full flex-col justify-center px-7 py-12 text-white md:min-h-[405px] md:w-[56%] md:px-14 md:text-[#1d2927] ${isArabic ? 'md:mr-auto' : 'md:mr-auto'}`}>
-          <p className="mb-5 font-['DM_Sans'] text-[9px] font-bold tracking-[.24em] text-[#a5e4c5] md:text-[#16835f]">LEARN ENGLISH. BE ANYWHERE.</p>
-          <h1 className="max-w-md text-[31px] font-extrabold leading-[1.55] tracking-tight md:text-[38px]">{tr('من أول كلمة','From your first word')}<br/>{tr('إلى طلاقة حقيقية','to real fluency')}</h1>
-          <p className="mt-5 max-w-md text-[11px] leading-7 text-white/80 md:text-[#65736f]">{tr('برنامج عملي ومنظم يساعدك تتعلم الإنجليزية خطوة بخطوة، وتتحدث بثقة في حياتك وشغلك.','A practical, structured program that helps you learn English step by step and speak confidently in life and at work.')}</p>
-          <div className="mt-7 flex flex-wrap items-center gap-4">
-            <Link href="/auth/register" className="inline-flex items-center gap-2 bg-[#16835f] px-5 py-3 text-[11px] font-bold text-white transition hover:bg-[#106a4d]">{tr('ابدأ رحلتك معنا','Start your journey')} <ArrowLeft size={14}/></Link>
-            <Link href="/placement-test" className="inline-flex items-center gap-2 text-[11px] font-bold text-white md:text-[#31403d]"><span className="flex h-5 w-5 items-center justify-center rounded-full border border-white/60 md:border-[#aeb9b5]"><BarChart3 size={11}/></span>{tr('اعرف مستواك مجاناً','Take the free level test')}</Link>
+      <section className="mx-auto grid max-w-[1200px] items-center gap-8 px-5 pb-12 pt-8 sm:px-8 sm:pb-16 sm:pt-12 lg:min-h-[580px] lg:grid-cols-[.95fr_1.05fr] lg:gap-14 lg:py-14">
+        <div className={`${isArabic ? 'text-right' : 'text-left'} order-2 max-w-[540px] lg:order-1`}>
+          <p className="mb-5 text-[10px] font-bold text-[#4b3175] sm:text-[11px]">
+            {tr('تعلم الإنجليزية بهدف واضح', 'ENGLISH LEARNING, WITH A CLEAR PURPOSE')}
+          </p>
+          <h1 className="max-w-[540px] text-[34px] font-extrabold leading-[1.42] text-[#292635] sm:text-[46px] sm:leading-[1.35] lg:text-[54px]">
+            {tr('الطلاقة تبدأ', 'Fluency comes')}<br />
+            <span className="text-[#4b3175]">{tr('بالتعلّم الصحيح.', 'first.')}</span>
+          </h1>
+          <p className="mt-5 max-w-[470px] text-[13px] leading-[2] text-[#686573] sm:text-[14px]">
+            {tr('رحلة تعلم منظمة من A1 إلى C2، تجمع بين الحصص المباشرة وممارسة التحدث وملاحظات المدرس؛ لتعرف دائماً خطوتك التالية.', 'A structured learning journey from A1 to C2, with live classes, speaking practice, and teacher feedback, so your next step is always clear.')}
+          </p>
+          <div className={`mt-7 flex flex-wrap items-center gap-3 ${isArabic ? 'justify-start' : 'justify-start'}`}>
+            <Link href="/auth/register" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-sm bg-[#4b3175] px-5 py-3 text-[12px] font-bold text-white transition-colors hover:bg-[#39245f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#4b3175]">
+              {tr('ابدأ رحلتك', 'Begin your journey')}
+              {isArabic ? <ArrowLeft size={15} aria-hidden="true" /> : <ArrowUpRight size={15} aria-hidden="true" />}
+            </Link>
+            <Link href="/packages" className="inline-flex min-h-12 items-center gap-2 rounded-sm px-3 py-3 text-[12px] font-bold text-[#4b3175] underline decoration-[#c8bdd8] underline-offset-4 hover:decoration-[#4b3175] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4b3175]">
+              {tr('استكشف البرامج', 'Explore programs')}
+            </Link>
           </div>
-          <div className="mt-8 flex gap-6 text-[9px] text-white/75 md:text-[#74817e]"><span className="flex items-center gap-1"><Clock3 size={12}/>{tr('مرونة 24/7','24/7 flexibility')}</span><span className="flex items-center gap-1"><UserRound size={12}/>{tr('مدرسون محترفون','Expert tutors')}</span><span className="flex items-center gap-1"><ShieldCheck size={12}/>{tr('متابعة حقيقية','Real follow-up')}</span></div>
+          <p className="mt-7 text-[11px] font-semibold text-[#696672]">
+            <span className="me-2 inline-block h-[7px] w-[7px] rounded-full bg-[#4d8b69] align-middle" aria-hidden="true" />
+            {tr('مسار عملي من المستوى A1 حتى C2', 'A practical path from A1 through C2')}
+          </p>
+        </div>
+        <div className="relative order-1 min-h-[265px] overflow-hidden rounded-sm bg-[#e8e4dd] sm:min-h-[350px] lg:order-2 lg:min-h-[440px]">
+          <Image src="/assets/home-hero-desk.png" alt={tr('مساحة هادئة لتعلم اللغة الإنجليزية', 'A calm space for learning English')} fill priority sizes="(max-width: 1024px) 100vw, 52vw" className="object-cover object-center" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#211d2b]/30 to-transparent" aria-hidden="true" />
+          <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-sm border border-white/50 bg-[#faf9f6]/95 px-3 py-2.5 text-[10px] font-semibold text-[#393543] sm:bottom-6 sm:left-6 sm:px-4">
+            <BookOpen size={15} className="text-[#4b3175]" aria-hidden="true" />
+            {tr('تعلم منظّم. ممارسة حقيقية.', 'Structured learning. Real practice.')}
+          </div>
         </div>
       </section>
 
-      <section id="how" className="mx-auto max-w-[1130px] px-6 py-16 text-center">
-        <p className="text-[9px] font-bold tracking-[.2em] text-[#16835f]">HOW IT WORKS</p><h2 className="mt-2 text-[21px] font-extrabold">{tr('خطوات بسيطة لبداية أفضل','Simple steps to a better start')}</h2><p className="mt-2 text-[10px] text-[#72807c]">{tr('رحلتك للغة الإنجليزية تبدأ بقرار واضح وخطوات مدروسة.','Your English journey starts with a clear decision and thoughtful steps.')}</p>
-        <div className="mt-12 grid gap-8 md:grid-cols-3">
-          {(isArabic ? [['01','اعرف مستواك','اختبار قصير يساعدنا نحدد نقطة البداية المناسبة لك.'],['02','ابدأ مع المدرب','خطة واضحة وحصص عملية تناسب مستواك وهدفك.'],['03','طور لغتك','تطبيق ومتابعة مستمرة حتى ترى فرقاً حقيقياً.']] : [['01','Know your level','A short test helps us find the right starting point for you.'],['02','Meet your tutor','A clear plan and practical classes built around your level and goal.'],['03','Build your fluency','Ongoing practice and follow-up until you see real progress.']]).map(([n,t,d])=><article key={n} className="relative px-5"><span className="font-['DM_Sans'] text-xl font-bold text-[#23a474]">{n}</span><h3 className="mt-3 text-[13px] font-bold">{t}</h3><p className="mt-2 text-[10px] leading-6 text-[#6d7976]">{d}</p></article>)}
+      <div className="border-y border-[#e9e6e2] bg-[#f3f1ec]">
+        <div className="mx-auto grid max-w-[1200px] grid-cols-2 gap-x-5 gap-y-5 px-5 py-6 sm:px-8 md:grid-cols-4 md:gap-5 md:py-7">
+          {[
+            [BookOpen, tr('مسار واضح', 'A clear learning path')],
+            [MessageCircle, tr('ممارسة التحدث', 'Speaking practice')],
+            [Headphones, tr('حصص مباشرة', 'Live classes')],
+            [Check, tr('ملاحظات المدرس', 'Teacher feedback')],
+          ].map(([Icon, title]) => {
+            const FeatureIcon = Icon as typeof BookOpen;
+            return (
+              <div key={title as string} className={`flex items-center gap-3 ${isArabic ? 'justify-start' : 'justify-start'}`}>
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-[#e8e3ef] text-[#4b3175]">
+                  <FeatureIcon size={17} strokeWidth={1.7} aria-hidden="true" />
+                </span>
+                <span className="text-[11px] font-bold text-[#403c49] sm:text-[12px]">{title as string}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <section className="mx-auto grid max-w-[1200px] gap-8 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[.8fr_1.2fr] lg:gap-20">
+        <div className={isArabic ? 'text-right' : 'text-left'}>
+          <p className="text-[10px] font-bold text-[#4b3175]">{tr('منهج عملي', 'A PRACTICAL APPROACH')}</p>
+          <h2 className="mt-3 max-w-[410px] text-[26px] font-extrabold leading-[1.55] sm:text-[32px]">
+            {tr('تعلّم اللغة لتستخدمها، لا لتكتفي بدراستها.', 'Learn English to use it, not just study it.')}
+          </h2>
+          <p className="mt-4 max-w-[410px] text-[12px] leading-[2] text-[#696672] sm:text-[13px]">
+            {tr('كل خطوة في مسارك لها غرض: فهم أفضل، ممارسة أكثر، وتوجيه يساعدك على مواصلة التقدم.', 'Each part of your path has a purpose: clearer understanding, more practice, and guidance for what to work on next.')}
+          </p>
+          <Link href="/about-path" className="mt-6 inline-flex items-center gap-2 text-[12px] font-bold text-[#4b3175] underline decoration-[#c8bdd8] underline-offset-4 hover:decoration-[#4b3175]">
+            {tr('تعرّف على منهجنا', 'Learn about our approach')}
+            {isArabic ? <ArrowLeft size={14} aria-hidden="true" /> : <ArrowUpRight size={14} aria-hidden="true" />}
+          </Link>
+        </div>
+        <div className="divide-y divide-[#e8e4df] border-y border-[#e8e4df]">
+          {[
+            [Mic2, tr('ممارسة مستمرة', 'Practice that keeps you speaking'), tr('مساحة لتطبيق ما تتعلمه والتدرّب على التعبير باللغة الإنجليزية.', 'Room to put new learning into practice and express yourself in English.')],
+            [MessageCircle, tr('توجيه من المدرس', 'Feedback from your teacher'), tr('ملاحظات وواجبات تساعدك على فهم ما أتقنته وما يستحق تركيزك بعد ذلك.', 'Feedback and homework help you see what is clicking and what to focus on next.')],
+            [BookOpen, tr('خطوات تالية واضحة', 'A clear next step'), tr('تعلم منظم يربط بين أهدافك ومستواك والممارسة المناسبة لك.', 'Structured learning connects your goals and level to the practice that fits.')],
+          ].map(([Icon, title, body]) => {
+            const FeatureIcon = Icon as typeof Mic2;
+            return (
+              <article key={title as string} className="flex gap-4 py-5 sm:gap-5 sm:py-6">
+                <span className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-[#eeebf2] text-[#4b3175]">
+                  <FeatureIcon size={18} strokeWidth={1.7} aria-hidden="true" />
+                </span>
+                <div>
+                  <h3 className="text-[13px] font-bold">{title as string}</h3>
+                  <p className="mt-2 max-w-[490px] text-[11px] leading-[1.9] text-[#6d6975] sm:text-[12px]">{body as string}</p>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </section>
 
-      <section id="levels" className="relative isolate overflow-hidden py-12 text-white"><Image src={mountainImage} alt="" fill sizes="100vw" className="-z-20 object-cover"/><div className="absolute inset-0 -z-10 bg-[#102927]/[.80]"/><div className="mx-auto max-w-[850px] px-6 text-center"><h2 className="text-[22px] font-bold">{tr('اختر مستواك وابدأ الآن','Choose your level and start now')}</h2><p className="mt-2 text-[10px] text-white/70">{tr('لكل مستوى هدف واضح وخطة تقربك من الطلاقة.','Every level has a clear goal and a plan that takes you closer to fluency.')}</p><div className="mt-8 grid grid-cols-5 gap-2">{['A1','A2','B1','B2','C1'].map((item)=><button key={item} onClick={()=>setLevel(item)} className={`border px-2 py-3 transition ${level===item?'border-[#28a978] bg-[#16835f]':'border-white/20 bg-white/10 hover:bg-white/20'}`}><b className="font-['DM_Sans'] block text-sm">{item}</b><span className="mt-1 block text-[8px]">{isArabic ? (item==='A1'?'مبتدئ':item==='A2'?'أساسي':item==='B1'?'متوسط':item==='B2'?'متقدم':'احترافي') : (item==='A1'?'Beginner':item==='A2'?'Elementary':item==='B1'?'Intermediate':item==='B2'?'Upper intermediate':'Advanced')}</span></button>)}</div></div></section>
+      <section className="border-y border-[#e9e6e2] bg-[#f2f0eb]">
+        <div className="mx-auto max-w-[1200px] px-5 py-14 sm:px-8 sm:py-16">
+          <div className={`flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between ${isArabic ? 'sm:flex-row-reverse' : ''}`}>
+            <div className={isArabic ? 'text-right' : 'text-left'}>
+              <p className="text-[10px] font-bold text-[#4b3175]">{tr('مستويات اللغة', 'ENGLISH LEVELS')}</p>
+              <h2 className="mt-2 text-[24px] font-extrabold sm:text-[30px]">{tr('ابدأ من مكانك.', 'Start where you are.')}</h2>
+            </div>
+            <p className={`max-w-[420px] text-[11px] leading-[1.9] text-[#686573] sm:text-[12px] ${isArabic ? 'text-right' : 'text-left'}`}>
+              {tr('من A1 إلى C2، اختر مستوى لتتعرّف على محطته؛ ثم استكشف المسار الكامل.', 'From A1 to C2, choose a level to explore its focus, then see the full learning path.')}
+            </p>
+          </div>
+          <div className="mt-8 grid grid-cols-3 gap-2 sm:grid-cols-6 sm:gap-3" role="group" aria-label={tr('اختر مستوى اللغة', 'Choose an English level')}>
+            {levels.map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => setLevel(item)}
+                aria-pressed={level === item}
+                className={`min-h-[67px] rounded-sm border px-3 py-3 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4b3175] ${level === item ? 'border-[#4b3175] bg-[#4b3175] text-white' : 'border-[#dcd7df] bg-[#faf9f6] text-[#423d4a] hover:border-[#9989ad]'}`}
+              >
+                <span className="block font-['DM_Sans'] text-[15px] font-bold">{item}</span>
+                <span className={`mt-1 block text-[11px] ${level === item ? 'text-white/75' : 'text-[#77727e]'}`}>{tr('المستوى', 'Level')}</span>
+              </button>
+            ))}
+          </div>
+          <div className={`mt-4 flex min-h-[93px] flex-col justify-center gap-2 rounded-sm border border-[#e2dde4] bg-[#faf9f6] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 ${isArabic ? 'sm:flex-row-reverse' : ''}`}>
+            <div className={`flex items-center gap-3 ${isArabic ? 'flex-row-reverse text-right' : ''}`}>
+              <span className="font-['DM_Sans'] text-[19px] font-bold text-[#4b3175]">{level}</span>
+              <p className="text-[11px] leading-[1.8] text-[#625e6a] sm:text-[12px]">{isArabic ? levelDescription[level][0] : levelDescription[level][1]}</p>
+            </div>
+            <Link href="/learning-path" className="inline-flex items-center gap-2 text-[11px] font-bold text-[#4b3175] hover:underline">
+              {tr('استكشف المسار', 'Explore the path')}
+              {isArabic ? <ArrowLeft size={14} aria-hidden="true" /> : <ArrowUpRight size={14} aria-hidden="true" />}
+            </Link>
+          </div>
+        </div>
+      </section>
 
-      <section className="mx-auto max-w-[1130px] px-6 py-14 text-center"><h2 className="text-[20px] font-extrabold">{tr('كل ما تحتاجه في مكان واحد','Everything you need in one place')}</h2><div className="mt-10 grid grid-cols-2 gap-y-9 md:grid-cols-6">{[[BookOpen,tr('منهج عملي','Practical curriculum')],[Headphones,tr('تدريب استماع','Listening practice')],[MessageCircle,tr('ممارسة مستمرة','Ongoing practice')],[UserRound,tr('مدرب خاص','Personal tutor')],[BarChart3,tr('قياس التقدم','Progress tracking')],[ShieldCheck,tr('متابعة جادة','Dedicated support')]].map(([Icon,title])=>{const I=Icon as typeof BookOpen; return <div key={title as string} className="flex flex-col items-center"><I size={20} strokeWidth={1.5} className="text-[#16835f]"/><p className="mt-3 text-[10px] font-bold">{title as string}</p><span className="mt-1 text-[8px] text-[#89938f]">{tr('كل ما تحتاجه للتقدم','Built to help you progress')}</span></div>})}</div></section>
+      <section className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 sm:py-20">
+        <div className={`flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between ${isArabic ? 'sm:flex-row-reverse' : ''}`}>
+          <div className={isArabic ? 'text-right' : 'text-left'}>
+            <p className="text-[10px] font-bold text-[#4b3175]">{tr('الباقات', 'PACKAGES')}</p>
+            <h2 className="mt-2 text-[24px] font-extrabold sm:text-[30px]">{tr('تفاصيل حقيقية، من المصدر.', 'Package details, straight from the source.')}</h2>
+          </div>
+          <Link href="/packages" className="inline-flex min-h-10 w-fit items-center gap-2 text-[11px] font-bold text-[#4b3175] underline decoration-[#c8bdd8] underline-offset-4 hover:decoration-[#4b3175]">
+            {tr('عرض جميع الباقات', 'View all packages')}
+            {isArabic ? <ArrowLeft size={14} aria-hidden="true" /> : <ArrowUpRight size={14} aria-hidden="true" />}
+          </Link>
+        </div>
 
-      <section id="packages" className="border-y border-[#e5e9e5] bg-[#fbfcfa] px-6 py-14 text-center"><p className="text-[9px] font-bold tracking-[.2em] text-[#16835f]">PLANS & PRICING</p><h2 className="mt-2 text-[21px] font-extrabold">{tr('باقات تناسب كل هدف','Plans for every goal')}</h2><div className="mx-auto mt-9 grid max-w-[930px] gap-4 md:grid-cols-3">{localizedPackages.map(p=><article key={p.level} className={`relative border p-6 ${isArabic ? 'text-right' : 'text-left'} ${p.featured?'border-[#16835f] bg-[#f4fbf7] shadow-[0_8px_25px_rgba(25,68,55,.08)]':'border-[#e2e7e3] bg-white'}`}>{p.featured&&<span className="absolute -top-3 right-1/2 translate-x-1/2 bg-[#16835f] px-3 py-1 text-[8px] font-bold text-white">{tr('الأكثر اختياراً','Most popular')}</span>}<p className="font-['DM_Sans'] text-[10px] font-bold text-[#16835f]">{p.level}</p><h3 className="mt-2 text-[15px] font-bold">{p.name}</h3><p className="mt-1 text-[9px] text-[#77837f]">{p.note}</p><div className="my-5 border-y border-[#e5e9e5] py-4"><b className="font-['DM_Sans'] text-3xl">{p.price}</b><span className={isArabic ? 'mr-1 text-[9px]' : 'ml-1 text-[9px]'}>{tr('جنيه / شهرياً','EGP / month')}</span></div>{(isArabic ? ['حصص مباشرة أسبوعياً','خطة تعليم واضحة','متابعة وتقييم مستمر','شهادة عند الإتمام'] : ['Weekly live classes','A clear learning plan','Continuous support and assessment','Certificate on completion']).map(x=><p key={x} className="mb-3 flex items-center gap-2 text-[9px]"><Check size={13} className="text-[#16835f]"/>{x}</p>)}<Link href="/auth/register" className={`mt-4 block py-3 text-center text-[10px] font-bold ${p.featured?'bg-[#16835f] text-white':'bg-[#f1f4f1] text-[#283633]'}`}>{tr('ابدأ الآن','Start now')}</Link></article>)}</div><Link href="/packages" className="mt-7 inline-block text-[10px] font-bold text-[#16835f] underline underline-offset-4">{tr('عرض كل الباقات','View all plans')}</Link></section>
+        {packageState.status === 'loading' && (
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label={tr('جارٍ تحميل الباقات', 'Loading packages')} aria-busy="true">
+            {[0, 1, 2].map((item) => (
+              <div key={item} className="min-h-[170px] animate-pulse rounded-sm border border-[#e8e4df] bg-[#f3f1ec] p-6">
+                <div className="h-3 w-1/3 rounded bg-[#e4e0da]" />
+                <div className="mt-6 h-5 w-2/3 rounded bg-[#e4e0da]" />
+                <div className="mt-5 h-3 w-1/2 rounded bg-[#e4e0da]" />
+              </div>
+            ))}
+          </div>
+        )}
 
-      <section id="stories" className="mx-auto max-w-[1130px] px-6 py-14"><div className="text-center"><p className="text-[9px] font-bold tracking-[.2em] text-[#16835f]">STUDENT STORIES</p><h2 className="mt-2 text-[20px] font-extrabold">{tr('قصص حقيقية، نتائج حقيقية','Real stories, real results')}</h2></div><div className="mt-9 grid gap-4 md:grid-cols-3">{(isArabic ? [['مريم أحمد','كنت مترددة في البداية، لكن النظام والمتابعة خلوني أتكلم بثقة في شغلي.','B1 → B2','م'],['عمر خالد','المنهج عملي جداً. لأول مرة أحس إني بتعلم لغة أقدر أستخدمها فعلاً.','A2 → B1','ع'],['سارة محمد','الحصص منظمة والمدرب فاهم هدفي. فرق واضح في الاستماع والمحادثة.','A1 → A2','س']] : [['Mariam Ahmed','I was hesitant at first, but the structure and follow-up helped me speak confidently at work.','B1 → B2','M'],['Omar Khaled','The curriculum is truly practical. For the first time, I am learning a language I can actually use.','A2 → B1','O'],['Sara Mohamed','The classes are organized and my tutor understands my goal. My listening and speaking clearly improved.','A1 → A2','S']]).map(([name,quote,level,initial])=><article key={name} className="border border-[#e5e9e5] p-5"><div className="font-['DM_Sans'] text-lg leading-none text-[#16835f]">“</div><p className="mt-2 text-[10px] leading-6 text-[#56635f]">{quote}</p><div className="mt-5 flex items-center gap-2 border-t border-[#edf0ed] pt-3"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#dcebe4] text-[8px] font-bold text-[#167655]">{initial}</span><div><b className="text-[10px]">{name}</b><span className={isArabic ? "mr-2 font-['DM_Sans'] text-[8px] text-[#16835f]" : "ml-2 font-['DM_Sans'] text-[8px] text-[#16835f]"}>{level}</span></div></div></article>)}</div></section>
+        {packageState.status === 'ready' && (
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {packageState.packages.slice(0, 3).map((item) => (
+              <article key={item.id} className="flex min-h-[190px] flex-col rounded-sm border border-[#e4e0da] bg-[#fffefa] p-5 sm:p-6">
+                <p className="text-[10px] font-semibold text-[#77727e]">{tr('باقة تعليمية', 'Learning package')}</p>
+                <h3 className="mt-3 text-[16px] font-bold leading-[1.6] text-[#292635]">{isArabic ? item.titleAr : item.title}</h3>
+                <div className="mt-4 flex items-baseline gap-2 border-t border-[#eeebe6] pt-4">
+                  <span className="text-[10px] text-[#77727e]">{tr('السعر المدرج', 'Listed price')}</span>
+                  <span className="font-['DM_Sans'] text-[18px] font-bold text-[#4b3175]">{String(item.price)}</span>
+                </div>
+                <Link href="/packages" className="mt-auto inline-flex min-h-10 items-center gap-2 pt-3 text-[11px] font-bold text-[#4b3175] hover:underline">
+                  {tr('التفاصيل', 'View details')}
+                  {isArabic ? <ArrowLeft size={13} aria-hidden="true" /> : <ArrowUpRight size={13} aria-hidden="true" />}
+                </Link>
+              </article>
+            ))}
+          </div>
+        )}
 
-      <section className="border-y border-[#e5e9e5] bg-[#fbfcfa] px-6 py-14"><div className="mx-auto max-w-[930px]"><div className="text-center"><p className="text-[9px] font-bold tracking-[.2em] text-[#16835f]">FAQ</p><h2 className="mt-2 text-[20px] font-extrabold">{tr('أسئلة شائعة','Frequently asked questions')}</h2></div><div className="mt-8 grid gap-x-7 md:grid-cols-2">{localizedFaqs.map((q,i)=><button key={q} onClick={()=>setOpenFaq(openFaq===i?null:i)} className={`border-b border-[#dfe5e0] py-4 ${isArabic ? 'text-right' : 'text-left'}`}><span className="flex items-center justify-between text-[10px] font-bold">{q}<ChevronDown size={15} className={`transition ${openFaq===i?'rotate-180':''}`}/></span>{openFaq===i&&<p className="mt-3 pe-7 text-[9px] leading-6 text-[#6d7875]">{tr('نبدأ بتحديد مستواك وهدفك، ثم نضع لك المسار الأنسب مع متابعة مستمرة من فريقنا.','We start by identifying your level and goal, then build the right path with continuous support from our team.')}</p>}</button>)}</div></div></section>
+        {packageState.status === 'empty' && (
+          <div className="mt-8 border border-dashed border-[#dcd7df] bg-[#f3f1ec] px-5 py-8 text-center">
+            <p className="text-[13px] font-bold">{tr('لا توجد باقات متاحة حالياً.', 'No packages are available right now.')}</p>
+            <p className="mt-2 text-[11px] text-[#6d6975]">{tr('يمكنك استكشاف مسار التعلم أو التواصل معنا لمعرفة المزيد.', 'Explore the learning path or contact us to learn more.')}</p>
+          </div>
+        )}
 
-      <section className="relative isolate overflow-hidden text-white"><Image src={travelImage} alt="" fill sizes="100vw" className="-z-20 object-cover"/><div className="absolute inset-0 -z-10 bg-[#102928]/[.82]"/><div className="mx-auto max-w-[1130px] px-7 py-14"><div className={`${isArabic ? 'mr-auto text-right' : 'mr-auto text-left'} max-w-md`}><h2 className="text-[25px] font-extrabold leading-relaxed">{tr('جاهز تبدأ رحلتك؟','Ready to start your journey?')}</h2><p className="mt-2 text-[10px] leading-6 text-white/75">{tr('خذ الخطوة الأولى نحو إنجليزية أقوى، وفرص أوسع.','Take the first step toward stronger English and wider opportunities.')}</p><div className="mt-6 flex gap-3"><Link href="/auth/register" className="bg-[#16835f] px-5 py-3 text-[10px] font-bold text-white">{tr('ابدأ رحلتك معنا','Start your journey')}</Link><Link href="/placement-test" className="border border-white/60 px-5 py-3 text-[10px] font-bold">{tr('اختبار تحديد المستوى','Level test')}</Link></div></div><footer className="mt-14 flex flex-col justify-between gap-5 border-t border-white/15 pt-5 text-[8px] text-white/60 md:flex-row"><div><b className="font-['DM_Sans'] text-sm text-white">Be Fluent</b><p className="mt-2">FLUENCY COMES FIRST</p></div><div className="flex gap-5"><Link href="/auth/login">{tr('دخول','Login')}</Link><Link href="/packages">{tr('الباقات','Plans')}</Link><Link href="/placement-test">{tr('اختبار المستوى','Level test')}</Link></div><p>© 2025 Be Fluent Academy</p></footer><div className="mt-5 border-t border-white/10 pt-4 text-center text-[9px] text-white/55"><span>Made by </span><a href="https://qiroxstudio.online" target="_blank" rel="noopener noreferrer" className="font-bold text-white transition hover:text-[#75c7a1]">Qirox Studio group</a></div></div></section>
+        {(packageState.status === 'error' || packageState.status === 'unavailable') && (
+          <div role="alert" className="mt-8 flex flex-col gap-4 border border-[#e2d6d4] bg-[#f7f0ed] px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[13px] font-bold text-[#43343a]">
+                {packageState.status === 'unavailable'
+                  ? tr('خدمة الباقات غير متاحة حالياً.', 'Packages are temporarily unavailable.')
+                  : tr('تعذّر تحميل الباقات.', 'We could not load the packages.')}
+              </p>
+              <p className="mt-1 text-[11px] leading-6 text-[#6d6065]">
+                {packageState.status === 'unavailable'
+                  ? tr('قاعدة البيانات غير متاحة حالياً. حاول مرة أخرى لاحقاً.', 'The database is currently unavailable. Please try again later.')
+                  : tr('تحقق من اتصالك وحاول مجدداً. لن نعرض تفاصيل غير مؤكدة.', 'Check your connection and try again. We will not show unverified package details.')}
+              </p>
+            </div>
+            <button type="button" onClick={() => { setPackageState({ status: 'loading' }); setRetryCount((count) => count + 1); }} className="min-h-10 shrink-0 rounded-sm border border-[#b8a9a8] px-4 text-[11px] font-bold text-[#43343a] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4b3175]">
+              {tr('إعادة المحاولة', 'Try again')}
+            </button>
+          </div>
+        )}
+      </section>
+
+      <section className="border-y border-[#e9e6e2] bg-[#f2f0eb]">
+        <div className="mx-auto grid max-w-[1200px] gap-8 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[.72fr_1.28fr] lg:gap-16">
+          <div className={isArabic ? 'text-right' : 'text-left'}>
+            <p className="text-[10px] font-bold text-[#4b3175]">{tr('أسئلة شائعة', 'COMMON QUESTIONS')}</p>
+            <h2 className="mt-3 text-[25px] font-extrabold leading-[1.5] sm:text-[30px]">{tr('قبل أن تبدأ', 'Before you begin')}</h2>
+            <p className="mt-3 max-w-[330px] text-[11px] leading-[2] text-[#686573] sm:text-[12px]">
+              {tr('إجابات مختصرة عن طريقة التعلم والخطوات التالية.', 'A few answers about the learning approach and what comes next.')}
+            </p>
+          </div>
+          <div className="border-t border-[#ded9d3]">
+            {faqItems.map(([question, answer], index) => (
+              <div key={question} className="border-b border-[#ded9d3]">
+                <button
+                  type="button"
+                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                  className={`flex min-h-[58px] w-full items-center justify-between gap-4 py-4 text-[11px] font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#4b3175] sm:text-[12px] ${isArabic ? 'text-right' : 'text-left'}`}
+                  aria-expanded={openFaq === index}
+                  aria-controls={`faq-answer-${index}`}
+                >
+                  <span>{question}</span>
+                  <ChevronDown size={16} className={`shrink-0 text-[#4b3175] transition-transform ${openFaq === index ? 'rotate-180' : ''}`} aria-hidden="true" />
+                </button>
+                {openFaq === index && (
+                  <p id={`faq-answer-${index}`} className={`max-w-[620px] pb-5 pe-7 text-[11px] leading-[2] text-[#696672] ${isArabic ? 'text-right' : 'text-left'}`}>
+                    {answer}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1200px] px-5 py-14 sm:px-8 sm:py-16">
+        <div className={`flex flex-col gap-6 border border-[#e5e0e9] bg-[#eeebf2] px-5 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-9 sm:py-9 ${isArabic ? 'sm:flex-row-reverse' : ''}`}>
+          <div className={isArabic ? 'text-right' : 'text-left'}>
+            <p className="text-[10px] font-bold text-[#4b3175]">{tr('الخطوة التالية', 'YOUR NEXT STEP')}</p>
+            <h2 className="mt-2 text-[22px] font-extrabold leading-[1.5] sm:text-[27px]">{tr('خلّينا نبدأ من هدفك.', 'Let’s start with your goal.')}</h2>
+            <p className="mt-2 max-w-[520px] text-[11px] leading-[1.9] text-[#625e6a] sm:text-[12px]">
+              {tr('تعرّف على المسار أو تواصل مع فريق Be Fluent لمناقشة بداية مناسبة لك.', 'Explore the learning path or contact the Be Fluent team to talk through a suitable starting point.')}
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <Link href="/learning-path" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm bg-[#4b3175] px-4 py-3 text-[11px] font-bold text-white hover:bg-[#39245f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#4b3175]">
+              {tr('مسار التعلم', 'Learning path')}
+              {isArabic ? <ArrowLeft size={14} aria-hidden="true" /> : <ArrowUpRight size={14} aria-hidden="true" />}
+            </Link>
+            <Link href="/contact" className="inline-flex min-h-11 items-center justify-center rounded-sm border border-[#c9c0d2] bg-[#faf9f6] px-4 py-3 text-[11px] font-bold text-[#4b3175] hover:border-[#4b3175] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4b3175]">
+              {tr('تواصل معنا', 'Contact us')}
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-[#e9e6e2] bg-[#faf9f6]">
+        <div className="mx-auto flex max-w-[1200px] flex-col gap-6 px-5 py-8 sm:px-8 md:flex-row md:items-center md:justify-between">
+          <div className={isArabic ? 'text-right' : 'text-left'}>
+            <Link href="/" className="font-['DM_Sans'] text-[16px] font-bold text-[#4b3175]">Be Fluent</Link>
+            <p className="mt-1 text-[11px] font-semibold text-[#77727e]">FLUENCY COMES FIRST.</p>
+          </div>
+          <nav className="flex flex-wrap gap-x-5 gap-y-3 text-[10px] font-semibold text-[#625e6a]" aria-label={tr('روابط التذييل', 'Footer navigation')}>
+            <Link href="/about-path" className="hover:text-[#4b3175]">{tr('عن المنهج', 'Our approach')}</Link>
+            <Link href="/learning-path" className="hover:text-[#4b3175]">{tr('مسار التعلم', 'Learning path')}</Link>
+            <Link href="/packages" className="hover:text-[#4b3175]">{tr('الباقات', 'Packages')}</Link>
+            <Link href="/contact" className="hover:text-[#4b3175]">{tr('تواصل معنا', 'Contact')}</Link>
+            <Link href="/auth/login" className="hover:text-[#4b3175]">{tr('دخول', 'Log in')}</Link>
+          </nav>
+          <p className="text-[11px] text-[#89848e]">© Be Fluent EDU</p>
+        </div>
+      </footer>
     </main>
   );
 }

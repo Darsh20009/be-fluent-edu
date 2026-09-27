@@ -50,18 +50,34 @@ export default function ClassesClient({ role }: { role: Role }) {
     try {
       const response = await fetch(config.endpoint, { cache: 'no-store' })
       const body = await response.json().catch(() => ({}))
-      if (!response.ok) { setItems([]); setState(getErrorState(response, body)); setMessage(String(body?.error?.message || 'The class service could not be reached.')); return }
+      if (!response.ok) {
+        const errorState = getErrorState(response, body)
+        setItems([])
+        setState(errorState)
+        setMessage(errorState === 'database'
+          ? 'Class records are unavailable right now.'
+          : errorState === 'provider'
+            ? 'Live meeting service is currently unavailable.'
+            : 'Class information could not be loaded. Please try again.')
+        return
+      }
       const next = Array.isArray(body) ? body : body.items
       setItems(Array.isArray(next) ? next : [])
       setLoadedAt(Date.now())
       setState(Array.isArray(next) && next.length ? 'ready' : 'empty')
-    } catch (error) { setItems([]); setState('error'); setMessage(error instanceof Error ? error.message : 'The class service could not be reached.') }
+    } catch { setItems([]); setState('error'); setMessage('Class information could not be loaded. Please try again.') }
   }, [config.endpoint])
 
   useEffect(() => {
     const timer = window.setTimeout(() => void load(), 0)
     return () => window.clearTimeout(timer)
   }, [load])
+  useEffect(() => {
+    const requestedView = new URLSearchParams(window.location.search).get('view')
+    // Apply optional deep-linked tabs after hydration to keep the server render stable.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (requestedView && (config.tabs as readonly string[]).includes(requestedView)) setTab(requestedView)
+  }, [config.tabs])
   const upcoming = useMemo(() => items.filter((item) => item.startTime && new Date(item.startTime).valueOf() >= loadedAt), [items, loadedAt])
   const visible = tab === 'Upcoming Sessions' || tab === 'Upcoming Class' ? upcoming : items
   const dbBlocked = state === 'database'
@@ -71,7 +87,15 @@ export default function ClassesClient({ role }: { role: Role }) {
     try {
       const response = await fetch(`/api/student/classes/sessions/${encodeURIComponent(id)}/join`, { method: 'POST' })
       const body = await response.json().catch(() => ({}))
-      if (!response.ok || body.allowed === false) { setJoinMessage(String(body?.error?.message || 'Joining is not available for this session.')); return }
+      if (!response.ok || body.allowed === false) {
+        const code = String((body?.error as Record<string, unknown> | undefined)?.code || body?.code || '')
+        setJoinMessage(code === 'DATABASE_UNAVAILABLE'
+          ? 'Class records are unavailable right now.'
+          : code === 'PROVIDER_UNAVAILABLE' || response.status === 502
+            ? 'Live meeting service is currently unavailable.'
+            : 'Joining is not available for this session.')
+        return
+      }
       if (body.joinUrl) window.location.assign(body.joinUrl)
       else setJoinMessage('This class is ready, but no join link was returned.')
     } catch { setJoinMessage('Joining is temporarily unavailable. Please try again.') }
@@ -83,14 +107,14 @@ export default function ClassesClient({ role }: { role: Role }) {
     </div>
     {state === 'loading' && <div className={base.grid} aria-live="polite" data-testid="state-loading">{[1, 2, 3].map((item) => <div className={base.skeleton} key={item} />)}</div>}
     {state === 'database' && <div className={`${base.notice} ${base.blocked}`} role="status" data-testid="state-database-unavailable"><strong>Database unavailable</strong><p>{message || 'Class records are unavailable. Controls remain disabled; no persistence is claimed.'}</p></div>}
-    {state === 'provider' && <div className={base.notice} role="status" data-testid="state-provider-unavailable"><strong>Provider unavailable</strong><p>{message || 'The live-class provider is unavailable. Try again later.'}</p><button className={base.button} data-testid="button-retry-provider" onClick={() => void load()}>Retry</button></div>}
+    {state === 'provider' && <div className={base.notice} role="status" data-testid="state-provider-unavailable"><strong>Live meeting service is currently unavailable.</strong><p>Please try again later.</p><button className={base.button} data-testid="button-retry-provider" onClick={() => void load()}>Retry</button></div>}
     {state === 'error' && <div className={base.error} role="alert" data-testid="state-error">{message}<button className={base.button} data-testid="button-retry-classes" onClick={() => void load()}>Retry</button></div>}
     {(state === 'empty' || (state === 'ready' && visible.length === 0)) && <div className={base.empty} data-testid="state-empty"><strong>No sessions to show</strong><br />When classes are assigned, they will appear here.</div>}
     {state === 'ready' && visible.length > 0 && <div className={base.grid} data-testid="class-list">
       {visible.map((item) => <article className={base.card} key={item.id} data-testid={`class-card-${item.id}`}>
         <div className={base.eyebrow}>{String(item.status || 'Scheduled')}</div>
         <h2 data-testid={`class-title-${item.id}`}>{String(item.title || item.group?.name || item.group?.nameAr || 'Untitled class')}</h2>
-        <p className={base.muted}>{formatDate(item.startTime)}{item.endTime ? ` — ${formatDate(item.endTime)}` : ''}</p>
+        <p className={base.muted}>{formatDate(item.startTime)}{item.endTime ? ` · ${formatDate(item.endTime)}` : ''}</p>
         <p>{item.group ? `Group · ${item.group.name || item.group.nameAr || 'Assigned group'}` : 'Class session'}{Array.isArray(item.participants) ? ` · ${item.participants.length} participants` : ''}</p>
         {role === 'admin' && <p className={base.muted}>{Array.isArray(item.attendances) ? `${item.attendances.length} attendance records` : 'Attendance not reported'}{item.qmeetMeeting ? ' · QMeet linked' : ' · QMeet not linked'}</p>}
         {role === 'student' && <div className={base.actions}><button className={base.button} disabled={dbBlocked} data-testid={`button-join-class-${item.id}`} onClick={() => void join(item.id)}>Join class</button></div>}
@@ -105,10 +129,29 @@ export default function ClassesClient({ role }: { role: Role }) {
 function QMeetStatus() {
   const [state, setState] = useState<LoadState>('loading')
   const [status, setStatus] = useState('')
-  useEffect(() => { fetch('/api/admin/classes/qmeet/status', { cache: 'no-store' }).then(async (response) => { const body = await response.json().catch(() => ({})); if (!response.ok) { setState(body?.error?.code === 'DATABASE_UNAVAILABLE' ? 'database' : body?.error?.code === 'PROVIDER_UNAVAILABLE' ? 'provider' : 'error'); return } setStatus(`${body.configured ? 'Configured' : 'Not configured'} · ${body.status || 'Status unavailable'}`); setState('ready') }).catch(() => setState('error')) }, [])
-  if (state === 'loading') return <div className={base.notice} data-testid="qmeet-loading">Checking QMeet readiness…</div>
-  if (state === 'database') return <div className={`${base.notice} ${base.blocked}`} data-testid="qmeet-database">Database unavailable. QMeet status cannot be confirmed.</div>
-  if (state === 'provider') return <div className={base.notice} data-testid="qmeet-provider">Provider unavailable. QMeet status cannot be confirmed.</div>
-  if (state === 'error') return <div className={base.error} data-testid="qmeet-error">QMeet status could not be loaded.</div>
+  const [retryKey, setRetryKey] = useState(0)
+  useEffect(() => {
+    let active = true
+    const timer = window.setTimeout(() => {
+      void fetch('/api/admin/classes/qmeet/status', { cache: 'no-store' }).then(async (response) => {
+        const body = await response.json().catch(() => ({}))
+        if (!response.ok) {
+          const code = String(body?.error?.code || body?.code || '')
+          if (active) setState(code === 'DATABASE_UNAVAILABLE' ? 'database' : code === 'PROVIDER_UNAVAILABLE' || response.status === 502 ? 'provider' : 'error')
+          return
+        }
+        if (active) {
+          setStatus(`${body.configured ? 'Configured' : 'Not configured'} · ${body.status || 'Status unavailable'}`)
+          setState('ready')
+        }
+      }).catch(() => { if (active) setState('error') })
+    }, 0)
+    return () => { active = false; window.clearTimeout(timer) }
+  }, [retryKey])
+  const retry = () => { setState('loading'); setRetryKey((key) => key + 1) }
+  if (state === 'loading') return <div className={base.notice} aria-live="polite" data-testid="qmeet-loading">Checking QMeet readiness…</div>
+  if (state === 'database') return <div className={`${base.notice} ${base.blocked}`} role="status" data-testid="qmeet-database">Database unavailable. QMeet status cannot be confirmed. <button className={base.button} onClick={retry}>Retry</button></div>
+  if (state === 'provider') return <div className={base.notice} role="status" data-testid="qmeet-provider"><strong>Live meeting service is currently unavailable.</strong> <button className={base.button} onClick={retry}>Retry</button></div>
+  if (state === 'error') return <div className={base.error} role="alert" data-testid="qmeet-error">QMeet status could not be loaded. <button className={base.button} onClick={retry}>Retry</button></div>
   return <div className={base.notice} data-testid="qmeet-status"><strong>QMeet readiness</strong><p>{status}</p></div>
 }
