@@ -386,10 +386,10 @@ export default function HomePage() {
               <p className="mt-1 text-[11px] leading-6 text-[#6d6065]">
                 {packageState.status === 'unavailable'
                   ? tr('قاعدة البيانات غير متاحة حالياً. حاول مرة أخرى لاحقاً.', 'The database is currently unavailable. Please try again later.')
-                  : tr('تحقق من اتصالك وحاول مجدداً. لن نعرض تفاصيل غير مؤكدة.', 'Check your connection and try again. We will not show unverified package details.')}
+                  : tr('حاول مرة أخرى لاحقاً. لن نعرض تفاصيل غير مؤكدة.', 'Please try again later. We will not show unverified package details.')}
               </p>
             </div>
-            <button type="button" onClick={() => { setPackageState({ status: 'loading' }); setRetryCount((count) => count + 1); }} className="min-h-10 shrink-0 rounded-sm border border-[#b8a9a8] px-4 text-[11px] font-bold text-[#43343a] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4b3175]">
+            <button type="button" onClick={() => { setPackageState({ status: 'loading' }); setRetryCount((count) => count + 1); }} className="min-h-11 shrink-0 rounded-sm border border-[#b8a9a8] px-4 text-[11px] font-bold text-[#43343a] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4b3175]">
               {tr('إعادة المحاولة', 'Try again')}
             </button>
           </div>

@@ -17,6 +17,7 @@
     "test:phase7": "tsx --test tests/phase7-core.test.ts",
     "test:phase8": "tsx --test tests/phase8-speaking.test.ts tests/phase8-whatsapp.test.ts && node --test tests/phase8-worker-runner.test.cjs",
     "test:phase9": "tsx --test tests/phase9-domain.test.ts tests/phase9-pipeline.test.ts tests/phase9-staff-service.test.ts app/dashboard/phase9/intelligence.contract.test.ts",
+    "test:phase10": "tsx --test tests/phase10-frontend.contract.test.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

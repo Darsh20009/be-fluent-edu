@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -16,6 +16,7 @@ import styles from './student-foundation.module.css'
 interface StudentDashboardClientProps { user: { name: string; email: string; isActive: boolean } }
 type MenuItem = { id: string; label: string; icon: typeof Home; href?: string; locked?: boolean }
 type SubscriptionInfo = { status?: string }
+type SubscriptionState = 'loading' | 'ready' | 'unavailable'
 
 export default function StudentDashboardClient({ user }: StudentDashboardClientProps) {
   const router = useRouter()
@@ -23,26 +24,39 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [hasSubscription, setHasSubscription] = useState(false)
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null)
+  const [subscriptionState, setSubscriptionState] = useState<SubscriptionState>('loading')
   const [cartItemsCount, setCartItemsCount] = useState(0)
 
-  const fetchCartCount = async () => {
+  const fetchCartCount = useCallback(async () => {
     try { const response = await fetch('/api/cart'); if (response.ok) { const data = await response.json(); setCartItemsCount(data.CartItem?.length || 0) } } catch (error) { console.error('Error fetching cart:', error) }
-  }
+  }, [])
+  const fetchSubscriptionStatus = useCallback(async () => {
+    setSubscriptionState('loading')
+    try {
+      const response = await fetch('/api/student/subscription-status', { cache: 'no-store' })
+      if (!response.ok) {
+        setSubscriptionState('unavailable')
+        return
+      }
+      const data = await response.json()
+      if (!data || typeof data !== 'object' || ('error' in data && data.error)) {
+        setSubscriptionState('unavailable')
+        return
+      }
+      setHasSubscription(Boolean(data.hasApprovedSubscription))
+      setSubscription(data.subscription || null)
+      setSubscriptionState('ready')
+    } catch {
+      setSubscriptionState('unavailable')
+    }
+  }, [])
   useEffect(() => {
     const timer = window.setTimeout(() => {
       void fetchCartCount()
-      void fetch('/api/student/subscription-status')
-        .then((response) => response.ok ? response.json() : null)
-        .then((data: { hasApprovedSubscription?: boolean; subscription?: SubscriptionInfo | null } | null) => {
-          if (data) {
-            setHasSubscription(Boolean(data.hasApprovedSubscription))
-            setSubscription(data.subscription || null)
-          }
-        })
-        .catch((error) => console.error('Error checking subscription:', error))
+      void fetchSubscriptionStatus()
     }, 0)
     return () => window.clearTimeout(timer)
-  }, [])
+  }, [fetchCartCount, fetchSubscriptionStatus])
   const primary: MenuItem[] = [
     { id: 'home', label: 'الرئيسية', icon: Home },
     { id: 'classes', label: 'حصصي', icon: Calendar, href: '/dashboard/student/classes' },
@@ -54,8 +68,8 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
     { id: 'profile', label: 'الملف الشخصي', icon: UserRound, href: '/dashboard/student/profile' },
   ]
   const explore: MenuItem[] = [
-    { id: 'sessions', label: 'الجلسات السابقة', icon: Video, locked: !hasSubscription },
-    { id: 'legacy-homework', label: 'الواجبات السابقة', icon: FileText, locked: !hasSubscription },
+    { id: 'sessions', label: 'الجلسات السابقة', icon: Video, locked: subscriptionState !== 'ready' || !hasSubscription },
+    { id: 'legacy-homework', label: 'الواجبات السابقة', icon: FileText, locked: subscriptionState !== 'ready' || !hasSubscription },
     { id: 'certificates', label: 'الشهادات', icon: Award },
     { id: 'lessons', label: 'الدروس التعليمية', icon: BookOpen, href: '/dashboard/student/lessons' },
     { id: 'level', label: 'تقدم المستوى', icon: TrendingUp, href: '/dashboard/student/level-progress' },
@@ -95,7 +109,24 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
         </nav>
       </aside>
       <main className={styles.surface}>
-        {!user.isActive && <div className={styles.notice}><strong>{subscription?.status === 'PENDING' ? 'طلبك قيد المراجعة' : 'حسابك غير مفعّل'}</strong><span className="mr-2">اختر باقة وأكمل خطوات الاشتراك للوصول إلى جميع أدوات التعلم.</span></div>}
+        {subscriptionState === 'unavailable' && (
+          <div role="alert" className={styles.notice}>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <strong>تعذر التحقق من حالة الاشتراك</strong>
+                <p className="mt-1">ستبقى الأدوات المقيدة مغلقة حتى نتمكن من التحقق من حالتك.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void fetchSubscriptionStatus()}
+                className="min-h-11 shrink-0 rounded border border-[#d7c99c] px-4 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4b3a70]"
+              >
+                إعادة المحاولة
+              </button>
+            </div>
+          </div>
+        )}
+        {!user.isActive && subscriptionState === 'ready' && <div className={styles.notice}><strong>{subscription?.status === 'PENDING' ? 'طلبك قيد المراجعة' : 'حسابك غير مفعّل'}</strong><span className="mr-2">اختر باقة وأكمل خطوات الاشتراك للوصول إلى جميع أدوات التعلم.</span></div>}
         {activeTab === 'home' && <HomeTab />}
         {activeTab === 'sessions' && <SessionsTab isActive={user.isActive} />}
         {activeTab === 'certificates' && <CertificatesTab />}
