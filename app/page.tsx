@@ -134,25 +134,25 @@ export default function HomePage() {
           </Link>
 
           <nav className="hidden items-center gap-7 text-[12px] font-semibold text-[#5f5b67] lg:flex" aria-label={tr('التنقل الرئيسي', 'Main navigation')}>
-            <Link href="/about-path" className="transition-colors hover:text-[#4c2f79]">{tr('عن المنهج', 'Our approach')}</Link>
-            <Link href="/learning-path" className="transition-colors hover:text-[#4c2f79]">{tr('مسار التعلم', 'Learning path')}</Link>
-            <Link href="/packages" className="transition-colors hover:text-[#4c2f79]">{tr('الباقات', 'Packages')}</Link>
-            <Link href="/contact" className="transition-colors hover:text-[#4c2f79]">{tr('تواصل معنا', 'Contact')}</Link>
+            <Link href="/about-path" className="inline-flex min-h-11 items-center transition-colors hover:text-[#4c2f79]">{tr('عن المنهج', 'Our approach')}</Link>
+            <Link href="/learning-path" className="inline-flex min-h-11 items-center transition-colors hover:text-[#4c2f79]">{tr('مسار التعلم', 'Learning path')}</Link>
+            <Link href="/packages" className="inline-flex min-h-11 items-center transition-colors hover:text-[#4c2f79]">{tr('الباقات', 'Packages')}</Link>
+            <Link href="/contact" className="inline-flex min-h-11 items-center transition-colors hover:text-[#4c2f79]">{tr('تواصل معنا', 'Contact')}</Link>
           </nav>
 
           <div className="hidden items-center gap-2 lg:flex">
             <button
               type="button"
               onClick={toggleLanguage}
-              className="rounded-sm px-3 py-2 text-[12px] font-semibold text-[#5f5b67] outline-none transition-colors hover:bg-[#f0edf3] focus-visible:ring-2 focus-visible:ring-[#4c2f79]"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-sm px-3 text-[12px] font-semibold text-[#5f5b67] outline-none transition-colors hover:bg-[#f0edf3] focus-visible:ring-2 focus-visible:ring-[#4c2f79]"
               aria-label={tr('عرض الموقع بالإنجليزية', 'View website in Arabic')}
             >
               {isArabic ? 'EN' : 'العربية'}
             </button>
-            <Link href="/auth/login" className="rounded-sm border border-[#d9d4de] px-4 py-[10px] text-[12px] font-bold text-[#403b49] transition-colors hover:border-[#4c2f79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4c2f79]">
+            <Link href="/auth/login" className="inline-flex min-h-11 items-center rounded-sm border border-[#d9d4de] px-4 text-[12px] font-bold text-[#403b49] transition-colors hover:border-[#4c2f79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4c2f79]">
               {tr('دخول', 'Log in')}
             </Link>
-            <Link href="/auth/register" className="rounded-sm bg-[#4b3175] px-4 py-[11px] text-[12px] font-bold text-white transition-colors hover:bg-[#39245f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#4b3175]">
+            <Link href="/auth/register" className="inline-flex min-h-11 items-center rounded-sm bg-[#4b3175] px-4 text-[12px] font-bold text-white transition-colors hover:bg-[#39245f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#4b3175]">
               {tr('ابدأ التعلم', 'Start learning')}
             </Link>
           </div>
@@ -161,7 +161,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={toggleLanguage}
-              className="rounded-sm px-2 py-2 text-[12px] font-semibold text-[#5f5b67] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4c2f79]"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-sm px-2 text-[12px] font-semibold text-[#5f5b67] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4c2f79]"
               aria-label={tr('عرض الموقع بالإنجليزية', 'View website in Arabic')}
             >
               {isArabic ? 'EN' : 'العربية'}
@@ -169,7 +169,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setMenuOpen((open) => !open)}
-              className="flex h-10 w-10 items-center justify-center rounded-sm text-[#393543] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4c2f79]"
+              className="flex h-11 w-11 items-center justify-center rounded-sm text-[#393543] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4c2f79]"
               aria-label={menuOpen ? tr('إغلاق القائمة', 'Close menu') : tr('فتح القائمة', 'Open menu')}
               aria-expanded={menuOpen}
               aria-controls="mobile-navigation"
