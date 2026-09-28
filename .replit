@@ -15,6 +15,9 @@ ZEGO_APP_ID = "1050328575"
 SMTP2GO_FROM_EMAIL = "noreply@befluent-edu.online"
 SMTP2GO_FROM_NAME = "Be Fluent Academy"
 
+[userenv.development]
+PHASE5_DATABASE_ENABLED = "true"
+
 [workflows]
 runButton = "Project"
 
