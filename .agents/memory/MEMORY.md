@@ -2,3 +2,4 @@
 - [Static image cache busting](static-image-cache-busting.md) — use a new public asset filename when replacing an image that Next Image may still serve from its optimized cache.
 - [Environment readiness](environment-readiness.md) — MongoDB and auth secrets belong only in runtime environment, never client-exposed Next.js config.
 - [Dependency audit tree mismatches](dependency-audit-tree-mismatches.md) — compare lockfile audits with the installed production tree; missing peer packages can return on clean install.
+- [Socket.IO WebSocket override](socketio-websocket-override.md) — keep the patched ws override until adapter ranges catch up; verify real loopback I/O because integration tests skip it.
