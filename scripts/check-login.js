@@ -1,57 +1,45 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
-const prisma = new PrismaClient();
-
 async function checkLogin() {
+  if (process.env.NODE_ENV !== 'development' || process.env.ALLOW_DEV_LOGIN_CHECK !== 'true') {
+    console.error('Login check is disabled unless explicitly enabled in Development.');
+    process.exitCode = 1;
+    return;
+  }
+
+  const email = process.env.LOGIN_CHECK_EMAIL;
+  const password = process.env.LOGIN_CHECK_PASSWORD;
+  if (!email || !password) {
+    console.error('Set LOGIN_CHECK_EMAIL and LOGIN_CHECK_PASSWORD in Development to run the login check.');
+    process.exitCode = 1;
+    return;
+  }
+
+  let prisma;
   try {
-    const testEmail = 'admin@befluent.com';
-    const testPassword = '123456';
-    
-    console.log('Testing login for:', testEmail);
-    console.log('Password being tested:', testPassword);
-    console.log('');
-    
+    prisma = new PrismaClient();
     const user = await prisma.user.findUnique({
-      where: { email: testEmail }
+      where: { email },
+      select: { password: true, isActive: true },
     });
-    
-    if (!user) {
-      console.log('❌ User not found!');
-      process.exit(1);
-    }
-    
-    console.log('✅ User found:');
-    console.log('   ID:', user.id);
-    console.log('   Name:', user.name);
-    console.log('   Email:', user.email);
-    console.log('   Role:', user.role);
-    console.log('   Active:', user.isActive);
-    console.log('   Password hash:', user.password);
-    console.log('');
-    
-    // Test password
-    const isValid = await bcrypt.compare(testPassword, user.password);
-    console.log('Password verification result:', isValid);
-    
-    if (isValid) {
-      console.log('✅ Password matches!');
-    } else {
-      console.log('❌ Password does NOT match!');
-      
-      // Let's try to create a new hash and compare
-      console.log('\nTesting hash generation:');
-      const newHash = await bcrypt.hash(testPassword, 10);
-      console.log('New hash generated:', newHash);
-      const newCheck = await bcrypt.compare(testPassword, newHash);
-      console.log('New hash verification:', newCheck);
-    }
-    
-  } catch (error) {
-    console.error('Error:', error);
+    const isValid = Boolean(user?.isActive && await bcrypt.compare(password, user.password));
+    console.log(isValid ? 'Login check passed.' : 'Login check failed.');
+    if (!isValid) process.exitCode = 1;
+  } catch {
+    console.error('Login check could not be completed; error details were suppressed.');
+    process.exitCode = 1;
   } finally {
-    await prisma.$disconnect();
+    if (prisma) {
+      await prisma.$disconnect().catch(() => {
+        console.error('Login check cleanup failed; error details were suppressed.');
+        process.exitCode = 1;
+      });
+    }
   }
 }
 
-checkLogin();
+checkLogin().catch(() => {
+  console.error('Login check could not be completed; error details were suppressed.');
+  process.exitCode = 1;
+});
