@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Check, LoaderCircle, LockKeyhole, MessageCircle, Phone, X } from 'lucide-react'
 import BFPhoneField from '@/components/auth/BFPhoneField'
 import BrandLockup from '@/components/brand/BrandLockup'
-import { getCountryByIso, toInternationalPhone } from '@/lib/phone-countries'
+import { getCountryByIso, toAsciiDigits, toInternationalPhone } from '@/lib/phone-countries'
 
 type EntryMode = 'login' | 'start'
 type AuthIntent = 'LOGIN' | 'REGISTER'
@@ -485,8 +485,9 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
                   maxLength={6}
                   pattern="[0-9]{6}"
                   dir="ltr"
+                  style={{ unicodeBidi: 'isolate' }}
                   value={code}
-                  onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onChange={(event) => setCode(toAsciiDigits(event.target.value).replace(/\D/g, '').slice(0, 6))}
                   className="min-h-14 w-full border border-[#dce4dc] px-4 text-center font-['DM_Sans'] text-2xl font-semibold tracking-[0.25em] text-[#202a25] outline-none focus:border-[#24714f] focus:ring-2 focus:ring-[#24714f]/15"
                   disabled={busy}
                 />
@@ -528,6 +529,8 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
                   <input
                     type="text"
                     autoComplete="username"
+                    dir="ltr"
+                    style={{ unicodeBidi: 'isolate' }}
                     value={emailOrPhone}
                     onChange={(event) => setEmailOrPhone(event.target.value)}
                     className="min-h-12 w-full border border-[#dce4dc] px-3 text-sm outline-none focus:border-[#24714f] focus:ring-2 focus:ring-[#24714f]/15"

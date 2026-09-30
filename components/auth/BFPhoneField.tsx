@@ -5,6 +5,7 @@ import { ChevronDown, Search } from 'lucide-react'
 import {
   formatDialCode,
   getCountryOptions,
+  toAsciiDigits,
   type CountryOption,
 } from '@/lib/phone-countries'
 
@@ -41,7 +42,7 @@ export default function BFPhoneField({
   const filteredCountries = useMemo(() => {
     const term = query.trim().toLocaleLowerCase(language)
     if (!term) return countries
-    const digits = term.replace(/\D/g, '')
+    const digits = toAsciiDigits(term).replace(/\D/g, '')
     return countries.filter((country) =>
       country.name.toLocaleLowerCase(language).includes(term) ||
       country.englishName.toLocaleLowerCase('en').includes(term) ||
@@ -74,6 +75,7 @@ export default function BFPhoneField({
       ref={containerRef}
       className="relative flex min-h-12 flex-row items-stretch border border-[#dce4dc] focus-within:border-[#24714f] focus-within:ring-2 focus-within:ring-[#24714f]/15"
       dir="ltr"
+      style={{ unicodeBidi: 'isolate' }}
       onKeyDown={(event) => {
         if (event.key === 'Escape' && open) {
           event.preventDefault()
@@ -97,7 +99,7 @@ export default function BFPhoneField({
           className="flex h-full min-h-12 items-center gap-2 border-r border-[#e4e9e4] px-3 text-sm font-semibold text-[#405047] disabled:opacity-60"
         >
           <span className="text-lg leading-none" aria-hidden="true">{selected.flag}</span>
-          <span>{formatDialCode(selected.dialCode)}</span>
+          <span dir="ltr" style={{ unicodeBidi: 'isolate' }}>{formatDialCode(selected.dialCode)}</span>
           <ChevronDown size={14} className="text-[#7c867f]" aria-hidden="true" />
         </button>
 
@@ -138,7 +140,9 @@ export default function BFPhoneField({
                   <span className="min-w-0 flex-1 truncate" dir={isArabic ? 'rtl' : 'ltr'}>
                     {isArabic ? country.name : country.englishName}
                   </span>
-                  <span className="shrink-0 text-xs font-semibold text-[#526157]">{formatDialCode(country.dialCode)}</span>
+                  <span dir="ltr" className="shrink-0 text-xs font-semibold text-[#526157]" style={{ unicodeBidi: 'isolate' }}>
+                    {formatDialCode(country.dialCode)}
+                  </span>
                 </button>
               )) : (
                 <p className="px-3 py-4 text-sm text-[#68746c]" role="status">
@@ -156,6 +160,7 @@ export default function BFPhoneField({
         inputMode="tel"
         autoComplete="tel-national"
         dir="ltr"
+        style={{ unicodeBidi: 'isolate' }}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}

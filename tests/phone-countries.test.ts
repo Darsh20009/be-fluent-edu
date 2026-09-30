@@ -3,6 +3,7 @@ import test from 'node:test'
 import {
   getCountryByIso,
   getCountryOptions,
+  toAsciiDigits,
   toInternationalPhone,
 } from '../lib/phone-countries'
 
@@ -36,6 +37,11 @@ test('country labels are localized for Arabic and English search', () => {
   assert.equal(englishEgypt?.englishName, 'Egypt')
   assert.ok(arabicEgypt?.name)
   assert.notEqual(arabicEgypt?.name, 'EG')
+})
+
+test('normalizes Arabic-Indic and Persian digits for LTR calling-code search', () => {
+  assert.equal(toAsciiDigits('٠١٢٣٤٥٦٧٨٩'), '0123456789')
+  assert.equal(toAsciiDigits('۰۱۲۳۴۵۶۷۸۹'), '0123456789')
 })
 
 test('normalizes Egyptian local numbers and Arabic-Indic digits', () => {

@@ -116,14 +116,14 @@ export function formatDialCode(dialCode: string): string {
     : dialCode
 }
 
-function asciiDigits(value: string): string {
+export function toAsciiDigits(value: string): string {
   return value
     .replace(/[٠-٩]/g, (digit) => String(digit.charCodeAt(0) - 0x0660))
     .replace(/[۰-۹]/g, (digit) => String(digit.charCodeAt(0) - 0x06f0))
 }
 
 export function toInternationalPhone(value: string, country: CountryDialCode): string {
-  const cleanedValue = asciiDigits(value.trim())
+  const cleanedValue = toAsciiDigits(value.trim())
   const compact = cleanedValue.replace(/[()\s.-]/g, '')
   if (!compact) return ''
 
