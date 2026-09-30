@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Award, BookOpen, Calendar, ChevronLeft, CreditCard, FileText, Home, Layers, LogOut, Medal, Menu, MessageSquare, Mic, ShoppingCart, Target, TrendingUp, UserRound, Video } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import BrandLockup from '@/components/brand/BrandLockup'
 import HomeTab from './components/HomeTab'
 import CertificatesTab from './components/CertificatesTab'
 import SessionsTab from './components/SessionsTab'
@@ -92,7 +93,7 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
 
   return <div className={styles.foundation} dir="rtl">
     <header className={styles.topbar}><div className={styles.topbarInner}>
-      <div className={styles.headerTools}><button type="button" aria-label="فتح القائمة" aria-expanded={sidebarOpen} aria-controls="student-navigation-panel" onClick={() => setSidebarOpen(true)} className={styles.mobileOnly}><Menu size={21} aria-hidden="true" /></button><Link href="/" className={styles.brand}><span className={styles.brandMark}>ب</span><span>Be Fluent EDU</span></Link></div>
+      <div className={styles.headerTools}><button type="button" aria-label="فتح القائمة" aria-expanded={sidebarOpen} aria-controls="student-navigation-panel" onClick={() => setSidebarOpen(true)} className={styles.mobileOnly}><Menu size={21} aria-hidden="true" /></button><Link href="/" className={styles.brand} aria-label="Be Fluent home"><BrandLockup size="xs" /></Link></div>
       <nav className={styles.desktopNav} aria-label="التنقل السريع"><Link href="/dashboard/student/classes">حصصي</Link><Link href="/dashboard/student/learning">التعلّم</Link><Link href="/dashboard/student/feedback">الملاحظات</Link></nav>
       <div className={styles.headerTools}><span className={styles.status}>{user.isActive ? 'حساب نشط' : 'قيد التفعيل'}</span><Link href="/dashboard/student/cart" aria-label="السلة" className="relative grid min-h-11 min-w-11 place-items-center rounded-lg text-[#496257] hover:bg-[#f2f7f2]"><ShoppingCart size={19} aria-hidden="true" />{cartItemsCount > 0 && <span className="absolute -top-1 -left-1 min-w-4 h-4 px-1 bg-[#247456] text-white text-[11px] grid place-items-center rounded-full">{cartItemsCount}</span>}</Link><Button variant="outline" size="sm" onClick={handleSignOut} className="!min-h-11 !border-[#d7e1d8] !rounded-lg !text-[#315f49]"><LogOut size={15} className="ml-1" />خروج</Button></div>
     </div></header>

@@ -15,9 +15,16 @@ export async function POST(req: Request) {
       <div style="font-family: 'Segoe UI', Arial, sans-serif; direction: rtl; text-align: right; background: #f9fafb; padding: 40px 20px;">
         <div style="max-width: 580px; margin: auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
           <div style="background: linear-gradient(135deg, #10B981, #059669); padding: 32px; text-align: center;">
-            <img src="https://befluent-edu.online/logo.png" alt="Be Fluent" style="max-width: 100px; margin-bottom: 16px;" />
+            <table role="presentation" align="center" style="border-collapse: collapse; margin: 0 auto 16px;">
+              <tr>
+                <td style="background: #ffffff; border-radius: 10px; padding: 6px; vertical-align: middle;">
+                  <img src="https://befluent-edu.online/brand/be-fluent-mark-2026.png" alt="" width="44" height="47" style="display: block; width: 44px; height: 47px; object-fit: contain;" />
+                </td>
+                <td style="padding-left: 10px; vertical-align: middle; color: #ffffff; font-family: Arial, sans-serif; font-size: 24px; font-weight: 700; white-space: nowrap;">Be Fluent</td>
+              </tr>
+            </table>
             <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 800;">اختبار تحديد المستوى</h1>
-            <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0; font-size: 14px;">Placement Test - Be Fluent Academy</p>
+            <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0; font-size: 14px;">Placement Test</p>
           </div>
 
           <div style="padding: 32px;">

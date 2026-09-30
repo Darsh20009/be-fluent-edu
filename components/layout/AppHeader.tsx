@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import BrandLockup from '@/components/brand/BrandLockup';
 
 export interface AppHeaderProps {
   variant?: 'marketing' | 'dashboard';
@@ -39,37 +39,15 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         >
           <div className="flex items-center gap-2 xs:gap-3 min-w-0 flex-1 mr-2">
             {showLogo && (
-              <>
-                <div className="relative flex-shrink-0">
-                  <Image
-                    src="/logo.png"
-                    alt="Be Fluent Logo"
-                    width={50}
-                    height={50}
-                    priority
-                    className={cn(
-                      'relative',
-              isMarketing ? 'w-9 h-9 sm:w-11 sm:h-11' : 'w-8 h-8 sm:w-10 sm:h-10 rounded-lg'
-                    )}
-                    style={{ width: 'auto', height: 'auto' }}
-                  />
-                </div>
-                <div className="min-w-0">
-                  <Link href="/">
-                    <span
-                      className={cn(
-                        'text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold block truncate',
-                         isMarketing ? 'text-[#1e2b29]' : 'text-white'
-                      )}
-                    >
-                      Be Fluent
-                    </span>
-                  </Link>
-                  {isMarketing && (
-                     <p className="text-[9px] text-[#68756f] truncate">FLUENCY COMES FIRST</p>
-                  )}
-                </div>
-              </>
+              <Link href="/" className="min-w-0 shrink-0" aria-label="Be Fluent home">
+                <BrandLockup
+                  size={isMarketing ? 'md' : 'sm'}
+                  tone={isMarketing ? 'dark' : 'light'}
+                  tagline={isMarketing ? 'FLUENCY COMES FIRST' : undefined}
+                  markClassName={isMarketing ? '' : 'rounded-md bg-white p-1'}
+                  priority
+                />
+              </Link>
             )}
           </div>
           <div className="flex gap-2 xs:gap-3 items-center flex-shrink-0">{children}</div>

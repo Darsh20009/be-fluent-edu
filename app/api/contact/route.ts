@@ -1,6 +1,17 @@
 import { NextResponse } from 'next/server'
 import { sendEmail } from '@/lib/email'
 
+const CONTACT_BRAND_HEADER = `
+  <table role="presentation" align="center" style="border-collapse: collapse; margin: 0 auto 20px;">
+    <tr>
+      <td style="padding-right: 10px; vertical-align: middle;">
+        <img src="https://befluent-edu.online/brand/be-fluent-mark-2026.png" alt="" width="44" height="47" style="display: block; width: 44px; height: 47px; object-fit: contain;" />
+      </td>
+      <td style="vertical-align: middle; color: #24342b; font-family: Arial, sans-serif; font-size: 24px; font-weight: 700; white-space: nowrap;">Be Fluent</td>
+    </tr>
+  </table>
+`
+
 export async function POST(request: Request) {
   try {
     const { name, email, subject, message } = await request.json()
@@ -19,9 +30,7 @@ export async function POST(request: Request) {
 
     const html = `
       <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; max-width: 600px; margin: auto;">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <img src="https://befluent-edu.online/logo.png" alt="Be Fluent" style="max-width: 120px; height: auto;" />
-        </div>
+        ${CONTACT_BRAND_HEADER}
         <h2 style="color: #10B981; border-bottom: 2px solid #10B981; padding-bottom: 10px;">رسالة جديدة من نموذج التواصل</h2>
         <table style="width:100%; border-collapse: collapse; margin-bottom: 20px;">
           <tr><td style="padding: 8px; font-weight: bold; color: #374151; width: 30%;">الاسم:</td><td style="padding: 8px; color: #6b7280;">${name}</td></tr>
@@ -50,9 +59,7 @@ export async function POST(request: Request) {
     if (result.success) {
       const confirmHtml = `
         <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; max-width: 600px; margin: auto;">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <img src="https://befluent-edu.online/logo.png" alt="Be Fluent" style="max-width: 120px; height: auto;" />
-          </div>
+          ${CONTACT_BRAND_HEADER}
           <h2 style="color: #10B981;">شكراً لتواصلك معنا، ${name}!</h2>
           <p style="color: #6b7280; line-height: 1.8;">لقد استلمنا رسالتك بخصوص "<strong>${subject}</strong>" وسيقوم فريقنا بالرد عليك في أقرب وقت ممكن خلال 24-48 ساعة.</p>
           <div style="margin-top: 20px; text-align: center;">

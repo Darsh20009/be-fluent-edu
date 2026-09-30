@@ -32,14 +32,25 @@ export async function sendEmail({ to, subject, html, attachments }: { to: string
   }
 }
 
-const LOGO_URL = process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL}/logo.png` : 'https://befluent-edu.online/logo.png';
+const LOGO_URL = process.env.NEXT_PUBLIC_APP_URL
+  ? `${process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, '')}/brand/be-fluent-mark-2026.png`
+  : 'https://befluent-edu.online/brand/be-fluent-mark-2026.png';
+
+const EMAIL_BRAND_HEADER = `
+  <table role="presentation" align="center" style="border-collapse: collapse; margin: 0 auto 20px;">
+    <tr>
+      <td style="padding-right: 10px; vertical-align: middle;">
+        <img src="${LOGO_URL}" alt="" width="44" height="47" style="display: block; width: 44px; height: 47px; object-fit: contain;" />
+      </td>
+      <td style="vertical-align: middle; color: #24342b; font-family: Arial, sans-serif; font-size: 24px; font-weight: 700; white-space: nowrap;">Be Fluent</td>
+    </tr>
+  </table>
+`;
 
 export function getAssignmentEmailTemplate(studentName: string, assignmentTitle: string, dueDate: string) {
   return `
     <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; max-width: 600px; margin: auto;">
-      <div style="text-align: center; margin-bottom: 20px;">
-        <img src="${LOGO_URL}" alt="Be Fluent Academy Logo" style="max-width: 150px; height: auto;" />
-      </div>
+      ${EMAIL_BRAND_HEADER}
       <h2 style="color: #10B981; border-bottom: 2px solid #10B981; padding-bottom: 10px;">واجب جديد / New Assignment</h2>
       <p>مرحباً ${studentName}،</p>
       <p>لديك واجب جديد بعنوان: <strong>${assignmentTitle}</strong></p>
@@ -55,9 +66,7 @@ export function getAssignmentEmailTemplate(studentName: string, assignmentTitle:
 export function getSessionEmailTemplate(studentName: string, sessionTitle: string, startTime: string) {
   return `
     <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; max-width: 600px; margin: auto;">
-      <div style="text-align: center; margin-bottom: 20px;">
-        <img src="${LOGO_URL}" alt="Be Fluent Academy Logo" style="max-width: 150px; height: auto;" />
-      </div>
+      ${EMAIL_BRAND_HEADER}
       <h2 style="color: #10B981; border-bottom: 2px solid #10B981; padding-bottom: 10px;">موعد حصة جديدة / New Session Scheduled</h2>
       <p>مرحباً ${studentName}،</p>
       <p>تم تحديد موعد حصة جديدة بعنوان: <strong>${sessionTitle}</strong></p>
@@ -73,9 +82,7 @@ export function getSessionEmailTemplate(studentName: string, sessionTitle: strin
 export function getCertificateEmailTemplate(studentName: string, level: string) {
   return `
     <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; max-width: 600px; margin: auto;">
-      <div style="text-align: center; margin-bottom: 20px;">
-        <img src="${LOGO_URL}" alt="Be Fluent Academy Logo" style="max-width: 150px; height: auto;" />
-      </div>
+      ${EMAIL_BRAND_HEADER}
       <h2 style="color: #10B981; border-bottom: 2px solid #10B981; padding-bottom: 10px;">تهانينا! شهادة جديدة / Congratulations! New Certificate</h2>
       <p>مرحباً ${studentName}،</p>
       <p>مبروك! لقد تم إصدار شهادة إتمام المستوى: <strong>${level}</strong> بنجاح.</p>
@@ -91,9 +98,7 @@ export function getCertificateEmailTemplate(studentName: string, level: string) 
 export function getWelcomeEmailTemplate(studentName: string) {
   return `
     <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; max-width: 600px; margin: auto;">
-      <div style="text-align: center; margin-bottom: 20px;">
-        <img src="${LOGO_URL}" alt="Be Fluent Academy Logo" style="max-width: 150px; height: auto;" />
-      </div>
+      ${EMAIL_BRAND_HEADER}
       <h2 style="color: #10B981; font-size: 22px; font-weight: 900; margin: 0 0 8px;">أهلاً بك يا ${studentName}! 🎉</h2>
       <p style="color: #374151; font-size: 15px; line-height: 1.7;">يسعدنا انضمامك لعائلة <strong>Be Fluent Academy</strong>. رحلتك نحو الطلاقة بدأت الآن!</p>
 
@@ -121,9 +126,7 @@ export function getWelcomeEmailTemplate(studentName: string) {
 export function getSubscriptionConfirmationTemplate(studentName: string) {
   return `
     <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; max-width: 600px; margin: auto;">
-      <div style="text-align: center; margin-bottom: 20px;">
-        <img src="${LOGO_URL}" alt="Be Fluent Academy Logo" style="max-width: 150px; height: auto;" />
-      </div>
+      ${EMAIL_BRAND_HEADER}
       <h2 style="color: #10B981; border-bottom: 2px solid #10B981; padding-bottom: 10px;">تأكيد تفعيل الاشتراك / Subscription Confirmed</h2>
       <p>مرحباً ${studentName}،</p>
       <p>يسعدنا إبلاغك بأنه تم تأكيد وتفعيل اشتراكك بنجاح في Be Fluent Academy.</p>

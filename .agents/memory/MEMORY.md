@@ -3,3 +3,4 @@
 - [Environment readiness](environment-readiness.md) — MongoDB and auth secrets belong only in runtime environment, never client-exposed Next.js config.
 - [Dependency audit tree mismatches](dependency-audit-tree-mismatches.md) — compare lockfile audits with the installed production tree; missing peer packages can return on clean install.
 - [Socket.IO WebSocket override](socketio-websocket-override.md) — keep the patched ws override until adapter ranges catch up; verify real loopback I/O because integration tests skip it.
+- [Brand lockup](brand-lockup.md) — Use editable “Be Fluent” text beside the provided mark, with a one-shot typewriter reveal in live UI.

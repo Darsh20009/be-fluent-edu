@@ -1,12 +1,12 @@
-const CACHE_NAME = 'befluent-v1';
-const STATIC_CACHE = 'befluent-static-v1';
+const CACHE_NAME = 'befluent-v2';
+const STATIC_CACHE = 'befluent-static-v2';
 
 const STATIC_ASSETS = [
   '/',
-  '/logo.png',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-  '/apple-touch-icon.png',
+  '/brand/be-fluent-mark-2026.png',
+  '/brand/be-fluent-icon-2026-192.png',
+  '/brand/be-fluent-icon-2026-512.png',
+  '/brand/be-fluent-apple-2026.png',
   '/manifest.webmanifest'
 ];
 

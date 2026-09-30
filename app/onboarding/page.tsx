@@ -1,10 +1,10 @@
 'use client'
 
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Check, ChevronLeft, ChevronRight, LoaderCircle } from 'lucide-react'
 import { useTheme } from '@/lib/contexts/ThemeContext'
+import BrandLockup from '@/components/brand/BrandLockup'
 
 type Gender = 'FEMALE' | 'MALE' | 'PREFER_NOT_TO_SAY'
 
@@ -109,12 +109,11 @@ export default function OnboardingPage() {
   return (
     <main className="min-h-dvh bg-[#f5f7f3] px-4 py-8 sm:grid sm:place-items-center sm:px-6" dir={isArabic ? 'rtl' : 'ltr'}>
       <section className="mx-auto w-full max-w-[520px] border border-[#dce4dc] bg-white px-5 py-7 sm:px-9 sm:py-9">
-        <div className="mb-8 flex items-center gap-3">
-          <Image src="/logo.png" alt="" width={42} height={42} className="h-10 w-10 object-contain" />
-          <div>
-            <p className="font-semibold text-[#24342b]">Be Fluent EDU</p>
-            <p className="text-[11px] text-[#68746c]">{tr('إعداد ملفك التعليمي', 'Learning profile setup')}</p>
-          </div>
+        <div className="mb-8">
+          <BrandLockup
+            size="md"
+            tagline={tr('إعداد ملفك التعليمي', 'Learning profile setup')}
+          />
         </div>
 
         <p className="bf-eyebrow">{tr('خطوة قصيرة لتخصيص تجربتك', 'A SHORT STEP TO PERSONALIZE YOUR LEARNING')}</p>

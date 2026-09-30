@@ -20,6 +20,7 @@ import {
   X,
 } from 'lucide-react';
 import { useTheme } from '@/lib/contexts/ThemeContext';
+import BrandLockup from '@/components/brand/BrandLockup';
 
 type PackageItem = {
   id: string | number;
@@ -136,8 +137,8 @@ export default function HomePage() {
     <main dir={isArabic ? 'rtl' : 'ltr'} lang={isArabic ? 'ar' : 'en'} className="min-h-[100dvh] overflow-x-clip bg-[#fffefa] text-[#26352f]">
       <header className="relative z-30 border-b border-[#e7ebe5] bg-[#fffefa]">
         <div dir="ltr" className="mx-auto flex h-[72px] max-w-[1240px] items-center justify-between px-5 sm:px-8">
-          <Link href="/" className="relative h-[44px] w-[128px] shrink-0 overflow-hidden" aria-label="Be Fluent home">
-            <Image src="/logo.png" alt="Be Fluent" width={127} height={116} className="absolute left-0 top-1/2 h-auto w-full -translate-y-1/2" priority />
+          <Link href="/" className="shrink-0" aria-label="Be Fluent home">
+            <BrandLockup size="sm" priority />
           </Link>
 
           <nav className="hidden items-center gap-7 text-[12px] font-semibold text-[#54635b] lg:flex" aria-label={tr('التنقل الرئيسي', 'Main navigation')}>
@@ -376,7 +377,7 @@ export default function HomePage() {
             <p className="text-[10px] font-bold text-[#28694b]">{tr('الباقات والاشتراكات', 'PACKAGES & SUBSCRIPTIONS')}</p>
             <h2 className={`mt-2 text-[26px] font-bold sm:text-[33px] ${isArabic ? '' : 'tracking-[-0.025em]'}`}>{tr('اختر ما يناسب رحلتك.', 'Find the right fit for your journey.')}</h2>
             <p className="mt-2 max-w-[520px] text-[12px] leading-[1.9] text-[#68766d] sm:text-[13px]">
-              {tr('تفاصيل الباقات المعروضة هنا تُحمّل مباشرة من Be Fluent EDU.', 'Package details shown here are loaded directly from Be Fluent EDU.')}
+              {tr('تفاصيل الباقات المعروضة هنا تُحمّل مباشرة من Be Fluent.', 'Package details shown here are loaded directly from Be Fluent.')}
             </p>
           </div>
           <Link href="/packages" className="inline-flex min-h-11 w-fit items-center gap-2 text-[12px] font-bold text-[#28694b] underline decoration-[#b7c8bb] underline-offset-4 hover:decoration-[#28694b]">
@@ -487,8 +488,9 @@ export default function HomePage() {
       <footer className="border-t border-[#e4eae3] bg-[#fffefa]">
         <div className="mx-auto flex max-w-[1240px] flex-col gap-6 px-5 py-8 sm:px-8 md:flex-row md:items-center md:justify-between">
           <div className={isArabic ? 'text-right' : 'text-left'}>
-            <Link href="/" className="text-[16px] font-bold text-[#28694b]">Be Fluent EDU</Link>
-            <p className="mt-1 text-[10px] font-semibold text-[#78847b]">{tr('إنجليزية تُستخدم في الحياة.', 'ENGLISH FOR REAL LIFE.')}</p>
+            <Link href="/" className="inline-block" aria-label="Be Fluent home">
+              <BrandLockup size="sm" tagline={tr('إنجليزية تُستخدم في الحياة.', 'ENGLISH FOR REAL LIFE.')} />
+            </Link>
           </div>
           <nav className="flex flex-wrap gap-x-5 gap-y-3 text-[11px] font-semibold text-[#5f6e64]" aria-label={tr('روابط التذييل', 'Footer navigation')}>
             <Link href="/about-path" className="hover:text-[#28694b]">{tr('عن المنهج', 'Our approach')}</Link>
@@ -497,7 +499,7 @@ export default function HomePage() {
             <Link href="/contact" className="hover:text-[#28694b]">{tr('تواصل معنا', 'Contact')}</Link>
             <Link href="/auth/login" className="hover:text-[#28694b]">{tr('دخول', 'Log in')}</Link>
           </nav>
-          <p className="text-[11px] text-[#89958c]">© Be Fluent EDU</p>
+          <p className="text-[11px] text-[#89958c]">© Be Fluent</p>
         </div>
       </footer>
     </main>

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import BrandLockup from '@/components/brand/BrandLockup';
 
 interface CertificateProps {
   studentName: string;
@@ -23,7 +23,7 @@ export default function CertificateTemplate({ studentName, level, date, certific
 
       {/* Watermark Logo */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.05] pointer-events-none">
-        <Image src="/logo.png" alt="Watermark" width={400} height={400} />
+        <Image src="/brand/be-fluent-mark-2026.png" alt="" width={400} height={400} />
       </div>
 
       {/* Decorative Corners */}
@@ -35,7 +35,7 @@ export default function CertificateTemplate({ studentName, level, date, certific
       {/* Header */}
       <div className="relative z-10 text-center mb-8">
         <div className="flex justify-between items-start mb-4">
-          <Image src="/logo.png" alt="Be Fluent Logo" width={100} height={100} className="object-contain" />
+          <BrandLockup size="md" animated={false} />
           <div className="text-right">
             <div className="flex items-center gap-2 justify-end mb-1">
               <span className="text-xs font-bold text-gray-400">ISO 9001:2015</span>
@@ -78,10 +78,8 @@ export default function CertificateTemplate({ studentName, level, date, certific
 
         <div className="text-center">
           <div className="w-48 h-[1px] bg-gray-400 mb-2" />
-          <p className="font-serif text-emerald-800 font-bold">Be Fluent Seal</p>
-          <div className="absolute -bottom-4 right-0 w-24 h-24 opacity-20">
-            <Image src="/logo.png" alt="Seal" width={100} height={100} />
-          </div>
+          <BrandLockup size="xs" animated={false} className="justify-center" />
+          <p className="text-[9px] text-gray-400">Official seal</p>
         </div>
       </div>
     </div>

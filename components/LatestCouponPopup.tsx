@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Tag, Gift, Sparkles } from 'lucide-react'
-import Image from 'next/image'
+import { X, Tag } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import BrandLockup from '@/components/brand/BrandLockup'
 
 export default function LatestCouponPopup() {
   const [coupon, setCoupon] = useState<any>(null)
@@ -70,25 +70,7 @@ export default function LatestCouponPopup() {
             </button>
 
             <div className="relative pt-12 pb-8 px-8 text-center">
-              {/* Logo & Icon */}
-              <div className="relative inline-block mb-6">
-                <div className="w-24 h-24 bg-white rounded-2xl shadow-lg p-3 flex items-center justify-center mx-auto ring-4 ring-emerald-50">
-                  <Image 
-                    src="/logo.png" 
-                    alt="Be Fluent Logo" 
-                    width={80} 
-                    height={80}
-                    className="object-contain"
-                  />
-                </div>
-                <motion.div 
-                  animate={{ rotate: [0, 15, -15, 0] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className="absolute -top-2 -right-2 bg-yellow-400 p-2 rounded-full shadow-md text-white"
-                >
-                  <Sparkles className="w-4 h-4" />
-                </motion.div>
-              </div>
+              <BrandLockup size="md" className="mx-auto mb-6 justify-center rounded-xl bg-white px-4 py-3" />
 
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 هدية خاصة لك! 🎁

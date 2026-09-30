@@ -3,14 +3,19 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { sendEmail } from '@/lib/email'
 
-const LOGO_URL = 'https://befluent-edu.online/logo.png'
+const LOGO_URL = 'https://befluent-edu.online/brand/be-fluent-mark-2026.png'
 
 function getDirectEmailTemplate(message: string) {
   return `
     <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; max-width: 600px; margin: auto;">
-      <div style="text-align: center; margin-bottom: 20px;">
-        <img src="${LOGO_URL}" alt="Be Fluent Academy Logo" style="max-width: 150px; height: auto;" />
-      </div>
+      <table role="presentation" align="center" style="border-collapse: collapse; margin: 0 auto 20px;">
+        <tr>
+          <td style="padding-right: 10px; vertical-align: middle;">
+            <img src="${LOGO_URL}" alt="" width="44" height="47" style="display: block; width: 44px; height: 47px; object-fit: contain;" />
+          </td>
+          <td style="vertical-align: middle; color: #24342b; font-family: Arial, sans-serif; font-size: 24px; font-weight: 700; white-space: nowrap;">Be Fluent</td>
+        </tr>
+      </table>
       <div style="padding: 20px 0; line-height: 1.8; white-space: pre-wrap;">
         ${message.replace(/\n/g, '<br>')}
       </div>

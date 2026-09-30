@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import BrandLockup from '@/components/brand/BrandLockup';
 
 export default function SplashScreen() {
   const [mounted, setMounted] = useState(false);
@@ -101,68 +101,9 @@ export default function SplashScreen() {
 
           {/* Main Content - Responsive */}
           <div className="relative z-10 text-center px-6 sm:px-8 w-full max-w-sm sm:max-w-md">
-            {/* Logo Container - Responsive */}
-            <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ 
-                type: "spring",
-                stiffness: 180,
-                damping: 18,
-                duration: 0.7
-              }}
-              className="relative mx-auto mb-6 sm:mb-8"
-            >
-              {/* Glowing Ring - Responsive */}
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.08, 1],
-                  opacity: [0.4, 0.7, 0.4]
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute inset-0 w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 mx-auto rounded-full bg-gradient-to-r from-[#10B981]/25 to-emerald-400/25 blur-xl"
-              />
-              
-              {/* Logo - Responsive */}
-              <div className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 mx-auto rounded-2xl sm:rounded-3xl overflow-hidden bg-white shadow-xl shadow-emerald-200/40 border-2 sm:border-4 border-white">
-                <motion.div
-                  animate={{ scale: [1, 1.03, 1] }}
-                  transition={{ duration: 2.5, repeat: Infinity }}
-                  className="relative w-full h-full"
-                >
-                  <Image
-                    src="/logo.png"
-                    alt="Be Fluent Logo"
-                    fill
-                    sizes="(max-width: 640px) 80px, (max-width: 768px) 112px, 128px"
-                    className="object-contain p-2 sm:p-3"
-                    priority
-                    quality={85}
-                  />
-                </motion.div>
-              </div>
-            </motion.div>
-
-            {/* Brand Name - Responsive */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="mb-3 sm:mb-4"
-            >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black mb-1 sm:mb-2">
-                <span className="text-[#1F2937]">Be </span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] via-emerald-500 to-teal-500">Fluent</span>
-              </h1>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-[10px] sm:text-xs font-bold tracking-[0.2em] sm:tracking-[0.3em] text-[#10B981] uppercase"
-              >
-                Fluency Comes First
-              </motion.p>
-            </motion.div>
+            <div className="mb-6 flex justify-center sm:mb-8">
+              <BrandLockup size="xl" tagline="FLUENCY COMES FIRST" priority />
+            </div>
 
             {/* Tagline - Responsive */}
             <motion.p

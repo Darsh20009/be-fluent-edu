@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
@@ -8,6 +7,7 @@ import { useTheme } from '@/lib/contexts/ThemeContext'
 import { useEffect, useRef, useState } from 'react'
 import { Check, LoaderCircle, LockKeyhole, MessageCircle, Phone, X } from 'lucide-react'
 import BFPhoneField from '@/components/auth/BFPhoneField'
+import BrandLockup from '@/components/brand/BrandLockup'
 import { getCountryByIso, toInternationalPhone } from '@/lib/phone-countries'
 
 type EntryMode = 'login' | 'start'
@@ -334,12 +334,11 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
           <X size={19} aria-hidden="true" />
         </button>
 
-        <div className="mb-7 flex items-center gap-3 pe-10">
-          <Image src="/logo.png" alt="" width={42} height={42} className="h-10 w-10 object-contain" />
-          <div>
-            <p className="font-semibold text-[#24342b]">Be Fluent EDU</p>
-            <p className="text-[11px] text-[#68746c]">{tr('الطلاقة تبدأ بخطوة واضحة', 'Fluency comes first')}</p>
-          </div>
+        <div className="mb-7 pe-10">
+          <BrandLockup
+            size="md"
+            tagline={tr('الطلاقة تبدأ بخطوة واضحة', 'Fluency comes first')}
+          />
         </div>
 
         <>

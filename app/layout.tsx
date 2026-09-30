@@ -40,18 +40,17 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         {/* Preload critical assets immediately */}
-        <link rel="preload" href="/logo.png" as="image" />
-        <link rel="icon" href="/logo.png" sizes="any" />
-        <link rel="icon" type="image/png" href="/logo.png" />
-        <link rel="shortcut icon" type="image/png" href="/logo.png" />
-        <link rel="apple-touch-icon" href="/logo.png" />
+        <link rel="preload" href="/brand/be-fluent-mark-2026.png" as="image" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/brand/be-fluent-icon-2026-32.png" />
+        <link rel="icon" type="image/png" sizes="48x48" href="/brand/be-fluent-icon-2026-48.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/brand/be-fluent-apple-2026.png" />
         <link rel="manifest" href="/manifest.webmanifest" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Be Fluent" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-TileColor" content="#24714f" />
-        <meta name="msapplication-TileImage" content="/logo.png" />
+        <meta name="msapplication-TileImage" content="/brand/be-fluent-icon-2026-144.png" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
         <Script

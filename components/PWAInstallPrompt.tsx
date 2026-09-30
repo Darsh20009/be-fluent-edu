@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { X, Download, Apple, Chrome } from 'lucide-react';
-import Image from 'next/image';
 import { useTheme } from '@/lib/contexts/ThemeContext';
+import BrandLockup from '@/components/brand/BrandLockup';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -84,9 +84,9 @@ export default function PWAInstallPrompt() {
     >
       <div className="max-h-[80dvh] overflow-y-auto rounded-lg border border-[#dce4dc] bg-white p-4 shadow-lg">
         <div className="flex items-start gap-3">
-          <Image src="/logo.png" alt="" width={36} height={36} className="h-9 w-9 shrink-0 object-contain" />
+          <BrandLockup size="xs" className="shrink-0" />
           <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-semibold text-[#202a25]">{tr('أضف Be Fluent إلى شاشتك الرئيسية', 'Add Be Fluent to your home screen')}</h2>
+            <h2 className="text-sm font-semibold text-[#202a25]">{tr('أضف التطبيق إلى شاشتك الرئيسية', 'Add this app to your home screen')}</h2>
             <p className="mt-1 text-xs leading-5 text-[#65716a]">{tr('افتح الموقع بسهولة كتطبيق عند الحاجة.', 'Open the site like an app whenever you need it.')}</p>
           </div>
           <button

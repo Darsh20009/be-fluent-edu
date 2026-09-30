@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { Mail, Phone, ArrowLeft } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -11,6 +10,7 @@ import Card from '@/components/ui/Card'
 import Alert from '@/components/ui/Alert'
 import AppHeader from '@/components/layout/AppHeader'
 import LanguageToggle from '@/components/LanguageToggle'
+import BrandLockup from '@/components/brand/BrandLockup'
 
 export default function ForgotPasswordPage() {
   const router = useRouter()
@@ -117,17 +117,8 @@ export default function ForgotPasswordPage() {
             <LanguageToggle />
           </div>
 
-          <div className="flex items-center justify-center mb-6 sm:mb-8">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-              <Image
-                src="/logo.png"
-                alt="Be Fluent Logo"
-                width={80}
-                height={80}
-                className="sm:w-[80px] sm:h-[80px]"
-                style={{ mixBlendMode: 'multiply' }}
-              />
-            </div>
+          <div className="mb-6 flex justify-center sm:mb-8">
+            <BrandLockup size="md" />
           </div>
 
            <h1 className="mb-2 text-center text-2xl font-bold text-[#1e2b29] sm:text-3xl">

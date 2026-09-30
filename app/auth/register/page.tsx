@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
+import BrandLockup from '@/components/brand/BrandLockup'
 import { 
   User, 
   Mail, 
@@ -648,9 +648,8 @@ export default function RegisterPage() {
               </Link>
             )}
             
-            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <Image src="/logo.png" alt="Be Fluent" width={32} height={32} style={{ mixBlendMode: 'multiply' }} />
-              <span className="font-bold text-gray-800">Be Fluent</span>
+            <Link href="/" className="hover:opacity-80 transition-opacity" aria-label="Be Fluent home">
+              <BrandLockup size="xs" />
             </Link>
             
             <LanguageToggle />
