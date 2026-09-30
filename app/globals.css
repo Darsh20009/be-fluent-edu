@@ -2,20 +2,29 @@
 @import "tailwindcss";
 
 :root {
-  --background: #faf9f6;
-  --foreground: #292635;
-  --primary: #12805e;
+  color-scheme: light;
+  --background: #fbfcfa;
+  --surface: #ffffff;
+  --surface-muted: #f4f6f3;
+  --foreground: #202a25;
+  --muted: #65716a;
+  --primary: #24714f;
+  --primary-strong: #1d5f42;
   --primary-foreground: #ffffff;
-  --accent: #4b3a70;
+  --accent: #24714f;
   --accent-foreground: #ffffff;
-  --border: #e5e3e9;
-  --radius: .625rem;
+  --border: #e2e8e2;
+  --radius: .5rem;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
   --color-primary: var(--primary);
+  --color-primary-strong: var(--primary-strong);
   --color-primary-foreground: var(--primary-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
@@ -25,12 +34,42 @@
 
 * { box-sizing: border-box; }
 html { background: var(--background); scroll-behavior: smooth; }
-body { margin: 0; background: var(--background); color: var(--foreground); font-family: "Noto Kufi Arabic", "DM Sans", sans-serif; }
+body {
+  min-width: 320px;
+  margin: 0;
+  overflow-x: clip;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Noto Kufi Arabic", "DM Sans", sans-serif;
+  text-rendering: optimizeLegibility;
+}
 button, a { -webkit-tap-highlight-color: transparent; }
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
+
+::selection { background: #dcebe1; color: #173d2c; }
+
+.bf-page {
+  min-height: 100dvh;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.bf-surface {
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.bf-eyebrow {
+  color: var(--primary-strong);
+  font-size: .7rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.bf-text-muted { color: var(--muted); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

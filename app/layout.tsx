@@ -6,8 +6,7 @@ import { ThemeProvider } from "@/lib/contexts/ThemeContext";
 import SessionProvider from "@/lib/providers/SessionProvider";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
-import ClientSplashScreen from "@/components/ClientSplashScreen";
-import CouponBanner from "@/components/CouponBanner";
+import BFAuthExperience from "@/components/auth/BFAuthExperience";
 import LatestCouponPopup from "@/components/LatestCouponPopup";
 import { Toaster } from "react-hot-toast";
 import { defaultMetadata, organizationJsonLd, courseJsonLd, faqJsonLd, websiteJsonLd } from "@/lib/seo";
@@ -28,7 +27,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#10B981',
+  themeColor: '#24714f',
   colorScheme: 'light',
 };
 
@@ -42,7 +41,6 @@ export default function RootLayout({
       <head>
         {/* Preload critical assets immediately */}
         <link rel="preload" href="/logo.png" as="image" />
-        <link rel="preload" href="/assets/hero-1.png" as="image" />
         <link rel="icon" href="/logo.png" sizes="any" />
         <link rel="icon" type="image/png" href="/logo.png" />
         <link rel="shortcut icon" type="image/png" href="/logo.png" />
@@ -52,10 +50,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Be Fluent" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#10B981" />
+        <meta name="msapplication-TileColor" content="#24714f" />
         <meta name="msapplication-TileImage" content="/logo.png" />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#faf9f6]`} suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
         <Script
           id="organization-jsonld"
           type="application/ld+json"
@@ -104,8 +102,8 @@ export default function RootLayout({
                 },
               }}
             />
-            <ClientSplashScreen />
             <LatestCouponPopup />
+            <BFAuthExperience />
             {children}
             <PWAInstallPrompt />
           </ThemeProvider>

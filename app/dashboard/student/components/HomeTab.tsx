@@ -201,22 +201,75 @@ export default function HomeTab() {
   const hasGoal = Boolean(profile?.goal)
   const hasTodayPlan = Boolean(today?.plan?.steps?.length || today?.session?.steps?.length)
 
+  const nextActionIsRecommendation = Boolean(recommendation)
+  const actionResource = nextActionIsRecommendation ? snapshot.recommendations : snapshot.today
+  const actionTitle = recommendation?.title || nextStep?.title || today?.plan?.status
+  const actionReason = recommendation?.reason || nextStep?.reason
+  const actionHref = nextActionIsRecommendation
+    ? '/dashboard/student/learning?view=Recommendations'
+    : '/dashboard/student/learning'
+  const actionPending = actionResource.state === 'loading'
+  const actionFailed = actionResource.state === 'error' || actionResource.state === 'unavailable'
+  const actionEmpty = actionResource.state === 'ready' && !actionTitle
+
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-7" dir="rtl">
       <BFPageHeader
-        title="مساحة تعلّمك"
-        description="تابع ما تحتاجه اليوم، واعرف خطوتك التالية."
+        title="تعلّمك اليوم"
+        description="خطوة واحدة واضحة، ثم واصل من حيث توقفت."
         actions={
           <Link
             href="/dashboard/student/learning"
-            className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#12805e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0e6a4e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12805e]"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-[#d8e3da] bg-white px-4 py-2 text-sm font-semibold text-[#285f46] hover:bg-[#f3f7f3] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#247456]"
           >
-            تعلّمي اليوم <ArrowLeft size={16} aria-hidden="true" />
+            خطتي التعليمية <ArrowLeft size={16} aria-hidden="true" />
           </Link>
         }
       />
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" aria-label="ملخص التعلّم">
+      <section
+        aria-labelledby="student-next-step"
+        className="overflow-hidden rounded-xl border border-[#dce8de] bg-[#f5f9f5] p-5 sm:p-7"
+      >
+        <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+          <div className="min-w-0">
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold text-[#527360]">
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-[#e2efe4] text-[#276646]">
+                <ClipboardCheck size={16} aria-hidden="true" />
+              </span>
+              الخطوة التالية
+            </div>
+            <h2 id="student-next-step" className="text-xl font-bold leading-8 text-[#26332e] sm:text-2xl">
+              {actionPending ? 'نجهّز خطوتك التالية' : actionTitle || 'لا توجد خطوة جديدة اليوم'}
+            </h2>
+            {actionReason && (
+              <p className="mt-2 max-w-2xl text-sm leading-7 text-[#65736a]">{actionReason}</p>
+            )}
+            {actionPending && (
+              <div role="status" aria-busy="true" aria-label="جارٍ تحميل خطوة التعلّم" className="mt-4 h-3 w-48 rounded bg-[#e2ebe3]" />
+            )}
+            {actionFailed && (
+              <div role="alert" className="mt-3">
+                <p className="text-sm text-[#7a4b43]">تعذر تحميل خطوتك الآن. لم نعرض بيانات غير مؤكدة.</p>
+                <button type="button" onClick={retry} className="mt-2 min-h-11 text-sm font-bold text-[#285f46] underline underline-offset-4">
+                  إعادة المحاولة
+                </button>
+              </div>
+            )}
+            {actionEmpty && <p className="mt-2 text-sm text-[#65736a]">يمكنك الرجوع إلى خطتك التعليمية لاختيار ما تتابعه.</p>}
+          </div>
+          {!actionPending && !actionFailed && !actionEmpty && actionTitle && (
+            <Link
+              href={actionHref}
+              className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-[#247456] px-5 text-sm font-bold text-white hover:bg-[#19583f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#247456]"
+            >
+              ابدأ الآن <ArrowLeft size={16} aria-hidden="true" />
+            </Link>
+          )}
+        </div>
+      </section>
+
+      <section aria-label="ما يحتاج انتباهك" className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <PanelCard
           title="الحصة القادمة"
           description="موعدك التعليمي التالي"
@@ -226,75 +279,59 @@ export default function HomeTab() {
           retry={retry}
         >
           <div className="flex items-start gap-3">
-            <CalendarDays className="mt-1 shrink-0 text-[#4b3a70]" size={19} aria-hidden="true" />
+            <CalendarDays className="mt-1 shrink-0 text-[#327453]" size={19} aria-hidden="true" />
             <div className="min-w-0">
-              <p className="font-semibold text-[#252238]">{getLabel(nextClass)}</p>
-              <p className="mt-1 text-sm text-[#687080]">{formatDate(nextClass.startTime)}</p>
-              {nextClass.TeacherProfile?.User?.name && <p className="mt-1 text-sm text-[#687080]">المدرس: {nextClass.TeacherProfile.User.name}</p>}
-              {nextClass.group?.nameAr && <p className="mt-1 text-sm text-[#687080]">المجموعة: {nextClass.group.nameAr}</p>}
+              <p className="font-semibold text-[#26332e]">{getLabel(nextClass)}</p>
+              <p className="mt-1 text-sm text-[#68756e]">{formatDate(nextClass.startTime)}</p>
+              {nextClass.TeacherProfile?.User?.name && <p className="mt-1 text-sm text-[#68756e]">المدرس: {nextClass.TeacherProfile.User.name}</p>}
+              {nextClass.group?.nameAr && <p className="mt-1 text-sm text-[#68756e]">المجموعة: {nextClass.group.nameAr}</p>}
             </div>
           </div>
-          <Link href="/dashboard/student/classes" className="mt-4 inline-block text-sm font-semibold text-[#4b3a70] underline underline-offset-4">تفاصيل الحصص</Link>
+          <Link href="/dashboard/student/classes" className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-[#285f46] underline underline-offset-4">تفاصيل الحصص</Link>
         </PanelCard>
 
         <PanelCard
           title="الواجبات المطلوبة"
-          description={`${pendingHomework.length} واجباً يحتاج إلى متابعة`}
+          description={pendingHomework.length ? `${pendingHomework.length} واجباً بانتظار المتابعة` : 'واجباتك الحالية'}
           resource={snapshot.homework}
           empty={!pendingHomework.length}
           emptyMessage="لا توجد واجبات بانتظارك."
           retry={retry}
         >
-          <ul className="space-y-3">
+          <ul className="divide-y divide-[#edf0ed]">
             {pendingHomework.slice(0, 3).map((item, index) => (
-              <li key={String(item.id || index)} className="flex items-start justify-between gap-3">
-                <span className="min-w-0 text-sm font-semibold text-[#252238]">{getLabel(item)}</span>
+              <li key={String(item.id || index)} className="flex min-h-12 items-center justify-between gap-3 py-2">
+                <span className="min-w-0 text-sm font-semibold text-[#26332e]">{getLabel(item)}</span>
                 <BFBadge tone={String(item.status).toUpperCase() === 'SUBMITTED' ? 'success' : 'warning'}>
                   {String(item.status).toUpperCase() === 'SUBMITTED' ? 'تم التسليم' : 'مطلوب'}
                 </BFBadge>
               </li>
             ))}
           </ul>
-          <Link href="/dashboard/student/homework" className="mt-4 inline-block text-sm font-semibold text-[#4b3a70] underline underline-offset-4">عرض الواجبات</Link>
+          <Link href="/dashboard/student/homework" className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-[#285f46] underline underline-offset-4">عرض الواجبات</Link>
         </PanelCard>
+      </section>
 
-        <PanelCard
-          title="ملاحظات المدرس"
-          description="آخر ملاحظات منشورة لك"
-          resource={snapshot.feedback}
-          empty={!feedback}
-          emptyMessage="لا توجد ملاحظات منشورة بعد."
-          retry={retry}
-        >
-          <div className="flex items-start gap-3">
-            <MessageSquareText className="mt-1 shrink-0 text-[#4b3a70]" size={19} aria-hidden="true" />
-            <div className="min-w-0">
-              <p className="text-sm leading-6 text-[#353143]">{feedback.summary || 'تتوفر ملاحظات من حصتك الأخيرة.'}</p>
-              {feedback.session?.title && <p className="mt-2 text-xs text-[#687080]">{feedback.session.title}</p>}
-            </div>
-          </div>
-          <Link href="/dashboard/student/feedback" className="mt-4 inline-block text-sm font-semibold text-[#4b3a70] underline underline-offset-4">عرض الملاحظات</Link>
-        </PanelCard>
-
+      <section aria-label="مسارك التعليمي" className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <PanelCard
           title="تقدّم التعلّم"
-          description="المستوى ومهاراتك المسجلة"
+          description="المستوى والمهارات المسجلة"
           resource={snapshot.profile}
           empty={!hasProgress}
           emptyMessage="سيظهر تقدمك هنا بعد تسجيل بيانات التعلّم."
           retry={retry}
         >
           <div className="flex items-start gap-3">
-            <BookOpen className="mt-1 shrink-0 text-[#12805e]" size={19} aria-hidden="true" />
+            <BookOpen className="mt-1 shrink-0 text-[#327453]" size={19} aria-hidden="true" />
             <div>
-              <p className="font-semibold text-[#252238]">
+              <p className="font-semibold text-[#26332e]">
                 {profile?.officialLevel?.name || 'المستوى غير محدد'}
                 {profile?.officialStage?.name ? ` · ${profile.officialStage.name}` : ''}
               </p>
-              {masteryCount > 0 && <p className="mt-1 text-sm text-[#687080]">{masteryCount} مهارة لها بيانات تقدّم</p>}
+              {masteryCount > 0 && <p className="mt-1 text-sm text-[#68756e]">{masteryCount} مهارة لها بيانات تقدّم</p>}
             </div>
           </div>
-          <Link href="/dashboard/student/learning" className="mt-4 inline-block text-sm font-semibold text-[#4b3a70] underline underline-offset-4">تفاصيل التقدم</Link>
+          <Link href="/dashboard/student/learning" className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-[#285f46] underline underline-offset-4">تفاصيل التقدم</Link>
         </PanelCard>
 
         <PanelCard
@@ -306,49 +343,49 @@ export default function HomeTab() {
           retry={retry}
         >
           <div className="flex items-start gap-3">
-            <Target className="mt-1 shrink-0 text-[#12805e]" size={19} aria-hidden="true" />
-            <p className="text-sm leading-6 text-[#353143]">{profile?.goal}</p>
+            <Target className="mt-1 shrink-0 text-[#327453]" size={19} aria-hidden="true" />
+            <p className="text-sm leading-6 text-[#38463e]">{profile?.goal}</p>
           </div>
-          <Link href="/dashboard/student/learning?view=Goals" className="mt-4 inline-block text-sm font-semibold text-[#4b3a70] underline underline-offset-4">تعديل الهدف</Link>
+          <Link href="/dashboard/student/learning?view=Goals" className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-[#285f46] underline underline-offset-4">عرض الهدف</Link>
         </PanelCard>
 
         <PanelCard
-          title="خطوتك التالية"
-          description="اقتراح مناسب لما تتعلمه الآن"
-          resource={snapshot.recommendations}
-          empty={!recommendation}
-          emptyMessage="لا توجد توصية جديدة حالياً."
-          retry={retry}
-        >
-          {recommendation && <>
-            <div className="flex items-start gap-3">
-              <ClipboardCheck className="mt-1 shrink-0 text-[#12805e]" size={19} aria-hidden="true" />
-              <div className="min-w-0">
-                <p className="font-semibold text-[#252238]">{recommendation.title || 'ممارسة مقترحة'}</p>
-                {recommendation.reason && <p className="mt-1 text-sm leading-6 text-[#687080]">{recommendation.reason}</p>}
-              </div>
-            </div>
-            <Link href="/dashboard/student/learning?view=Recommendations" className="mt-4 inline-block text-sm font-semibold text-[#4b3a70] underline underline-offset-4">عرض التوصيات</Link>
-          </>}
-        </PanelCard>
-
-        <PanelCard
-          title="تعلم اليوم"
-          description="خطة قصيرة مبنية على ما تعلمته"
-          resource={snapshot.today}
-          empty={!hasTodayPlan}
-          emptyMessage="لا توجد خطوات تعلّم لليوم حالياً."
+          title="ملاحظات المدرس"
+          description="آخر ملاحظات منشورة لك"
+          resource={snapshot.feedback}
+          empty={!feedback}
+          emptyMessage="لا توجد ملاحظات منشورة بعد."
           retry={retry}
         >
           <div className="flex items-start gap-3">
-            <BookOpen className="mt-1 shrink-0 text-[#12805e]" size={19} aria-hidden="true" />
+            <MessageSquareText className="mt-1 shrink-0 text-[#327453]" size={19} aria-hidden="true" />
             <div className="min-w-0">
-              <p className="font-semibold text-[#252238]">{nextStep?.title || today?.plan?.status || 'خطوة التعلّم التالية'}</p>
-              {nextStep?.reason && <p className="mt-1 text-sm leading-6 text-[#687080]">{nextStep.reason}</p>}
+              <p className="text-sm leading-6 text-[#38463e]">{feedback.summary || 'تتوفر ملاحظات من حصتك الأخيرة.'}</p>
+              {feedback.session?.title && <p className="mt-2 text-xs text-[#68756e]">{feedback.session.title}</p>}
             </div>
           </div>
-          <Link href="/dashboard/student/learning" className="mt-4 inline-block text-sm font-semibold text-[#4b3a70] underline underline-offset-4">ابدأ التعلّم</Link>
+          <Link href="/dashboard/student/feedback" className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-[#285f46] underline underline-offset-4">عرض الملاحظات</Link>
         </PanelCard>
+
+        {hasTodayPlan && nextStep && (
+          <PanelCard
+            title="خطة اليوم"
+            description="خطوات التعلّم المسجلة لهذا اليوم"
+            resource={snapshot.today}
+            empty={!hasTodayPlan}
+            emptyMessage="لا توجد خطوات تعلّم لليوم حالياً."
+            retry={retry}
+          >
+            <div className="flex items-start gap-3">
+              <BookOpen className="mt-1 shrink-0 text-[#327453]" size={19} aria-hidden="true" />
+              <div className="min-w-0">
+                <p className="font-semibold text-[#26332e]">{nextStep.title || 'خطوة التعلّم التالية'}</p>
+                {nextStep.reason && <p className="mt-1 text-sm leading-6 text-[#68756e]">{nextStep.reason}</p>}
+              </div>
+            </div>
+            <Link href="/dashboard/student/learning" className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-[#285f46] underline underline-offset-4">افتح خطة اليوم</Link>
+          </PanelCard>
+        )}
       </section>
     </div>
   )

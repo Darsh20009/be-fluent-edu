@@ -90,16 +90,16 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
     </button>
   })
 
-  return <div dir="rtl">
+  return <div className={styles.foundation} dir="rtl">
     <header className={styles.topbar}><div className={styles.topbarInner}>
-      <div className={styles.headerTools}><button aria-label="فتح القائمة" aria-expanded={sidebarOpen} aria-controls="student-navigation-panel" onClick={() => setSidebarOpen(true)} className={`${styles.mobileOnly} p-2`}><Menu size={21} aria-hidden="true" /></button><Link href="/" className={styles.brand}><span className={styles.brandMark}>ب</span><span>Be Fluent EDU</span></Link></div>
+      <div className={styles.headerTools}><button type="button" aria-label="فتح القائمة" aria-expanded={sidebarOpen} aria-controls="student-navigation-panel" onClick={() => setSidebarOpen(true)} className={styles.mobileOnly}><Menu size={21} aria-hidden="true" /></button><Link href="/" className={styles.brand}><span className={styles.brandMark}>ب</span><span>Be Fluent EDU</span></Link></div>
       <nav className={styles.desktopNav} aria-label="التنقل السريع"><Link href="/dashboard/student/classes">حصصي</Link><Link href="/dashboard/student/learning">التعلّم</Link><Link href="/dashboard/student/feedback">الملاحظات</Link></nav>
-      <div className={styles.headerTools}><span className={styles.status}>{user.isActive ? 'حساب نشط' : 'قيد التفعيل'}</span><Link href="/dashboard/student/cart" aria-label="السلة" className="relative p-2"><ShoppingCart size={19}/>{cartItemsCount > 0 && <span className="absolute -top-1 -left-1 min-w-4 h-4 px-1 bg-[#0e4c3a] text-[#fffdf7] text-[11px] grid place-items-center rounded-full">{cartItemsCount}</span>}</Link><Button variant="outline" size="sm" onClick={handleSignOut} className="!border-[#d7ddd3] !rounded-none !text-[#20332c]"><LogOut size={15} className="ml-1" />خروج</Button></div>
+      <div className={styles.headerTools}><span className={styles.status}>{user.isActive ? 'حساب نشط' : 'قيد التفعيل'}</span><Link href="/dashboard/student/cart" aria-label="السلة" className="relative grid min-h-11 min-w-11 place-items-center rounded-lg text-[#496257] hover:bg-[#f2f7f2]"><ShoppingCart size={19} aria-hidden="true" />{cartItemsCount > 0 && <span className="absolute -top-1 -left-1 min-w-4 h-4 px-1 bg-[#247456] text-white text-[11px] grid place-items-center rounded-full">{cartItemsCount}</span>}</Link><Button variant="outline" size="sm" onClick={handleSignOut} className="!min-h-11 !border-[#d7e1d8] !rounded-lg !text-[#315f49]"><LogOut size={15} className="ml-1" />خروج</Button></div>
     </div></header>
     {sidebarOpen && <button type="button" aria-label="إغلاق القائمة" className={styles.mobileOverlay} onClick={() => setSidebarOpen(false)} />}
     <div className={styles.page}><div className={styles.shell}>
       <aside id="student-navigation-panel" aria-label="قائمة الطالب" className={`${styles.side} ${sidebarOpen ? styles.sideOpen : ''}`}>
-        <button aria-label="إغلاق القائمة" onClick={() => setSidebarOpen(false)} className={`${styles.mobileOnly} absolute top-4 left-4 p-1`}><ChevronLeft size={20}/></button>
+        <button type="button" aria-label="إغلاق القائمة" onClick={() => setSidebarOpen(false)} className={`${styles.mobileOnly} absolute top-3 left-3`}><ChevronLeft size={20}/></button>
         <div className={styles.profile}><div className="flex items-center gap-3"><div className={styles.avatar} aria-hidden="true">{user.name?.charAt(0)}</div><div className="min-w-0"><p className="font-bold truncate">{user.name}</p><p className="text-xs text-[#6e776f] truncate">{user.email}</p></div></div></div>
         <nav id="student-primary-menu" aria-label="التنقل الرئيسي">
           <p className={styles.sectionLabel}>مساحتك التعليمية</p>{renderMenu(primary)}

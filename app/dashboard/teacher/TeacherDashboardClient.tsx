@@ -1,18 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import Image from 'next/image'
+import { useState, useEffect, useCallback } from 'react'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { 
-  Home, Users, Calendar, BookOpen, MessageCircle, LogOut, Shield, FileText, Menu, X
-} from 'lucide-react'
+import { Home, Users, Calendar, BookOpen, MessageCircle, LogOut, Shield, FileText, Menu, X } from 'lucide-react'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import FloatingContactButtons from '@/components/FloatingContactButtons'
 import ChatBox from '@/components/ChatBox'
 import ConversationsList from '@/components/ConversationsList'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import HomeTab from './components/HomeTab'
 import StudentsTab from './components/StudentsTab'
 import SessionsTab from './components/SessionsTab'
@@ -34,28 +32,37 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [user, setUser] = useState(initialUser)
   const [loading, setLoading] = useState(!initialUser.teacherProfileId)
+  const [setupFailed, setSetupFailed] = useState(false)
 
-  useEffect(() => {
-    if (!user.teacherProfileId) {
-      setupTeacherProfile()
-    }
-  }, [user.teacherProfileId])
-
-  async function setupTeacherProfile() {
+  const setupTeacherProfile = useCallback(async () => {
+    setLoading(true)
+    setSetupFailed(false)
     try {
       const response = await fetch('/api/teacher/setup', {
         method: 'POST'
       })
       if (response.ok) {
         const data = await response.json()
-        setUser({ ...user, teacherProfileId: data.teacherProfileId })
+        if (typeof data?.teacherProfileId === 'string' && data.teacherProfileId) {
+          setUser(current => ({ ...current, teacherProfileId: data.teacherProfileId }))
+        } else {
+          setSetupFailed(true)
+        }
+      } else {
+        setSetupFailed(true)
       }
-    } catch (error) {
-      console.error('Error setting up teacher profile:', error)
+    } catch {
+      setSetupFailed(true)
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (!user.teacherProfileId) {
+      void setupTeacherProfile()
+    }
+  }, [user.teacherProfileId, setupTeacherProfile])
 
   const handleSignOut = async () => {
     await signOut({ redirect: false })
@@ -73,117 +80,145 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
   ]
 
   return (
-    <div className="min-h-screen bg-[#f4f1e9] text-[#1f2924] [&_button]:rounded-none [&_input]:rounded-none [&_select]:rounded-none [&_textarea]:rounded-none" dir="rtl">
-      <header className="sticky top-0 z-30 border-b border-[#d7d4ca] bg-[#f8f6f0]/95 backdrop-blur">
-        <div className="mx-auto max-w-[1600px] px-4 py-3 sm:px-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <button
-                aria-label="فتح القائمة"
-                className="lg:hidden grid h-9 w-9 place-items-center border border-[#c9c7bc] bg-[#f8f6f0] text-[#174d3a] transition-colors hover:bg-[#e8eee8]"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-              >
-                <Menu className="h-5 w-5" />
-              </button>
-              <div className="border-r-2 border-[#174d3a] pr-3 leading-none">
-                <h1 className="text-lg font-black tracking-[-0.06em] text-[#174d3a] sm:text-xl">Be Fluent</h1>
-                <span className="mt-1 block text-[9px] font-bold tracking-[0.16em] text-[#758178]">TEACHER DESK</span>
+    <div className="min-h-[100dvh] bg-[#f5f7f4] text-[#26332e]" dir="rtl">
+      <header className="sticky top-0 z-30 border-b border-[#e0e6e1] bg-white/95">
+        <div className="mx-auto flex min-h-[68px] max-w-[1480px] items-center justify-between gap-4 px-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <button
+              aria-label="فتح القائمة"
+              aria-expanded={sidebarOpen}
+              className="grid min-h-11 min-w-11 place-items-center rounded-lg border border-[#e0e6e1] text-[#315f49] hover:bg-[#f2f7f2] lg:hidden"
+              onClick={() => setSidebarOpen(true)}
+              type="button"
+            >
+              <Menu className="h-5 w-5" aria-hidden="true" />
+            </button>
+            <div className="flex items-center gap-3">
+              <span className="grid h-9 w-9 place-items-center rounded-[10px] bg-[#247456] text-sm font-black text-white">ب</span>
+              <div className="leading-tight">
+                <p className="text-sm font-extrabold text-[#26332e]">Be Fluent</p>
+                <p className="mt-1 text-[10px] font-semibold text-[#718078]">مساحة المعلم</p>
               </div>
-              <Link href="/dashboard/admin" className="hidden items-center gap-2 border border-[#b8c8ba] bg-[#e8eee8] px-3 py-2 text-xs font-bold text-[#174d3a] transition-colors hover:bg-[#d8e5d9] sm:flex">
-                <Shield className="h-4 w-4" />
-                <span className="text-xs font-bold">لوحة الأدمن</span>
-              </Link>
             </div>
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div className="hidden text-left sm:block">
-                <span className="block text-xs font-bold text-[#1f2924]">{user.name}</span>
-                <span className="text-[10px] font-medium text-[#758178]">المساحة التعليمية</span>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSignOut}
-                className="!rounded-none !border-[#9c4437] !bg-transparent !px-2 !text-xs !text-[#9c4437] hover:!bg-[#f6e8e2] sm:!px-4"
-              >
-                <LogOut className="h-4 w-4 sm:ml-2" />
-                <span className="hidden sm:inline">Logout / خروج</span>
-              </Button>
+            <Link href="/dashboard/admin" className="hidden min-h-10 items-center gap-2 rounded-lg border border-[#e0e6e1] px-3 text-xs font-bold text-[#42634f] hover:bg-[#f3f7f3] sm:flex">
+              <Shield className="h-4 w-4" aria-hidden="true" />
+              لوحة الإدارة
+            </Link>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="hidden text-left sm:block">
+              <span className="block text-xs font-bold text-[#26332e]">{user.name}</span>
+              <span className="text-[11px] text-[#718078]">المساحة التعليمية</span>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSignOut}
+              className="!min-h-11 !rounded-lg !border-[#dce5de] !px-3 !text-[#465a4e] hover:!bg-[#f5f8f5] sm:!px-4"
+            >
+              <LogOut className="h-4 w-4 sm:ml-2" aria-hidden="true" />
+              <span className="hidden sm:inline">تسجيل الخروج</span>
+            </Button>
           </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6 sm:py-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
-          {/* Mobile Sidebar Overlay */}
+      <div className="mx-auto max-w-[1480px] px-3 py-4 sm:px-6 sm:py-7">
+        <div className="flex gap-5 lg:gap-7">
           {sidebarOpen && (
-            <div 
-              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            <button
+              type="button"
+              aria-label="إغلاق القائمة"
+              className="fixed inset-0 z-40 bg-[#172b21]/35 lg:hidden"
               onClick={() => setSidebarOpen(false)}
             />
           )}
-
-          {/* Sidebar */}
-          <div className={`
-             fixed lg:static inset-y-0 right-0 z-50 lg:z-auto
-             w-72 lg:w-64 lg:flex-none
-            transform lg:transform-none transition-transform duration-300
-             ${sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
-          `}>
-            <Card variant="elevated" padding="none" className="h-full !rounded-none !border-[#d7d4ca] !bg-[#f8f6f0] !shadow-none lg:h-auto">
-              <div className="border-b border-[#d7d4ca] p-4">
-                <div className="flex items-center justify-between lg:justify-start gap-3">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="flex h-10 w-10 items-center justify-center bg-[#174d3a] text-lg font-bold text-[#f8f6f0] sm:h-12 sm:w-12 sm:text-xl">
-                      {user.name?.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-[#1f2924] sm:text-base">{user.name}</p>
-                      <p className="text-xs text-[#758178] sm:text-sm">Teacher / مدرس</p>
-                    </div>
-                  </div>
-                  <button 
-                    className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
+          <aside
+            className={`fixed inset-y-0 right-0 z-50 w-[min(330px,88vw)] overflow-y-auto bg-white p-4 transition-transform duration-200 lg:sticky lg:top-[88px] lg:z-0 lg:h-[calc(100dvh-112px)] lg:w-[258px] lg:shrink-0 lg:translate-x-0 lg:rounded-xl lg:border lg:border-[#e0e6e1] lg:p-0 ${
+              sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
+            }`}
+          >
+            <div className="flex min-h-[94px] items-center justify-between border-b border-[#e8ece8] px-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#e8f1e9] text-base font-extrabold text-[#286547]">
+                  {user.name?.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold text-[#29362f]">{user.name}</p>
+                  <p className="mt-1 text-xs text-[#718078]">مدرس</p>
                 </div>
               </div>
-            <nav className="p-2" aria-label="Teacher navigation">
-                {menuItems.map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        setActiveTab(item.id)
-                        setSidebarOpen(false)
-                      }}
-                       className={`mb-1 flex w-full items-center gap-3 border-r-2 px-3 py-2.5 text-right transition-colors sm:px-4 ${
-                        activeTab === item.id
-                           ? 'border-[#174d3a] bg-[#dce9dc] font-bold text-[#174d3a]'
-                           : 'border-transparent text-[#4c5750] hover:bg-[#eeece5] hover:text-[#174d3a]'
-                      }`}
-                    >
-                      <Icon className="h-5 w-5" />
-                      <span className="text-xs sm:text-sm font-medium">{item.label}</span>
-                    </button>
-                  )
-                })}
-              </nav>
-            </Card>
-          </div>
+              <button
+                type="button"
+                aria-label="إغلاق القائمة"
+                className="grid min-h-11 min-w-11 place-items-center rounded-lg text-[#68756e] hover:bg-[#f3f6f3] lg:hidden"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <X className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
+            <nav className="space-y-1 p-3" aria-label="التنقل الرئيسي للمعلم">
+              <p className="px-3 pb-2 pt-3 text-[11px] font-bold text-[#849087]">مساحة العمل</p>
+              {menuItems.map((item) => {
+                const Icon = item.icon
+                const selected = activeTab === item.id
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-current={selected ? 'page' : undefined}
+                    onClick={() => {
+                      setActiveTab(item.id)
+                      setSidebarOpen(false)
+                    }}
+                    className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-right text-sm transition-colors ${
+                      selected
+                        ? 'bg-[#edf5ef] font-bold text-[#225d41]'
+                        : 'text-[#5c6961] hover:bg-[#f5f7f5] hover:text-[#225d41]'
+                    }`}
+                  >
+                    <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+                    <span>{item.label}</span>
+                  </button>
+                )
+              })}
+            </nav>
+          </aside>
 
-          <div className="min-w-0 flex-1">
-            {activeTab === 'home' && user.teacherProfileId && <HomeTab teacherProfileId={user.teacherProfileId} />}
-            {activeTab === 'students' && user.teacherProfileId && <StudentsTab teacherProfileId={user.teacherProfileId} />}
-            {activeTab === 'sessions' && user.teacherProfileId && <SessionsTab teacherProfileId={user.teacherProfileId} />}
-            {activeTab === 'assignments' && user.teacherProfileId && <AssignmentsTab teacherProfileId={user.teacherProfileId} />}
-            {activeTab === 'writing-tests' && user.teacherProfileId && <WritingTestsTab teacherProfileId={user.teacherProfileId} />}
-            {activeTab === 'manuscripts' && user.teacherProfileId && <ManuscriptsTab teacherProfileId={user.teacherProfileId} />}
-            {activeTab === 'chat' && <ChatTab />}
-          </div>
+          <main className="min-w-0 flex-1">
+            {loading && !user.teacherProfileId ? (
+              <div className="space-y-4" aria-busy="true" aria-label="جارٍ تجهيز مساحة المعلم">
+                <div className="h-8 w-52 animate-pulse rounded bg-[#e6ece7]" />
+                <div className="h-28 rounded-xl border border-[#e3e9e4] bg-white" />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="h-40 rounded-xl border border-[#e3e9e4] bg-white" />
+                  <div className="h-40 rounded-xl border border-[#e3e9e4] bg-white" />
+                </div>
+              </div>
+            ) : !user.teacherProfileId && setupFailed ? (
+              <section className="rounded-xl border border-[#ead9d5] bg-white p-6 sm:p-8" role="alert">
+                <h1 className="text-lg font-bold text-[#26332e]">تعذر تجهيز مساحة المعلم</h1>
+                <p className="mt-1 text-sm leading-6 text-[#68756e]">لم نتمكن من تجهيز ملف المعلم الآن. حاول مرة أخرى.</p>
+                <button
+                  type="button"
+                  onClick={() => void setupTeacherProfile()}
+                  className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-[#247456] px-4 text-sm font-bold text-white hover:bg-[#19583f]"
+                >
+                  إعادة المحاولة
+                </button>
+              </section>
+            ) : (
+              <>
+                {activeTab === 'home' && user.teacherProfileId && <HomeTab teacherProfileId={user.teacherProfileId} setActiveTab={setActiveTab} />}
+                {activeTab === 'students' && user.teacherProfileId && <StudentsTab teacherProfileId={user.teacherProfileId} />}
+                {activeTab === 'sessions' && user.teacherProfileId && <SessionsTab teacherProfileId={user.teacherProfileId} />}
+                {activeTab === 'assignments' && user.teacherProfileId && <AssignmentsTab teacherProfileId={user.teacherProfileId} />}
+                {activeTab === 'writing-tests' && user.teacherProfileId && <WritingTestsTab teacherProfileId={user.teacherProfileId} />}
+                {activeTab === 'manuscripts' && user.teacherProfileId && <ManuscriptsTab teacherProfileId={user.teacherProfileId} />}
+                {activeTab === 'chat' && <ChatTab />}
+              </>
+            )}
+          </main>
         </div>
       </div>
       <FloatingContactButtons />
@@ -191,10 +226,17 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
   )
 }
 
+type ChatContact = {
+  id: string
+  role: string
+  name: string
+  profilePhoto?: string | null
+}
+
 function ChatTab() {
-  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [selectedUser, setSelectedUser] = useState<ChatContact | null>(null)
   const [showNewChatModal, setShowNewChatModal] = useState(false)
-  const [availableContacts, setAvailableContacts] = useState<any[]>([])
+  const [availableContacts, setAvailableContacts] = useState<ChatContact[]>([])
   const [loadingContacts, setLoadingContacts] = useState(false)
 
   const fetchAvailableContacts = async () => {
@@ -217,7 +259,7 @@ function ChatTab() {
     setShowNewChatModal(true)
   }
 
-  const handleSelectContact = (contact: any) => {
+  const handleSelectContact = (contact: ChatContact) => {
     setSelectedUser(contact)
     setShowNewChatModal(false)
   }
@@ -310,9 +352,9 @@ function ChatTab() {
                         onClick={() => handleSelectContact(contact)}
                         className="w-full p-4 rounded-lg hover:bg-gray-100 transition-colors text-right border border-gray-200 flex items-center gap-3"
                       >
-                        <div className="w-12 h-12 bg-gradient-to-br from-[#10B981] to-[#059669] rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+                        <div className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e8f1e9] font-bold text-[#286547]">
                           {contact.profilePhoto ? (
-                            <img src={contact.profilePhoto} alt={contact.name} className="w-full h-full rounded-full object-cover" />
+                            <Image src={contact.profilePhoto} alt="" fill sizes="48px" unoptimized className="rounded-full object-cover" />
                           ) : (
                             contact.name.charAt(0).toUpperCase()
                           )}
