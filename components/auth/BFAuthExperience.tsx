@@ -7,6 +7,25 @@ import BFAuthModal from './BFAuthModal'
 
 type EntryMode = 'login' | 'start'
 
+function safeReturnTo(destination: URL) {
+  const callbackUrl = destination.searchParams.get('callbackUrl')
+  if (callbackUrl) {
+    try {
+      const callback = new URL(callbackUrl, destination.origin)
+      const isSafeReturnPath =
+        callback.pathname === '/onboarding' ||
+        callback.pathname === '/dashboard' ||
+        callback.pathname.startsWith('/dashboard/')
+      if (callback.origin === destination.origin && isSafeReturnPath) {
+        return `${callback.pathname}${callback.search}${callback.hash}`
+      }
+    } catch {
+      // Keep the safe dashboard default for malformed callback URLs.
+    }
+  }
+  return '/dashboard'
+}
+
 export default function BFAuthExperience() {
   const pathname = usePathname()
   const router = useRouter()
@@ -23,6 +42,26 @@ export default function BFAuthExperience() {
   }, [])
 
   useEffect(() => {
+    const isDirectAuthEntry = pathname === '/auth/login' || pathname === '/auth/register'
+    if (isDirectAuthEntry) {
+      if (status === 'loading') return
+      if (status === 'authenticated') {
+        router.replace('/dashboard')
+        return
+      }
+
+      const timeout = window.setTimeout(() => {
+        const destination = new URL(window.location.href)
+        setEntryMode(pathname === '/auth/register' ? 'start' : 'login')
+        setRegistrationHref(pathname === '/auth/register'
+          ? `${destination.pathname}${destination.search}`
+          : '/auth/register')
+        setReturnTo(safeReturnTo(destination))
+        setOpen(true)
+        router.replace('/')
+      }, 0)
+      return () => window.clearTimeout(timeout)
+    }
     if (pathname.startsWith('/auth/')) return
 
     const handleSiteAuthLink = (event: MouseEvent) => {
@@ -59,18 +98,7 @@ export default function BFAuthExperience() {
       let nextPath = isDashboardDestination
         ? `${destination.pathname}${destination.search}${destination.hash}`
         : '/dashboard'
-      const callbackUrl = destination.searchParams.get('callbackUrl')
-      if (isAuthEntry && callbackUrl) {
-        try {
-          const callback = new URL(callbackUrl, destination.origin)
-          const isSafeDashboardPath = callback.pathname === '/dashboard' || callback.pathname.startsWith('/dashboard/')
-          if (callback.origin === destination.origin && isSafeDashboardPath) {
-            nextPath = `${callback.pathname}${callback.search}${callback.hash}`
-          }
-        } catch {
-          // Keep the safe dashboard default for malformed callback URLs.
-        }
-      }
+      if (isAuthEntry) nextPath = safeReturnTo(destination)
       setReturnTo(nextPath)
       setOpen(true)
     }

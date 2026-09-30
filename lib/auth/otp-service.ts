@@ -298,6 +298,7 @@ async function createOtpUser(
       phone: identity.normalizedPhone,
       normalizedPhone: identity.normalizedPhone,
       passwordHash,
+      passwordSetupRequired: true,
       role: 'STUDENT',
       isActive: true,
       status: 'ACTIVE',

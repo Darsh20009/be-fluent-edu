@@ -11,6 +11,10 @@ export const profilePatchSchema = z.object({
   age: z.number().int().min(1).max(120).nullable().optional(),
 })
 
+export const studentProfilePatchSchema = profilePatchSchema.extend({
+  gender: z.enum(['FEMALE', 'MALE', 'PREFER_NOT_TO_SAY']).nullable().optional(),
+})
+
 export const goalsSchema = z.object({
   overallGoal: z.string().trim().max(1000).nullable().optional(),
   monthlyGoal: z.string().trim().max(1000).nullable().optional(),

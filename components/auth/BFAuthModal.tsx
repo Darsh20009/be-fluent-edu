@@ -7,9 +7,12 @@ import { signIn } from 'next-auth/react'
 import { useTheme } from '@/lib/contexts/ThemeContext'
 import { useEffect, useRef, useState } from 'react'
 import { Check, LoaderCircle, LockKeyhole, MessageCircle, Phone, X } from 'lucide-react'
+import BFPhoneField from '@/components/auth/BFPhoneField'
+import { getCountryByIso, toInternationalPhone } from '@/lib/phone-countries'
 
 type EntryMode = 'login' | 'start'
-type ModalView = 'phone' | 'code' | 'password'
+type AuthIntent = 'LOGIN' | 'REGISTER'
+type ModalView = 'phone' | 'register' | 'code' | 'password' | 'passwordSetup'
 
 type Props = {
   open: boolean
@@ -17,13 +20,6 @@ type Props = {
   returnTo: string
   registrationHref: string
   onClose: () => void
-}
-
-function toEgyptNumber(value: string) {
-  let digits = value.replace(/\D/g, '')
-  if (digits.startsWith('20')) digits = digits.slice(2)
-  if (digits.startsWith('0')) digits = digits.slice(1)
-  return digits.length >= 10 && digits.length <= 11 ? `+20${digits}` : ''
 }
 
 function friendlyOtpError(code: string, isArabic: boolean) {
@@ -48,23 +44,35 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
   const isArabic = language === 'ar'
   const tr = (ar: string, en: string) => isArabic ? ar : en
   const [view, setView] = useState<ModalView>('phone')
+  const [authIntent, setAuthIntent] = useState<AuthIntent>('LOGIN')
+  const [countryIso, setCountryIso] = useState('EG')
   const [phoneInput, setPhoneInput] = useState('')
+  const [pendingPhone, setPendingPhone] = useState('')
   const [code, setCode] = useState('')
   const [emailOrPhone, setEmailOrPhone] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [registrationEmail, setRegistrationEmail] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [resendIn, setResendIn] = useState(0)
-  const phoneRef = useRef<HTMLInputElement>(null)
+  const nameRef = useRef<HTMLInputElement>(null)
   const panelRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     if (!open) return
-    setView('phone')
+    setView(entryMode === 'start' ? 'register' : 'phone')
+    setAuthIntent(entryMode === 'start' ? 'REGISTER' : 'LOGIN')
+    setCountryIso('EG')
     setPhoneInput('')
+    setPendingPhone('')
     setCode('')
     setEmailOrPhone('')
     setPassword('')
+    setConfirmPassword('')
+    setFullName('')
+    setRegistrationEmail('')
     setError('')
     setBusy(false)
     setResendIn(0)
@@ -76,7 +84,8 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
       ? document.activeElement
       : null
     const focusTimer = window.setTimeout(() => {
-      if (view === 'phone') phoneRef.current?.focus()
+      if (view === 'phone') document.getElementById('bf-auth-phone')?.focus()
+      else if (view === 'register') nameRef.current?.focus()
       else panelRef.current?.focus()
     }, 0)
 
@@ -120,11 +129,73 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
 
   if (!open) return null
 
+  const onboardingDestination = () => {
+    try {
+      const packageId = new URL(registrationHref, 'https://befluent.invalid').searchParams.get('packageId')
+      if (packageId && /^[\w-]{1,100}$/.test(packageId)) {
+        return `/onboarding?packageId=${encodeURIComponent(packageId)}`
+      }
+    } catch {
+      // Continue to profile setup without an optional package selection.
+    }
+    return '/onboarding'
+  }
+
+  const saveRegistrationPassword = async () => {
+    setError('')
+    try {
+      const response = await fetch('/api/auth/password/setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ password }),
+      })
+      const body: unknown = await response.json().catch(() => null)
+      const data = body && typeof body === 'object' ? body as { ok?: unknown } : null
+      if (!response.ok || data?.ok !== true) {
+        setError(tr('تم التحقق من الهاتف، لكن تعذر حفظ كلمة المرور. حاول مرة أخرى.', 'Your phone is verified, but we could not save the password. Try again.'))
+        return
+      }
+      onClose()
+      router.push(onboardingDestination())
+      router.refresh()
+    } catch {
+      setError(tr('تم التحقق من الهاتف، لكن تعذر الاتصال لحفظ كلمة المرور.', 'Your phone is verified, but we could not reach the service to save the password.'))
+    }
+  }
+
+  const retryRegistrationPassword = async () => {
+    setBusy(true)
+    await saveRegistrationPassword()
+    setBusy(false)
+  }
+
   const requestCode = async () => {
-    const normalizedPhone = toEgyptNumber(phoneInput)
+    const normalizedPhone = toInternationalPhone(phoneInput, getCountryByIso(countryIso))
     if (!normalizedPhone) {
-      setError(tr('أدخل رقم هاتف مصرياً صحيحاً.', 'Enter a valid Egyptian mobile number.'))
+      setError(tr('أدخل رقم هاتف صحيحاً وفق الدولة المحددة.', 'Enter a valid phone number for the selected country.'))
       return
+    }
+    if (authIntent === 'REGISTER') {
+      if (fullName.trim().length < 2) {
+        setError(tr('أدخل اسمك الكامل.', 'Enter your full name.'))
+        return
+      }
+      if (registrationEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registrationEmail.trim())) {
+        setError(tr('تحقق من البريد الإلكتروني أو اتركه فارغاً.', 'Enter a valid email address or leave it blank.'))
+        return
+      }
+      if (password.length < 8) {
+        setError(tr('يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.', 'Use a password with at least 8 characters.'))
+        return
+      }
+      if (new TextEncoder().encode(password).byteLength > 72) {
+        setError(tr('كلمة المرور طويلة جداً. استخدم 72 بايتاً أو أقل.', 'Password is too long. Use 72 bytes or fewer.'))
+        return
+      }
+      if (password !== confirmPassword) {
+        setError(tr('كلمتا المرور غير متطابقتين.', 'The passwords do not match.'))
+        return
+      }
     }
 
     setBusy(true)
@@ -133,7 +204,14 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
       const response = await fetch('/api/auth/otp/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ phone: normalizedPhone, intent: 'LOGIN', channel: 'WHATSAPP' }),
+        body: JSON.stringify({
+          phone: normalizedPhone,
+          intent: authIntent,
+          channel: 'WHATSAPP',
+          ...(authIntent === 'REGISTER'
+            ? { name: fullName.trim(), email: registrationEmail.trim() || undefined }
+            : {}),
+        }),
       })
       const body: unknown = await response.json().catch(() => null)
       const data = body && typeof body === 'object' ? body as {
@@ -148,7 +226,8 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
         return
       }
 
-      setPhoneInput(normalizedPhone)
+      setPendingPhone(normalizedPhone)
+      setCode('')
       setResendIn(typeof data.resendAfterSeconds === 'number'
         ? Math.min(600, Math.max(0, data.resendAfterSeconds))
         : 60)
@@ -166,9 +245,8 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
       setError(tr('أدخل الرمز المكوّن من 6 أرقام.', 'Enter the 6-digit verification code.'))
       return
     }
-    const normalizedPhone = toEgyptNumber(phoneInput)
-    if (!normalizedPhone) {
-      setView('phone')
+    if (!pendingPhone) {
+      setView(authIntent === 'REGISTER' ? 'register' : 'phone')
       setError(tr('تحقق من رقم الهاتف ثم أعد المحاولة.', 'Check the phone number and try again.'))
       return
     }
@@ -177,13 +255,18 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
     setError('')
     try {
       const result = await signIn('otp', {
-        phone: normalizedPhone,
+        phone: pendingPhone,
         code,
-        intent: 'LOGIN',
+        intent: authIntent,
         redirect: false,
       })
       if (!result?.ok || result.error) {
         setError(tr('الرمز غير صحيح أو انتهت صلاحيته. اطلب رمزاً جديداً.', 'That code is invalid or expired. Request a new one.'))
+        return
+      }
+      if (authIntent === 'REGISTER') {
+        setView('passwordSetup')
+        await saveRegistrationPassword()
         return
       }
       onClose()
@@ -263,57 +346,134 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
           <p className="bf-eyebrow">{tr('مساحتك التعليمية', 'YOUR LEARNING SPACE')}</p>
           <h2 id="bf-auth-title" className="mt-2 text-[25px] font-semibold text-[#202a25]">
             {view === 'code'
-              ? tr('أدخل رمز التحقق', 'Enter your verification code')
+              ? authIntent === 'REGISTER'
+                ? tr('تحقق من رقمك', 'Verify your phone')
+                : tr('أدخل رمز التحقق', 'Enter your verification code')
+              : view === 'passwordSetup'
+                ? tr('أمّن حسابك', 'Secure your account')
               : view === 'password'
                 ? tr('تسجيل الدخول بكلمة المرور', 'Sign in with your password')
-                : entryMode === 'start'
-                  ? tr('ابدأ رحلة التعلّم', 'Start your learning journey')
+                : view === 'register'
+                  ? tr('أنشئ حسابك', 'Create your account')
                   : tr('أهلاً بعودتك', 'Welcome back')}
           </h2>
           <p className="mt-2 text-sm leading-6 text-[#65716a]">
             {view === 'code'
-              ? tr(`أرسلنا رمزاً إلى واتساب على ${phoneInput}.`, `We sent a WhatsApp code to ${phoneInput}.`)
+              ? tr(`أرسلنا رمزاً إلى واتساب على ${pendingPhone}.`, `We sent a WhatsApp code to ${pendingPhone}.`)
+              : view === 'passwordSetup'
+                ? tr('تم التحقق من هاتفك. احفظ كلمة المرور للمتابعة إلى إعداد ملفك التعليمي.', 'Your phone is verified. Save your password to continue to your learning profile.')
               : view === 'password'
                 ? tr('استخدم البريد الإلكتروني أو رقم الهاتف المسجل.', 'Use your registered email address or phone number.')
-                : entryMode === 'start'
-                  ? tr('أدخل رقم هاتفك للمتابعة. إذا كنت مستخدماً جديداً، ابدأ التسجيل من الرابط أدناه.', 'Enter your phone number to continue. If you are new, use the registration link below.')
+                : view === 'register'
+                  ? tr('تحقق من هاتفك أولاً، ثم أكمل العمر والاهتمامات التعليمية في خطوة منفصلة.', 'Verify your phone first. You will add your age and learning details in the next step.')
                   : tr('تابع دروسك وممارستك وخطوتك التالية.', 'Continue your classes, practice, and next learning step.')}
           </p>
 
             {error && <p className="mt-5 border border-[#eed7d4] bg-[#fff8f6] px-3 py-3 text-sm leading-6 text-[#874039]" role="alert">{error}</p>}
 
             {view === 'phone' && (
-              <div className="mt-6">
+              <form className="mt-6" onSubmit={(event) => { event.preventDefault(); void requestCode() }}>
                 <label htmlFor="bf-auth-phone" className="mb-2 block text-sm font-semibold text-[#34443a]">{tr('رقم الهاتف', 'Mobile phone')}</label>
-                <div className="flex min-h-12 items-center border border-[#dce4dc] focus-within:border-[#24714f] focus-within:ring-2 focus-within:ring-[#24714f]/15">
-                  <span className={`flex h-12 shrink-0 items-center gap-2 border-[#e4e9e4] px-3 text-sm font-semibold text-[#526157] ${isArabic ? 'border-s' : 'border-e'}`} dir="ltr">
-                    <span aria-hidden="true">+20</span>
-                    <span className="text-xs font-medium text-[#7c867f]">{tr('مصر', 'EG')}</span>
-                  </span>
-                  <input
-                    ref={phoneRef}
-                    id="bf-auth-phone"
-                    autoComplete="tel-national"
-                    inputMode="tel"
-                    type="tel"
-                    dir="ltr"
-                    value={phoneInput}
-                    onChange={(event) => setPhoneInput(event.target.value)}
-                    onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); void requestCode() } }}
-                    placeholder="10 1234 5678"
-                    className="min-w-0 min-h-12 flex-1 bg-transparent px-3 text-sm text-[#202a25] outline-none placeholder:text-[#9aa49d]"
-                    disabled={busy}
-                  />
-                </div>
+                <BFPhoneField
+                  id="bf-auth-phone"
+                  value={phoneInput}
+                  countryIso={countryIso}
+                  language={language}
+                  onChange={setPhoneInput}
+                  onCountryChange={setCountryIso}
+                  placeholder={countryIso === 'EG' ? '10 1234 5678' : tr('رقمك المحلي', 'National number')}
+                  disabled={busy}
+                />
                 <p className="mt-2 flex items-center gap-2 text-xs text-[#68746c]">
                   <MessageCircle size={14} className="shrink-0 text-[#24714f]" aria-hidden="true" />
                   {tr('سنرسل رمز الدخول عبر واتساب.', 'We will send a sign-in code through WhatsApp.')}
                 </p>
-                <button type="button" disabled={busy} onClick={() => void requestCode()} className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 bg-[#24714f] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#1d5f42] disabled:cursor-wait disabled:opacity-65">
+                <button type="submit" disabled={busy} className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 bg-[#24714f] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#1d5f42] disabled:cursor-wait disabled:opacity-65">
                   {busy ? <LoaderCircle className="animate-spin" size={17} aria-hidden="true" /> : <Phone size={16} aria-hidden="true" />}
                   {tr('إرسال رمز واتساب', 'Send WhatsApp code')}
                 </button>
-              </div>
+              </form>
+            )}
+
+            {view === 'register' && (
+              <form className="mt-6 space-y-4" onSubmit={(event) => { event.preventDefault(); void requestCode() }}>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-[#34443a]">{tr('الاسم الكامل', 'Full name')}</span>
+                  <input
+                    ref={nameRef}
+                    type="text"
+                    autoComplete="name"
+                    maxLength={120}
+                    value={fullName}
+                    onChange={(event) => setFullName(event.target.value)}
+                    className="min-h-12 w-full border border-[#dce4dc] px-3 text-sm outline-none focus:border-[#24714f] focus:ring-2 focus:ring-[#24714f]/15"
+                    disabled={busy}
+                    required
+                  />
+                </label>
+                <label htmlFor="bf-auth-phone" className="mb-2 block text-sm font-semibold text-[#34443a]">{tr('رقم الهاتف', 'Mobile phone')}</label>
+                <BFPhoneField
+                  id="bf-auth-phone"
+                  value={phoneInput}
+                  countryIso={countryIso}
+                  language={language}
+                  onChange={setPhoneInput}
+                  onCountryChange={setCountryIso}
+                  placeholder={countryIso === 'EG' ? '10 1234 5678' : tr('رقمك المحلي', 'National number')}
+                  disabled={busy}
+                />
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-[#34443a]">
+                    {tr('البريد الإلكتروني', 'Email')}
+                    <span className="ms-1 font-normal text-[#7c867f]">{tr('(اختياري)', '(optional)')}</span>
+                  </span>
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    maxLength={254}
+                    value={registrationEmail}
+                    onChange={(event) => setRegistrationEmail(event.target.value)}
+                    className="min-h-12 w-full border border-[#dce4dc] px-3 text-sm outline-none focus:border-[#24714f] focus:ring-2 focus:ring-[#24714f]/15"
+                    disabled={busy}
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-[#34443a]">{tr('كلمة المرور', 'Password')}</span>
+                  <input
+                    type="password"
+                    autoComplete="new-password"
+                    minLength={8}
+                    maxLength={72}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    className="min-h-12 w-full border border-[#dce4dc] px-3 text-sm outline-none focus:border-[#24714f] focus:ring-2 focus:ring-[#24714f]/15"
+                    disabled={busy}
+                    required
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-[#34443a]">{tr('تأكيد كلمة المرور', 'Confirm password')}</span>
+                  <input
+                    type="password"
+                    autoComplete="new-password"
+                    minLength={8}
+                    maxLength={72}
+                    value={confirmPassword}
+                    onChange={(event) => setConfirmPassword(event.target.value)}
+                    className="min-h-12 w-full border border-[#dce4dc] px-3 text-sm outline-none focus:border-[#24714f] focus:ring-2 focus:ring-[#24714f]/15"
+                    disabled={busy}
+                    required
+                  />
+                </label>
+                <p className="flex items-center gap-2 text-xs leading-5 text-[#68746c]">
+                  <MessageCircle size={14} className="shrink-0 text-[#24714f]" aria-hidden="true" />
+                  {tr('سنرسل رمز التحقق عبر واتساب. إعداد ملفك التعليمي يأتي بعد إنشاء الحساب.', 'We will send a WhatsApp verification code. Your learning profile comes after account creation.')}
+                </p>
+                <button type="submit" disabled={busy} className="inline-flex min-h-12 w-full items-center justify-center gap-2 bg-[#24714f] px-4 text-sm font-semibold text-white hover:bg-[#1d5f42] disabled:cursor-wait disabled:opacity-65">
+                  {busy ? <LoaderCircle className="animate-spin" size={17} aria-hidden="true" /> : <Phone size={16} aria-hidden="true" />}
+                  {tr('تحقق وأنشئ الحساب', 'Verify and create account')}
+                </button>
+              </form>
             )}
 
             {view === 'code' && (
@@ -333,10 +493,12 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
                 />
                 <button type="submit" disabled={busy || code.length !== 6} className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 bg-[#24714f] px-4 text-sm font-semibold text-white hover:bg-[#1d5f42] disabled:cursor-not-allowed disabled:opacity-55">
                   {busy ? <LoaderCircle className="animate-spin" size={17} aria-hidden="true" /> : <Check size={17} aria-hidden="true" />}
-                  {tr('تحقق وتسجيل الدخول', 'Verify and sign in')}
+                  {authIntent === 'REGISTER'
+                    ? tr('تحقق وأنشئ الحساب', 'Verify and create account')
+                    : tr('تحقق وتسجيل الدخول', 'Verify and sign in')}
                 </button>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs">
-                  <button type="button" className="min-h-11 text-[#24714f] underline underline-offset-4" onClick={() => { setCode(''); setError(''); setView('phone') }}>
+                  <button type="button" disabled={busy} className="min-h-11 text-[#24714f] underline underline-offset-4 disabled:opacity-50" onClick={() => { setCode(''); setError(''); setView(authIntent === 'REGISTER' ? 'register' : 'phone') }}>
                     {tr('تغيير الرقم', 'Change number')}
                   </button>
                   <button type="button" disabled={busy || resendIn > 0} className="min-h-11 text-[#526157] underline underline-offset-4 disabled:no-underline disabled:opacity-55" onClick={() => void requestCode()}>
@@ -346,6 +508,18 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
                   </button>
                 </div>
               </form>
+            )}
+
+            {view === 'passwordSetup' && (
+              <div className="mt-6">
+                <p className="text-sm leading-6 text-[#68746c]">
+                  {tr('تم التحقق من ملكية الهاتف. احفظ كلمة المرور التي اخترتها للتمكن من تسجيل الدخول بها لاحقاً.', 'Your phone ownership is verified. Save the password you chose so you can use it to sign in later.')}
+                </p>
+                <button type="button" disabled={busy} onClick={() => void retryRegistrationPassword()} className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 bg-[#24714f] px-4 text-sm font-semibold text-white hover:bg-[#1d5f42] disabled:cursor-wait disabled:opacity-65">
+                  {busy ? <LoaderCircle className="animate-spin" size={17} aria-hidden="true" /> : <LockKeyhole size={16} aria-hidden="true" />}
+                  {tr('حفظ ومتابعة', 'Save and continue')}
+                </button>
+              </div>
             )}
 
             {view === 'password' && (
@@ -397,13 +571,22 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
             {view === 'phone' && (
               <p className="mt-5 text-center text-xs leading-6 text-[#68746c]">
                 {tr('مستخدم جديد؟', 'New to Be Fluent?')}{' '}
-                <Link href={registrationHref} data-bf-auth-bypass onClick={onClose} className="font-semibold text-[#24714f] underline underline-offset-4">
+                <button type="button" onClick={() => { setAuthIntent('REGISTER'); setError(''); setView('register') }} className="font-semibold text-[#24714f] underline underline-offset-4">
                   {tr('ابدأ التسجيل', 'Start registration')}
-                </Link>
+                </button>
               </p>
             )}
 
-            <button type="button" onClick={onClose} className="mt-5 flex min-h-11 w-full items-center justify-center text-xs text-[#758078]">
+            {view === 'register' && (
+              <p className="mt-4 text-center text-xs leading-6 text-[#68746c]">
+                {tr('لديك حساب بالفعل؟', 'Already have an account?')}{' '}
+                <button type="button" disabled={busy} onClick={() => { setAuthIntent('LOGIN'); setError(''); setPassword(''); setConfirmPassword(''); setView('phone') }} className="font-semibold text-[#24714f] underline underline-offset-4">
+                  {tr('تسجيل الدخول', 'Sign in')}
+                </button>
+              </p>
+            )}
+
+            <button type="button" disabled={busy} onClick={onClose} className="mt-5 flex min-h-11 w-full items-center justify-center text-xs text-[#758078] disabled:opacity-50">
               {tr('متابعة التصفح', 'Continue browsing')}
             </button>
         </>
