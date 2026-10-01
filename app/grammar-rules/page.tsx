@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { BookOpen, CheckCircle } from 'lucide-react'
-import FloatingContactButtons from '@/components/FloatingContactButtons'
 import { MarketingFrame } from '@/components/marketing/MarketingFrame'
 
 export default function GrammarRulesPage() {
@@ -224,7 +223,6 @@ export default function GrammarRulesPage() {
         </div>
       </main>
 
-      <FloatingContactButtons />
     </MarketingFrame>
   )
 }

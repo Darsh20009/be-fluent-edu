@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from "next/link";
 import { Check, Star, Users } from 'lucide-react'
-import FloatingContactButtons from '@/components/FloatingContactButtons'
 import { MarketingFrame } from '@/components/marketing/MarketingFrame'
 
 const BASIC_PACKAGES = [
@@ -103,7 +102,6 @@ export default function PackagesPage() {
           ))}
         </div>
       </main>
-      <FloatingContactButtons />
     </MarketingFrame>
   )
 }

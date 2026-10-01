@@ -15,6 +15,41 @@
   --accent-foreground: #ffffff;
   --border: #e2e8e2;
   --radius: .5rem;
+  --bf-canvas: #f3f6f2;
+  --bf-paper: #ffffff;
+  --bf-paper-soft: #f8faf7;
+  --bf-ink: #202d28;
+  --bf-muted: #66756e;
+  --bf-line: #e2e9e3;
+  --bf-green: #147755;
+  --bf-green-soft: #e8f4ed;
+  --bf-purple: #342b52;
+  --bf-purple-soft: #f0edf6;
+}
+
+html.dark {
+  color-scheme: dark;
+  --background: #111915;
+  --surface: #19231d;
+  --surface-muted: #202c25;
+  --foreground: #e8efe9;
+  --muted: #a8b5ac;
+  --primary: #68ad86;
+  --primary-strong: #8bc9a2;
+  --primary-foreground: #102018;
+  --accent: #68ad86;
+  --accent-foreground: #102018;
+  --border: #344239;
+  --bf-canvas: #111915;
+  --bf-paper: #19231d;
+  --bf-paper-soft: #202c25;
+  --bf-ink: #e8efe9;
+  --bf-muted: #a8b5ac;
+  --bf-line: #344239;
+  --bf-green: #68ad86;
+  --bf-green-soft: #233a2c;
+  --bf-purple: #c4b7e3;
+  --bf-purple-soft: #302a3d;
 }
 
 @theme inline {
@@ -34,6 +69,7 @@
 
 * { box-sizing: border-box; }
 html { background: var(--background); scroll-behavior: smooth; }
+html.dark { background: var(--background); }
 body {
   min-width: 320px;
   margin: 0;
@@ -42,6 +78,10 @@ body {
   color: var(--foreground);
   font-family: "Noto Kufi Arabic", "DM Sans", sans-serif;
   text-rendering: optimizeLegibility;
+}
+html.dark body {
+  background: var(--background);
+  color: var(--foreground);
 }
 button, a { -webkit-tap-highlight-color: transparent; }
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
@@ -70,6 +110,133 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 
 .bf-text-muted { color: var(--muted); }
+
+html.dark :where(
+  .bg-white,
+  .bg-gray-50,
+  .bg-gray-100,
+  .bg-neutral-50,
+  .bg-neutral-100,
+  .bg-slate-50,
+  .bg-slate-100,
+  .bg-zinc-50,
+  .bg-zinc-100
+) {
+  background-color: var(--surface) !important;
+}
+
+html.dark :where(
+  .text-gray-900,
+  .text-gray-800,
+  .text-neutral-900,
+  .text-neutral-800,
+  .text-slate-900,
+  .text-slate-800,
+  .text-zinc-900,
+  .text-zinc-800
+) {
+  color: var(--foreground);
+}
+
+html.dark :where(
+  .text-gray-700,
+  .text-gray-600,
+  .text-gray-500,
+  .text-neutral-700,
+  .text-neutral-600,
+  .text-neutral-500,
+  .text-slate-700,
+  .text-slate-600,
+  .text-slate-500,
+  .text-zinc-700,
+  .text-zinc-600,
+  .text-zinc-500
+) {
+  color: var(--muted);
+}
+
+html.dark :where(
+  .border-gray-100,
+  .border-gray-200,
+  .border-gray-300,
+  .border-neutral-100,
+  .border-neutral-200,
+  .border-slate-100,
+  .border-slate-200,
+  .border-zinc-100,
+  .border-zinc-200
+) {
+  border-color: var(--border);
+}
+
+html.dark [class*="bg-[#d"],
+html.dark [class*="bg-[#e"],
+html.dark [class*="bg-[#f"] {
+  background-color: var(--surface-muted) !important;
+}
+
+html.dark [class*="bg-white/"] {
+  background-color: color-mix(in srgb, var(--surface) 96%, transparent) !important;
+}
+
+html.dark [class*="border-[#d"],
+html.dark [class*="border-[#e"],
+html.dark [class*="border-[#f"] {
+  border-color: var(--border) !important;
+}
+
+html.dark :where([class*="text-[#263"], [class*="text-[#334"], [class*="text-[#344"]]) {
+  color: var(--foreground) !important;
+}
+
+html.dark :where(
+  [class*="text-[#147050"],
+  [class*="text-[#28694b"],
+  [class*="text-[#247456"],
+  [class*="text-[#285f46"],
+  [class*="text-[#286547"],
+  [class*="text-[#315f49"],
+  [class*="text-[#327453"]
+) {
+  color: var(--primary) !important;
+}
+
+html.dark :where(
+  [class*="text-[#465"],
+  [class*="text-[#496"],
+  [class*="text-[#526"],
+  [class*="text-[#546"],
+  [class*="text-[#647"],
+  [class*="text-[#5f6"],
+  [class*="text-[#637"],
+  [class*="text-[#657"],
+  [class*="text-[#687"],
+  [class*="text-[#6e7"],
+  [class*="text-[#718"],
+  [class*="text-[#899"],
+  [class*="text-[#a8"]
+) {
+  color: var(--muted) !important;
+}
+
+html.dark :where(.bf-marketing, .bf-landing) {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+html.dark :where(.bf-marketing, .bf-landing) [class*="bg-[#d"],
+html.dark :where(.bf-marketing, .bf-landing) [class*="bg-[#e"],
+html.dark :where(.bf-marketing, .bf-landing) [class*="bg-[#f"] {
+  background-color: var(--surface-muted) !important;
+}
+
+html.dark :where(.bf-marketing, .bf-landing) :where(h1, h2, h3, h4, label) {
+  color: var(--foreground);
+}
+
+html.dark :where(.bf-marketing, .bf-landing) :where(p, li) {
+  color: var(--muted);
+}
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

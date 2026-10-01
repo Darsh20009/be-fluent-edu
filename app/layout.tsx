@@ -7,7 +7,6 @@ import SessionProvider from "@/lib/providers/SessionProvider";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import BFAuthExperience from "@/components/auth/BFAuthExperience";
-import LatestCouponPopup from "@/components/LatestCouponPopup";
 import { Toaster } from "react-hot-toast";
 import { defaultMetadata, organizationJsonLd, courseJsonLd, faqJsonLd, websiteJsonLd } from "@/lib/seo";
 
@@ -28,7 +27,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: '#24714f',
-  colorScheme: 'light',
+  colorScheme: 'light dark',
 };
 
 export default function RootLayout({
@@ -40,7 +39,6 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         {/* Preload critical assets immediately */}
-        <link rel="preload" href="/brand/be-fluent-mark-2026.png" as="image" />
         <link rel="icon" type="image/png" sizes="32x32" href="/brand/be-fluent-icon-2026-32.png" />
         <link rel="icon" type="image/png" sizes="48x48" href="/brand/be-fluent-icon-2026-48.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/brand/be-fluent-apple-2026.png" />
@@ -101,7 +99,6 @@ export default function RootLayout({
                 },
               }}
             />
-            <LatestCouponPopup />
             <BFAuthExperience />
             {children}
             <PWAInstallPrompt />

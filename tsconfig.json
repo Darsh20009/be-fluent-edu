@@ -30,5 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "attached_assets"]
+  "exclude": ["node_modules", "attached_assets", "artifacts/mockup-sandbox"]
 }

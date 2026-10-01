@@ -16,11 +16,14 @@ import {
   MessageCircle,
   Mic2,
   NotebookPen,
+  Moon,
+  Sun,
   UsersRound,
   X,
 } from 'lucide-react';
 import { useTheme } from '@/lib/contexts/ThemeContext';
 import BrandLockup from '@/components/brand/BrandLockup';
+import LatestCouponPopup from '@/components/LatestCouponPopup';
 
 type PackageItem = {
   id: string | number;
@@ -40,8 +43,9 @@ const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 const packageEndpoint = '/api/packages';
 
 export default function HomePage() {
-  const { language, toggleLanguage } = useTheme();
+  const { language, theme, toggleTheme, toggleLanguage } = useTheme();
   const isArabic = language === 'ar';
+  const isDark = theme === 'dark';
   const tr = (arabic: string, english: string) => isArabic ? arabic : english;
   const [menuOpen, setMenuOpen] = useState(false);
   const [level, setLevel] = useState('B1');
@@ -134,8 +138,8 @@ export default function HomePage() {
   const ArrowIcon = isArabic ? ArrowLeft : ArrowUpRight;
 
   return (
-    <main dir={isArabic ? 'rtl' : 'ltr'} lang={isArabic ? 'ar' : 'en'} className="min-h-[100dvh] overflow-x-clip bg-[#fffefa] text-[#26352f]">
-      <header className="relative z-30 border-b border-[#e7ebe5] bg-[#fffefa]">
+    <main dir={isArabic ? 'rtl' : 'ltr'} lang={isArabic ? 'ar' : 'en'} className={`bf-landing min-h-[100dvh] overflow-x-clip ${isDark ? 'bg-[#111915] text-[#e8efe9]' : 'bg-[#fffefa] text-[#26352f]'}`}>
+      <header className={`relative z-30 border-b ${isDark ? 'border-[#344239] bg-[#19231d] text-[#e8efe9]' : 'border-[#e7ebe5] bg-[#fffefa] text-[#26352f]'}`}>
         <div dir="ltr" className="mx-auto flex h-[72px] max-w-[1240px] items-center justify-between px-5 sm:px-8">
           <Link href="/" className="shrink-0" aria-label="Be Fluent home">
             <BrandLockup size="sm" priority />
@@ -149,6 +153,9 @@ export default function HomePage() {
           </nav>
 
           <div className="hidden items-center gap-2 lg:flex">
+            <button type="button" onClick={toggleTheme} className={`grid min-h-10 min-w-10 place-items-center rounded ${isDark ? 'bg-[#26332e] text-[#e8efe9]' : 'bg-[#f1f5ef] text-[#54635b]'}`} aria-label={tr(isDark ? 'التبديل إلى الوضع الفاتح' : 'التبديل إلى الوضع الداكن', isDark ? 'Switch to light mode' : 'Switch to dark mode')}>
+              {isDark ? <Sun size={17} aria-hidden="true" /> : <Moon size={17} aria-hidden="true" />}
+            </button>
             <button type="button" onClick={toggleLanguage} className="flex min-h-11 min-w-11 items-center justify-center rounded px-3 text-[12px] font-semibold text-[#54635b] transition-colors hover:bg-[#f1f5ef] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#28694b]" aria-label={tr('عرض الموقع بالإنجليزية', 'View website in Arabic')}>
               {isArabic ? 'EN' : 'العربية'}
             </button>
@@ -161,6 +168,9 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-1 lg:hidden">
+            <button type="button" onClick={toggleTheme} className="flex h-11 w-11 items-center justify-center rounded" aria-label={tr(isDark ? 'التبديل إلى الوضع الفاتح' : 'التبديل إلى الوضع الداكن', isDark ? 'Switch to light mode' : 'Switch to dark mode')}>
+              {isDark ? <Sun size={17} aria-hidden="true" /> : <Moon size={17} aria-hidden="true" />}
+            </button>
             <button type="button" onClick={toggleLanguage} className="flex min-h-11 min-w-11 items-center justify-center rounded px-2 text-[12px] font-semibold text-[#54635b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#28694b]" aria-label={tr('عرض الموقع بالإنجليزية', 'View website in Arabic')}>
               {isArabic ? 'EN' : 'العربية'}
             </button>
@@ -170,7 +180,7 @@ export default function HomePage() {
           </div>
         </div>
         {menuOpen && (
-          <nav id="mobile-navigation" className="absolute inset-x-0 top-full border-b border-[#e7ebe5] bg-[#fffefa] px-5 py-5 lg:hidden" aria-label={tr('التنقل الرئيسي', 'Main navigation')}>
+          <nav id="mobile-navigation" className={`absolute inset-x-0 top-full border-b px-5 py-5 lg:hidden ${isDark ? 'border-[#344239] bg-[#19231d] text-[#e8efe9]' : 'border-[#e7ebe5] bg-[#fffefa] text-[#26352f]'}`} aria-label={tr('التنقل الرئيسي', 'Main navigation')}>
             <div className="mx-auto flex max-w-[1240px] flex-col items-stretch gap-1">
               <Link href="/about-path" onClick={closeMenu} className="rounded px-3 py-3 text-sm font-semibold hover:bg-[#f1f5ef]">{tr('عن المنهج', 'Our approach')}</Link>
               <Link href="/learning-path" onClick={closeMenu} className="rounded px-3 py-3 text-sm font-semibold hover:bg-[#f1f5ef]">{tr('مسار التعلم', 'Learning path')}</Link>
@@ -212,7 +222,7 @@ export default function HomePage() {
           </div>
         </div>
         <div className="relative order-2 min-h-[290px] overflow-hidden rounded-sm bg-[#e9eee8] sm:min-h-[390px] lg:min-h-[470px]">
-          <Image src="/assets/home-hero-desk.png" alt={tr('مساحة هادئة للتعلم والممارسة', 'A calm desk for learning and practice')} fill priority sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover object-center" />
+          <Image src="/assets/home-hero-desk-optimized.webp" alt={tr('مساحة هادئة للتعلم والممارسة', 'A calm desk for learning and practice')} fill priority sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover object-center" />
           <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#17241e]/35 to-transparent" aria-hidden="true" />
           <div className={`absolute bottom-4 ${isArabic ? 'right-4 sm:right-6' : 'left-4 sm:left-6'} flex items-center gap-3 border border-white/50 bg-[#fffefa]/95 px-4 py-3 text-[11px] font-semibold text-[#33463b] sm:bottom-6`}>
             <span className="flex h-9 w-9 items-center justify-center rounded-sm bg-[#e7efe8] text-[#28694b]"><BookOpen size={17} strokeWidth={1.7} aria-hidden="true" /></span>
@@ -485,7 +495,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="border-t border-[#e4eae3] bg-[#fffefa]">
+      <footer className={`border-t ${isDark ? 'border-[#344239] bg-[#111915]' : 'border-[#e4eae3] bg-[#fffefa]'}`}>
         <div className="mx-auto flex max-w-[1240px] flex-col gap-6 px-5 py-8 sm:px-8 md:flex-row md:items-center md:justify-between">
           <div className={isArabic ? 'text-right' : 'text-left'}>
             <Link href="/" className="inline-block" aria-label="Be Fluent home">
@@ -502,6 +512,7 @@ export default function HomePage() {
           <p className="text-[11px] text-[#89958c]">© Be Fluent</p>
         </div>
       </footer>
+      <LatestCouponPopup />
     </main>
   );
 }

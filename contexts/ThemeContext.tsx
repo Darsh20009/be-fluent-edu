@@ -23,14 +23,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true)
-    const savedTheme = localStorage.getItem('theme') as Theme || 'light'
-    const savedLang = localStorage.getItem('language') as Language || 'ar'
+    const storedTheme = localStorage.getItem('theme')
+    const storedLanguage = localStorage.getItem('language')
+    const savedTheme: Theme = storedTheme === 'dark' ? 'dark' : 'light'
+    const savedLang: Language = storedLanguage === 'en' ? 'en' : 'ar'
     setThemeState(savedTheme)
     setLanguageState(savedLang)
     
-    if (savedTheme === 'dark') {
-      document.documentElement.classList.add('dark')
-    }
+    document.documentElement.classList.toggle('dark', savedTheme === 'dark')
     document.documentElement.dir = savedLang === 'ar' ? 'rtl' : 'ltr'
     document.documentElement.lang = savedLang
   }, [])
@@ -39,11 +39,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeState(newTheme)
     localStorage.setItem('theme', newTheme)
     
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
+    document.documentElement.classList.toggle('dark', newTheme === 'dark')
   }
 
   const setLanguage = (newLang: Language) => {

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import ThemeToggle from '@/components/ThemeToggle'
 import styles from './phase4.module.css'
 
 export function Phase4Nav({ area }: { area: 'admin' | 'teacher' | 'student' }) {
@@ -45,5 +46,6 @@ export function Phase4Nav({ area }: { area: 'admin' | 'teacher' | 'student' }) {
 
   return <nav className={styles.nav} aria-label={labels[area]}>
     {links.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}
+    <ThemeToggle />
   </nav>
 }

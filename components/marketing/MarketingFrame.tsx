@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { Menu, X } from 'lucide-react'
+import { Menu, Moon, Sun, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useTheme } from '@/lib/contexts/ThemeContext'
 import BrandLockup from '@/components/brand/BrandLockup'
+import LatestCouponPopup from '@/components/LatestCouponPopup'
 
 const links = [
   { href: '/learning-path', label: 'كيف نبدأ' },
@@ -16,9 +17,10 @@ const links = [
 
 export function MarketingHeader() {
   const [open, setOpen] = useState(false)
-  const { language, toggleLanguage } = useTheme()
+  const { language, theme, toggleTheme, toggleLanguage } = useTheme()
   const isArabic = language === 'ar'
-  return <header dir={isArabic ? 'rtl' : 'ltr'} className="border-b border-[#dfe5dd] bg-[#fdfcf8] text-[#1e2b29]">
+  const isDark = theme === 'dark'
+  return <header dir={isArabic ? 'rtl' : 'ltr'} className={`border-b ${isDark ? 'border-[#344239] bg-[#19231d] text-[#e8efe9]' : 'border-[#dfe5dd] bg-[#fdfcf8] text-[#1e2b29]'}`}>
     <div className="mx-auto flex h-[70px] max-w-[1130px] items-center justify-between px-5">
       <Link href="/" className="shrink-0" aria-label="Be Fluent">
         <BrandLockup size="sm" priority />
@@ -27,13 +29,21 @@ export function MarketingHeader() {
         {links.map((link, index) => <Link key={link.href} href={link.href} className="transition-colors hover:text-[#147050]">{isArabic ? link.label : ['How it works','Learning path','Plans','Grammar','Contact'][index]}</Link>)}
       </nav>
       <div className="hidden items-center gap-2 md:flex">
+        <button type="button" onClick={toggleTheme} aria-label={isArabic ? (isDark ? 'التبديل إلى الوضع الفاتح' : 'التبديل إلى الوضع الداكن') : (isDark ? 'Switch to light mode' : 'Switch to dark mode')} className={`grid min-h-10 min-w-10 place-items-center rounded-lg ${isDark ? 'bg-[#26332e] text-[#eff1e9] hover:bg-[#334239]' : 'bg-[#edf1eb] text-[#435148] hover:bg-[#e4ebe3]'}`}>
+          {isDark ? <Sun size={17} aria-hidden="true" /> : <Moon size={17} aria-hidden="true" />}
+        </button>
         <button onClick={toggleLanguage} className="px-2 text-[10px] font-bold text-[#64716c]">{isArabic ? 'EN' : 'عربي'}</button>
         <Link href="/auth/login" className="border border-[#cfd8d1] px-4 py-2 text-[11px] font-bold transition hover:border-[#147050]">{isArabic ? 'دخول' : 'Login'}</Link>
         <Link href="/auth/register" className="bg-[#147050] px-4 py-2 text-[11px] font-bold text-[#fffef9] transition hover:bg-[#0e5940]">{isArabic ? 'ابدأ معنا' : 'Get started'}</Link>
       </div>
-      <button onClick={() => setOpen(!open)} aria-label="القائمة" className="p-2 md:hidden">{open ? <X size={19} /> : <Menu size={19} />}</button>
+      <div className="flex items-center gap-1 md:hidden">
+        <button type="button" onClick={toggleTheme} aria-label={isArabic ? (isDark ? 'التبديل إلى الوضع الفاتح' : 'التبديل إلى الوضع الداكن') : (isDark ? 'Switch to light mode' : 'Switch to dark mode')} className="grid h-10 w-10 place-items-center rounded-lg">
+          {isDark ? <Sun size={17} aria-hidden="true" /> : <Moon size={17} aria-hidden="true" />}
+        </button>
+        <button onClick={() => setOpen(!open)} aria-label="القائمة" className="p-2">{open ? <X size={19} /> : <Menu size={19} />}</button>
+      </div>
     </div>
-    {open && <div className="border-t border-[#dfe5dd] px-5 py-4 md:hidden">
+    {open && <div className={`border-t px-5 py-4 md:hidden ${isDark ? 'border-[#344239] bg-[#19231d]' : 'border-[#dfe5dd] bg-[#fdfcf8]'}`}>
       <nav className="mx-auto flex max-w-[1130px] flex-col gap-3 text-sm font-bold">
         <button onClick={toggleLanguage} className="text-start font-bold">{isArabic ? 'English' : 'العربية'}</button>
         {links.map((link, index) => <Link onClick={() => setOpen(false)} key={link.href} href={link.href}>{isArabic ? link.label : ['How it works','Learning path','Plans','Grammar','Contact'][index]}</Link>)}
@@ -61,6 +71,7 @@ export function MarketingFooter() {
 }
 
 export function MarketingFrame({ children }: { children: ReactNode }) {
-  const { language } = useTheme()
-  return <main dir={language === 'ar' ? 'rtl' : 'ltr'} className="min-h-[100dvh] bg-[#fdfcf8] font-sans text-[#1e2b29]"><MarketingHeader />{children}<MarketingFooter /></main>
+  const { language, theme } = useTheme()
+  const isDark = theme === 'dark'
+  return <main dir={language === 'ar' ? 'rtl' : 'ltr'} className={`bf-marketing min-h-[100dvh] font-sans ${isDark ? 'bg-[#111915] text-[#e8efe9]' : 'bg-[#fdfcf8] text-[#1e2b29]'}`}><MarketingHeader /><LatestCouponPopup />{children}<MarketingFooter /></main>
 }

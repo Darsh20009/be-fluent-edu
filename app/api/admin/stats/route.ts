@@ -39,7 +39,8 @@ export async function GET() {
       }),
       prisma.subscription.count({ where: { status: 'PENDING' } }),
       prisma.subscription.findMany({
-        where: { status: 'APPROVED' }
+        where: { status: 'APPROVED' },
+        select: { packageId: true }
       }),
       prisma.subscription.findMany({
         take: 5,
@@ -83,30 +84,23 @@ export async function GET() {
     }
 
     // Monthly revenue visualization (last 6 months)
-    const monthlyRevenue = []
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date()
-      date.setMonth(date.getMonth() - i)
+    const currentMonth = new Date()
+    const monthlyRevenue = await Promise.all(Array.from({ length: 6 }, async (_, index) => {
+      const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - (5 - index), 1)
       const month = date.toLocaleString('default', { month: 'short' })
-      const year = date.getFullYear()
-      
-      const startOfMonth = new Date(year, date.getMonth(), 1)
-      const endOfMonth = new Date(year, date.getMonth() + 1, 0)
+      const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1)
+      const startOfNextMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1)
 
       const monthSubs = await prisma.subscription.findMany({
         where: {
           status: 'APPROVED',
-          createdAt: {
-            gte: startOfMonth,
-            lte: endOfMonth
-          }
+          createdAt: { gte: startOfMonth, lt: startOfNextMonth }
         },
         include: { Package: { select: { price: true } } }
       })
 
-      const revenue = monthSubs.reduce((acc, sub) => acc + sub.Package.price, 0)
-      monthlyRevenue.push({ month, revenue })
-    }
+      return { month, revenue: monthSubs.reduce((sum, sub) => sum + sub.Package.price, 0) }
+    }))
 
     return NextResponse.json({
       totalUsers,

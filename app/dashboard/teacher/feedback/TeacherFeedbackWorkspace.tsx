@@ -1,0 +1,645 @@
+'use client'
+
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
+import Link from 'next/link'
+import {
+  ArrowLeft,
+  BookOpen,
+  Check,
+  CheckCircle2,
+  ChevronLeft,
+  Circle,
+  Clock3,
+  Plus,
+  Save,
+  Send,
+  Trash2,
+} from 'lucide-react'
+
+type Participant = {
+  userId?: string
+  status?: string
+  role?: string
+  user?: { id?: string; name?: string | null; role?: string }
+}
+type Session = {
+  id: string
+  title?: string
+  status?: string
+  startTime?: string
+  endTime?: string
+  group?: { name?: string | null; nameAr?: string | null } | null
+  participants?: Participant[]
+}
+type Expression = { expression: string; meaning: string; example: string; category: string }
+type Mistake = { original: string; correction: string; explanation: string }
+type Pronunciation = { target: string; actual: string; guidance: string; phonetic: string; teacherNote: string }
+type Ebi = { betterExpression: string; explanation: string; priority: 'LOW' | 'NORMAL' | 'HIGH' }
+type Draft = {
+  summary: string
+  teacherNotes: string
+  expressions: Expression[]
+  idioms: Expression[]
+  mistakes: Mistake[]
+  pronunciation: Pronunciation[]
+  ebi: Ebi[]
+}
+type FeedbackRecord = {
+  id: string
+  sessionId: string
+  studentId: string
+  summary?: string | null
+  teacherNotes?: string | null
+  status: string
+  updatedAt?: string
+  expressions?: Array<Partial<Expression>>
+  mistakes?: Array<Partial<Mistake>>
+  pronunciation?: Array<Partial<Pronunciation>>
+  ebi?: Array<Partial<Ebi>>
+}
+type StudentSession = { session: Session; studentId: string; studentName: string }
+type RequestState = 'loading' | 'ready' | 'error'
+
+const emptyDraft = (): Draft => ({
+  summary: '',
+  teacherNotes: '',
+  expressions: [],
+  idioms: [],
+  mistakes: [],
+  pronunciation: [],
+  ebi: [],
+})
+
+function getItems<T>(body: unknown): T[] {
+  if (Array.isArray(body)) return body as T[]
+  if (body && typeof body === 'object' && Array.isArray((body as { items?: unknown }).items)) {
+    return (body as { items: T[] }).items
+  }
+  return []
+}
+
+function makeKey(sessionId: string, studentId: string) {
+  return `${sessionId}:${studentId}`
+}
+
+function formatDate(value?: string) {
+  if (!value) return ''
+  const date = new Date(value)
+  return Number.isNaN(date.valueOf()) ? '' : date.toLocaleString('ar-SA', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
+}
+
+function statusText(status?: string) {
+  if (status === 'PUBLISHED') return 'منشور'
+  if (status === 'READY_TO_PUBLISH') return 'جاهز للمراجعة'
+  if (status === 'DRAFT') return 'مسودة'
+  return 'لم يبدأ'
+}
+
+function recordToDraft(record?: FeedbackRecord): Draft {
+  if (!record) return emptyDraft()
+  const allExpressions = (record.expressions || []).map((item) => ({
+    expression: String(item.expression || ''),
+    meaning: String(item.meaning || ''),
+    example: String(item.example || ''),
+    category: String(item.category || 'VOCABULARY'),
+  }))
+  return {
+    summary: record.summary || '',
+    teacherNotes: record.teacherNotes || '',
+    expressions: allExpressions.filter((item) => item.category !== 'IDIOM'),
+    idioms: allExpressions.filter((item) => item.category === 'IDIOM'),
+    mistakes: (record.mistakes || []).map((item) => ({
+      original: String(item.original || ''),
+      correction: String(item.correction || ''),
+      explanation: String(item.explanation || ''),
+    })),
+    pronunciation: (record.pronunciation || []).map((item) => ({
+      target: String(item.target || ''),
+      actual: String(item.actual || ''),
+      guidance: String(item.guidance || ''),
+      phonetic: String(item.phonetic || ''),
+      teacherNote: String(item.teacherNote || ''),
+    })),
+    ebi: (record.ebi || []).map((item) => ({
+      betterExpression: String(item.betterExpression || ''),
+      explanation: String(item.explanation || ''),
+      priority: item.priority === 'LOW' || item.priority === 'HIGH' ? item.priority : 'NORMAL',
+    })),
+  }
+}
+
+async function readRequest(url: string) {
+  try {
+    const response = await fetch(url, { cache: 'no-store' })
+    const body: unknown = await response.json().catch(() => null)
+    if (!response.ok) {
+      const envelope = body && typeof body === 'object' ? body as { error?: { message?: string }; message?: string } : undefined
+      return { ok: false as const, message: envelope?.error?.message || envelope?.message || 'تعذر تحميل البيانات.' }
+    }
+    return { ok: true as const, body }
+  } catch {
+    return { ok: false as const, message: 'تعذر الاتصال بالخدمة. تحقق من الاتصال ثم أعد المحاولة.' }
+  }
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+  multiline = false,
+  rows = 3,
+  disabled = false,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+  multiline?: boolean
+  rows?: number
+  disabled?: boolean
+}) {
+  const fieldClass = 'mt-1.5 w-full rounded-xl border px-3 py-2.5 text-sm leading-6 outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] disabled:opacity-60'
+  return (
+    <label className="block min-w-0 text-xs font-semibold" style={{ color: 'var(--muted)' }}>
+      {label}
+      {multiline ? (
+        <textarea
+          rows={rows}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={fieldClass}
+          style={{ background: 'var(--surface)', color: 'var(--foreground)', borderColor: 'var(--border)' }}
+        />
+      ) : (
+        <input
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={fieldClass}
+          style={{ background: 'var(--surface)', color: 'var(--foreground)', borderColor: 'var(--border)' }}
+        />
+      )}
+    </label>
+  )
+}
+
+function Section({
+  title,
+  note,
+  count,
+  onAdd,
+  disabled,
+  children,
+}: {
+  title: string
+  note: string
+  count: number
+  onAdd: () => void
+  disabled: boolean
+  children: ReactNode
+}) {
+  return (
+    <section className="rounded-2xl border p-4 sm:p-5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="font-bold">{title}</h3>
+            <span className="rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums" style={{ background: 'var(--surface-muted)', color: 'var(--muted)' }}>{count}</span>
+          </div>
+          <p className="mt-1 text-xs leading-5" style={{ color: 'var(--muted)' }}>{note}</p>
+        </div>
+        {!disabled && <button type="button" onClick={onAdd} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 text-xs font-bold" style={{ background: 'var(--bf-green-soft)', color: 'var(--primary)' }}><Plus size={15} aria-hidden="true" />إضافة</button>}
+      </div>
+      <div className="mt-4 space-y-3">{children}</div>
+    </section>
+  )
+}
+
+function EmptyRows({ children }: { children: ReactNode }) {
+  return <p className="rounded-xl border border-dashed px-4 py-5 text-center text-sm" style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>{children}</p>
+}
+
+export default function TeacherFeedbackWorkspace() {
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [records, setRecords] = useState<FeedbackRecord[]>([])
+  const [sessionsState, setSessionsState] = useState<RequestState>('loading')
+  const [recordsState, setRecordsState] = useState<RequestState>('loading')
+  const [selectedKey, setSelectedKey] = useState('')
+  const [draft, setDraft] = useState<Draft>(emptyDraft)
+  const [search, setSearch] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [notice, setNotice] = useState<{ kind: 'success' | 'error' | 'info'; text: string } | null>(null)
+  const [retryKey, setRetryKey] = useState(0)
+
+  const load = useCallback(async () => {
+    setSessionsState('loading')
+    setRecordsState('loading')
+    const [sessionResult, feedbackResult] = await Promise.all([
+      readRequest('/api/teacher/classes/sessions'),
+      readRequest('/api/teacher/feedback'),
+    ])
+    if (sessionResult.ok) {
+      setSessions(getItems<Session>(sessionResult.body))
+      setSessionsState('ready')
+    } else {
+      setSessions([])
+      setSessionsState('error')
+    }
+    if (feedbackResult.ok) {
+      setRecords(getItems<FeedbackRecord>(feedbackResult.body))
+      setRecordsState('ready')
+    } else {
+      setRecords([])
+      setRecordsState('error')
+    }
+  }, [])
+
+  useEffect(() => { void load() }, [load, retryKey])
+
+  const sessionStudents = useMemo<StudentSession[]>(() => sessions
+    .filter((session) => ['ENDED', 'FEEDBACK_PENDING', 'COMPLETED'].includes(String(session.status || '').toUpperCase()))
+    .flatMap((session) => (session.participants || [])
+      .filter((participant) => participant.status !== 'CANCELLED' && participant.role !== 'TEACHER')
+      .map((participant) => {
+        const studentId = String(participant.userId || participant.user?.id || '')
+        if (!studentId) return null
+        return {
+          session,
+          studentId,
+          studentName: participant.user?.name || 'طالب',
+        }
+      })
+      .filter((item): item is StudentSession => Boolean(item)))
+    .sort((left, right) => new Date(right.session.startTime || 0).valueOf() - new Date(left.session.startTime || 0).valueOf()), [sessions])
+
+  useEffect(() => {
+    if (!sessionStudents.length) return
+    if (!selectedKey || !sessionStudents.some((item) => makeKey(item.session.id, item.studentId) === selectedKey)) {
+      const first = sessionStudents[0]
+      setSelectedKey(makeKey(first.session.id, first.studentId))
+    }
+  }, [sessionStudents, selectedKey])
+
+  useEffect(() => {
+    if (!selectedKey) return
+    const record = records.find((item) => makeKey(item.sessionId, item.studentId) === selectedKey)
+    setDraft(recordToDraft(record))
+    setNotice(null)
+  }, [selectedKey])
+
+  const selected = sessionStudents.find((item) => makeKey(item.session.id, item.studentId) === selectedKey)
+  const existing = records.find((item) => makeKey(item.sessionId, item.studentId) === selectedKey)
+  const published = existing?.status === 'PUBLISHED'
+  const filteredStudents = sessionStudents.filter((item) => {
+    const text = `${item.studentName} ${item.session.title || ''} ${item.session.group?.nameAr || item.session.group?.name || ''}`.toLocaleLowerCase()
+    return text.includes(search.trim().toLocaleLowerCase())
+  })
+  const isEducationalContentPresent = Boolean(
+    draft.summary.trim() || draft.expressions.some((item) => item.expression.trim()) || draft.idioms.some((item) => item.expression.trim())
+    || draft.mistakes.some((item) => item.original.trim() || item.correction.trim())
+    || draft.pronunciation.some((item) => item.target.trim())
+    || draft.ebi.some((item) => item.betterExpression.trim()),
+  )
+
+  const setField = <K extends keyof Draft>(key: K, value: Draft[K]) => setDraft((current) => ({ ...current, [key]: value }))
+
+  const updateRow = <T extends object, K extends keyof Draft>(
+    key: K,
+    index: number,
+    field: keyof T,
+    value: string,
+  ) => {
+    setDraft((current) => ({
+      ...current,
+      [key]: (current[key] as T[]).map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item),
+    }))
+  }
+
+  const deleteRow = <K extends keyof Draft>(key: K, index: number) => {
+    setDraft((current) => ({ ...current, [key]: (current[key] as unknown[]).filter((_, itemIndex) => itemIndex !== index) }))
+  }
+
+  const saveBody = () => ({
+    sessionId: selected?.session.id,
+    studentId: selected?.studentId,
+    summary: draft.summary.trim() || null,
+    teacherNotes: draft.teacherNotes.trim() || null,
+    expressions: [
+      ...draft.expressions.filter((item) => item.expression.trim()).map((item) => ({
+        expression: item.expression.trim(),
+        meaning: item.meaning.trim() || null,
+        example: item.example.trim() || null,
+        category: item.category || 'VOCABULARY',
+      })),
+      ...draft.idioms.filter((item) => item.expression.trim()).map((item) => ({
+        expression: item.expression.trim(),
+        meaning: item.meaning.trim() || null,
+        example: item.example.trim() || null,
+        category: 'IDIOM',
+      })),
+    ],
+    mistakes: draft.mistakes.filter((item) => item.original.trim() && item.correction.trim()).map((item) => ({
+      original: item.original.trim(),
+      correction: item.correction.trim(),
+      explanation: item.explanation.trim() || null,
+    })),
+    pronunciation: draft.pronunciation.filter((item) => item.target.trim() && item.guidance.trim()).map((item) => ({
+      target: item.target.trim(),
+      actual: item.actual.trim() || null,
+      guidance: item.guidance.trim(),
+      phonetic: item.phonetic.trim() || null,
+      teacherNote: item.teacherNote.trim() || null,
+    })),
+    ebi: draft.ebi.filter((item) => item.betterExpression.trim()).map((item) => ({
+      betterExpression: item.betterExpression.trim(),
+      explanation: item.explanation.trim() || null,
+      priority: item.priority,
+    })),
+  })
+
+  const transition = async (id: string, status: 'DRAFT' | 'READY_TO_PUBLISH' | 'PUBLISHED') => {
+    const response = await fetch(`/api/teacher/feedback/${encodeURIComponent(id)}/transition`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    })
+    const body = await response.json().catch(() => null)
+    if (!response.ok) {
+      const envelope = body && typeof body === 'object' ? body as { error?: { message?: string } } : undefined
+      throw new Error(envelope?.error?.message || `تعذر تحديث حالة الملاحظة (${response.status}).`)
+    }
+    return body as Partial<FeedbackRecord>
+  }
+
+  const saveUpsert = async () => {
+    if (!selected) throw new Error('اختر حصة وطالباً أولاً.')
+    const response = await fetch('/api/teacher/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(saveBody()),
+    })
+    const body = await response.json().catch(() => null)
+    if (!response.ok) {
+      const envelope = body && typeof body === 'object' ? body as { error?: { message?: string } } : undefined
+      throw new Error(envelope?.error?.message || `تعذر حفظ الملاحظة (${response.status}).`)
+    }
+    return body as FeedbackRecord
+  }
+
+  const replaceRecord = (record: FeedbackRecord) => {
+    setRecords((current) => {
+      const index = current.findIndex((item) => item.id === record.id || makeKey(item.sessionId, item.studentId) === makeKey(record.sessionId, record.studentId))
+      if (index < 0) return [record, ...current]
+      return current.map((item, itemIndex) => itemIndex === index ? { ...item, ...record } : item)
+    })
+  }
+
+  const saveDraft = async () => {
+    if (!selected || published) return
+    setBusy(true)
+    setNotice(null)
+    try {
+      if (existing?.status === 'READY_TO_PUBLISH') await transition(existing.id, 'DRAFT')
+      const saved = await saveUpsert()
+      const local = { ...saved, status: 'DRAFT' }
+      replaceRecord(local)
+      setNotice({ kind: 'success', text: 'حُفظت المسودة.' })
+    } catch (error) {
+      setNotice({ kind: 'error', text: error instanceof Error ? error.message : 'تعذر حفظ المسودة.' })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const prepareToPublish = async () => {
+    if (!selected || published) return
+    if (!isEducationalContentPresent) {
+      setNotice({ kind: 'error', text: 'أضف ملاحظة تعليمية واحدة على الأقل قبل الإرسال للمراجعة.' })
+      return
+    }
+    setBusy(true)
+    setNotice(null)
+    try {
+      if (existing?.status === 'READY_TO_PUBLISH') await transition(existing.id, 'DRAFT')
+      const saved = await saveUpsert()
+      const ready = await transition(saved.id, 'READY_TO_PUBLISH')
+      const next = { ...saved, ...ready, status: 'READY_TO_PUBLISH' }
+      replaceRecord(next as FeedbackRecord)
+      setNotice({ kind: 'success', text: 'أُرسلت الملاحظة للمراجعة قبل النشر.' })
+    } catch (error) {
+      setNotice({ kind: 'error', text: error instanceof Error ? error.message : 'تعذر تجهيز الملاحظة للنشر.' })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const publish = async () => {
+    if (!existing || existing.status !== 'READY_TO_PUBLISH') return
+    if (!window.confirm('هل تريد نشر هذه الملاحظة للطالب؟')) return
+    setBusy(true)
+    setNotice(null)
+    try {
+      const result = await transition(existing.id, 'PUBLISHED')
+      replaceRecord({ ...existing, ...result, status: 'PUBLISHED' })
+      setNotice({ kind: 'success', text: 'نُشرت الملاحظة للطالب.' })
+    } catch (error) {
+      setNotice({ kind: 'error', text: error instanceof Error ? error.message : 'تعذر نشر الملاحظة.' })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const editorUnavailable = published || !selected || recordsState !== 'ready'
+  const cardStyle = { background: 'var(--surface)', color: 'var(--foreground)', borderColor: 'var(--border)' }
+
+  return (
+    <div className="space-y-5" dir="rtl">
+      <section className="grid gap-4 xl:grid-cols-[minmax(280px,.78fr)_minmax(0,1.22fr)]">
+        <aside className="overflow-hidden rounded-2xl border" style={cardStyle}>
+          <div className="border-b p-4 sm:p-5" style={{ borderColor: 'var(--border)' }}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="font-bold">الحصص المكتملة</h2>
+                <p className="mt-1 text-xs leading-5" style={{ color: 'var(--muted)' }}>اختر طالباً لكتابة ملاحظته التعليمية.</p>
+              </div>
+              <span className="rounded-full px-2.5 py-1 text-xs font-bold tabular-nums" style={{ background: 'var(--surface-muted)', color: 'var(--muted)' }}>{sessionStudents.length}</span>
+            </div>
+            <label className="mt-4 block">
+              <span className="sr-only">ابحث عن طالب أو حصة</span>
+              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="ابحث عن طالب أو حصة" className="min-h-11 w-full rounded-xl border px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]" style={{ background: 'var(--surface)', color: 'var(--foreground)', borderColor: 'var(--border)' }} />
+            </label>
+          </div>
+          <div className="max-h-[620px] space-y-1 overflow-y-auto p-2">
+            {sessionsState === 'loading' && <div className="space-y-2 p-2" aria-busy="true">{[0, 1, 2].map((item) => <div key={item} className="h-[82px] animate-pulse rounded-xl" style={{ background: 'var(--surface-muted)' }} />)}</div>}
+            {sessionsState === 'error' && <div className="p-4 text-sm leading-6" role="alert" style={{ color: 'var(--muted)' }}>تعذر تحميل الحصص. <button type="button" onClick={() => setRetryKey((key) => key + 1)} className="font-bold underline" style={{ color: 'var(--primary)' }}>إعادة المحاولة</button></div>}
+            {sessionsState === 'ready' && filteredStudents.length === 0 && (
+              <div className="p-6 text-center">
+                <span className="mx-auto grid h-10 w-10 place-items-center rounded-xl" style={{ background: 'var(--bf-green-soft)', color: 'var(--primary)' }}><CheckCircle2 size={19} aria-hidden="true" /></span>
+                <p className="mt-3 text-sm font-bold">{sessionStudents.length ? 'لا توجد نتائج مطابقة' : 'لا توجد حصة مكتملة'}</p>
+                <p className="mt-1 text-xs leading-5" style={{ color: 'var(--muted)' }}>{sessionStudents.length ? 'جرّب اسماً أو عنواناً آخر.' : 'ستظهر هنا الحصص المؤهلة بعد انتهائها.'}</p>
+                {!sessionStudents.length && <Link href="/dashboard/teacher/classes" className="mt-3 inline-flex min-h-10 items-center gap-2 text-xs font-bold" style={{ color: 'var(--primary)' }}>إدارة الحصص <ArrowLeft size={14} aria-hidden="true" /></Link>}
+              </div>
+            )}
+            {filteredStudents.map((item) => {
+              const key = makeKey(item.session.id, item.studentId)
+              const record = records.find((entry) => makeKey(entry.sessionId, entry.studentId) === key)
+              const active = key === selectedKey
+              return (
+                <button key={key} type="button" onClick={() => setSelectedKey(key)} aria-pressed={active} className="w-full rounded-xl border p-3 text-right transition-colors" style={{ background: active ? 'var(--bf-green-soft)' : 'transparent', color: 'var(--foreground)', borderColor: active ? 'var(--primary)' : 'transparent' }}>
+                  <span className="flex items-start justify-between gap-2">
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-bold">{item.studentName}</span>
+                      <span className="mt-1 block truncate text-xs" style={{ color: 'var(--muted)' }}>{item.session.title || 'حصة تعليمية'}</span>
+                    </span>
+                    <span className="mt-0.5 shrink-0 text-[10px] font-semibold" style={{ color: record?.status === 'PUBLISHED' ? 'var(--primary)' : 'var(--muted)' }}>{statusText(record?.status)}</span>
+                  </span>
+                  <span className="mt-2 flex items-center gap-1.5 text-[11px]" style={{ color: 'var(--muted)' }}><Clock3 size={13} aria-hidden="true" />{formatDate(item.session.startTime)}</span>
+                </button>
+              )
+            })}
+          </div>
+        </aside>
+
+        <section className="min-w-0 rounded-2xl border" style={cardStyle}>
+          {!selected ? (
+            <div className="grid min-h-[420px] place-items-center p-6 text-center">
+              <div>
+                <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl" style={{ background: 'var(--bf-green-soft)', color: 'var(--primary)' }}><BookOpen size={22} aria-hidden="true" /></span>
+                <h2 className="mt-4 font-bold">اختر حصة من القائمة</h2>
+                <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>ستظهر تفاصيل الطالب ومحرر الملاحظات هنا.</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <header className="border-b p-4 sm:p-6" style={{ borderColor: 'var(--border)' }}>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold" style={{ color: 'var(--primary)' }}>ملاحظة الحصة</p>
+                    <h2 className="mt-1 truncate text-xl font-bold">{selected.studentName}</h2>
+                    <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>{selected.session.title || 'حصة تعليمية'}{selected.session.group?.nameAr || selected.session.group?.name ? ` · ${selected.session.group.nameAr || selected.session.group.name}` : ''}</p>
+                    <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>{formatDate(selected.session.startTime)}</p>
+                  </div>
+                  <span className="inline-flex min-h-9 items-center gap-2 rounded-full px-3 text-xs font-bold" style={{ background: existing?.status === 'PUBLISHED' ? 'var(--bf-green-soft)' : 'var(--surface-muted)', color: existing?.status === 'PUBLISHED' ? 'var(--primary)' : 'var(--muted)' }}>
+                    {existing?.status === 'PUBLISHED' ? <CheckCircle2 size={15} aria-hidden="true" /> : <Circle size={13} aria-hidden="true" />}
+                    {statusText(existing?.status)}
+                  </span>
+                </div>
+              </header>
+
+              <div className="space-y-4 p-4 sm:p-6">
+                {recordsState === 'error' && <p role="alert" className="rounded-xl border p-3 text-sm" style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>تعذر تحميل الملاحظات المحفوظة. لن نستبدلها بمحتوى غير مؤكد. <button type="button" className="font-bold underline" style={{ color: 'var(--primary)' }} onClick={() => setRetryKey((key) => key + 1)}>إعادة المحاولة</button></p>}
+                {recordsState === 'loading' && <p className="rounded-xl border p-3 text-sm" style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>جارٍ تحميل الملاحظات المحفوظة…</p>}
+                {published && <p className="rounded-xl border px-4 py-3 text-sm leading-6" style={{ borderColor: 'var(--border)', background: 'var(--surface-muted)', color: 'var(--muted)' }}>هذه الملاحظة منشورة ولا تسمح حالتها الحالية بالتعديل.</p>}
+                {notice && <p role={notice.kind === 'error' ? 'alert' : 'status'} className="rounded-xl border px-4 py-3 text-sm leading-6" style={{ borderColor: 'var(--border)', background: notice.kind === 'error' ? 'var(--surface-muted)' : 'var(--bf-green-soft)', color: notice.kind === 'error' ? 'var(--muted)' : 'var(--primary)' }}>{notice.text}</p>}
+                <section className="rounded-2xl border p-4 sm:p-5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+                  <div className="mb-4 flex items-center gap-2">
+                    <span className="grid h-8 w-8 place-items-center rounded-lg" style={{ background: 'var(--bf-green-soft)', color: 'var(--primary)' }}><Check size={16} aria-hidden="true" /></span>
+                    <div>
+                      <h3 className="text-sm font-bold">ملخص الحصة</h3>
+                      <p className="mt-0.5 text-xs" style={{ color: 'var(--muted)' }}>ملاحظة موجزة تساعد الطالب على معرفة ما أتقنه.</p>
+                    </div>
+                  </div>
+                  <Field label="ملخص تعليمي" value={draft.summary} onChange={(value) => setField('summary', value)} placeholder="اكتب ملاحظة عملية ومحددة..." multiline rows={4} disabled={editorUnavailable} />
+                </section>
+
+                <Section title="مفردات وتعبيرات" note="عبارات جديدة ومعناها ومثال على استخدامها." count={draft.expressions.length} disabled={editorUnavailable} onAdd={() => setField('expressions', [...draft.expressions, { expression: '', meaning: '', example: '', category: 'VOCABULARY' }])}>
+                  {draft.expressions.map((item, index) => <div key={`expression-${index}`} className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--surface-muted)' }}>
+                    <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('expressions', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label="حذف التعبير" style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Field label="التعبير" value={item.expression} onChange={(value) => updateRow<Expression, 'expressions'>('expressions', index, 'expression', value)} disabled={editorUnavailable} />
+                      <Field label="المعنى" value={item.meaning} onChange={(value) => updateRow<Expression, 'expressions'>('expressions', index, 'meaning', value)} disabled={editorUnavailable} />
+                      <div className="sm:col-span-2"><Field label="مثال" value={item.example} onChange={(value) => updateRow<Expression, 'expressions'>('expressions', index, 'example', value)} disabled={editorUnavailable} /></div>
+                    </div>
+                  </div>)}
+                  {!draft.expressions.length && <EmptyRows>لم تُضف مفردات بعد.</EmptyRows>}
+                </Section>
+
+                <Section title="تعابير اصطلاحية" note="تُحفظ ضمن مكتبة التعبيرات مع تصنيفها كتعابير اصطلاحية." count={draft.idioms.length} disabled={editorUnavailable} onAdd={() => setField('idioms', [...draft.idioms, { expression: '', meaning: '', example: '', category: 'IDIOM' }])}>
+                  {draft.idioms.map((item, index) => <div key={`idiom-${index}`} className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--surface-muted)' }}>
+                    <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('idioms', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label="حذف التعبير الاصطلاحي" style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Field label="التعبير" value={item.expression} onChange={(value) => updateRow<Expression, 'idioms'>('idioms', index, 'expression', value)} disabled={editorUnavailable} />
+                      <Field label="المعنى" value={item.meaning} onChange={(value) => updateRow<Expression, 'idioms'>('idioms', index, 'meaning', value)} disabled={editorUnavailable} />
+                      <div className="sm:col-span-2"><Field label="مثال" value={item.example} onChange={(value) => updateRow<Expression, 'idioms'>('idioms', index, 'example', value)} disabled={editorUnavailable} /></div>
+                    </div>
+                  </div>)}
+                  {!draft.idioms.length && <EmptyRows>لم تُضف تعابير اصطلاحية بعد.</EmptyRows>}
+                </Section>
+
+                <Section title="تصحيحات لغوية" note="اعرض العبارة الأصلية والتصحيح مع توضيح مختصر." count={draft.mistakes.length} disabled={editorUnavailable} onAdd={() => setField('mistakes', [...draft.mistakes, { original: '', correction: '', explanation: '' }])}>
+                  {draft.mistakes.map((item, index) => <div key={`mistake-${index}`} className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--surface-muted)' }}>
+                    <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('mistakes', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label="حذف التصحيح" style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Field label="ما قيل" value={item.original} onChange={(value) => updateRow<Mistake, 'mistakes'>('mistakes', index, 'original', value)} disabled={editorUnavailable} />
+                      <Field label="التصحيح" value={item.correction} onChange={(value) => updateRow<Mistake, 'mistakes'>('mistakes', index, 'correction', value)} disabled={editorUnavailable} />
+                      <div className="sm:col-span-2"><Field label="التوضيح" value={item.explanation} onChange={(value) => updateRow<Mistake, 'mistakes'>('mistakes', index, 'explanation', value)} disabled={editorUnavailable} /></div>
+                    </div>
+                  </div>)}
+                  {!draft.mistakes.length && <EmptyRows>لم تُضف تصحيحات بعد.</EmptyRows>}
+                </Section>
+
+                <Section title="النطق" note="وجّه الطالب إلى الصوت أو النبرة أو طريقة النطق المطلوبة." count={draft.pronunciation.length} disabled={editorUnavailable} onAdd={() => setField('pronunciation', [...draft.pronunciation, { target: '', actual: '', guidance: '', phonetic: '', teacherNote: '' }])}>
+                  {draft.pronunciation.map((item, index) => <div key={`pronunciation-${index}`} className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--surface-muted)' }}>
+                    <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('pronunciation', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label="حذف ملاحظة النطق" style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Field label="الصوت أو الكلمة المستهدفة" value={item.target} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'target', value)} disabled={editorUnavailable} />
+                      <Field label="ما نُطق فعلياً" value={item.actual} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'actual', value)} disabled={editorUnavailable} />
+                      <Field label="الإرشاد" value={item.guidance} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'guidance', value)} disabled={editorUnavailable} />
+                      <Field label="التهجئة الصوتية" value={item.phonetic} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'phonetic', value)} disabled={editorUnavailable} />
+                      <div className="sm:col-span-2"><Field label="ملاحظة إضافية" value={item.teacherNote} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'teacherNote', value)} disabled={editorUnavailable} /></div>
+                    </div>
+                  </div>)}
+                  {!draft.pronunciation.length && <EmptyRows>لم تُضف ملاحظات نطق بعد.</EmptyRows>}
+                </Section>
+
+                <Section title="ما يمكن تحسينه" note="اقتراح تعبير بديل مع شرح يساعد على تطوير الصياغة." count={draft.ebi.length} disabled={editorUnavailable} onAdd={() => setField('ebi', [...draft.ebi, { betterExpression: '', explanation: '', priority: 'NORMAL' }])}>
+                  {draft.ebi.map((item, index) => <div key={`ebi-${index}`} className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--surface-muted)' }}>
+                    <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('ebi', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label="حذف اقتراح التحسين" style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Field label="التعبير الأفضل" value={item.betterExpression} onChange={(value) => updateRow<Ebi, 'ebi'>('ebi', index, 'betterExpression', value)} disabled={editorUnavailable} />
+                      <label className="block text-xs font-semibold" style={{ color: 'var(--muted)' }}>الأولوية
+                        <select value={item.priority} onChange={(event) => setDraft((current) => ({ ...current, ebi: current.ebi.map((row, rowIndex) => rowIndex === index ? { ...row, priority: event.target.value as Ebi['priority'] } : row) }))} disabled={editorUnavailable} className="mt-1.5 min-h-11 w-full rounded-xl border px-3 text-sm" style={{ background: 'var(--surface)', color: 'var(--foreground)', borderColor: 'var(--border)' }}>
+                          <option value="LOW">عادية</option><option value="NORMAL">متوسطة</option><option value="HIGH">مهمة</option>
+                        </select>
+                      </label>
+                      <div className="sm:col-span-2"><Field label="الشرح" value={item.explanation} onChange={(value) => updateRow<Ebi, 'ebi'>('ebi', index, 'explanation', value)} disabled={editorUnavailable} /></div>
+                    </div>
+                  </div>)}
+                  {!draft.ebi.length && <EmptyRows>لم تُضف اقتراحات تحسين بعد.</EmptyRows>}
+                </Section>
+
+                <section className="rounded-2xl border p-4 sm:p-5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+                  <h3 className="font-bold">ملاحظة خاصة للمدرس</h3>
+                  <p className="mt-1 text-xs leading-5" style={{ color: 'var(--muted)' }}>تبقى هذه الملاحظة ضمن سجل المدرس ولا تظهر للطالب.</p>
+                  <Field label="ملاحظات داخلية" value={draft.teacherNotes} onChange={(value) => setField('teacherNotes', value)} placeholder="ملاحظات للمتابعة لاحقاً..." multiline rows={3} disabled={editorUnavailable} />
+                </section>
+
+                <div className="sticky bottom-2 z-10 rounded-2xl border p-3 shadow-sm sm:p-4" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+                    <button type="button" onClick={() => void saveDraft()} disabled={busy || editorUnavailable} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-bold disabled:opacity-50" style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}>
+                      <Save size={16} aria-hidden="true" />{busy ? 'جارٍ الحفظ…' : 'حفظ المسودة'}
+                    </button>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <button type="button" onClick={() => void prepareToPublish()} disabled={busy || editorUnavailable} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold text-white disabled:opacity-50" style={{ background: 'var(--primary)' }}>
+                        <CheckCircle2 size={16} aria-hidden="true" />إرسال للمراجعة
+                      </button>
+                      <button type="button" onClick={() => void publish()} disabled={busy || existing?.status !== 'READY_TO_PUBLISH'} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-bold disabled:opacity-50" style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}>
+                        <Send size={15} aria-hidden="true" />نشر للطالب
+                      </button>
+                    </div>
+                  </div>
+                  {existing?.status === 'READY_TO_PUBLISH' && <p className="mt-2 text-center text-[11px]" style={{ color: 'var(--muted)' }}>الملاحظة جاهزة. راجع محتواها ثم انشرها للطالب.</p>}
+                </div>
+              </div>
+            </>
+          )}
+        </section>
+      </section>
+    </div>
+  )
+}

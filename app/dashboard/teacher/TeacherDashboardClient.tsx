@@ -8,7 +8,7 @@ import { Home, Users, Calendar, BookOpen, MessageCircle, LogOut, Shield, FileTex
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
-import FloatingContactButtons from '@/components/FloatingContactButtons'
+import ThemeToggle from '@/components/ThemeToggle'
 import ChatBox from '@/components/ChatBox'
 import ConversationsList from '@/components/ConversationsList'
 import HomeTab from './components/HomeTab'
@@ -84,6 +84,7 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
       <header className="sticky top-0 z-30 border-b border-[#e0e6e1] bg-white/95">
         <div className="mx-auto flex min-h-[68px] max-w-[1480px] items-center justify-between gap-4 px-4 sm:px-6">
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <button
               aria-label="فتح القائمة"
               aria-expanded={sidebarOpen}
@@ -221,7 +222,6 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
           </main>
         </div>
       </div>
-      <FloatingContactButtons />
     </div>
   )
 }

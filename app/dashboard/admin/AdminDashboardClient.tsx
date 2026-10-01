@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import {
@@ -9,7 +9,7 @@ import {
   Globe, Layers, PhoneCall
 } from 'lucide-react'
 import Link from 'next/link'
-import HomeTab from './components/HomeTab'
+import HomeTab, { type AdminOverviewStats } from './components/AdminOverviewRedesign'
 import UsersTab from './components/UsersTab'
 import SubscriptionsTab from './components/SubscriptionsTab'
 import SystemTab from './components/SystemTab'
@@ -20,14 +20,10 @@ import EmailTab from './components/EmailTab'
 import CouponsTab from './components/CouponsTab'
 import PageEditorTab from './components/PageEditorTab'
 import LeadsTab from './components/LeadsTab'
-import FloatingContactButtons from '@/components/FloatingContactButtons'
+import ThemeToggle from '@/components/ThemeToggle'
 
 interface Props {
   user: { name: string; email: string; role: string }
-}
-
-interface AdminShellStats {
-  pendingSubscriptions?: unknown
 }
 
 const MENU_GROUPS = [
@@ -73,11 +69,23 @@ export default function AdminDashboardClient({ user }: Props) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('home')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [stats, setStats] = useState<AdminShellStats | null>(null)
+  const [stats, setStats] = useState<AdminOverviewStats | null>(null)
+  const [statsState, setStatsState] = useState<'loading' | 'ready' | 'error'>('loading')
 
-  useEffect(() => {
-    fetch('/api/admin/stats').then(r => r.ok ? r.json() : null).then(d => { if (d) setStats(d) }).catch(() => {})
+  const loadStats = useCallback(async () => {
+    setStatsState('loading')
+    try {
+      const response = await fetch('/api/admin/stats', { cache: 'no-store' })
+      if (!response.ok) throw new Error('Admin stats unavailable')
+      setStats(await response.json() as AdminOverviewStats)
+      setStatsState('ready')
+    } catch {
+      setStats(null)
+      setStatsState('error')
+    }
   }, [])
+
+  useEffect(() => { void loadStats() }, [loadStats])
 
   const handleSignOut = async () => {
     await signOut({ redirect: false })
@@ -205,6 +213,7 @@ export default function AdminDashboardClient({ user }: Props) {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <ThemeToggle />
               <span className="hidden text-left sm:block">
                 <span className="block text-xs font-bold text-[#344239]">{user.name}</span>
                 <span className="mt-1 block text-[11px] text-[#718078]">{user.role === 'ADMIN' ? 'مدير النظام' : 'مساعد'}</span>
@@ -217,7 +226,7 @@ export default function AdminDashboardClient({ user }: Props) {
         </header>
 
         <main className="mx-auto w-full max-w-[1440px] p-4 sm:p-6">
-          {activeTab === 'home' && <HomeTab setActiveTab={setActiveTab} />}
+          {activeTab === 'home' && <HomeTab stats={stats} statsState={statsState} onRetryStats={loadStats} />}
           {activeTab === 'leads' && <LeadsTab />}
           {activeTab === 'users' && <UsersTab />}
           {activeTab === 'subscriptions' && <SubscriptionsTab />}
@@ -230,7 +239,6 @@ export default function AdminDashboardClient({ user }: Props) {
           {activeTab === 'system' && <SystemTab />}
         </main>
       </div>
-      <FloatingContactButtons />
     </div>
   )
 }

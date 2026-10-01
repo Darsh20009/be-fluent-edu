@@ -5,9 +5,15 @@ import { join } from 'node:path'
 
 const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
 const homepage = read('app/page.tsx')
+const layout = read('app/layout.tsx')
 const studentDashboard = read('app/dashboard/student/StudentDashboardClient.tsx')
-const studentHome = read('app/dashboard/student/components/HomeTab.tsx')
+const studentHome = read('app/dashboard/student/components/RedesignedHomeTab.tsx')
+const adminDashboard = read('app/dashboard/admin/AdminDashboardClient.tsx')
+const adminOverview = read('app/dashboard/admin/components/AdminOverviewRedesign.tsx')
+const teacherFeedbackPage = read('app/dashboard/teacher/feedback/page.tsx')
+const teacherFeedback = read('app/dashboard/teacher/feedback/TeacherFeedbackWorkspace.tsx')
 const studentNavigation = read('app/phase4/nav.tsx')
+const marketingFrame = read('components/marketing/MarketingFrame.tsx')
 
 test('homepage package failures stay generic, truthful, and retryable', () => {
   assert.match(homepage, /fetch\(packageEndpoint/)
@@ -32,10 +38,34 @@ test('student home summaries use existing read APIs and safe unavailable states'
     assert.ok(studentHome.includes(endpoint), `Missing existing read API: ${endpoint}`)
   }
   assert.match(studentHome, /loadResource\(url/)
-  assert.match(studentHome, /BFErrorState/)
-  assert.match(studentHome, /BFEmptyState/)
+  assert.match(studentHome, /ResourceMessage/)
+  assert.match(studentHome, /تعذر تحميل هذه المعلومات/)
+  assert.match(studentHome, /إعادة المحاولة/)
   assert.doesNotMatch(studentHome, /error\.message|error\.stack/)
   assert.doesNotMatch(studentHome, /method:\s*['"](?:POST|PUT|PATCH|DELETE)['"]/i)
+})
+
+test('approved role screens use their real routes and supported lifecycle APIs', () => {
+  assert.match(studentDashboard, /components\/RedesignedHomeTab/)
+  assert.match(adminDashboard, /components\/AdminOverviewRedesign/)
+  assert.equal((adminDashboard.match(/\/api\/admin\/stats/g) || []).length, 1, 'Admin stats are fetched once and shared with the overview')
+  assert.match(adminDashboard, /HomeTab stats=\{stats\}/)
+  for (const endpoint of ['/api/admin/feedback', '/api/admin/homework']) {
+    assert.ok(adminOverview.includes(endpoint), `Missing existing admin read API: ${endpoint}`)
+  }
+  assert.doesNotMatch(adminOverview, /\/api\/admin\/stats/)
+  assert.match(teacherFeedbackPage, /TeacherFeedbackWorkspace/)
+  for (const endpoint of ['/api/teacher/classes/sessions', '/api/teacher/feedback']) {
+    assert.ok(teacherFeedback.includes(endpoint), `Missing existing teacher read API: ${endpoint}`)
+  }
+  assert.match(teacherFeedback, /READY_TO_PUBLISH/)
+  assert.match(teacherFeedback, /PUBLISHED/)
+})
+
+test('coupon lookup stays on public marketing pages instead of every authenticated route', () => {
+  assert.doesNotMatch(layout, /LatestCouponPopup/)
+  assert.match(homepage, /LatestCouponPopup/)
+  assert.match(marketingFrame, /LatestCouponPopup/)
 })
 
 test('subscription lookup failures are not presented as a confirmed inactive subscription', () => {
