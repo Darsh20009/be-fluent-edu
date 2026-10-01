@@ -8,6 +8,7 @@ import {
   canTransitionDailySession,
   canTransitionDailyStep,
   canTransitionRecommendation,
+  completedRecommendationIds,
   dailyPlanSnapshotIsImmutable,
   generateDeterministicRecommendations,
   normalizePublishedFeedbackSignals,
@@ -189,6 +190,24 @@ test('recommendation lifecycle and expiry preserve completed history', () => {
   assert.equal(canTransitionRecommendation('COMPLETED', 'PENDING'), false)
   assert.equal(recommendationIsExpired({ status: 'PENDING', expiresAt: new Date('2025-03-09T00:00:00Z') }, now), true)
   assert.equal(recommendationIsExpired({ status: 'COMPLETED', expiresAt: new Date('2025-03-09T00:00:00Z') }, now), false)
+})
+
+test('daily completion links only completed steps to unique recommendation IDs', () => {
+  assert.deepEqual(completedRecommendationIds([
+    { status: 'COMPLETED', recommendationId: 'rec-1' },
+    { status: 'SKIPPED', recommendationId: 'rec-skipped' },
+    { status: 'COMPLETED', recommendationId: 'rec-1' },
+    { status: 'COMPLETED', recommendationId: null },
+    { status: 'COMPLETED', recommendationId: ' rec-2 ' },
+  ]), ['rec-1', 'rec-2'])
+})
+
+test('daily sessions can be abandoned only before reaching a terminal state', () => {
+  for (const status of ['NOT_STARTED', 'IN_PROGRESS', 'PAUSED']) {
+    assert.equal(canTransitionDailySession(status, 'ABANDONED'), true)
+  }
+  assert.equal(canTransitionDailySession('COMPLETED', 'ABANDONED'), false)
+  assert.equal(canTransitionDailySession('ABANDONED', 'IN_PROGRESS'), false)
 })
 
 test('mastery uses only at least three completed scored evidence items', () => {

@@ -24,37 +24,241 @@ function Shell({ children, title, subtitle, tabs, tab, setTab }: { children: Rea
 }
 
 export function StudentLearning() {
-  const [tab, setTab] = useState(studentLearningTabs[0]); const [state, setState] = useState<Load>('loading'); const [data, setData] = useState<any>({})
+  const [tab, setTab] = useState(studentLearningTabs[0])
+  const [state, setState] = useState<Load>('loading')
+  const [data, setData] = useState<any>({})
+  const [posting, setPosting] = useState(false)
+  const [confirmAbandon, setConfirmAbandon] = useState(false)
   const [tabInitialized, setTabInitialized] = useState(false)
-  const load = useCallback(async () => { setState('loading'); try { const url = tab === 'Today' ? '/api/student/learning/today' : tab === 'Recommendations' ? '/api/student/learning/recommendations' : '/api/student/learning/profile'; const result = await api(url); setData(result?.profile && Array.isArray(result.profile.mastery) ? { ...result, mastery: result.profile.mastery } : result); setState('ready') } catch (error) { setState((error as Error).message === 'DATABASE_UNAVAILABLE' ? 'database' : 'error') } }, [tab])
+  const load = useCallback(async () => {
+    setState('loading')
+    try {
+      const url = tab === 'Today'
+        ? '/api/student/learning/today'
+        : tab === 'Recommendations'
+          ? '/api/student/learning/recommendations'
+          : '/api/student/learning/profile'
+      const result = await api(url)
+      setData(result?.profile && Array.isArray(result.profile.mastery)
+        ? { ...result, mastery: result.profile.mastery }
+        : result)
+      setState('ready')
+    } catch (error) {
+      setState((error as Error).message === 'DATABASE_UNAVAILABLE' ? 'database' : 'error')
+    }
+  }, [tab])
   useEffect(() => {
     const requestedView = new URLSearchParams(window.location.search).get('view')
     if (requestedView && studentLearningTabs.includes(requestedView)) setTab(requestedView)
     setTabInitialized(true)
   }, [])
-  useEffect(() => { if (tabInitialized) void load() }, [load, tabInitialized])
-  const post = async (url: string, body?: any) => { try { await api(url, { method: 'POST', body: body ? JSON.stringify(body) : undefined }); void load() } catch (error) { setState((error as Error).message === 'DATABASE_UNAVAILABLE' ? 'database' : 'error') } }
-  const plan = data.plan; const steps = data.session?.steps?.map((step: any, index: number) => ({ ...step, ...(plan?.steps?.[index] || {}) })) || plan?.steps || []
-  return <Shell title="Your learning, today" subtitle="A short plan shaped by what happened in your classes." tabs={studentLearningTabs} tab={tab} setTab={setTab}><State state={state} retry={load} />
-    {state === 'ready' && tab === 'Today' && <section className={styles.card}><div className={styles.kicker}>{data.session?.status || 'NOT_STARTED'}</div><h2>Daily plan · {plan?.status || 'NOT_READY'}</h2><p className={styles.muted}>{plan?.status === 'READY' ? 'A focused set of steps from your class evidence.' : 'A plan will appear when enough evidence and resources are available.'}</p><b>{plan?.totalMinutes || 0} minutes</b>{!data.session && plan?.steps?.length > 0 && <div className={styles.actions}><button className={`${styles.button} ${styles.primary}`} onClick={() => post('/api/student/learning/today/start')}>Start today</button></div>}{steps.map((step: any, index: number) => <div className={styles.item} key={step.stepIndex ?? index}><div className={styles.row}><b>{(step.stepIndex ?? index) + 1}. {step.title || step.type}</b><span className={styles.tag}>{step.status || 'PENDING'}</span></div><p className={styles.muted}>{[step.reason, step.skillCode, step.resourceId && `Resource ${step.resourceId}`, step.durationMinutes && `${step.durationMinutes} min`].filter(Boolean).join(' · ')}</p>{step.status === 'PENDING' && step.stepIndex === data.session?.currentStepIndex && <button className={styles.button} onClick={() => post('/api/student/learning/today/progress', { action: 'START_STEP', stepIndex: step.stepIndex })}>Begin</button>}{step.status === 'IN_PROGRESS' && <button className={`${styles.button} ${styles.primary}`} onClick={() => post('/api/student/learning/today/progress', { action: 'COMPLETE_STEP', stepIndex: step.stepIndex })}>Mark complete</button>}</div>)}</section>}
+  useEffect(() => {
+    if (tabInitialized) void load()
+  }, [load, tabInitialized])
+
+  const post = async (url: string, body?: any) => {
+    if (posting) return
+    setPosting(true)
+    try {
+      await api(url, { method: 'POST', body: body ? JSON.stringify(body) : undefined })
+      setConfirmAbandon(false)
+      await load()
+    } catch (error) {
+      setState((error as Error).message === 'DATABASE_UNAVAILABLE' ? 'database' : 'error')
+    } finally {
+      setPosting(false)
+    }
+  }
+
+  const plan = data.plan
+  const session = data.session
+  const sessionStatus = session?.status
+  const steps = session?.steps?.map((step: any, index: number) => ({
+    ...step,
+    ...(plan?.steps?.[index] || {}),
+  })) || plan?.steps || []
+  const terminalSession = sessionStatus === 'COMPLETED' || sessionStatus === 'ABANDONED'
+  const canProgress = sessionStatus === 'NOT_STARTED' || sessionStatus === 'IN_PROGRESS'
+  const allStepsResolved = steps.length > 0
+    && steps.every((step: any) => ['COMPLETED', 'SKIPPED'].includes(step.status))
+
+  return <Shell
+    title="Your learning, today"
+    subtitle="A short plan shaped by what happened in your classes."
+    tabs={studentLearningTabs}
+    tab={tab}
+    setTab={setTab}
+  >
+    <State state={state} retry={load} />
+    {state === 'ready' && tab === 'Today' && <section className={styles.card}>
+      <div className={styles.kicker}>{sessionStatus || 'NOT_STARTED'}</div>
+      <h2>Daily plan · {plan?.status || 'NOT_READY'}</h2>
+      <p className={styles.muted}>
+        {plan?.status === 'READY'
+          ? 'Starting a recommendation step accepts it; only completed steps are marked complete.'
+          : 'A plan will appear when current recommendations have suitable learning resources.'}
+      </p>
+      <b>{plan?.totalMinutes || 0} minutes</b>
+
+      {!session && plan?.steps?.length > 0 && <div className={styles.actions}>
+        <button
+          className={`${styles.button} ${styles.primary}`}
+          disabled={posting}
+          onClick={() => void post('/api/student/learning/today/start')}
+        >
+          Start today
+        </button>
+      </div>}
+
+      {!session && plan?.status === 'NO_RECOMMENDATIONS' && <div className={styles.notice}>
+        <p>No current recommendations are available for a daily plan.</p>
+        <button className={styles.button} onClick={() => setTab('Recommendations')}>
+          Review recommendations
+        </button>
+      </div>}
+
+      {session && !terminalSession && <div className={styles.actions}>
+        {sessionStatus === 'IN_PROGRESS' && <button
+          className={styles.button}
+          disabled={posting}
+          onClick={() => void post('/api/student/learning/today/progress', { action: 'PAUSE' })}
+        >
+          Pause
+        </button>}
+        {sessionStatus === 'PAUSED' && <button
+          className={`${styles.button} ${styles.primary}`}
+          disabled={posting}
+          onClick={() => void post('/api/student/learning/today/progress', { action: 'RESUME' })}
+        >
+          Resume
+        </button>}
+        <button
+          className={styles.button}
+          disabled={posting}
+          onClick={() => setConfirmAbandon(true)}
+        >
+          End session
+        </button>
+      </div>}
+
+      {confirmAbandon && session && !terminalSession && <div className={styles.notice} role="group" aria-label="Confirm ending today's learning session">
+        <p>End this session? Its current progress will remain in the record, and the session cannot be resumed.</p>
+        <div className={styles.actions}>
+          <button className={styles.button} disabled={posting} onClick={() => setConfirmAbandon(false)}>
+            Keep session
+          </button>
+          <button
+            className={styles.button}
+            disabled={posting}
+            onClick={() => void post('/api/student/learning/today/abandon')}
+          >
+            End session
+          </button>
+        </div>
+      </div>}
+
+      {sessionStatus === 'COMPLETED' && <div className={styles.notice} role="status">
+        Today&apos;s learning session is complete.
+      </div>}
+      {sessionStatus === 'ABANDONED' && <div className={styles.notice} role="status">
+        This session has ended. Its saved progress remains in your history.
+      </div>}
+
+      {steps.map((step: any, index: number) => {
+        const stepIndex = step.stepIndex ?? index
+        const isCurrentStep = stepIndex === session?.currentStepIndex
+        return <div className={styles.item} key={stepIndex}>
+          <div className={styles.row}>
+            <b>{stepIndex + 1}. {step.title || step.type}</b>
+            <span className={styles.tag}>{step.status || 'PENDING'}</span>
+          </div>
+          <p className={styles.muted}>
+            {[step.reason, step.skillCode, step.resourceId && `Resource ${step.resourceId}`, step.durationMinutes && `${step.durationMinutes} min`]
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+          {session && canProgress && isCurrentStep && step.status === 'PENDING' && <div className={styles.actions}>
+            <button
+              className={styles.button}
+              disabled={posting}
+              onClick={() => void post('/api/student/learning/today/progress', { action: 'START_STEP', stepIndex })}
+            >
+              Begin
+            </button>
+            <button
+              className={styles.button}
+              disabled={posting}
+              onClick={() => void post('/api/student/learning/today/progress', { action: 'SKIP_STEP', stepIndex })}
+            >
+              Skip
+            </button>
+          </div>}
+          {sessionStatus === 'IN_PROGRESS' && isCurrentStep && step.status === 'IN_PROGRESS' && <div className={styles.actions}>
+            <button
+              className={`${styles.button} ${styles.primary}`}
+              disabled={posting}
+              onClick={() => void post('/api/student/learning/today/progress', { action: 'COMPLETE_STEP', stepIndex })}
+            >
+              Mark complete
+            </button>
+            <button
+              className={styles.button}
+              disabled={posting}
+              onClick={() => void post('/api/student/learning/today/progress', { action: 'SKIP_STEP', stepIndex })}
+            >
+              Skip
+            </button>
+          </div>}
+        </div>
+      })}
+
+      {session && allStepsResolved && !terminalSession && <div className={styles.actions}>
+        <button
+          className={`${styles.button} ${styles.primary}`}
+          disabled={posting}
+          onClick={() => void post('/api/student/learning/today/complete')}
+        >
+          Complete today&apos;s plan
+        </button>
+      </div>}
+    </section>}
     {state === 'ready' && tab === 'Recommendations' && <RecommendationList items={data.items || []} post={post} />}
-    {state === 'ready' && tab === 'Progress' && <section className={styles.card}><h2>Progress by skill</h2>{data.mastery?.length ? data.mastery.map((item: any, index: number) => <div className={styles.item} key={`${item.skill?.code || 'skill'}-${item.levelId || ''}-${item.stageId || ''}-${index}`}><div className={styles.row}><b>{item.skill?.name || item.skill?.code || 'Skill'}</b><span>{item.evidence?.score ?? 'No score'}</span></div><p className={styles.muted}>{[item.levelId, item.stageId, item.evidence?.evidenceCount && `${item.evidence.evidenceCount} pieces of evidence`, item.evidence?.source].filter(Boolean).join(' · ')}</p></div>) : <div className={styles.empty}>Progress will appear after completed learning.</div>}</section>}
-    {state === 'ready' && tab === 'Goals' && <GoalsPanel goal={data.profile?.goal || ''} goals={data.profile?.goals || []} onSave={async (value) => {
-      try {
-        const saved = await api('/api/student/goals', { method: 'PATCH', body: JSON.stringify({ overallGoal: value || null }) })
-        setData((current: any) => ({
-          ...current,
-          profile: {
-            ...current.profile,
-            goal: value || null,
-            ...(Array.isArray(saved?.goals) ? { goals: saved.goals } : {}),
-          },
-        }))
-      } catch (error) {
-        if ((error as Error).message === 'DATABASE_UNAVAILABLE') setState('database')
-        throw error
-      }
-    }} />}
+    {state === 'ready' && tab === 'Progress' && <section className={styles.card}>
+      <h2>Progress by skill</h2>
+      {data.mastery?.length
+        ? data.mastery.map((item: any, index: number) => <div className={styles.item} key={`${item.skill?.code || 'skill'}-${item.levelId || ''}-${item.stageId || ''}-${index}`}>
+          <div className={styles.row}>
+            <b>{item.skill?.name || item.skill?.code || 'Skill'}</b>
+            <span>{item.evidence?.score ?? 'No score'}</span>
+          </div>
+          <p className={styles.muted}>
+            {[item.levelId, item.stageId, item.evidence?.evidenceCount && `${item.evidence.evidenceCount} pieces of evidence`, item.evidence?.source]
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+        </div>)
+        : <div className={styles.empty}>Progress will appear after completed learning.</div>}
+    </section>}
+    {state === 'ready' && tab === 'Goals' && <GoalsPanel
+      goal={data.profile?.goal || ''}
+      goals={data.profile?.goals || []}
+      onSave={async (value) => {
+        try {
+          const saved = await api('/api/student/goals', { method: 'PATCH', body: JSON.stringify({ overallGoal: value || null }) })
+          setData((current: any) => ({
+            ...current,
+            profile: {
+              ...current.profile,
+              goal: value || null,
+              ...(Array.isArray(saved?.goals) ? { goals: saved.goals } : {}),
+            },
+          }))
+        } catch (error) {
+          if ((error as Error).message === 'DATABASE_UNAVAILABLE') setState('database')
+          throw error
+        }
+      }}
+    />}
     {state === 'ready' && tab === 'Learning Profile' && <Profile profile={data.profile || {}} />}
   </Shell>
 }

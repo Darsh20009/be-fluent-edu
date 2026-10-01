@@ -6,6 +6,8 @@ import { join } from 'node:path'
 const source = readFileSync(join(process.cwd(), 'app/dashboard/phase9/IntelligenceClient.tsx'), 'utf8')
 const studentPage = readFileSync(join(process.cwd(), 'app/dashboard/student/learning/page.tsx'), 'utf8')
 const studentNavigation = readFileSync(join(process.cwd(), 'app/phase4/nav.tsx'), 'utf8')
+const studentService = readFileSync(join(process.cwd(), 'lib/phase9/student-service.ts'), 'utf8')
+const abandonRoute = readFileSync(join(process.cwd(), 'app/api/student/learning/today/abandon/route.ts'), 'utf8')
 
 test('teacher suggestion UI keeps every displayed type on its allowed draft keys', () => {
   assert.match(source, /FEEDBACK_EXPRESSION: \['expression', 'meaning', 'example', 'category'\]/)
@@ -23,7 +25,9 @@ test('teacher suggestion UI uses the create and explicit approval contracts', ()
 })
 
 test('student contract clients use profile for goals and mastery for progress', () => {
-  assert.match(source, /tab === 'Recommendations' \? '\/api\/student\/learning\/recommendations' : '\/api\/student\/learning\/profile'/)
+  assert.ok(source.includes("tab === 'Recommendations'"))
+  assert.ok(source.includes('/api/student/learning/recommendations'))
+  assert.ok(source.includes('/api/student/learning/profile'))
   assert.match(source, /data\.mastery/)
   assert.match(source, /item\.evidence\?\.score/)
   assert.match(source, /item\.evidence\?\.evidenceCount/)
@@ -35,6 +39,24 @@ test('today contract client renders plan status and snapshot step metadata', () 
   assert.match(source, /step\.skillCode/)
   assert.match(source, /step\.resourceId/)
   assert.match(source, /step\.durationMinutes/)
+})
+
+test('daily learning controls use the owned session lifecycle APIs', () => {
+  for (const endpoint of [
+    '/api/student/learning/today/complete',
+    '/api/student/learning/today/abandon',
+  ]) {
+    assert.ok(source.includes(endpoint), `Missing daily session action: ${endpoint}`)
+  }
+  for (const action of ['START_STEP', 'PAUSE', 'RESUME', 'SKIP_STEP', 'COMPLETE_STEP']) {
+    assert.ok(source.includes(`action: '${action}'`), `Missing progress action: ${action}`)
+  }
+  assert.match(studentService, /status: \{ in: \['PENDING', 'ACCEPTED'\] \}, OR:/)
+  assert.match(studentService, /data: \{ status: 'ACCEPTED' \}/)
+  assert.match(studentService, /completedRecommendationIds\(session\.steps\)/)
+  assert.match(abandonRoute, /phase9DatabaseGuard\(\)/)
+  assert.match(abandonRoute, /requireStudent\(\)/)
+  assert.match(abandonRoute, /abandonTodayLearning\(access\.userId\)/)
 })
 
 test('student learning route preserves the canonical component, navigation, and all existing sections', () => {

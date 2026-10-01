@@ -10,6 +10,8 @@ Phase 9 implementation files provide a deterministic learning-intelligence found
 - Idempotent source-event signal persistence helpers with a fail-closed database gate; goal and attendance corrections supersede active state signals without deleting history.
 - Evidence-based profile mastery calculated from at least three completed scored progress records as a rounded arithmetic mean.
 - Deterministic recommendation classification, explanation, priority scoring, active deduplication, expiry, and student accept/dismiss transitions.
+- Daily plans use pending or accepted recommendations; starting a linked pending step accepts it, and completing a plan completes accepted recommendations linked to completed steps.
+- Student daily-session UI and API support pause, resume, step skip, completion, and explicit abandonment.
 - Recommendation history renewal keyed by evidence cycles, preserving old terminal records while allowing a new cycle after new evidence; schema uniqueness is `(studentId, dedupeKey, dedupeCycle)`.
 - Strict published-resource matching: returned recommendation resources and daily-plan resources must exactly match the recommendation/student level, stage, and skill context; no generic or wrong-skill fallback is used.
 - A UTC-day plan/session snapshot with bounded durations, progress transitions, pause/resume, and completion validation.
@@ -24,7 +26,7 @@ Phase 9 implementation files provide a deterministic learning-intelligence found
 - Current speaking ingestion records activity and room topic; it does not create reported-difficulty signals or assess speech quality.
 - The priority function supports upcoming-class and mastery factors, but the active refresh only supplies goals and applies the mastery penalty to strong-homework signals. It does not pass upcoming-class relevance or broadly classify mastery from profile evidence.
 - Plan generation uses its default 15-minute preference in the service. It requires a published matching resource; lack of recommendations/resources is surfaced, not replaced with synthetic exercises.
-- Student endpoints accept or dismiss recommendations but do not expose a recommendation-completion action. Completing a daily session does not automatically complete linked recommendations. No session-abandon endpoint is present.
+- There is no standalone student recommendation-completion endpoint; linked recommendations complete as part of finishing completed daily-plan steps. Skipping a pending step leaves it pending; skipping an accepted step leaves it accepted.
 - Suggestion approval marks a draft approved but does not create student-facing content or records.
 - UI pages are implemented, but database-dependent behavior is unavailable while the persistence gate is disabled.
 

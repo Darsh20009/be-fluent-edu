@@ -14,7 +14,7 @@ The gate's precedence means a request made while the database is disabled receiv
 
 | Actor | Allowed access | Tenant/student scope |
 | --- | --- | --- |
-| Student | Read own learning profile, signals, recommendations, daily plan/session; accept/dismiss own recommendation; operate own daily session. | Identity comes from the authenticated session. Recommendation and session queries include that user ID in the lookup/update predicates. |
+| Student | Read own learning profile, signals, recommendations, daily plan/session; accept/dismiss own recommendation; operate, complete, or abandon own daily session. | Identity comes from the authenticated session. Recommendation and session queries include that user ID in the lookup/update predicates. A linked recommendation is accepted only when that student's step starts. |
 | Teacher | View currently assigned student's intelligence and recommendation list with `teacher.viewStudentIntelligence`; create/approve suggestion drafts with `teacher.manageIntelligenceSuggestions`. | Assignment is rechecked server-side against current, live assignment records. Historical feedback and legacy session-student rows do not establish access. The client cannot specify a teacher owner. Suggestions are tied to the authenticated teacher and assigned student. |
 | Admin / manager | Read overview, recommendation reporting, and settings with `admin.viewLearningIntelligence` or `manager.viewLearningIntelligence`. | Reports are intentionally administrative and may include student ID/name with recommendation summaries. These routes are read-only. |
 | Staff | No Phase 9 access is granted by the Phase 9 permission list by default. | A custom grant would need to be explicit and is not implied by another role. |

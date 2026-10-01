@@ -21,8 +21,12 @@ export async function POST(request: Request) {
   if (!parsed.success) return NextResponse.json({ ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0]?.message || 'Invalid progress request.' } }, { status: 400 })
   const result = await progressTodayLearning(access.userId, parsed.data)
   if ('error' in result) {
-    const status = result.error === 'NOT_FOUND' ? 404 : result.error === 'CONFLICT' ? 409 : 400
-    return NextResponse.json({ ok: false, error: { code: result.error, message: 'Daily learning progress could not be updated.' } }, { status })
+    const code = result.error || 'INVALID_TRANSITION'
+    const status = code === 'NOT_FOUND' ? 404
+      : code === 'RECOMMENDATION_EXPIRED' ? 410
+        : ['CONFLICT', 'INVALID_TRANSITION', 'RECOMMENDATION_UNAVAILABLE'].includes(code) ? 409
+          : 400
+    return NextResponse.json({ ok: false, error: { code, message: 'Daily learning progress could not be updated.' } }, { status })
   }
   return NextResponse.json({ ok: true, ...result })
 }

@@ -614,6 +614,17 @@ export function canTransitionDailySession(from: string, to: string) {
     && dailySessionTransitionMap[from as DailySessionStatus].includes(to as DailySessionStatus)
 }
 
+export function completedRecommendationIds(
+  steps: readonly { status: string; recommendationId?: string | null }[],
+) {
+  const ids = new Set<string>()
+  for (const step of steps) {
+    const id = step.recommendationId?.trim()
+    if (step.status === 'COMPLETED' && id) ids.add(id)
+  }
+  return [...ids]
+}
+
 export function canTransitionDailyStep(from: string, to: string) {
   const transitions: Record<(typeof dailyStepStatuses)[number], readonly string[]> = {
     PENDING: ['IN_PROGRESS', 'SKIPPED'],

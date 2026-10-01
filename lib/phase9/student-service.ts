@@ -5,6 +5,7 @@ import {
   canTransitionRecommendation,
   canTransitionDailySession,
   canTransitionDailyStep,
+  completedRecommendationIds,
   dailyLearningStepSchema,
   dailyLearningPlanSchema,
   generateDeterministicRecommendations,
@@ -513,68 +514,114 @@ export async function startTodayLearning(userId: string) {
 
 export type DailyProgressAction = 'START_STEP' | 'COMPLETE_STEP' | 'SKIP_STEP' | 'PAUSE' | 'RESUME'
 
+class DailyLearningProgressConflict extends Error {
+  constructor() {
+    super('Daily learning progress changed concurrently.')
+    this.name = 'DailyLearningProgressConflict'
+  }
+}
+
 export async function progressTodayLearning(userId: string, input: { action: DailyProgressAction; stepIndex?: number }) {
   const dailyKey = utcDailyKey()
-  return prisma.$transaction(async (tx) => {
-    const session = await tx.dailyLearningSession.findUnique({
-      where: { studentId_dailyKey: { studentId: userId, dailyKey } },
-      include: { steps: { orderBy: { stepIndex: 'asc' } } },
-    })
-    if (!session) return { error: 'NOT_FOUND' as const }
-
-    const updateSessionStatus = async (to: DailySessionStatus) => {
-      if (!canTransitionDailySession(session.status, to)) return false
-      const result = await tx.dailyLearningSession.updateMany({
-        where: { id: session.id, studentId: userId, status: session.status },
-        data: {
-          status: to,
-          ...(to === 'IN_PROGRESS' && !session.startedAt ? { startedAt: new Date() } : {}),
-          ...(to === 'PAUSED' ? { pausedAt: new Date() } : {}),
-          ...(to === 'COMPLETED' ? { completedAt: new Date() } : {}),
-          ...(to === 'ABANDONED' ? { abandonedAt: new Date() } : {}),
-        },
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const session = await tx.dailyLearningSession.findUnique({
+        where: { studentId_dailyKey: { studentId: userId, dailyKey } },
+        include: { steps: { orderBy: { stepIndex: 'asc' } } },
       })
-      return result.count === 1
-    }
+      if (!session) return { error: 'NOT_FOUND' as const }
 
-    if (input.action === 'PAUSE' || input.action === 'RESUME') {
-      const to = input.action === 'PAUSE' ? 'PAUSED' : 'IN_PROGRESS'
-      const ok = await updateSessionStatus(to)
-      return ok ? { sessionId: session.id, status: to } : { error: 'INVALID_TRANSITION' as const }
-    }
+      const updateSessionStatus = async (to: DailySessionStatus) => {
+        if (!canTransitionDailySession(session.status, to)) return false
+        const result = await tx.dailyLearningSession.updateMany({
+          where: { id: session.id, studentId: userId, status: session.status },
+          data: {
+            status: to,
+            ...(to === 'IN_PROGRESS' && !session.startedAt ? { startedAt: new Date() } : {}),
+            ...(to === 'PAUSED' ? { pausedAt: new Date() } : {}),
+            ...(to === 'COMPLETED' ? { completedAt: new Date() } : {}),
+            ...(to === 'ABANDONED' ? { abandonedAt: new Date() } : {}),
+          },
+        })
+        return result.count === 1
+      }
 
-    if (!['NOT_STARTED', 'IN_PROGRESS'].includes(session.status)) return { error: 'INVALID_TRANSITION' as const }
-    const stepIndex = input.stepIndex
-    if (stepIndex == null || stepIndex !== session.currentStepIndex) return { error: 'INVALID_STEP' as const }
-    const step = session.steps[stepIndex]
-    if (!step) return { error: 'INVALID_STEP' as const }
+      if (input.action === 'PAUSE' || input.action === 'RESUME') {
+        const to = input.action === 'PAUSE' ? 'PAUSED' : 'IN_PROGRESS'
+        const ok = await updateSessionStatus(to)
+        return ok ? { sessionId: session.id, status: to } : { error: 'INVALID_TRANSITION' as const }
+      }
 
-    if (input.action === 'START_STEP') {
-      if (step.status !== 'PENDING') return { error: 'INVALID_TRANSITION' as const }
-      if (session.status === 'NOT_STARTED' && !(await updateSessionStatus('IN_PROGRESS'))) return { error: 'CONFLICT' as const }
-      if (!canTransitionDailyStep(step.status, 'IN_PROGRESS')) return { error: 'INVALID_TRANSITION' as const }
-      const changed = await tx.dailyLearningSessionStep.updateMany({
-        where: { id: step.id, sessionId: session.id, stepIndex, status: 'PENDING' },
-        data: { status: 'IN_PROGRESS', startedAt: new Date() },
+      if (!['NOT_STARTED', 'IN_PROGRESS'].includes(session.status)) return { error: 'INVALID_TRANSITION' as const }
+      const stepIndex = input.stepIndex
+      if (stepIndex == null || stepIndex !== session.currentStepIndex) return { error: 'INVALID_STEP' as const }
+      const step = session.steps[stepIndex]
+      if (!step) return { error: 'INVALID_STEP' as const }
+
+      if (input.action === 'START_STEP') {
+        if (step.status !== 'PENDING' || !canTransitionDailyStep(step.status, 'IN_PROGRESS')) {
+          return { error: 'INVALID_TRANSITION' as const }
+        }
+
+        if (step.recommendationId) {
+          const recommendation = await tx.aIRecommendation.findFirst({
+            where: { id: step.recommendationId, studentId: userId },
+            select: { status: true, expiresAt: true },
+          })
+          if (!recommendation || !['PENDING', 'ACCEPTED'].includes(recommendation.status)) {
+            return { error: 'RECOMMENDATION_UNAVAILABLE' as const }
+          }
+          const now = new Date()
+          if (recommendationIsExpired(recommendation, now)) {
+            return { error: 'RECOMMENDATION_EXPIRED' as const }
+          }
+          if (recommendation.status === 'PENDING') {
+            const accepted = await tx.aIRecommendation.updateMany({
+              where: {
+                id: step.recommendationId,
+                studentId: userId,
+                status: 'PENDING',
+                OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+              },
+              data: { status: 'ACCEPTED' },
+            })
+            if (accepted.count !== 1) throw new DailyLearningProgressConflict()
+          }
+        }
+
+        if (session.status === 'NOT_STARTED' && !(await updateSessionStatus('IN_PROGRESS'))) {
+          throw new DailyLearningProgressConflict()
+        }
+        const changed = await tx.dailyLearningSessionStep.updateMany({
+          where: { id: step.id, sessionId: session.id, stepIndex, status: 'PENDING' },
+          data: { status: 'IN_PROGRESS', startedAt: new Date() },
+        })
+        if (changed.count !== 1) throw new DailyLearningProgressConflict()
+        return { sessionId: session.id, stepIndex, status: 'IN_PROGRESS' as const }
+      }
+
+      const to = input.action === 'COMPLETE_STEP' ? 'COMPLETED' : 'SKIPPED'
+      if (!canTransitionDailyStep(step.status, to)) return { error: 'INVALID_TRANSITION' as const }
+      if (session.status === 'NOT_STARTED' && !(await updateSessionStatus('IN_PROGRESS'))) {
+        throw new DailyLearningProgressConflict()
+      }
+      const changedStep = await tx.dailyLearningSessionStep.updateMany({
+        where: { id: step.id, sessionId: session.id, stepIndex, status: step.status },
+        data: { status: to, ...(to === 'COMPLETED' ? { completedAt: new Date() } : {}) },
       })
-      return changed.count === 1 ? { sessionId: session.id, stepIndex, status: 'IN_PROGRESS' } : { error: 'CONFLICT' as const }
-    }
-
-    const to = input.action === 'COMPLETE_STEP' ? 'COMPLETED' : 'SKIPPED'
-    if (!canTransitionDailyStep(step.status, to)) return { error: 'INVALID_TRANSITION' as const }
-    if (session.status === 'NOT_STARTED' && !(await updateSessionStatus('IN_PROGRESS'))) return { error: 'CONFLICT' as const }
-    const changedStep = await tx.dailyLearningSessionStep.updateMany({
-      where: { id: step.id, sessionId: session.id, stepIndex, status: step.status },
-      data: { status: to, ...(to === 'COMPLETED' ? { completedAt: new Date() } : {}) },
+      if (changedStep.count !== 1) throw new DailyLearningProgressConflict()
+      const nextIndex = stepIndex + 1
+      const advanced = await tx.dailyLearningSession.updateMany({
+        where: { id: session.id, studentId: userId, currentStepIndex: stepIndex },
+        data: { currentStepIndex: nextIndex },
+      })
+      if (advanced.count !== 1) throw new DailyLearningProgressConflict()
+      return { sessionId: session.id, stepIndex, status: to, currentStepIndex: nextIndex }
     })
-    if (changedStep.count !== 1) return { error: 'CONFLICT' as const }
-    const nextIndex = stepIndex + 1
-    await tx.dailyLearningSession.updateMany({
-      where: { id: session.id, studentId: userId, currentStepIndex: stepIndex },
-      data: { currentStepIndex: nextIndex },
-    })
-    return { sessionId: session.id, stepIndex, status: to, currentStepIndex: nextIndex }
-  })
+  } catch (error) {
+    if (error instanceof DailyLearningProgressConflict) return { error: 'CONFLICT' as const }
+    throw error
+  }
 }
 
 export async function completeTodayLearning(userId: string) {
@@ -593,6 +640,37 @@ export async function completeTodayLearning(userId: string) {
       where: { id: session.id, studentId: userId, status: session.status },
       data: { status: 'COMPLETED', completedAt: new Date() },
     })
-    return updated.count === 1 ? { sessionId: session.id, status: 'COMPLETED' as const } : { error: 'CONFLICT' as const }
+    if (updated.count !== 1) return { error: 'CONFLICT' as const }
+
+    const recommendationIds = completedRecommendationIds(session.steps)
+    if (recommendationIds.length) {
+      await tx.aIRecommendation.updateMany({
+        where: { studentId: userId, id: { in: recommendationIds }, status: 'ACCEPTED' },
+        data: { status: 'COMPLETED' },
+      })
+    }
+    return { sessionId: session.id, status: 'COMPLETED' as const }
+  })
+}
+
+export async function abandonTodayLearning(userId: string) {
+  const dailyKey = utcDailyKey()
+  return prisma.$transaction(async (tx) => {
+    const session = await tx.dailyLearningSession.findUnique({
+      where: { studentId_dailyKey: { studentId: userId, dailyKey } },
+      select: { id: true, status: true },
+    })
+    if (!session) return { error: 'NOT_FOUND' as const }
+    if (!canTransitionDailySession(session.status, 'ABANDONED')) {
+      return { error: 'INVALID_TRANSITION' as const }
+    }
+
+    const updated = await tx.dailyLearningSession.updateMany({
+      where: { id: session.id, studentId: userId, status: session.status },
+      data: { status: 'ABANDONED', abandonedAt: new Date() },
+    })
+    return updated.count === 1
+      ? { sessionId: session.id, status: 'ABANDONED' as const }
+      : { error: 'CONFLICT' as const }
   })
 }
