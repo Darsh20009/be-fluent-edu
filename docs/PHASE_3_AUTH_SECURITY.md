@@ -74,11 +74,11 @@ Roles are server-resolved:
 
 Staff permissions come from `StaffPermission` and are not granted merely by
 the client role claim. `MANAGER` keeps the confirmed broad role permissions for
-people, levels, packages, subscriptions, enrollments, groups, sessions,
-feedback, homework, speaking rooms, WhatsApp CRM, and learning intelligence;
-this is not the full `ADMIN` permission set. Reusable helpers are available
-through `requireRole`, `requirePermission`, `requireAnyPermission`, and
-`requireAllPermissions`.
+users, people, levels, packages, subscriptions, enrollments, groups, sessions,
+feedback, homework, speaking rooms, system management, WhatsApp CRM, and
+learning intelligence; this is not the full `ADMIN` permission set. Reusable
+helpers are available through `requireRole`, `requirePermission`,
+`requireAnyPermission`, and `requireAllPermissions`.
 
 ## Audit events
 
