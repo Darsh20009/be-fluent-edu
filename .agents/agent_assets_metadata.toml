@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "M0jaHPX0jSfHUhPJEMk_m"
+uri = "file://docs/B-FLUENT-MASTER-SPEC.md"
+type = "text"
+title = "مواصفة B Fluent الأساسية"
+description = "مسودة مرجعية موحّدة لتجربة الطالب والمدرس والإدارة، الحصص وQMeet وWhatsApp وFeedback وHomework، مع قرارات الاستضافة والأمان المفتوحة."
+logical_id = "8fd76fbd-0584-4205-8edf-a717f3fa033f"
+content_hash = "sha256:7b43473a05df0dac7a0b8649305431c3bc6c71ecc43d3ebc0737a562cdfbab5d"
+size = 18126
+mtime_ms = 1790888158243
+storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:d606eafe-183c-43ab-8387-5e60c3e02e51/8fd76fbd-0584-4205-8edf-a717f3fa033f/be8bfb58-481f-4f43-8c6e-dd2896a36572"
+storage_version_token = "1790888192101369"
+content_type = "text/markdown"
