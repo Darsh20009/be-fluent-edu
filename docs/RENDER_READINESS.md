@@ -26,7 +26,7 @@ configured. No deployment was started or changed.
 
 - Read-only MongoDB connectivity: blocked by missing `MONGODB_URI`
 - Render health check: no dedicated health endpoint exists
-- Production email delivery: SMTP2GO credentials are absent
+- Production email delivery: the separate `QIROX_EMAIL_API_KEY_PRODUCTION` secret is absent; the development key is not reused
 - Production WhatsApp OTP delivery: provider URL/token are absent
 - Production session signing: deployment secret is absent
 - Durable uploads and WhatsApp worker storage

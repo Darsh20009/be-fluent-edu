@@ -42,8 +42,9 @@ reconciled before any production unique constraint is added.
 
 - WhatsApp uses `WHATSAPP_OTP_PROVIDER_URL` and an optional token environment
   variable.
-- Email uses the existing SMTP2GO integration and the configured
-  `SMTP2GO_FROM_EMAIL`, defaulting to `befluent@qirox.online`.
+- Email uses the existing Qirox project email integration. Development reads
+  `QIROX_EMAIL_API_KEY`; production requires the separately issued
+  `QIROX_EMAIL_API_KEY_PRODUCTION` secret.
 - Development can use `AUTH_OTP_TEST_MODE=true` for a non-network provider.
 - The authentication provider does not import or depend on Baileys CRM code.
 

@@ -85,7 +85,7 @@ class EmailOtpProvider implements OtpDeliveryProvider {
       throw new Error('Email OTP provider failed')
     }
 
-    return { providerMessageId: 'smtp2go' }
+    return { providerMessageId: result.providerMessageId || 'qirox-email' }
   }
 }
 

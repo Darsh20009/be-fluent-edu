@@ -128,7 +128,7 @@ export default function SystemTab() {
             </div>
             <div className="flex justify-between py-2 border-b border-gray-100">
               <span>Email Service</span>
-              <span className="text-green-600 font-bold">SMTP2GO</span>
+              <span className="text-gray-600 font-bold">Qirox Studio</span>
             </div>
             <div className="flex justify-between py-2">
               <span>Platform Version</span>

@@ -1,37 +1,173 @@
-export async function sendEmail({ to, subject, html, attachments }: { to: string, subject: string, html: string, attachments?: Array<{ filename: string, fileblob: string, content_type: string }> }) {
-  const apiKey = process.env.SMTP2GO_API_KEY;
-  const fromEmail = process.env.SMTP2GO_FROM_EMAIL || 'befluent@qirox.online';
-  const fromName = process.env.SMTP2GO_FROM_NAME || 'Be Fluent Academy';
-  
-  try {
-    const response = await fetch('https://api.smtp2go.com/v3/email/send', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        api_key: apiKey,
-        to: [to],
-        sender: `${fromName} <${fromEmail}>`,
-        subject: subject,
-        html_body: html,
-        attachments: attachments || []
-      }),
-    });
+import { randomUUID } from 'node:crypto'
 
-    const data = await response.json();
-    if (!response.ok) {
-      console.error('SMTP2GO Error:', data);
-      return { success: false, error: data };
-    }
+const QIROX_EMAIL_ENDPOINT = 'https://qiroxstudio.online/api/v1/projects/6a994e0e21f958475d1c6b1e/email'
+const QIROX_EMAIL_KEY_PREFIX = 'qrx_project_email_'
 
-    return { success: true, data };
-  } catch (error) {
-    console.error('Email Sending Error:', error);
-    return { success: false, error };
-  }
+export type EmailSendError =
+  | 'CONFIGURATION_ERROR'
+  | 'INVALID_MESSAGE'
+  | 'ATTACHMENTS_UNSUPPORTED'
+  | 'PROVIDER_UNAVAILABLE'
+  | 'TIMEOUT'
+  | 'HTTP_ERROR'
+
+export type EmailSendResult =
+  | { success: true; providerMessageId?: string }
+  | { success: false; error: EmailSendError; retryable: boolean }
+
+export interface SendEmailInput {
+  to: string
+  subject: string
+  html?: string
+  text?: string
+  recipientName?: string
+  attachments?: Array<{ filename: string; fileblob: string; content_type: string }>
+  idempotencyKey?: string
 }
 
+function getConfiguredApiKey() {
+  return process.env.NODE_ENV === 'production'
+    ? process.env.QIROX_EMAIL_API_KEY_PRODUCTION
+    : process.env.QIROX_EMAIL_API_KEY
+}
+
+export function qiroxEmailProviderStatus() {
+  const environment = process.env.NODE_ENV === 'production' ? 'production' : 'development'
+  const apiKey = getConfiguredApiKey()
+  if (!apiKey) {
+    return {
+      configured: false,
+      environment,
+      reason: environment === 'production' ? 'PRODUCTION_KEY_REQUIRED' : 'MISSING_API_KEY',
+    } as const
+  }
+  if (!apiKey.startsWith(QIROX_EMAIL_KEY_PREFIX)) {
+    return { configured: false, environment, reason: 'INVALID_API_KEY_FORMAT' } as const
+  }
+  return { configured: true, environment } as const
+}
+
+export function htmlToEmailText(html: string) {
+  return html
+    .replace(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi, (_match, attributes: string, label: string) => {
+      const href = attributes.match(/\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i)
+      const url = href?.[1] || href?.[2] || href?.[3]
+      const visibleLabel = label.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+      if (!url || !/^(https?:\/\/|mailto:)/i.test(url)) return visibleLabel
+      return visibleLabel ? `${visibleLabel} (${url})` : url
+    })
+    .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, ' ')
+    .replace(/<br\b[^>]*\/?>/gi, '\n')
+    .replace(/<\/(p|div|li|tr|h[1-6]|table)\s*>/gi, '\n')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&#(x[0-9a-f]+|\d+);/gi, (_match, entity: string) => {
+      const codePoint = entity[0].toLowerCase() === 'x'
+        ? Number.parseInt(entity.slice(1), 16)
+        : Number.parseInt(entity, 10)
+      return Number.isFinite(codePoint) && codePoint > 0 && codePoint <= 0x10ffff
+        ? String.fromCodePoint(codePoint)
+        : ' '
+    })
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n[ \t]+/g, '\n')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
+function getProviderMessageId(payload: unknown) {
+  if (!payload || typeof payload !== 'object') return undefined
+  const record = payload as Record<string, unknown>
+  const nested = record.data && typeof record.data === 'object'
+    ? record.data as Record<string, unknown>
+    : undefined
+  const id = record.messageId || record.id || nested?.messageId || nested?.id
+  return typeof id === 'string' ? id : undefined
+}
+
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  text,
+  recipientName,
+  attachments,
+  idempotencyKey,
+}: SendEmailInput): Promise<EmailSendResult> {
+  const status = qiroxEmailProviderStatus()
+  if (!status.configured) {
+    return { success: false, error: 'CONFIGURATION_ERROR', retryable: false }
+  }
+
+  if (attachments?.length) {
+    return { success: false, error: 'ATTACHMENTS_UNSUPPORTED', retryable: false }
+  }
+
+  const message = text?.trim() || (html ? htmlToEmailText(html) : '')
+  const safeRecipient = to.trim()
+  const safeSubject = subject.trim()
+  const operationKey = idempotencyKey || randomUUID()
+  if (
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeRecipient)
+    || safeSubject.length === 0
+    || safeSubject.length > 200
+    || message.length === 0
+    || message.length > 100_000
+    || operationKey.length < 8
+    || operationKey.length > 160
+  ) {
+    return { success: false, error: 'INVALID_MESSAGE', retryable: false }
+  }
+
+  const apiKey = getConfiguredApiKey()
+  if (!apiKey) {
+    return { success: false, error: 'CONFIGURATION_ERROR', retryable: false }
+  }
+
+  try {
+    const response = await fetch(QIROX_EMAIL_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Idempotency-Key': operationKey,
+      },
+      body: JSON.stringify({
+        recipient: {
+          email: safeRecipient,
+          ...(recipientName?.trim() ? { name: recipientName.trim() } : {}),
+        },
+        subject: safeSubject,
+        message,
+      }),
+      signal: AbortSignal.timeout(12_000),
+    })
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: 'HTTP_ERROR',
+        retryable: response.status === 408 || response.status === 429 || response.status >= 500,
+      }
+    }
+
+    const payload = await response.json().catch(() => undefined)
+    return { success: true, providerMessageId: getProviderMessageId(payload) }
+  } catch (error) {
+    const isTimeout = error instanceof Error && error.name === 'TimeoutError'
+    return {
+      success: false,
+      error: isTimeout ? 'TIMEOUT' : 'PROVIDER_UNAVAILABLE',
+      retryable: true,
+    }
+  }
+}
 const LOGO_URL = process.env.NEXT_PUBLIC_APP_URL
   ? `${process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, '')}/brand/be-fluent-mark-2026.png`
   : 'https://befluent-edu.online/brand/be-fluent-mark-2026.png';

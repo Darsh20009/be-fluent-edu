@@ -22,9 +22,8 @@ a non-connected placeholder only; they did not connect to or write to MongoDB.
 | `NEXT_PUBLIC_APP_URL` | Public application URL | Optional | No | Email/assets and public links | Public | Placeholder documented in `.env.example` |
 | `NODE_ENV` | Runtime mode | Yes at runtime | Runtime-managed/implicit | Next.js/server | Public configuration | Development workflow currently runs non-production |
 | `PORT` | Server listening port | Yes for Render | Runtime/deployment | `start-server.js` | Public configuration | Server now uses `PORT`, defaulting to 5000 |
-| `SMTP2GO_API_KEY` | Email delivery | Required for real email fallback | No | Email provider | Secret | Not configured |
-| `SMTP2GO_FROM_EMAIL` | Email sender | Optional | Shared value exists | Email provider | Public configuration | Source fallback is `befluent@qirox.online`; shared environment currently differs |
-| `SMTP2GO_FROM_NAME` | Email sender name | Optional | No | Email provider | Public configuration | Defaults in source |
+| `QIROX_EMAIL_API_KEY` | Qirox email delivery | Required for development email | Yes as shared secret | Email provider | Secret | Visible to both development and production runtimes; application code uses it only outside production |
+| `QIROX_EMAIL_API_KEY_PRODUCTION` | Qirox production email delivery | Required for production email | No | Email provider | Secret | Production deliberately does not reuse the development key |
 | `WHATSAPP_OTP_PROVIDER_URL` | WhatsApp OTP provider endpoint | Required for real WhatsApp OTP | No | OTP provider | Secret/configuration | Separate from CRM/Baileys |
 | `WHATSAPP_OTP_PROVIDER_TOKEN` | WhatsApp provider credential | Required with provider | No | OTP provider | Secret | Not configured |
 | `QMEET_API_BASE_URL` | Future QMeet provider endpoint | Optional/out of scope | No | QMeet adapter | Configuration | Not needed for Phase 3.5 |

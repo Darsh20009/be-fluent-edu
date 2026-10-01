@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     if (result.success) {
       return NextResponse.json({ success: true, message: 'Email sent successfully' })
     } else {
-      return NextResponse.json({ error: 'Failed to send email', details: result.error }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to send email' }, { status: 502 })
     }
   } catch (error) {
     console.error('Send email error:', error)

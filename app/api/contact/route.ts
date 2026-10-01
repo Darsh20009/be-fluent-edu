@@ -25,7 +25,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'البريد الإلكتروني غير صحيح' }, { status: 400 })
     }
 
-    const adminEmail = process.env.SMTP2GO_FROM_EMAIL || 'noreply@befluent-edu.online'
     const supportEmail = 'support@befluent-edu.online'
 
     const html = `
