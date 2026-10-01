@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap');
+
+.bfluent-current-admin,
+.bfluent-current-teacher {
+  font-family: "Noto Kufi Arabic", "DM Sans", sans-serif;
+  letter-spacing: normal;
+}
+
+.bfluent-current-admin button,
+.bfluent-current-teacher button {
+  font: inherit;
+}
+
+.bfluent-brand-wordmark,
+.bfluent-brand-static-wordmark {
+  display: inline-flex;
+  white-space: nowrap;
+}
+
+.bfluent-brand-character {
+  opacity: 0;
+  animation: bfluent-brand-type 1ms steps(1, end) var(--brand-char-delay, 0ms) both;
+}
+
+.bfluent-brand-static-wordmark .bfluent-brand-character {
+  opacity: 1;
+  animation: none;
+}
+
+@keyframes bfluent-brand-type {
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bfluent-brand-wordmark .bfluent-brand-character {
+    opacity: 1;
+    animation: none;
+  }
+}

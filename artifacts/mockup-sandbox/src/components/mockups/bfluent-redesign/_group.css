@@ -1,0 +1,52 @@
+:root {
+  color-scheme: light;
+  --bf-canvas: #f3f6f2;
+  --bf-paper: #ffffff;
+  --bf-paper-soft: #f8faf7;
+  --bf-ink: #202d28;
+  --bf-muted: #66756e;
+  --bf-line: #e2e9e3;
+  --bf-green: #147755;
+  --bf-green-soft: #e8f4ed;
+  --bf-purple: #342b52;
+  --bf-purple-soft: #f0edf6;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bf-canvas);
+  color: var(--bf-ink);
+  font-family: "DM Sans", "Noto Kufi Arabic", Tahoma, Arial, sans-serif;
+  letter-spacing: normal;
+}
+
+button {
+  font: inherit;
+}
+
+.bf-brand-name {
+  display: inline-block;
+  width: 6.25rem;
+  overflow: hidden;
+  white-space: nowrap;
+  direction: ltr;
+  animation: bf-brand-type 360ms steps(9, end) both;
+}
+
+@keyframes bf-brand-type {
+  from { width: 0; }
+  to { width: 6.25rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bf-brand-name {
+    width: 6.25rem;
+    animation: none;
+  }
+}
