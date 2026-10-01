@@ -7,6 +7,7 @@ import {
   Home, Users, CreditCard, Activity, LogOut, Shield, BookOpen,
   GraduationCap, ClipboardList, Mail, Tag, ChevronRight, Menu, X,
   Globe, Layers, PhoneCall
+  , MessageCircle
 } from 'lucide-react'
 import Link from 'next/link'
 import HomeTab, { type AdminOverviewStats } from './components/AdminOverviewRedesign'
@@ -61,6 +62,13 @@ const MENU_GROUPS = [
     items: [
       { id: 'email', label: 'البريد المباشر', icon: Mail },
       { id: 'system', label: 'النظام والسجلات', icon: Activity },
+    ]
+  },
+  {
+    label: 'المساحة الجديدة',
+    items: [
+      { id: 'new-workspace', label: 'صفحات الإدارة الجديدة', icon: Layers },
+      { id: 'whatsapp', label: 'إدارة WhatsApp CRM', icon: MessageCircle },
     ]
   }
 ]
@@ -154,7 +162,18 @@ export default function AdminDashboardClient({ user }: Props) {
                       key={item.id}
                       type="button"
                       aria-current={selected ? 'page' : undefined}
-                      onClick={() => { setActiveTab(item.id); setSidebarOpen(false) }}
+                      onClick={() => {
+                        setSidebarOpen(false)
+                        if (item.id === 'new-workspace') {
+                          router.push('/dashboard/admin/classes')
+                          return
+                        }
+                        if (item.id === 'whatsapp') {
+                          router.push('/dashboard/admin/whatsapp')
+                          return
+                        }
+                        setActiveTab(item.id)
+                      }}
                       className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-right text-sm transition-colors ${
                         selected ? 'bg-[#edf5ef] font-bold text-[#225d41]' : 'text-[#5c6961] hover:bg-[#f5f7f5] hover:text-[#225d41]'
                       }`}

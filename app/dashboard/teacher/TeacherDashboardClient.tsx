@@ -183,6 +183,14 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
                   </button>
                 )
               })}
+              <Link
+                href="/dashboard/teacher/feedback"
+                onClick={() => setSidebarOpen(false)}
+                className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-right text-sm text-[#5c6961] transition-colors hover:bg-[#f5f7f5] hover:text-[#225d41]"
+              >
+                <FileText className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+                <span>Feedback / ملاحظات الحصص</span>
+              </Link>
             </nav>
           </aside>
 
