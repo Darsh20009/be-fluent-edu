@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { useTheme } from '@/lib/contexts/ThemeContext'
-import { useEffect, useRef, useState } from 'react'
-import { Check, LoaderCircle, LockKeyhole, MessageCircle, Phone, X } from 'lucide-react'
+import { useEffect, useId, useRef, useState } from 'react'
+import { Check, Eye, EyeOff, LoaderCircle, LockKeyhole, MessageCircle, Phone, X } from 'lucide-react'
 import BFPhoneField from '@/components/auth/BFPhoneField'
 import BrandLockup from '@/components/brand/BrandLockup'
 import { getCountryByIso, toAsciiDigits, toInternationalPhone } from '@/lib/phone-countries'
@@ -43,6 +43,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
   const { language } = useTheme()
   const isArabic = language === 'ar'
   const tr = (ar: string, en: string) => isArabic ? ar : en
+  const passwordInputId = useId()
   const [view, setView] = useState<ModalView>('phone')
   const [authIntent, setAuthIntent] = useState<AuthIntent>('LOGIN')
   const [countryIso, setCountryIso] = useState('EG')
@@ -51,6 +52,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
   const [code, setCode] = useState('')
   const [emailOrPhone, setEmailOrPhone] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [confirmPassword, setConfirmPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [registrationEmail, setRegistrationEmail] = useState('')
@@ -70,6 +72,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
     setCode('')
     setEmailOrPhone('')
     setPassword('')
+    setShowPassword(false)
     setConfirmPassword('')
     setFullName('')
     setRegistrationEmail('')
@@ -538,21 +541,34 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
                     required
                   />
                 </label>
-                <label className="block">
-                  <span className="mb-2 block text-sm font-semibold text-[#34443a]">{tr('كلمة المرور', 'Password')}</span>
+                <div>
+                  <label htmlFor={passwordInputId} className="mb-2 block text-sm font-semibold text-[#34443a]">{tr('كلمة المرور', 'Password')}</label>
                   <span className="relative block">
                     <LockKeyhole size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-[#718078]" aria-hidden="true" />
                     <input
-                      type="password"
+                      id={passwordInputId}
+                      type={showPassword ? 'text' : 'password'}
                       autoComplete="current-password"
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
-                      className="min-h-12 w-full border border-[#dce4dc] ps-10 pe-3 text-sm outline-none focus:border-[#24714f] focus:ring-2 focus:ring-[#24714f]/15"
+                      className="min-h-12 w-full border border-[#dce4dc] ps-10 pe-10 text-sm outline-none focus:border-[#24714f] focus:ring-2 focus:ring-[#24714f]/15"
                       disabled={busy}
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((visible) => !visible)}
+                      className="absolute end-3 top-1/2 -translate-y-1/2 text-[#718078] hover:text-[#34443a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#24714f]"
+                      aria-label={showPassword ? tr('إخفاء كلمة المرور', 'Hide password') : tr('إظهار كلمة المرور', 'Show password')}
+                      aria-pressed={showPassword}
+                      disabled={busy}
+                    >
+                      {showPassword
+                        ? <EyeOff size={18} aria-hidden="true" />
+                        : <Eye size={18} aria-hidden="true" />}
+                    </button>
                   </span>
-                </label>
+                </div>
                 <button type="submit" disabled={busy} className="inline-flex min-h-12 w-full items-center justify-center gap-2 bg-[#24714f] px-4 text-sm font-semibold text-white hover:bg-[#1d5f42] disabled:cursor-wait disabled:opacity-65">
                   {busy ? <LoaderCircle className="animate-spin" size={17} aria-hidden="true" /> : <LockKeyhole size={16} aria-hidden="true" />}
                   {tr('تسجيل الدخول', 'Sign in')}
