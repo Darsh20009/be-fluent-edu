@@ -9,21 +9,16 @@ import {
   ChevronLeft, 
   Loader2, 
   Sparkles,
-  MessageCircle,
   User,
   Trash2,
   Volume2,
   VolumeX,
   Mic,
   MicOff,
-  Settings,
   History,
   X,
-  Play,
   Pause,
-  RefreshCw
 } from 'lucide-react'
-import Script from 'next/script'
 
 interface Message {
   id: string
@@ -39,18 +34,44 @@ interface ConversationHistory {
   createdAt: Date
 }
 
+interface SpeechRecognitionAlternativeLike {
+  transcript: string
+}
+
+type SpeechRecognitionResultLike = ArrayLike<SpeechRecognitionAlternativeLike>
+
+interface SpeechRecognitionEventLike {
+  results: ArrayLike<SpeechRecognitionResultLike>
+}
+
+interface SpeechRecognitionErrorLike {
+  error: string
+}
+
+interface SpeechRecognitionLike {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  start(): void
+  stop(): void
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null
+  onend: (() => void) | null
+  onerror: ((event: SpeechRecognitionErrorLike) => void) | null
+}
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike
+
 export default function AIAssistantPage() {
   const router = useRouter()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [puterReady, setPuterReady] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   
   // Voice features
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [isListening, setIsListening] = useState(false)
-  const [voiceEnabled, setVoiceEnabled] = useState(true)
+  const [voiceEnabled] = useState(true)
   const [autoSpeak, setAutoSpeak] = useState(true)
   const [speechSupported, setSpeechSupported] = useState(false)
   const [recognitionSupported, setRecognitionSupported] = useState(false)
@@ -62,7 +83,7 @@ export default function AIAssistantPage() {
   
   // Speech synthesis and recognition refs
   const synthRef = useRef<SpeechSynthesis | null>(null)
-  const recognitionRef = useRef<any>(null)
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
 
   const scrollToBottom = () => {
@@ -83,7 +104,11 @@ export default function AIAssistantPage() {
       }
       
       // Check STT support
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      const speechWindow = window as Window & {
+        SpeechRecognition?: SpeechRecognitionConstructor
+        webkitSpeechRecognition?: SpeechRecognitionConstructor
+      }
+      const SpeechRecognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition
       if (SpeechRecognition) {
         setRecognitionSupported(true)
         recognitionRef.current = new SpeechRecognition()
@@ -91,9 +116,9 @@ export default function AIAssistantPage() {
         recognitionRef.current.interimResults = true
         recognitionRef.current.lang = 'en-US'
         
-        recognitionRef.current.onresult = (event: any) => {
+        recognitionRef.current.onresult = (event: SpeechRecognitionEventLike) => {
           const transcript = Array.from(event.results)
-            .map((result: any) => result[0].transcript)
+            .map((result) => result[0]?.transcript || '')
             .join('')
           setInput(transcript)
         }
@@ -102,7 +127,7 @@ export default function AIAssistantPage() {
           setIsListening(false)
         }
         
-        recognitionRef.current.onerror = (event: any) => {
+        recognitionRef.current.onerror = (event: SpeechRecognitionErrorLike) => {
           console.error('Speech recognition error:', event.error)
           setIsListening(false)
         }
@@ -130,9 +155,9 @@ export default function AIAssistantPage() {
     const welcomeMessage: Message = {
       id: 'welcome',
       role: 'assistant',
-      content: `مرحباً! أنا Be Fluent AI، مساعدك الذكي المجاني لتعلم اللغة الإنجليزية!
+      content: `مرحباً! أنا Be Fluent AI، مساعدك لتعلم اللغة الإنجليزية!
 
-Hello! I'm Be Fluent AI, your FREE smart English learning assistant!
+Hello! I'm Be Fluent AI, your English learning assistant!
 
 يمكنني التحدث معك بالصوت. اضغط على أيقونة السماعة لسماعي.
 يمكنك التحدث معي. اضغط على أيقونة المايكروفون.
@@ -258,72 +283,25 @@ How can I help you today?`,
     setLoading(true)
 
     try {
-      if (!window.puter) {
-        throw new Error('AI service not ready')
-      }
-
-      const systemPrompt = `You are "Be Fluent AI" - a friendly, expert English teacher for Arabic speakers. Your name is Be Fluent AI.
-
-IMPORTANT RULES:
-1. Always respond in BOTH English AND Arabic to help understanding
-2. Be warm, encouraging, and patient like a supportive friend
-3. Use simple, clear language for beginners
-4. Provide practical examples from daily life
-5. Correct mistakes gently and explain why
-6. Keep formatting clean and do not use emojis
-
-YOUR CAPABILITIES:
-- Explain English grammar rules with Arabic translations
-- Teach new vocabulary with pronunciation guides
-- Practice conversations for different situations
-- Translate between English and Arabic
-- Help with writing and speaking skills
-
-RESPONSE FORMAT EXAMPLE:
-"Great question!
-**In English:** The word 'beautiful' means very pretty.
-**بالعربي:** كلمة 'beautiful' تعني جميل جداً.
-
-**Example:** She has beautiful eyes.
-**مثال:** لديها عيون جميلة.
-
-**Pronunciation:** BYOO-tih-ful
-
-Keep practicing! استمر في التدريب."`
-
       const conversationHistory = messages.slice(-10).map(m => ({
         role: m.role,
         content: m.content
       }))
 
-      const apiMessages = [
-        { role: 'system', content: systemPrompt },
-        ...conversationHistory,
-        { role: 'user', content: userMessage.content }
-      ]
-
-      const response = await window.puter.ai.chat(apiMessages, {
-        model: 'gpt-4o-mini',
-        stream: false
+      const response = await fetch('/api/ai-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userMessage.content,
+          conversationHistory,
+        }),
       })
-
-      let aiContent = ''
-      if (typeof response === 'string') {
-        aiContent = response
-      } else if (response && typeof response === 'object') {
-        const resp = response as any
-        if (resp.message?.content) {
-          aiContent = resp.message.content
-        } else if (resp.text) {
-          aiContent = resp.text
-        } else if (resp.content) {
-          aiContent = resp.content
-        }
+      const result = await response.json().catch(() => null)
+      if (!response.ok || typeof result?.message !== 'string') {
+        throw new Error('AI service request failed')
       }
 
-      if (!aiContent) {
-        aiContent = 'عذراً، لم أتمكن من فهم الرد. يرجى المحاولة مرة أخرى.\nSorry, I could not understand the response. Please try again.'
-      }
+      const aiContent = result.message
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -341,8 +319,8 @@ Keep practicing! استمر في التدريب."`
         setTimeout(() => speak(aiContent), 500)
       }
 
-    } catch (error) {
-      console.error('Error sending message:', error)
+    } catch {
+      console.error('AI assistant request failed')
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -403,12 +381,6 @@ Hello! I'm ready to help you learn English!
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] flex flex-col hide-floating-contact">
-      <Script 
-        src="https://js.puter.com/v2/" 
-        strategy="afterInteractive"
-        onLoad={() => setPuterReady(true)}
-      />
-      
       {/* Header */}
       <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-4 shadow-lg">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -636,7 +608,7 @@ Hello! I'm ready to help you learn English!
             {/* Send Button */}
             <button
               onClick={sendMessage}
-              disabled={!input.trim() || loading || !puterReady}
+              disabled={!input.trim() || loading}
               className="bg-[#10B981] text-white p-3 rounded-full hover:bg-[#003a6a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
@@ -651,23 +623,12 @@ Hello! I'm ready to help you learn English!
               placeholder={isListening ? 'جاري الاستماع...' : 'اكتب سؤالك هنا... / Type your question...'}
               className="flex-1 px-4 py-3 border-2 border-gray-300 bg-white text-black placeholder:text-gray-500 rounded-full focus:ring-2 focus:ring-[#10B981] focus:border-transparent text-right"
               dir="auto"
-              disabled={loading || !puterReady}
+              disabled={loading}
             />
           </div>
           
           {/* Status indicators */}
           <div className="flex justify-center gap-4 mt-2 text-xs text-gray-500">
-            {!puterReady && (
-              <span className="flex items-center gap-1">
-                <Loader2 className="w-3 h-3 animate-spin" />
-                جاري تحميل الذكاء الاصطناعي...
-              </span>
-            )}
-            {puterReady && (
-              <span className="text-green-600 flex items-center gap-1">
-                ✓ AI جاهز
-              </span>
-            )}
             {speechSupported && (
               <span className="text-blue-600 flex items-center gap-1">
                 الصوت متاح

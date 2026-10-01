@@ -1,7 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import OpenAI from 'openai'
+import { createThanarahCompletion, ThanarahError } from '@/lib/thanarah'
+
+interface ConversationMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+function isConversationMessage(value: unknown): value is ConversationMessage {
+  if (!value || typeof value !== 'object') return false
+  const message = value as Record<string, unknown>
+  return (
+    (message.role === 'user' || message.role === 'assistant') &&
+    typeof message.content === 'string'
+  )
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,15 +24,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.THANARAH_API_KEY) {
       return NextResponse.json({ error: 'AI service not configured' }, { status: 503 })
     }
 
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    const body = await req.json().catch(() => null)
+    const message = typeof body?.message === 'string' ? body.message.trim() : ''
+    const conversationHistory: unknown = body?.conversationHistory
 
-    const { message, conversationHistory } = await req.json()
-
-    if (!message || typeof message !== 'string') {
+    if (!message || message.length > 2000) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
 
@@ -38,44 +52,38 @@ Guidelines:
 - Provide Arabic translations when explaining new concepts
 - Give practical examples
 - Encourage the student to practice
-
-Current student: ${session.user.name || 'Student'}`
+`
 
     const sanitizedHistory = Array.isArray(conversationHistory)
       ? conversationHistory
-          .filter((msg: any) => 
-            msg && 
-            typeof msg === 'object' &&
-            (msg.role === 'user' || msg.role === 'assistant') &&
-            typeof msg.content === 'string'
-          )
+          .filter(isConversationMessage)
           .slice(-10)
-          .map((msg: any) => ({
-            role: msg.role as 'user' | 'assistant',
-            content: msg.content.slice(0, 2000)
+          .map((historyMessage) => ({
+            role: historyMessage.role,
+            content: historyMessage.content.slice(0, 2000)
           }))
       : []
 
     const messages: Array<{role: 'system' | 'user' | 'assistant', content: string}> = [
       { role: 'system', content: systemPrompt },
       ...sanitizedHistory,
-      { role: 'user', content: message.slice(0, 2000) }
+      { role: 'user', content: message }
     ]
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages,
-      max_tokens: 1024,
-    })
-
-    const aiResponse = response.choices[0].message.content
+    const aiResponse = await createThanarahCompletion(messages, { maxTokens: 1024 })
 
     return NextResponse.json({
       message: aiResponse,
       role: 'assistant'
     })
   } catch (error) {
-    console.error('AI Assistant error:', error)
-    return NextResponse.json({ error: 'Failed to get AI response' }, { status: 500 })
+    if (error instanceof ThanarahError && error.code === 'MISSING_API_KEY') {
+      return NextResponse.json({ error: 'AI service not configured' }, { status: 503 })
+    }
+    console.error(
+      'AI Assistant request failed',
+      error instanceof ThanarahError ? { code: error.code, status: error.status } : undefined,
+    )
+    return NextResponse.json({ error: 'Failed to get AI response' }, { status: 502 })
   }
 }

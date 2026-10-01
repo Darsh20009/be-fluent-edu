@@ -7,21 +7,16 @@ import {
   Play,
   ChevronLeft,
   Loader2,
-  Video,
   CheckCircle,
   XCircle,
   BookOpen,
-  Star,
   Trophy,
   Clock,
-  Filter
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import Script from 'next/script'
-import '@/types/puter'
 
 interface VideoItem {
   id: string
@@ -54,14 +49,13 @@ export default function VideoLearningPage() {
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null)
   const [questions, setQuestions] = useState<Question[]>([])
   const [loadingQuestions, setLoadingQuestions] = useState(false)
+  const [questionError, setQuestionError] = useState<string | null>(null)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
   const [showResult, setShowResult] = useState(false)
   const [score, setScore] = useState(0)
   const [quizCompleted, setQuizCompleted] = useState(false)
   const [filterLevel, setFilterLevel] = useState<string>('all')
-  const [puterReady, setPuterReady] = useState(false)
-
   useEffect(() => {
     fetchVideos()
   }, [])
@@ -83,6 +77,7 @@ export default function VideoLearningPage() {
   async function generateQuestions(video: VideoItem) {
     setSelectedVideo(video)
     setLoadingQuestions(true)
+    setQuestionError(null)
     setQuestions([])
     setCurrentQuestionIndex(0)
     setSelectedAnswer(null)
@@ -91,86 +86,19 @@ export default function VideoLearningPage() {
     setQuizCompleted(false)
 
     try {
-      if (!window.puter) {
-        throw new Error('AI service not ready')
-      }
-
-      const prompt = `Based on this English learning video, generate 5 multiple choice questions to test the student's understanding. The video is about "${video.title}".
-
-Video Description:
-${video.description}
-
-Arabic Description:
-${video.descriptionAr}
-
-Generate questions in this exact JSON format (respond only with JSON, no other text):
-{
-  "questions": [
-    {
-      "id": 1,
-      "question": "Question in English",
-      "questionAr": "السؤال بالعربية",
-      "options": [
-        {"id": "a", "text": "Option A", "textAr": "الخيار أ"},
-        {"id": "b", "text": "Option B", "textAr": "الخيار ب"},
-        {"id": "c", "text": "Option C", "textAr": "الخيار ج"},
-        {"id": "d", "text": "Option D", "textAr": "الخيار د"}
-      ],
-      "correctAnswer": "a",
-      "explanation": "Explanation in English",
-      "explanationAr": "التفسير بالعربية"
-    }
-  ]
-}
-
-Make the questions appropriate for ${video.level} level students.`
-
-      const response = await window.puter.ai.chat([
-        { role: 'system', content: 'You are an English teacher creating quiz questions. Always respond with valid JSON only, no other text.' },
-        { role: 'user', content: prompt }
-      ], {
-        model: 'gpt-4o-mini',
-        stream: false
+      const response = await fetch('/api/video-learning', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoId: video.id, action: 'generate-questions' }),
       })
-
-      let jsonContent = ''
-      if (typeof response === 'string') {
-        jsonContent = response
-      } else if (response && typeof response === 'object') {
-        const resp = response as any
-        if (resp.message?.content) {
-          jsonContent = resp.message.content
-        } else if (resp.text) {
-          jsonContent = resp.text
-        } else if (resp.content) {
-          jsonContent = resp.content
-        }
+      const result = await response.json().catch(() => null)
+      if (!response.ok || !Array.isArray(result?.questions) || result.questions.length === 0) {
+        throw new Error('Question generation failed')
       }
-
-      const jsonMatch = jsonContent.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0])
-        setQuestions(parsed.questions || [])
-      }
-
-    } catch (error) {
-      console.error('Error generating questions:', error)
-      setQuestions([
-        {
-          id: 1,
-          question: "What is the main topic of this video?",
-          questionAr: "ما هو الموضوع الرئيسي لهذا الفيديو؟",
-          options: [
-            { id: "a", text: video.title, textAr: video.titleAr },
-            { id: "b", text: "Advanced Grammar", textAr: "القواعد المتقدمة" },
-            { id: "c", text: "Business English", textAr: "إنجليزي الأعمال" },
-            { id: "d", text: "IELTS Preparation", textAr: "التحضير لاختبار IELTS" }
-          ],
-          correctAnswer: "a",
-          explanation: "The video focuses on " + video.title,
-          explanationAr: "يركز الفيديو على " + video.titleAr
-        }
-      ])
+      setQuestions(result.questions)
+    } catch {
+      console.error('AI video question request failed')
+      setQuestionError('تعذر إنشاء الأسئلة الآن. يرجى المحاولة مرة أخرى.')
     } finally {
       setLoadingQuestions(false)
     }
@@ -233,12 +161,6 @@ Make the questions appropriate for ${video.level} level students.`
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] p-4 md:p-6">
-      <Script 
-        src="https://js.puter.com/v2/" 
-        strategy="afterInteractive"
-        onLoad={() => setPuterReady(true)}
-      />
-      
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <button
@@ -317,10 +239,9 @@ Make the questions appropriate for ${video.level} level students.`
                     <Button 
                       onClick={() => generateQuestions(video)}
                       className="w-full flex items-center justify-center gap-2"
-                      disabled={!puterReady}
                     >
                       <Play className="w-4 h-4" />
-                      {puterReady ? 'شاهد وتعلم' : 'جاري التحميل...'}
+                      شاهد وتعلم
                     </Button>
                   </div>
                 </Card>
@@ -352,6 +273,14 @@ Make the questions appropriate for ${video.level} level students.`
                   <p className="text-gray-600">جاري إنشاء الأسئلة بالذكاء الاصطناعي...</p>
                   <p className="text-sm text-gray-500">Generating AI questions...</p>
                 </div>
+              </Card>
+            ) : questionError ? (
+              <Card className="p-6 text-center">
+                <XCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
+                <p className="text-gray-700 mb-4">{questionError}</p>
+                <Button onClick={() => selectedVideo && generateQuestions(selectedVideo)}>
+                  إعادة المحاولة
+                </Button>
               </Card>
             ) : questions.length > 0 && !quizCompleted ? (
               <Card className="p-6">

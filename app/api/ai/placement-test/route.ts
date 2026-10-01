@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { askKimi } from '@/lib/kimi';
+import { createThanarahCompletion, parseThanarahJson, ThanarahError } from '@/lib/thanarah';
 
 const SYSTEM_PROMPT = `You are an English level assessment specialist. Your job is to generate adaptive multiple-choice questions to determine a student's English proficiency level (A1, A2, B1, B2, or C1).
 
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
 
     const body = await req.json();
-    const { action, history = [], lastAnswer, questionId, isCorrect } = body;
+    const { action, history = [], isCorrect } = body;
 
     if (action === 'start') {
       const messages = [
@@ -48,9 +48,8 @@ export async function POST(req: NextRequest) {
         { role: 'user' as const, content: 'Start the assessment. Generate question 1 of 10 at A2 level.' }
       ];
 
-      const raw = await askKimi(messages, { temperature: 0.4 });
-      const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      const question = JSON.parse(cleaned);
+      const raw = await createThanarahCompletion(messages, { temperature: 0.4, maxTokens: 800 });
+      const question = parseThanarahJson(raw);
 
       return NextResponse.json({ success: true, question });
     }
@@ -83,9 +82,8 @@ export async function POST(req: NextRequest) {
         { role: 'user' as const, content: nextInstruction }
       ];
 
-      const raw = await askKimi(messages, { temperature: 0.4 });
-      const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      const question = JSON.parse(cleaned);
+      const raw = await createThanarahCompletion(messages, { temperature: 0.4, maxTokens: 800 });
+      const question = parseThanarahJson(raw);
 
       return NextResponse.json({ success: true, question });
     }
@@ -101,7 +99,7 @@ export async function POST(req: NextRequest) {
       else if (percentage >= 60) level = 'B1';
       else if (percentage >= 40) level = 'A2';
 
-      const historyMessages = answers.map((h: { question: string; answer: string; correct: boolean; level: string }, i: number) => [
+      const historyMessages = answers.map((h: { question: string; answer: string; correct: boolean; level: string }) => [
         { role: 'assistant' as const, content: JSON.stringify({ type: 'question', text: h.question, level: h.level }) },
         { role: 'user' as const, content: `Student answered "${h.answer}". ${h.correct ? 'CORRECT' : 'INCORRECT'}.` }
       ]).flat();
@@ -112,12 +110,11 @@ export async function POST(req: NextRequest) {
         { role: 'user' as const, content: 'All 10 questions done. Return the final result JSON now.' }
       ];
 
-      const raw = await askKimi(messages, { temperature: 0.2 });
-      const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const raw = await createThanarahCompletion(messages, { temperature: 0.2, maxTokens: 400 });
 
       let aiResult;
       try {
-        aiResult = JSON.parse(cleaned);
+        aiResult = parseThanarahJson<{ level?: string }>(raw);
       } catch {
         aiResult = null;
       }
@@ -152,8 +149,8 @@ export async function POST(req: NextRequest) {
               placementTestPercentage: Math.round(percentage)
             }
           });
-        } catch (dbErr) {
-          console.error('DB save error:', dbErr);
+        } catch {
+          console.error('Placement test result could not be saved');
         }
       }
 
@@ -168,7 +165,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
-    console.error('AI placement test error:', error);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    if (error instanceof ThanarahError && error.code === 'MISSING_API_KEY') {
+      return NextResponse.json({ error: 'AI service not configured' }, { status: 503 });
+    }
+    console.error(
+      'AI placement test request failed',
+      error instanceof ThanarahError ? { code: error.code, status: error.status } : undefined,
+    );
+    return NextResponse.json({ error: 'AI placement test failed' }, { status: 502 });
   }
 }

@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import OpenAI from 'openai'
+import { createThanarahCompletion, parseThanarahJson, ThanarahError } from '@/lib/thanarah'
 
-const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null
+interface GrammarCheckResult {
+  errors: Array<{
+    error: string
+    correction: string
+    explanation: string
+    type: string
+  }>
+  overallScore: number
+  summary: string
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,36 +22,59 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!openai) {
+    if (!process.env.THANARAH_API_KEY) {
       return NextResponse.json({ error: 'Grammar check service is not configured' }, { status: 503 })
     }
 
-    const { text } = await request.json()
+    const body = await request.json().catch(() => null)
+    const text = typeof body?.text === 'string' ? body.text.trim() : ''
 
     if (!text) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 })
     }
 
-    // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
-    const response = await openai.chat.completions.create({
-      model: "gpt-5",
-      messages: [
-        {
-          role: "system",
-          content: "You are an expert English grammar checker for English learning students. Analyze the text and provide detailed grammar corrections. Return JSON with this format: { 'errors': [{ 'error': string, 'correction': string, 'explanation': string, 'type': string }], 'overallScore': number, 'summary': string }"
-        },
-        {
-          role: "user",
-          content: `Check this student's English text for grammar errors:\n\n${text}`
-        }
-      ],
-      response_format: { type: "json_object" }
-    })
+    if (text.length > 5000) {
+      return NextResponse.json({ error: 'Text is too long' }, { status: 400 })
+    }
 
-    const result = JSON.parse(response.choices[0].message.content || '{}')
+    const raw = await createThanarahCompletion([
+      {
+        role: 'system',
+        content: 'You are an expert English grammar checker for English learners. Analyze the text and return one valid JSON object only, with keys: errors (array of objects with error, correction, explanation, and type strings), overallScore (number from 0 to 100), and summary (string).',
+      },
+      {
+        role: 'user',
+        content: `Check this student's English text for grammar errors:\n\n${text}`,
+      },
+    ], { maxTokens: 1600 })
+
+    const result = parseThanarahJson<GrammarCheckResult>(raw)
+    const validResult =
+      result &&
+      Array.isArray(result.errors) &&
+      Number.isFinite(result.overallScore) &&
+      typeof result.summary === 'string' &&
+      result.errors.every((item) =>
+        item &&
+        typeof item.error === 'string' &&
+        typeof item.correction === 'string' &&
+        typeof item.explanation === 'string' &&
+        typeof item.type === 'string',
+      )
+
+    if (!validResult) {
+      throw new ThanarahError('INVALID_RESPONSE')
+    }
+
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Error checking grammar:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    if (error instanceof ThanarahError && error.code === 'MISSING_API_KEY') {
+      return NextResponse.json({ error: 'Grammar check service is not configured' }, { status: 503 })
+    }
+    console.error(
+      'Grammar check request failed',
+      error instanceof ThanarahError ? { code: error.code, status: error.status } : undefined,
+    )
+    return NextResponse.json({ error: 'Failed to check grammar' }, { status: 502 })
   }
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import OpenAI from 'openai'
+import { createThanarahCompletion, parseThanarahJson, ThanarahError } from '@/lib/thanarah'
 
 
 const educationalVideos = [
@@ -124,6 +124,49 @@ const educationalVideos = [
   }
 ]
 
+interface GeneratedOption {
+  id: string
+  text: string
+  textAr: string
+}
+
+interface GeneratedQuestion {
+  id: number
+  question: string
+  questionAr: string
+  options: GeneratedOption[]
+  correctAnswer: string
+  explanation: string
+  explanationAr: string
+}
+
+function isGeneratedQuestion(value: unknown): value is GeneratedQuestion {
+  if (!value || typeof value !== 'object') return false
+  const question = value as Record<string, unknown>
+  const options = question.options
+
+  return (
+    typeof question.id === 'number' &&
+    Number.isInteger(question.id) &&
+    typeof question.question === 'string' &&
+    typeof question.questionAr === 'string' &&
+    Array.isArray(options) &&
+    options.length === 4 &&
+    options.every((option: unknown) => {
+      if (!option || typeof option !== 'object') return false
+      const candidate = option as Record<string, unknown>
+      return (
+        typeof candidate.id === 'string' &&
+        typeof candidate.text === 'string' &&
+        typeof candidate.textAr === 'string'
+      )
+    }) &&
+    typeof question.correctAnswer === 'string' &&
+    typeof question.explanation === 'string' &&
+    typeof question.explanationAr === 'string'
+  )
+}
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -168,18 +211,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ error: 'AI service not configured' }, { status: 503 })
-    }
-
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-
-    const { videoId, action } = await req.json()
+    const body = await req.json().catch(() => null)
+    const videoId = body?.videoId
+    const action = body?.action
 
     if (action === 'generate-questions') {
       const video = educationalVideos.find(v => v.id === videoId)
       if (!video) {
         return NextResponse.json({ error: 'Video not found' }, { status: 404 })
+      }
+
+      if (!process.env.THANARAH_API_KEY) {
+        return NextResponse.json({ error: 'AI service not configured' }, { status: 503 })
       }
 
       const prompt = `Based on this English learning video transcript, generate 5 multiple choice questions to test the student's understanding. The video is about "${video.title}".
@@ -209,23 +252,22 @@ Generate questions in this JSON format:
 
 Make the questions appropriate for ${video.level} level students.`
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [
+      const raw = await createThanarahCompletion([
           { role: 'system', content: 'You are an English teacher creating quiz questions. Always respond with valid JSON only.' },
           { role: 'user', content: prompt }
-        ],
-        response_format: { type: 'json_object' },
-        max_tokens: 2048,
-      })
+      ], { maxTokens: 2048 })
 
-      let questionsData = { questions: [] }
-      try {
-        questionsData = JSON.parse(response.choices[0].message.content || '{"questions": []}')
-      } catch (parseError) {
-        console.error('Failed to parse AI response:', parseError)
-        return NextResponse.json({ error: 'Failed to generate questions' }, { status: 500 })
+      const questionsData = parseThanarahJson<{ questions: unknown[] }>(raw)
+      const rawQuestions = questionsData?.questions
+      if (!Array.isArray(rawQuestions) || rawQuestions.length !== 5) {
+        throw new ThanarahError('INVALID_RESPONSE')
       }
+      const questions = rawQuestions.map((question) => {
+        if (!isGeneratedQuestion(question)) {
+          throw new ThanarahError('INVALID_RESPONSE')
+        }
+        return question
+      })
 
       return NextResponse.json({
         video: {
@@ -233,13 +275,19 @@ Make the questions appropriate for ${video.level} level students.`
           title: video.title,
           titleAr: video.titleAr
         },
-        ...questionsData
+        questions
       })
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
   } catch (error) {
-    console.error('Video learning error:', error)
-    return NextResponse.json({ error: 'Failed to generate questions' }, { status: 500 })
+    if (error instanceof ThanarahError && error.code === 'MISSING_API_KEY') {
+      return NextResponse.json({ error: 'AI service not configured' }, { status: 503 })
+    }
+    console.error(
+      'Video question generation failed',
+      error instanceof ThanarahError ? { code: error.code, status: error.status } : undefined,
+    )
+    return NextResponse.json({ error: 'Failed to generate questions' }, { status: 502 })
   }
 }
