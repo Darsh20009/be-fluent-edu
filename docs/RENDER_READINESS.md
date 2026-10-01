@@ -2,9 +2,12 @@
 
 ## Result
 
-The project is **not ready for a real Render deployment yet** because the
-required MongoDB connection and deployment authentication secrets are not
-configured. No deployment was started or changed.
+Render with a persistent Node service is the selected production target. The
+project is **not yet verified ready to deploy**: this workspace's secrets do
+not establish that the matching values are configured in Render, and Render's
+service environment and database connectivity have not been verified here.
+No Render deployment or production database operation was performed as part of
+the hosting decision.
 
 ## Verified
 
@@ -24,17 +27,21 @@ configured. No deployment was started or changed.
 
 ## Not yet verified
 
-- Read-only MongoDB connectivity: blocked by missing `MONGODB_URI`
+- Read-only MongoDB connectivity from the Render service; verify `MONGODB_URI`
+  in Render rather than assuming a Replit workspace secret is present there
 - Render health check: no dedicated health endpoint exists
-- Production email delivery: the separate `QIROX_EMAIL_API_KEY_PRODUCTION` secret is absent; the development key is not reused
-- Production WhatsApp OTP delivery: provider URL/token are absent
-- Production session signing: deployment secret is absent
+- Production email delivery and its required provider secret; development
+  credentials are not reused
+- Production WhatsApp OTP delivery and its provider configuration
+- Production session signing configuration (`NEXTAUTH_SECRET` or the supported
+  `SESSION_SECRET` fallback)
 - Durable uploads and WhatsApp worker storage
 
 ## Required before deployment
 
-1. Configure `MONGODB_URI` as a secret on the Render service.
-2. Configure `NEXTAUTH_SECRET` and the required OTP/email provider secrets.
+1. Configure and verify `MONGODB_URI` in the Render service's secret settings.
+2. Configure the session-signing secret and any OTP/email provider secrets
+   required by the features enabled in production.
 3. Run a read-only Prisma/MongoDB connectivity check in the target environment.
 4. Configure a dedicated unauthenticated health endpoint or an equivalent
    Render health check path.
