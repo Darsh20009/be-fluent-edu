@@ -31,6 +31,7 @@ async function main() {
       passwordHash,
       role: 'ADMIN',
       isActive: true,
+      status: 'ACTIVE',
       passwordSetupRequired: false,
     },
   })
