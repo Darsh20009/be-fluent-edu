@@ -2,20 +2,23 @@ import Link from 'next/link'
 import ThemeToggle from '@/components/ThemeToggle'
 import styles from './phase4.module.css'
 
-export function Phase4Nav({ area }: { area: 'admin' | 'teacher' | 'student' }) {
+export function Phase4Nav({ area }: { area: 'admin' | 'manager' | 'teacher' | 'student' }) {
+  const adminLinks = [
+    ['/dashboard/admin/classes', 'Classes'],
+    ['/dashboard/admin/feedback', 'Feedback'],
+    ['/dashboard/admin/homework', 'Homework'],
+    ['/dashboard/admin/commerce', 'Control center'],
+    ['/dashboard/admin/people', 'People'],
+    ['/dashboard/admin/levels', 'Levels'],
+    ['/dashboard/admin/intelligence', 'Learning intelligence'],
+    ['/dashboard/admin/speaking', 'Community'],
+    ['/dashboard/admin/whatsapp', 'Communication'],
+  ] as const
+
   const links = area === 'admin'
-    ? [
-        ['/dashboard/admin/classes', 'Classes'],
-        ['/dashboard/admin/feedback', 'Feedback'],
-        ['/dashboard/admin/homework', 'Homework'],
-        ['/dashboard/admin/commerce', 'Control center'],
-        ['/dashboard/admin/people', 'People'],
-        ['/dashboard/admin/levels', 'Levels'],
-        ['/dashboard/admin/intelligence', 'Learning intelligence'],
-        ['/dashboard/admin/speaking', 'Community'],
-        ['/dashboard/admin/whatsapp', 'Communication'],
-        ['/dashboard/admin', 'Legacy overview'],
-      ]
+    ? [...adminLinks, ['/dashboard/admin', 'Legacy overview'] as const]
+    : area === 'manager'
+      ? adminLinks
     : area === 'teacher'
        ? [
            ['/dashboard/teacher/classes', 'My classes'],
@@ -40,6 +43,7 @@ export function Phase4Nav({ area }: { area: 'admin' | 'teacher' | 'student' }) {
 
   const labels = {
     admin: 'Admin navigation',
+    manager: 'Manager navigation',
     teacher: 'Teacher navigation',
     student: 'Student navigation',
   }

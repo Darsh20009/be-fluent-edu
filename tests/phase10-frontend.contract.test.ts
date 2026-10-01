@@ -6,13 +6,16 @@ import { join } from 'node:path'
 const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
 const homepage = read('app/page.tsx')
 const layout = read('app/layout.tsx')
+const dashboardRoute = read('app/dashboard/page.tsx')
 const studentDashboard = read('app/dashboard/student/StudentDashboardClient.tsx')
 const studentHome = read('app/dashboard/student/components/RedesignedHomeTab.tsx')
 const adminDashboard = read('app/dashboard/admin/AdminDashboardClient.tsx')
 const adminOverview = read('app/dashboard/admin/components/AdminOverviewRedesign.tsx')
+const teacherDashboard = read('app/dashboard/teacher/TeacherDashboardClient.tsx')
 const teacherFeedbackPage = read('app/dashboard/teacher/feedback/page.tsx')
 const teacherFeedback = read('app/dashboard/teacher/feedback/TeacherFeedbackWorkspace.tsx')
 const studentNavigation = read('app/phase4/nav.tsx')
+const managerDashboard = read('app/dashboard/manager/page.tsx')
 const marketingFrame = read('components/marketing/MarketingFrame.tsx')
 
 test('homepage package failures stay generic, truthful, and retryable', () => {
@@ -50,16 +53,29 @@ test('approved role screens use their real routes and supported lifecycle APIs',
   assert.match(adminDashboard, /components\/AdminOverviewRedesign/)
   assert.equal((adminDashboard.match(/\/api\/admin\/stats/g) || []).length, 1, 'Admin stats are fetched once and shared with the overview')
   assert.match(adminDashboard, /HomeTab stats=\{stats\}/)
+  assert.match(adminDashboard, /router\.push\('\/dashboard\/admin\/whatsapp'\)/)
+  assert.match(adminDashboard, /router\.push\('\/dashboard\/admin\/classes'\)/)
   for (const endpoint of ['/api/admin/feedback', '/api/admin/homework']) {
     assert.ok(adminOverview.includes(endpoint), `Missing existing admin read API: ${endpoint}`)
   }
   assert.doesNotMatch(adminOverview, /\/api\/admin\/stats/)
   assert.match(teacherFeedbackPage, /TeacherFeedbackWorkspace/)
+  assert.match(teacherDashboard, /href="\/dashboard\/teacher\/feedback"/)
   for (const endpoint of ['/api/teacher/classes/sessions', '/api/teacher/feedback']) {
     assert.ok(teacherFeedback.includes(endpoint), `Missing existing teacher read API: ${endpoint}`)
   }
   assert.match(teacherFeedback, /READY_TO_PUBLISH/)
   assert.match(teacherFeedback, /PUBLISHED/)
+})
+
+test('manager role reaches its permission-scoped workspace and WhatsApp CRM', () => {
+  assert.match(dashboardRoute, /role === 'MANAGER'/)
+  assert.match(dashboardRoute, /redirect\('\/dashboard\/manager'\)/)
+  assert.match(managerDashboard, /session\.user\.role !== 'MANAGER'/)
+  assert.match(managerDashboard, /\/dashboard\/admin\/whatsapp/)
+  assert.match(managerDashboard, /Phase4Nav area="manager"/)
+  assert.match(studentNavigation, /area === 'manager'/)
+  assert.doesNotMatch(managerDashboard, /AdminOverviewRedesign|AdminDashboardClient/)
 })
 
 test('coupon lookup stays on public marketing pages instead of every authenticated route', () => {

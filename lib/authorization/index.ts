@@ -10,6 +10,16 @@ export interface AuthorizationContext {
   permissions?: readonly string[]
 }
 
+const MANAGER_PERMISSION_ALIASES: Partial<Record<Permission, Permission>> = {
+  'admin.manageUsers': 'manager.manageUsers',
+  'admin.manageSessions': 'manager.manageSessions',
+  'admin.manageFeedback': 'manager.manageFeedback',
+  'admin.manageHomework': 'manager.manageHomework',
+  'admin.manageSpeakingRooms': 'manager.manageSpeakingRooms',
+  'admin.viewLearningIntelligence': 'manager.viewLearningIntelligence',
+  'admin.manageLearningIntelligence': 'manager.manageLearningIntelligence',
+}
+
 export function hasPermission(
   context: AuthorizationContext,
   permission: Permission,
@@ -30,7 +40,11 @@ export function hasPermission(
     return false
   }
 
-  return ROLE_PERMISSIONS[role].includes(permission)
+  const rolePermissions = ROLE_PERMISSIONS[role]
+  if (rolePermissions.includes(permission)) return true
+
+  const managerAlias = role === 'MANAGER' ? MANAGER_PERMISSION_ALIASES[permission] : undefined
+  return managerAlias ? rolePermissions.includes(managerAlias) : false
 }
 
 export function can(
@@ -69,5 +83,5 @@ export function roleHasPermission(
 ): boolean {
   const normalizedRole = normalizeRole(role)
   if (normalizedRole === 'STAFF') return false
-  return normalizedRole ? ROLE_PERMISSIONS[normalizedRole].includes(permission) : false
+  return normalizedRole ? hasPermission({ userId: '', role: normalizedRole }, permission) : false
 }
