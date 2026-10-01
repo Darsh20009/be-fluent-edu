@@ -4,13 +4,14 @@ import { isNextResponse } from '@/lib/auth-helpers'
 import { validationError } from '@/lib/phase5'
 import { phase8WhatsAppDatabaseGuard, whatsappAccountSchema } from '@/lib/phase8-whatsapp'
 import { requireWhatsAppAccess } from '@/lib/whatsapp/access'
+import { whatsappAuthPersistence } from '@/lib/whatsapp/persistence'
 import { recordAuditEvent } from '@/lib/audit'
 
 export async function GET() {
   const blocked = phase8WhatsAppDatabaseGuard(); if (blocked) return blocked
   const access = await requireWhatsAppAccess(); if (isNextResponse(access)) return access
   const accounts = await prisma.whatsAppAccount.findMany({
-    select: { id: true, provider: true, phoneNumber: true, normalizedPhone: true, status: true, authPersistenceStatus: true, reconnectAttempts: true, lastError: true, lastConnectedAt: true, createdAt: true, updatedAt: true },
+    select: { id: true, provider: true, phoneNumber: true, normalizedPhone: true, status: true, authPersistenceStatus: true, isOtpSender: true, reconnectAttempts: true, lastError: true, lastConnectedAt: true, createdAt: true, updatedAt: true },
     orderBy: { updatedAt: 'desc' },
   })
   return NextResponse.json({ items: accounts })
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
       normalizedPhone,
       userId: access.userId,
       status: 'DISCONNECTED',
-      authPersistenceStatus: 'PERSISTENCE_UNAVAILABLE',
+      authPersistenceStatus: whatsappAuthPersistence().status,
     },
     select: { id: true, provider: true, phoneNumber: true, status: true, authPersistenceStatus: true, createdAt: true },
   })

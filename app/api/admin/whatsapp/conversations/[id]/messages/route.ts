@@ -27,7 +27,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const blocked = phase8WhatsAppDatabaseGuard(); if (blocked) return blocked
   const access = await requireWhatsAppAccess(); if (isNextResponse(access)) return access
-  const provider = whatsappProviderStatus()
+  const provider = await whatsappProviderStatus()
   if (provider.status === 'PROVIDER_UNAVAILABLE') return NextResponse.json({ ok: false, error: { code: 'PROVIDER_UNAVAILABLE', message: provider.reason } }, { status: 503 })
   const parsed = whatsappMessageSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return validationError(parsed.error)

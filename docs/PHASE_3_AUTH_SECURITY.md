@@ -40,13 +40,16 @@ reconciled before any production unique constraint is added.
 
 `sendVerificationCode` is the only authentication delivery boundary.
 
-- WhatsApp uses `WHATSAPP_OTP_PROVIDER_URL` and an optional token environment
-  variable.
+- WhatsApp OTP uses the selected QR-linked Baileys account directly. OTP
+  messages bypass CRM history and the durable message queue so the code is not
+  stored in plaintext.
 - Email uses the existing Qirox project email integration. Development reads
   `QIROX_EMAIL_API_KEY`; production requires the separately issued
   `QIROX_EMAIL_API_KEY_PRODUCTION` secret.
 - Development can use `AUTH_OTP_TEST_MODE=true` for a non-network provider.
-- The authentication provider does not import or depend on Baileys CRM code.
+- OTP generation, hashing, expiry, rate limits, and NextAuth verification stay
+  in the authentication service; only delivery uses the existing Baileys
+  provider.
 
 Provider credentials are never hardcoded or written to audit records.
 
@@ -90,5 +93,6 @@ credential, and API-key fields.
   boundaries; password inspection is disabled and reset now requires an
   authenticated admin-management permission.
 - Provider setup and actual WhatsApp delivery require environment configuration.
-- No WhatsApp CRM, Baileys, QMeet, Speaking Rooms, dashboards, or Phase 4 work
-  was started.
+- At Phase 3 completion, WhatsApp CRM/Baileys, QMeet, Speaking Rooms,
+  dashboards, and later phases remained out of scope. Subsequent WhatsApp
+  behavior is documented in `PHASE_8_COMPLETION.md`.

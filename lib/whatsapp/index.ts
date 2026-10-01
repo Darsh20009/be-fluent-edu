@@ -16,6 +16,12 @@ export interface WhatsAppMessageResult {
 }
 
 export interface WhatsAppProvider {
+  state(): {
+    status: WhatsAppAccount['status'] | 'PROVIDER_UNAVAILABLE'
+    persistence: 'PERSISTENCE_CONFIGURED' | 'PERSISTENCE_UNAVAILABLE'
+    authenticated: boolean
+    reason?: string
+  }
   connect(): Promise<void>
   disconnect(): Promise<void>
   getConnectionState(): Promise<WhatsAppAccount>

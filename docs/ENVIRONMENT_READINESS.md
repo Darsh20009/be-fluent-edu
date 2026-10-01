@@ -24,8 +24,7 @@ a non-connected placeholder only; they did not connect to or write to MongoDB.
 | `PORT` | Server listening port | Yes for Render | Runtime/deployment | `start-server.js` | Public configuration | Server now uses `PORT`, defaulting to 5000 |
 | `QIROX_EMAIL_API_KEY` | Qirox email delivery | Required for development email | Yes as shared secret | Email provider | Secret | Visible to both development and production runtimes; application code uses it only outside production |
 | `QIROX_EMAIL_API_KEY_PRODUCTION` | Qirox production email delivery | Required for production email | No | Email provider | Secret | Production deliberately does not reuse the development key |
-| `WHATSAPP_OTP_PROVIDER_URL` | WhatsApp OTP provider endpoint | Required for real WhatsApp OTP | No | OTP provider | Secret/configuration | Separate from CRM/Baileys |
-| `WHATSAPP_OTP_PROVIDER_TOKEN` | WhatsApp provider credential | Required with provider | No | OTP provider | Secret | Not configured |
+| `WHATSAPP_PROVIDER` | Internal WhatsApp CRM and OTP transport | `baileys` | Shared non-secret configuration | Baileys provider | Configuration | The QR-linked OTP sender is selected in WhatsApp CRM; auth state is encrypted in MongoDB using a key derived from `SESSION_SECRET` |
 | `QMEET_API_BASE_URL` | Future QMeet provider endpoint | Optional/out of scope | No | QMeet adapter | Configuration | Not needed for Phase 3.5 |
 | `QMEET_API_KEY` | Future QMeet credential | Optional/out of scope | No | QMeet adapter | Secret | Not needed for Phase 3.5 |
 | `OPENAI_API_KEY` | AI features | Optional | No | AI routes | Secret | Those routes fail explicitly when unavailable |

@@ -7,7 +7,7 @@ import { whatsappProviderStatus } from './provider'
  * does not create a parallel notification system.
  */
 export async function preparePendingWhatsAppTransport(limit = 50) {
-  const provider = whatsappProviderStatus()
+  const provider = await whatsappProviderStatus()
   if (provider.status === 'PROVIDER_UNAVAILABLE') {
     return { prepared: false, reason: provider.reason, count: 0 }
   }

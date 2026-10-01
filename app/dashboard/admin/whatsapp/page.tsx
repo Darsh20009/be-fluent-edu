@@ -1,2 +1,11 @@
 import { AdminWhatsApp } from '@/app/dashboard/SpeakingClient'
-export default function Page(){return <AdminWhatsApp/>}
+import { WhatsAppConnectionPanel } from './WhatsAppConnectionPanel'
+
+export default function Page() {
+  return (
+    <>
+      <WhatsAppConnectionPanel />
+      <AdminWhatsApp />
+    </>
+  )
+}

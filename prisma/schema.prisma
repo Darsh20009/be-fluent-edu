@@ -1645,6 +1645,7 @@ model WhatsAppAccount {
   id              String                @id @default(uuid()) @map("_id")
   userId          String?
   provider        String
+  isOtpSender     Boolean               @default(false)
   phoneNumber     String
   normalizedPhone String?
   status          String                @default("DISCONNECTED")
@@ -1665,6 +1666,7 @@ model WhatsAppAccount {
 
   @@index([normalizedPhone])
   @@index([provider, status])
+  @@index([provider, status, isOtpSender])
 }
 
 model WhatsAppContact {

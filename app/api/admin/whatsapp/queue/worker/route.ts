@@ -13,11 +13,10 @@ import { WhatsAppOutboxWorker } from '@/lib/whatsapp/worker'
 export async function POST() {
   const blocked = phase8WhatsAppDatabaseGuard(); if (blocked) return blocked
   const access = await requireWhatsAppAccess(); if (isNextResponse(access)) return access
-  const providerState = whatsappProviderStatus()
+  const providerState = await whatsappProviderStatus()
   if (providerState.status === 'PROVIDER_UNAVAILABLE') {
     return NextResponse.json({ ok: false, error: { code: 'PROVIDER_UNAVAILABLE', message: providerState.reason }, worker: { processed: false, reason: 'PROVIDER_UNAVAILABLE' } }, { status: 503 })
   }
-  const provider = await createWhatsAppProvider()
-  const result = await new WhatsAppOutboxWorker(undefined, provider).drainOnce()
+  const result = await new WhatsAppOutboxWorker(undefined, createWhatsAppProvider).drainOnce()
   return NextResponse.json({ ok: true, worker: result })
 }

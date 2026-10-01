@@ -6,5 +6,5 @@ import { whatsappProviderStatus } from '@/lib/whatsapp/provider'
  * credential information and does not touch MongoDB.
  */
 export async function GET() {
-  return NextResponse.json({ ok: true, ...whatsappProviderStatus() })
+  return NextResponse.json({ ok: true, ...await whatsappProviderStatus() })
 }

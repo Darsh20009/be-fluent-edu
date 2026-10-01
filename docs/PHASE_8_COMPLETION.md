@@ -21,9 +21,12 @@
 
 - Admin/manager account, contact, conversation, message, and queue APIs.
 - Explicit CRM RBAC; students and teachers have no CRM access.
-- Baileys provider boundary with lazy construction only.
-- Persistent auth storage abstraction.
-- Account lifecycle states and logout/reconnect helpers.
+- Live Baileys socket lifecycle with an admin-only QR linking panel.
+- Encrypted MongoDB auth state, account-scoped HKDF/AES-256-GCM keys, and a
+  renewable per-account ownership lease to prevent competing server sockets.
+- Direct OTP delivery through one explicitly selected connected account. OTP
+  bodies bypass CRM history and queue storage.
+- Account lifecycle states, logout/reconnect, and explicit OTP-sender selection.
 - Ten failed reconnect attempts transitions to `ERROR`.
 - Email alert is prepared only as pending provider work; no email is sent.
 - Sequential per-account queue with 3-second minimum pacing.
@@ -49,28 +52,30 @@
 - queue dedupe and three-second pacing
 - WhatsApp database guard
 
-MongoDB/Socket.IO integration and MongoDB/Baileys integration tests are marked
-`skip` with explicit infrastructure/provider reasons. No real WhatsApp message
-was sent and no real Baileys session was initialized.
+Auth-state cryptography is tested locally. MongoDB/Socket.IO integration and
+MongoDB/Baileys integration tests remain `skip` with explicit reasons. No QR
+was scanned and no real WhatsApp message was sent.
 
 ## Truthful blocked states
 
-- MongoDB remains disabled behind `PHASE5_DATABASE_ENABLED`.
-- Database-dependent Phase 8 APIs return HTTP `503 DATABASE_UNAVAILABLE` before
-  auth/Prisma.
+- Development MongoDB is enabled for this workspace. Other environments remain
+  subject to their own `PHASE5_DATABASE_ENABLED` gate.
 - Speaking voice upload remains unavailable when StorageProvider is unavailable.
-- WhatsApp returns `PROVIDER_UNAVAILABLE`.
-- WhatsApp auth returns `PERSISTENCE_UNAVAILABLE`.
+- WhatsApp requires `WHATSAPP_PROVIDER=baileys`, the database gate, and the
+  existing server-only `SESSION_SECRET`; it fails closed if any are unavailable.
 - No QR or connected state is fabricated.
 - No email is sent without a configured provider.
 
 ## Operational limitations
 
-The current deployment does not include a production-safe encrypted persistent
-Baileys auth store, so WhatsApp cannot connect or restore authentication.
-Durable queue/account/contact/conversation persistence also remains blocked by
-MongoDB. Realtime integration with authenticated sockets remains explicitly
-blocked from live integration testing for the same reason.
+The development path is implemented, but an authorized admin must scan the QR
+and test delivery to an approved development number. Session restore after
+restart and production operation have not been live-verified. There is no active
+production deployment in this project. Speaking realtime integration also
+remains unverified against live authenticated clients.
+
+Rotating `SESSION_SECRET` makes existing Baileys auth state unreadable and
+requires the affected WhatsApp accounts to be reset and linked again.
 
 ## Scope boundary
 

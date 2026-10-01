@@ -1,4 +1,5 @@
 import { sendEmail } from '@/lib/email'
+import { sendWhatsAppOtp } from '@/lib/whatsapp/otp-delivery'
 
 export type OtpDeliveryChannel = 'WHATSAPP' | 'EMAIL'
 
@@ -29,35 +30,7 @@ class WhatsAppOtpProvider implements OtpDeliveryProvider {
   readonly channel = 'WHATSAPP' as const
 
   async sendVerificationCode(message: VerificationCodeMessage) {
-    const endpoint = process.env.WHATSAPP_OTP_PROVIDER_URL
-    if (!endpoint) {
-      throw new Error('WhatsApp OTP provider is not configured')
-    }
-
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(process.env.WHATSAPP_OTP_PROVIDER_TOKEN
-          ? { Authorization: `Bearer ${process.env.WHATSAPP_OTP_PROVIDER_TOKEN}` }
-          : {}),
-      },
-      body: JSON.stringify({
-        to: message.phone,
-        code: message.code,
-        expiresInSeconds: message.expiresInSeconds,
-      }),
-    })
-
-    if (!response.ok) {
-      throw new Error(`WhatsApp OTP provider returned ${response.status}`)
-    }
-
-    const payload = (await response.json().catch(() => ({}))) as {
-      messageId?: string
-      id?: string
-    }
-    return { providerMessageId: payload.messageId || payload.id }
+    return sendWhatsAppOtp(message)
   }
 }
 

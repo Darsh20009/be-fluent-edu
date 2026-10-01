@@ -220,6 +220,13 @@ app.prepare().then(() => {
     if (whatsappWorkerStop) {
       await withShutdownTimeout(whatsappWorkerStop(), 5000);
     }
+    try {
+      require('tsx/cjs');
+      const { closeWhatsAppProviders } = require('./lib/whatsapp/provider.ts');
+      await withShutdownTimeout(closeWhatsAppProviders(), 5000);
+    } catch {
+      // The persisted session remains recoverable after the ownership lease expires.
+    }
     io.close();
     await withShutdownTimeout(new Promise((resolve) => {
       try {

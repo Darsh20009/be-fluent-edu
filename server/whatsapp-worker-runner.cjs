@@ -20,10 +20,10 @@ function loadWorkerModule() {
 
 function createWhatsAppWorkerRunner(options = {}) {
   const providerStatus = options.providerStatus || (() => loadProviderModule().whatsappProviderStatus());
-  const createProvider = options.createProvider || (() => loadProviderModule().createWhatsAppProvider());
-  const createWorker = options.createWorker || ((provider) => {
+  const createProvider = options.createProvider || ((accountId) => loadProviderModule().createWhatsAppProvider(accountId));
+  const createWorker = options.createWorker || ((providerFactory) => {
     const { WhatsAppOutboxWorker } = loadWorkerModule();
-    return new WhatsAppOutboxWorker(undefined, provider);
+    return new WhatsAppOutboxWorker(undefined, providerFactory);
   });
   const setIntervalFn = options.setIntervalFn || setInterval;
   const clearIntervalFn = options.clearIntervalFn || clearInterval;
@@ -41,7 +41,7 @@ function createWhatsAppWorkerRunner(options = {}) {
     // imports Prisma. Unavailable deployments therefore perform no DB work.
     let state;
     try {
-      state = providerStatus();
+      state = await providerStatus();
     } catch (error) {
       onError(error);
       return { processed: false, reason: 'PREFLIGHT_FAILED' };
@@ -52,8 +52,7 @@ function createWhatsAppWorkerRunner(options = {}) {
 
     inFlight = true;
     try {
-      const provider = await createProvider();
-      const worker = createWorker(provider);
+      const worker = createWorker(createProvider);
       return await worker.drainOnce();
     } catch (error) {
       onError(error);

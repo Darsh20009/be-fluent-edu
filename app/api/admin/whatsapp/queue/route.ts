@@ -13,5 +13,5 @@ export async function GET() {
     prisma.whatsAppQueue.count({ where: { status: 'FAILED' } }),
     prisma.whatsAppQueue.count({ where: { status: 'SENT' } }),
   ])
-  return NextResponse.json({ provider: whatsappProviderStatus(), counts: { pending, failed, sent }, pacingMs: 3000, maxAttempts: 3 })
+  return NextResponse.json({ provider: await whatsappProviderStatus(), counts: { pending, failed, sent }, pacingMs: 3000, maxAttempts: 3 })
 }

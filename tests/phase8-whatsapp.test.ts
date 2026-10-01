@@ -9,7 +9,11 @@ import {
   prepareReconnectAlert,
   retentionCutoff,
 } from '@/lib/phase8-whatsapp'
-import { UnavailableWhatsAppAuthPersistence } from '@/lib/whatsapp/persistence'
+import {
+  decryptWhatsAppAuthState,
+  encryptWhatsAppAuthState,
+  UnavailableWhatsAppAuthPersistence,
+} from '@/lib/whatsapp/persistence'
 import { UnavailableWhatsAppProvider, whatsappProviderStatus } from '@/lib/whatsapp/provider'
 import { WhatsAppSequentialQueue } from '@/lib/whatsapp/queue'
 import { WhatsAppOutboxWorker } from '@/lib/whatsapp/worker'
@@ -29,10 +33,31 @@ test('phone normalization and group-chat filtering are server-bound', () => {
 })
 
 test('provider and auth persistence are truthful when unavailable', async () => {
-  assert.equal(new UnavailableWhatsAppAuthPersistence().status, 'PERSISTENCE_UNAVAILABLE')
-  assert.equal(whatsappProviderStatus().status, 'PROVIDER_UNAVAILABLE')
-  assert.equal(whatsappProviderStatus().persistence, 'PERSISTENCE_UNAVAILABLE')
-  await assert.rejects(() => new UnavailableWhatsAppProvider().connect())
+  const originalProvider = process.env.WHATSAPP_PROVIDER
+  process.env.WHATSAPP_PROVIDER = 'disabled'
+  try {
+    assert.equal(new UnavailableWhatsAppAuthPersistence().status, 'PERSISTENCE_UNAVAILABLE')
+    assert.equal((await whatsappProviderStatus()).status, 'PROVIDER_UNAVAILABLE')
+    assert.equal((await whatsappProviderStatus()).persistence, 'PERSISTENCE_UNAVAILABLE')
+    await assert.rejects(() => new UnavailableWhatsAppProvider().connect())
+  } finally {
+    if (originalProvider === undefined) delete process.env.WHATSAPP_PROVIDER
+    else process.env.WHATSAPP_PROVIDER = originalProvider
+  }
+})
+
+test('Baileys auth state is encrypted, account-scoped, and tamper-evident', () => {
+  const secret = 'test-only-session-secret-for-whatsapp-state'
+  const state = {
+    creds: { noiseKey: { public: Buffer.from('public-key'), private: Buffer.from('private-key') } },
+    keys: { session: { peer: Buffer.from('signal-state') } },
+  }
+  const encrypted = encryptWhatsAppAuthState('account-1', state, secret)
+  assert.equal('creds' in encrypted, false)
+  assert.deepEqual(decryptWhatsAppAuthState(encrypted, 'account-1', secret), state)
+  assert.throws(() => decryptWhatsAppAuthState(encrypted, 'account-2', secret))
+  const changedCiphertext = `${encrypted.ciphertext[0] === 'A' ? 'B' : 'A'}${encrypted.ciphertext.slice(1)}`
+  assert.throws(() => decryptWhatsAppAuthState({ ...encrypted, ciphertext: changedCiphertext }, 'account-1', secret))
 })
 
 test('reconnect stops at ten attempts and prepares email only', () => {
@@ -89,16 +114,23 @@ test('in-memory queue holds an in-flight account lock during concurrent sends', 
 })
 
 test('worker stops before database claims and provider sends when unavailable', async () => {
-  let databaseTouched = false
-  const database = new Proxy({}, { get() { databaseTouched = true; throw new Error('database should not be touched') } })
-  let sends = 0
-  const provider = {
-    sendMessage: async () => { sends += 1; return { queued: false } },
-  } as never
-  const result = await new WhatsAppOutboxWorker(database as never, provider).drainOnce()
-  assert.deepEqual(result, { processed: false, reason: 'PROVIDER_UNAVAILABLE' })
-  assert.equal(databaseTouched, false)
-  assert.equal(sends, 0)
+  const originalProvider = process.env.WHATSAPP_PROVIDER
+  process.env.WHATSAPP_PROVIDER = 'disabled'
+  try {
+    let databaseTouched = false
+    const database = new Proxy({}, { get() { databaseTouched = true; throw new Error('database should not be touched') } })
+    let sends = 0
+    const provider = {
+      sendMessage: async () => { sends += 1; return { queued: false } },
+    } as never
+    const result = await new WhatsAppOutboxWorker(database as never, provider).drainOnce()
+    assert.deepEqual(result, { processed: false, reason: 'PROVIDER_UNAVAILABLE' })
+    assert.equal(databaseTouched, false)
+    assert.equal(sends, 0)
+  } finally {
+    if (originalProvider === undefined) delete process.env.WHATSAPP_PROVIDER
+    else process.env.WHATSAPP_PROVIDER = originalProvider
+  }
 })
 
 test('WhatsApp database guard blocks before authentication while MongoDB is disabled', async () => {

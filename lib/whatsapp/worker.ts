@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { prisma } from '@/lib/prisma'
 import { Prisma, type PrismaClient } from '@prisma/client'
 import { WHATSAPP_MIN_OUTGOING_INTERVAL_MS, type WhatsAppProvider } from '@/lib/whatsapp'
-import { whatsappProviderStatus } from './provider'
+import { createWhatsAppProvider, whatsappProviderStatus } from './provider'
 
 const LOCK_TIMEOUT_MS = 30_000
 const DEFAULT_MAX_ATTEMPTS = 3
@@ -10,6 +10,8 @@ const DEFAULT_MAX_ATTEMPTS = 3
 export type WorkerResult =
   | { processed: false; reason: 'PROVIDER_UNAVAILABLE' | 'NO_DUE_WORK' | 'LOCK_BUSY' | 'PACED' }
   | { processed: true; status: 'SENT' | 'RETRY_SCHEDULED' | 'FAILED' }
+
+type WhatsAppProviderSource = WhatsAppProvider | ((accountId: string) => Promise<WhatsAppProvider>)
 
 /**
  * Durable server worker. It is intended for a protected server-side job
@@ -19,12 +21,12 @@ export type WorkerResult =
 export class WhatsAppOutboxWorker {
   constructor(
     private readonly db: PrismaClient = prisma,
-    private readonly provider: WhatsAppProvider,
+    private readonly providerSource: WhatsAppProviderSource = createWhatsAppProvider,
     private readonly now: () => Date = () => new Date(),
   ) {}
 
   async drainOnce(): Promise<WorkerResult> {
-    const providerState = whatsappProviderStatus()
+    const providerState = await whatsappProviderStatus()
     if (providerState.status === 'PROVIDER_UNAVAILABLE') return { processed: false, reason: 'PROVIDER_UNAVAILABLE' }
     await this.materializePendingOutbox()
     const current = this.now()
@@ -71,7 +73,10 @@ export class WhatsAppOutboxWorker {
       })
       if (claimed.count !== 1) return { processed: false, reason: 'LOCK_BUSY' }
       try {
-        const result = await this.provider.sendMessage({ to: queue.conversation.contact.normalizedPhone || queue.conversation.contact.phoneNumber, body: queue.message.body || '', correlationId: queue.dedupeKey })
+        const provider = typeof this.providerSource === 'function'
+          ? await this.providerSource(account.id)
+          : this.providerSource
+        const result = await provider.sendMessage({ to: queue.conversation.contact.normalizedPhone || queue.conversation.contact.phoneNumber, body: queue.message.body || '', correlationId: queue.dedupeKey })
         await this.db.$transaction([
           this.db.whatsAppQueue.update({ where: { id: queue.id }, data: { status: 'SENT', lockedAt: null, lastError: null } }),
           this.db.whatsAppMessage.update({ where: { id: queue.message.id }, data: { deliveryStatus: 'SENT', providerMessageId: result.providerMessageId, sentAt: current } }),
