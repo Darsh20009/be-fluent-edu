@@ -147,6 +147,11 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
     return { id: this.accountId, status: this.statusValue }
   }
 
+  private markConnecting() {
+    this.statusValue = 'CONNECTING'
+    this.reason = undefined
+  }
+
   async connect(): Promise<void> {
     if (this.persistence.status !== 'PERSISTENCE_CONFIGURED') {
       throw new Error('WhatsApp auth persistence is unavailable')
@@ -154,6 +159,7 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
     if (this.socket && ['CONNECTING', 'QR_REQUIRED', 'CONNECTED'].includes(this.statusValue)) return
     if (this.connectPromise) return this.connectPromise
 
+    this.markConnecting()
     const attempt = this.startSocket()
     this.connectPromise = attempt
     try {

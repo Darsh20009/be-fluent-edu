@@ -29,11 +29,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  serverExternalPackages: ['@whiskeysockets/baileys'],
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
+    turbopackPluginRuntimeStrategy: 'workerThreads',
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',

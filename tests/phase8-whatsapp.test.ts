@@ -14,7 +14,7 @@ import {
   encryptWhatsAppAuthState,
   UnavailableWhatsAppAuthPersistence,
 } from '@/lib/whatsapp/persistence'
-import { UnavailableWhatsAppProvider, whatsappProviderStatus } from '@/lib/whatsapp/provider'
+import { BaileysWhatsAppProvider, UnavailableWhatsAppProvider, whatsappProviderStatus } from '@/lib/whatsapp/provider'
 import { WhatsAppSequentialQueue } from '@/lib/whatsapp/queue'
 import { WhatsAppOutboxWorker } from '@/lib/whatsapp/worker'
 
@@ -44,6 +44,25 @@ test('provider and auth persistence are truthful when unavailable', async () => 
     if (originalProvider === undefined) delete process.env.WHATSAPP_PROVIDER
     else process.env.WHATSAPP_PROVIDER = originalProvider
   }
+})
+
+test('provider reports CONNECTING while session ownership is still being acquired', async () => {
+  let releaseLock!: () => void
+  const lockPending = new Promise<void>((resolve) => { releaseLock = resolve })
+  const persistence = {
+    status: 'PERSISTENCE_CONFIGURED',
+    acquireLock: async () => {
+      await lockPending
+      return false
+    },
+  } as never
+  const provider = new BaileysWhatsAppProvider('account-1', persistence)
+  const attempt = provider.connect()
+
+  assert.equal(provider.state().status, 'CONNECTING')
+  releaseLock()
+  await assert.rejects(attempt)
+  assert.equal(provider.state().status, 'ERROR')
 })
 
 test('Baileys auth state is encrypted, account-scoped, and tamper-evident', () => {

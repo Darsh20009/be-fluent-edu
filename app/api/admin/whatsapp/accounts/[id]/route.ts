@@ -78,16 +78,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         provider: provider.state(),
       }, { status: 503 })
     }
-    try {
-      await provider.connect()
-    } catch {
-      return NextResponse.json({
-        ok: false,
-        error: { code: 'CONNECT_FAILED', message: 'WhatsApp could not start. Check the provider status and try again.' },
-        provider: provider.state(),
-      }, { status: 503 })
-    }
-    await recordAuditEvent({ action: 'WHATSAPP_OPERATION', userId: access.userId, details: { operation: action, accountId: id, providerStatus: provider.state().status } }).catch(() => undefined)
+    void provider.connect().catch(() => undefined)
+    void recordAuditEvent({ action: 'WHATSAPP_OPERATION', userId: access.userId, details: { operation: action, accountId: id, providerStatus: provider.state().status } }).catch(() => undefined)
     return NextResponse.json({ ...account, reconnectAttempts: nextAttempts, provider: provider.state(), reconnectAlert: prepareReconnectAlert(nextAttempts) }, { status: 202 })
   }
   if (action === 'LOGOUT') {
