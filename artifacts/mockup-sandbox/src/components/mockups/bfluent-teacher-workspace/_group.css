@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap');
+
+.bfluent-current-teacher {
+  font-family: "Noto Kufi Arabic", "DM Sans", sans-serif;
+  letter-spacing: normal;
+}
+
+.bfluent-current-teacher button,
+.bfluent-current-teacher input,
+.bfluent-current-teacher textarea {
+  font-family: inherit;
+}

@@ -9,5 +9,7 @@ export const modules: ModuleMap = {
   "./components/mockups/bfluent-current/primitives.tsx": () => import("../components/mockups/bfluent-current/primitives.tsx"),
   "./components/mockups/bfluent-redesign/AdminOverview.tsx": () => import("../components/mockups/bfluent-redesign/AdminOverview.tsx"),
   "./components/mockups/bfluent-redesign/StudentHome.tsx": () => import("../components/mockups/bfluent-redesign/StudentHome.tsx"),
-  "./components/mockups/bfluent-redesign/TeacherFeedback.tsx": () => import("../components/mockups/bfluent-redesign/TeacherFeedback.tsx")
+  "./components/mockups/bfluent-redesign/TeacherFeedback.tsx": () => import("../components/mockups/bfluent-redesign/TeacherFeedback.tsx"),
+  "./components/mockups/bfluent-admin-assistant/Current.tsx": () => import("../components/mockups/bfluent-admin-assistant/Current.tsx"),
+  "./components/mockups/bfluent-teacher-workspace/Current.tsx": () => import("../components/mockups/bfluent-teacher-workspace/Current.tsx")
 };
