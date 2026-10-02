@@ -4,11 +4,12 @@
   "private": true,
   "packageManager": "pnpm@10.26.1",
   "scripts": {
-    "dev": "node start-server.js",
+    "dev": "node --max-old-space-size=2048 start-server.js",
     "socket": "node server/socket.js",
     "build": "next build",
     "start": "node start-server.js",
     "lint": "eslint",
+    "typecheck": "node scripts/typecheck.cjs",
     "test:foundation": "tsx --test tests/foundation.test.ts",
     "test:phase2": "tsx --test tests/phase2-schema.test.ts",
     "test:phase3": "tsx --test tests/phase3-auth.test.ts",

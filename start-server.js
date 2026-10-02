@@ -1,4 +1,11 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
+const dev = process.env.NODE_ENV !== 'production';
+if (dev) {
+  // Keep native compilation concurrency below the container's four CPU cores.
+  // This is a process-local dev default, not a production environment change.
+  process.env.RAYON_NUM_THREADS ||= '2';
+  require('./server/dev-resource-guard.cjs').assertStaticChecksIdle();
+}
 const { createServer } = require('http');
 const { parse } = require('url');
 const next = require('next');
@@ -10,7 +17,6 @@ const { startWhatsAppWorkerRunner } = require('./server/whatsapp-worker-runner.c
 const { startEmailWorkerRunner } = require('./server/email-worker-runner.cjs');
 const { persistSpeakingActivitySignal } = require('./lib/phase9/speaking-socket.cjs');
 
-const dev = process.env.NODE_ENV !== 'production';
 const port = parseInt(process.env.PORT || '5000', 10);
 const app = next({ dev });
 const handle = app.getRequestHandler();

@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": ".next/cache/typecheck.tsbuildinfo"
+  },
+  "exclude": [
+    "node_modules",
+    "attached_assets",
+    "artifacts/mockup-sandbox",
+    ".next/dev/**"
+  ]
+}

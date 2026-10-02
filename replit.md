@@ -17,6 +17,8 @@ The platform utilizes a modern web stack: **Next.js 16 (App Router)** with **Rea
 - Install dependencies with `npm install` (the lockfile is committed).
 - Start the web app with `npm run dev`.
 - The `Be Fluent Server` workflow runs this command and exposes the custom Next.js/Socket.IO server on port 5000.
+- Pause `Be Fluent Server` before a full TypeScript check, run `npm run typecheck` once, then restart the workflow. Do not launch raw `tsc`, multiple project checks, or checks alongside cold route compilation: they share an 8 GiB container with the editor. The guarded command rejects overlapping checks or an active server; dev startup also rejects an active check.
+- The development command caps V8's old-generation heap at 2 GiB and defaults native Rust compilation to two threads; this is not a cap on total native/RSS memory. Turbopack retains its default adaptive eviction and disk cache. Development disables/unregisters this app's service worker. Production keeps its existing command and policies. Compare first route compilation with warm repeats; do not claim production improvements from these measurements.
 - Core runtime configuration requires `MONGODB_URI` and `NEXTAUTH_SECRET`. AI and email features additionally use their provider-specific environment variables.
 
 **UI/UX Decisions (Updated January 2026):**
