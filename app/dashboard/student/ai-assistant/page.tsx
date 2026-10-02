@@ -19,6 +19,8 @@ import {
   X,
   Pause,
 } from 'lucide-react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeDirection, localeText } from '@/lib/locale'
 
 interface Message {
   id: string
@@ -63,6 +65,8 @@ type SpeechRecognitionConstructor = new () => SpeechRecognitionLike
 
 export default function AIAssistantPage() {
   const router = useRouter()
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -93,6 +97,10 @@ export default function AIAssistantPage() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    if (recognitionRef.current) recognitionRef.current.lang = language === 'ar' ? 'ar-EG' : 'en-US'
+  }, [language])
 
   // Initialize speech APIs
   useEffect(() => {
@@ -155,25 +163,14 @@ export default function AIAssistantPage() {
     const welcomeMessage: Message = {
       id: 'welcome',
       role: 'assistant',
-      content: `مرحباً! أنا Be Fluent AI، مساعدك لتعلم اللغة الإنجليزية!
-
-Hello! I'm Be Fluent AI, your English learning assistant!
-
-يمكنني التحدث معك بالصوت. اضغط على أيقونة السماعة لسماعي.
-يمكنك التحدث معي. اضغط على أيقونة المايكروفون.
-
-كيف يمكنني مساعدتك اليوم؟ أستطيع:
-- شرح قواعد اللغة الإنجليزية
-- تصحيح الأخطاء اللغوية  
-- مساعدتك في الترجمة
-- تعليمك كلمات جديدة
-- التدرب على المحادثة
-
-How can I help you today?`,
+      content: localeText(language,
+        'مرحباً! أنا Be Fluent AI، مساعدك لتعلم اللغة الإنجليزية!\n\nيمكنني التحدث معك بالصوت. اضغط على أيقونة السماعة لسماعي، أو تحدث معي عبر الميكروفون.\n\nكيف يمكنني مساعدتك اليوم؟ أستطيع شرح القواعد، وتصحيح الأخطاء، ومساعدتك في الترجمة، وتعليمك كلمات جديدة، والتدرب على المحادثة.',
+        "Hello! I'm Be Fluent AI, your English learning assistant.\n\nI can speak with you. Tap the speaker to hear me or use the microphone to talk.\n\nHow can I help you today? I can explain grammar, correct mistakes, help with translation, teach new words, and practice conversation."
+      ),
       timestamp: new Date()
     }
-    setMessages([welcomeMessage])
-  }, [])
+    setMessages(current => current.length === 0 || (current.length === 1 && current[0].id === 'welcome') ? [welcomeMessage] : current)
+  }, [language])
 
   const loadConversationHistory = () => {
     try {
@@ -191,7 +188,7 @@ How can I help you today?`,
     if (msgs.length <= 1) return
     
     try {
-      const title = msgs.find(m => m.role === 'user')?.content.slice(0, 40) || 'محادثة جديدة'
+      const title = msgs.find(m => m.role === 'user')?.content.slice(0, 40) || t('محادثة جديدة', 'New conversation')
       const conversation: ConversationHistory = {
         id: currentConversationId,
         title,
@@ -207,7 +204,7 @@ How can I help you today?`,
     } catch (e) {
       console.error('Error saving conversation:', e)
     }
-  }, [currentConversationId, conversationHistory])
+  }, [currentConversationId, conversationHistory, language])
 
   // Speak text using Web Speech API
   const speak = useCallback((text: string) => {
@@ -324,7 +321,7 @@ How can I help you today?`,
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.\nSorry, a connection error occurred. Please try again.',
+        content: t('عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.', 'Sorry, a connection error occurred. Please try again.'),
         timestamp: new Date()
       }
       setMessages(prev => [...prev, errorMessage])
@@ -346,11 +343,7 @@ How can I help you today?`,
     setMessages([{
       id: 'welcome',
       role: 'assistant',
-      content: `مرحباً! أنا جاهز لمساعدتك في تعلم الإنجليزية!
-
-Hello! I'm ready to help you learn English!
-
-كيف يمكنني مساعدتك؟ How can I help you?`,
+      content: t('مرحباً! أنا جاهز لمساعدتك في تعلم الإنجليزية!\n\nكيف يمكنني مساعدتك؟', "Hello! I'm ready to help you learn English!\n\nHow can I help you?"),
       timestamp: new Date()
     }])
   }
@@ -370,17 +363,12 @@ Hello! I'm ready to help you learn English!
     localStorage.setItem('befluent-ai-history', JSON.stringify(updated))
   }
 
-  const suggestedQuestions = [
-    'كيف أقول "أنا بخير" بالإنجليزية؟',
-    'What is the difference between "a" and "an"?',
-    'اشرح لي قاعدة المضارع البسيط',
-    'How do I introduce myself?',
-    'ما الفرق بين was و were؟',
-    'Teach me 5 new words today'
-  ]
+  const suggestedQuestions = language === 'ar'
+    ? ['كيف أقول "أنا بخير" بالإنجليزية؟', 'ما الفرق بين "a" و "an"؟', 'اشرح لي قاعدة المضارع البسيط', 'كيف أقدم نفسي؟', 'ما الفرق بين was و were؟', 'علّمني 5 كلمات جديدة اليوم']
+    : ['How do I say “I am fine” in English?', 'What is the difference between “a” and “an”?', 'Explain the present simple tense', 'How do I introduce myself?', 'What is the difference between was and were?', 'Teach me 5 new words today']
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] flex flex-col hide-floating-contact">
+    <div className="min-h-screen bg-[#F9FAFB] flex flex-col hide-floating-contact" dir={localeDirection(language)}>
       {/* Header */}
       <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-4 shadow-lg">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -398,9 +386,9 @@ Hello! I'm ready to help you learn English!
               <div>
                 <h1 className="font-bold text-lg flex items-center gap-2">
                   Be Fluent AI
-                  <span className="text-xs bg-green-500 px-2 py-0.5 rounded-full">مجاني FREE</span>
+                  <span className="text-xs bg-green-500 px-2 py-0.5 rounded-full">{t('مجاني', 'Free')}</span>
                 </h1>
-                <p className="text-xs text-white/80">مساعدك الذكي للتعلم • يتكلم ويسمع</p>
+                <p className="text-xs text-white/80">{t('مساعدك الذكي للتعلم • يتكلم ويسمع', 'Your smart learning assistant • speaks and listens')}</p>
               </div>
             </div>
           </div>
@@ -410,7 +398,7 @@ Hello! I'm ready to help you learn English!
             <button
               onClick={() => setAutoSpeak(!autoSpeak)}
               className={`p-2 rounded-lg transition-colors ${autoSpeak ? 'bg-white/20' : 'bg-white/10'}`}
-              title={autoSpeak ? 'إيقاف الرد الصوتي التلقائي' : 'تفعيل الرد الصوتي التلقائي'}
+              title={autoSpeak ? t('إيقاف الرد الصوتي التلقائي', 'Disable automatic speech') : t('تفعيل الرد الصوتي التلقائي', 'Enable automatic speech')}
             >
               {autoSpeak ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
             </button>
@@ -419,7 +407,7 @@ Hello! I'm ready to help you learn English!
             <button
               onClick={() => setShowHistory(true)}
               className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-              title="سجل المحادثات"
+              title={t('سجل المحادثات', 'Conversation history')}
             >
               <History className="w-5 h-5" />
             </button>
@@ -428,7 +416,7 @@ Hello! I'm ready to help you learn English!
             <button
               onClick={clearChat}
               className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-              title="مسح المحادثة"
+              title={t('مسح المحادثة', 'Clear conversation')}
             >
               <Trash2 className="w-5 h-5" />
             </button>
@@ -454,14 +442,14 @@ Hello! I'm ready to help you learn English!
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-[#10B981]">سجل المحادثات</h2>
+                <h2 className="text-lg font-bold text-[#10B981]">{t('سجل المحادثات', 'Conversation history')}</h2>
                 <button onClick={() => setShowHistory(false)}>
                   <X className="w-5 h-5" />
                 </button>
               </div>
               
               {conversationHistory.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">لا توجد محادثات سابقة</p>
+                <p className="text-gray-500 text-center py-8">{t('لا توجد محادثات سابقة', 'No previous conversations')}</p>
               ) : (
                 <div className="space-y-2">
                   {conversationHistory.map(conv => (
@@ -475,7 +463,7 @@ Hello! I'm ready to help you learn English!
                       >
                         <p className="font-medium text-gray-800 truncate">{conv.title}</p>
                         <p className="text-xs text-gray-500">
-                          {new Date(conv.createdAt).toLocaleDateString('ar-EG')}
+                          {new Date(conv.createdAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
                         </p>
                       </button>
                       <button
@@ -523,7 +511,7 @@ Hello! I'm ready to help you learn English!
                     </p>
                     <div className={`flex items-center justify-between mt-2 gap-2 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}>
                       <p className={`text-xs ${message.role === 'user' ? 'text-white/60' : 'text-gray-400'}`}>
-                        {message.timestamp.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
+                        {message.timestamp.toLocaleTimeString(language === 'ar' ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                       </p>
                       {message.role === 'assistant' && speechSupported && (
                         <button
@@ -531,7 +519,7 @@ Hello! I'm ready to help you learn English!
                           className={`p-1 rounded-full transition-colors ${
                             isSpeaking ? 'bg-red-100 text-red-500' : 'hover:bg-gray-100 text-gray-500'
                           }`}
-                          title={isSpeaking ? 'إيقاف' : 'استمع'}
+                          title={isSpeaking ? t('إيقاف', 'Stop') : t('استمع', 'Listen')}
                         >
                           {isSpeaking ? <Pause className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                         </button>
@@ -556,7 +544,7 @@ Hello! I'm ready to help you learn English!
                 <div className="bg-white rounded-2xl px-4 py-3 border border-gray-200 shadow-sm">
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin text-[#10B981]" />
-                    <span className="text-gray-500">جاري التفكير...</span>
+                    <span className="text-gray-500">{t('جاري التفكير...', 'Thinking...')}</span>
                   </div>
                 </div>
               </div>
@@ -569,7 +557,7 @@ Hello! I'm ready to help you learn English!
         {/* Suggested Questions */}
         {messages.length <= 1 && (
           <div className="mt-4">
-            <p className="text-sm text-gray-600 mb-3 text-center">أسئلة مقترحة / Suggested questions:</p>
+            <p className="text-sm text-gray-600 mb-3 text-center">{t('أسئلة مقترحة', 'Suggested questions')}</p>
             <div className="flex flex-wrap gap-2 justify-center">
               {suggestedQuestions.map((q, i) => (
                 <button
@@ -599,7 +587,7 @@ Hello! I'm ready to help you learn English!
                     ? 'bg-red-500 text-white animate-pulse' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
-                title={isListening ? 'إيقاف الاستماع' : 'تحدث معي'}
+                title={isListening ? t('إيقاف الاستماع', 'Stop listening') : t('تحدث معي', 'Talk to me')}
               >
                 {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
               </button>
@@ -620,7 +608,7 @@ Hello! I'm ready to help you learn English!
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={isListening ? 'جاري الاستماع...' : 'اكتب سؤالك هنا... / Type your question...'}
+              placeholder={isListening ? t('جاري الاستماع...', 'Listening...') : t('اكتب سؤالك هنا...', 'Type your question...')}
               className="flex-1 px-4 py-3 border-2 border-gray-300 bg-white text-black placeholder:text-gray-500 rounded-full focus:ring-2 focus:ring-[#10B981] focus:border-transparent text-right"
               dir="auto"
               disabled={loading}
@@ -631,12 +619,12 @@ Hello! I'm ready to help you learn English!
           <div className="flex justify-center gap-4 mt-2 text-xs text-gray-500">
             {speechSupported && (
               <span className="text-blue-600 flex items-center gap-1">
-                الصوت متاح
+                {t('الصوت متاح', 'Voice output available')}
               </span>
             )}
             {recognitionSupported && (
               <span className="text-purple-600 flex items-center gap-1">
-                التحدث متاح
+                {t('التحدث متاح', 'Voice input available')}
               </span>
             )}
           </div>

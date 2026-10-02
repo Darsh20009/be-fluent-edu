@@ -8,6 +8,8 @@ import Badge from '@/components/ui/Badge'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import CertificateTemplate from '@/components/CertificateTemplate'
 import Modal from '@/components/ui/Modal'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 interface Certificate {
   id: string
@@ -18,6 +20,7 @@ interface Certificate {
 }
 
 export default function MyCertificates() {
+  const { language } = useTheme()
   const [certificates, setCertificates] = useState<Certificate[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCert, setSelectedCert] = useState<any>(null)
@@ -47,15 +50,15 @@ export default function MyCertificates() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-emerald-800">شهاداتي / My Certificates</h2>
+        <h2 className="text-2xl font-bold text-emerald-800">{localeText(language, 'شهاداتي', 'My Certificates')}</h2>
         <Award className="h-8 w-8 text-emerald-600" />
       </div>
 
       {certificates.length === 0 ? (
         <Card className="flex flex-col items-center justify-center py-12 text-gray-500">
           <Award className="h-16 w-16 mb-4 opacity-20" />
-          <p className="text-lg font-medium">لا توجد شهادات متاحة حالياً</p>
-          <p className="text-sm">ستظهر شهاداتك هنا بمجرد إتمامك للمستويات بنجاح</p>
+          <p className="text-lg font-medium">{localeText(language, 'لا توجد شهادات متاحة حالياً', 'No certificates are available yet')}</p>
+          <p className="text-sm">{localeText(language, 'ستظهر شهاداتك هنا بمجرد إتمامك للمستويات بنجاح', 'Your certificates will appear here once you complete levels successfully')}</p>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -69,13 +72,13 @@ export default function MyCertificates() {
                     </Badge>
                     <span className="text-xs text-gray-400 font-mono">{cert.id.split('-')[0]}</span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">شهادة إتمام المستوى</h3>
+                  <h3 className="text-xl font-bold text-gray-900">{localeText(language, 'شهادة إتمام المستوى', 'Level completion certificate')}</h3>
                   <p className="text-sm text-gray-600">
-                    تاريخ الإصدار: {new Date(cert.issueDate).toLocaleDateString('ar-EG')}
+                    {localeText(language, 'تاريخ الإصدار: ', 'Issued: ')}{new Date(cert.issueDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
                   </p>
                   {cert.issuerName && (
                     <p className="text-xs text-emerald-600 font-medium italic">
-                      بواسطة: {cert.issuerName}
+                      {localeText(language, 'بواسطة: ', 'Issued by: ')}{cert.issuerName}
                     </p>
                   )}
                 </div>
@@ -85,11 +88,11 @@ export default function MyCertificates() {
                     onClick={() => setSelectedCert(cert)}
                   >
                     <Eye className="h-4 w-4" />
-                    عرض
+                    {localeText(language, 'عرض', 'View')}
                   </Button>
                   <Button variant="outline" className="gap-2" onClick={() => window.print()}>
                     <Download className="h-4 w-4" />
-                    تحميل
+                    {localeText(language, 'تحميل', 'Download')}
                   </Button>
                 </div>
               </div>
@@ -102,7 +105,7 @@ export default function MyCertificates() {
         <Modal 
           isOpen={!!selectedCert} 
           onClose={() => setSelectedCert(null)}
-          title="عرض الشهادة"
+          title={localeText(language, 'عرض الشهادة', 'View certificate')}
           size="xl"
         >
           <div className="overflow-x-auto p-4 bg-gray-100 rounded-lg">
@@ -122,7 +125,7 @@ export default function MyCertificates() {
           <div className="mt-4 flex justify-end">
             <Button onClick={() => window.print()} className="gap-2">
               <Download className="h-4 w-4" />
-              طباعة / تحميل PDF
+              {localeText(language, 'طباعة / تحميل PDF', 'Print / Download PDF')}
             </Button>
           </div>
         </Modal>

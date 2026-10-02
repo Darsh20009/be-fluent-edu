@@ -8,6 +8,8 @@ import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Modal from '@/components/ui/Modal'
 import toast from 'react-hot-toast'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 interface WritingTest {
   id: string
@@ -41,6 +43,7 @@ interface GrammarError {
 }
 
 export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId: string }) {
+  const { language } = useTheme()
   const [tests, setTests] = useState<WritingTest[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -75,7 +78,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
 
   async function handleCreateTest() {
     if (!newTest.title) {
-      toast.error('يرجى إدخال عنوان')
+      toast.error(localeText(language, 'يرجى إدخال عنوان', 'Please enter a title'))
       return
     }
 
@@ -91,13 +94,13 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
         await fetchTests()
         setNewTest({ title: '', titleAr: '', instructions: '', instructionsAr: '', dueDate: '' })
         setShowCreateForm(false)
-        toast.success('تم إنشاء اختبار الكتابة بنجاح!')
+        toast.success(localeText(language, 'تم إنشاء اختبار الكتابة بنجاح!', 'Writing test created successfully!'))
       } else {
-        toast.error('فشل إنشاء اختبار الكتابة')
+        toast.error(localeText(language, 'فشل إنشاء اختبار الكتابة', 'Failed to create writing test'))
       }
     } catch (error) {
       console.error('Error creating test:', error)
-      toast.error('خطأ في إنشاء اختبار الكتابة')
+      toast.error(localeText(language, 'خطأ في إنشاء اختبار الكتابة', 'Error creating writing test'))
     } finally {
       setSubmitting(false)
     }
@@ -105,13 +108,13 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
 
   async function handleGradeSubmission() {
     if (!gradingSubmission || !gradeData.grade) {
-      toast.error('يرجى إدخال الدرجة')
+      toast.error(localeText(language, 'يرجى إدخال الدرجة', 'Please enter a grade'))
       return
     }
 
     const grade = parseFloat(gradeData.grade)
     if (isNaN(grade) || grade < 0 || grade > 100) {
-      toast.error('يرجى إدخال درجة صحيحة بين 0 و 100')
+      toast.error(localeText(language, 'يرجى إدخال درجة صحيحة بين 0 و 100', 'Enter a valid grade between 0 and 100'))
       return
     }
 
@@ -131,13 +134,13 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
         await fetchTests()
         setGradingSubmission(null)
         setGradeData({ grade: '', feedback: '', grammarErrors: [] })
-        toast.success('تم تصحيح الكتابة بنجاح!')
+        toast.success(localeText(language, 'تم تصحيح الكتابة بنجاح!', 'Writing graded successfully!'))
       } else {
-        toast.error('فشل تصحيح الكتابة')
+        toast.error(localeText(language, 'فشل تصحيح الكتابة', 'Failed to grade writing'))
       }
     } catch (error) {
       console.error('Error grading submission:', error)
-      toast.error('خطأ في تصحيح الكتابة')
+      toast.error(localeText(language, 'خطأ في تصحيح الكتابة', 'Error grading writing'))
     } finally {
       setSubmitting(false)
     }
@@ -178,19 +181,18 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-[#10B981]">
-          Writing Tests / اختبارات الكتابة
+          {localeText(language, 'اختبارات الكتابة', 'Writing tests')}
         </h2>
         <Button variant="primary" onClick={() => setShowCreateForm(true)}>
           <Plus className="h-5 w-5 ml-2" />
-          Create Test / إنشاء اختبار
+          {localeText(language, 'إنشاء اختبار', 'Create test')}
         </Button>
       </div>
 
       {tests.length === 0 && !showCreateForm && (
         <Card variant="elevated" className="text-center py-12">
           <FileText className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-          <p className="text-gray-600">No writing tests created yet</p>
-          <p className="text-gray-600">لا توجد اختبارات كتابة بعد</p>
+          <p className="text-gray-600">{localeText(language, 'لا توجد اختبارات كتابة بعد.', 'No writing tests created yet.')}</p>
         </Card>
       )}
 
@@ -208,17 +210,17 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
                   {test.titleAr && <p className="text-gray-600">{test.titleAr}</p>}
                   {test.dueDate && (
                     <p className="text-sm text-gray-500 mt-1">
-                      Due: {new Date(test.dueDate).toLocaleDateString('ar-EG')}
+                      {localeText(language, 'تاريخ الاستحقاق:', 'Due:')} {new Date(test.dueDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
                     </p>
                   )}
                 </div>
                 <div className="flex gap-2">
                   <Badge variant="info">
-                    {totalSubmissions} submission{totalSubmissions !== 1 ? 's' : ''}
+                    {totalSubmissions} {localeText(language, 'تسليم', totalSubmissions !== 1 ? 'submissions' : 'submission')}
                   </Badge>
                   {pendingSubmissions > 0 && (
                     <Badge variant="warning">
-                      {pendingSubmissions} pending
+                      {pendingSubmissions} {localeText(language, 'بانتظار التصحيح', 'pending')}
                     </Badge>
                   )}
                 </div>
@@ -235,20 +237,20 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
 
               {test.WritingTestSubmission.length > 0 && (
                 <div className="space-y-3">
-                  <h4 className="font-semibold text-gray-900">Submissions:</h4>
+                  <h4 className="font-semibold text-gray-900">{localeText(language, 'التسليمات:', 'Submissions:')}</h4>
                   {test.WritingTestSubmission.map((submission) => (
                     <div key={submission.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
                       <div className="flex-1">
                         <p className="font-semibold text-gray-900">{submission.User.name}</p>
                         <p className="text-sm text-gray-600">
-                          Submitted: {new Date(submission.submittedAt).toLocaleDateString('ar-EG')}
+                          {localeText(language, 'تاريخ الإرسال:', 'Submitted:')} {new Date(submission.submittedAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
                         </p>
                       </div>
                       {submission.grade !== null ? (
                         <div className="flex items-center gap-3">
                           <Badge variant="success">
                             <CheckCircle className="h-3 w-3 mr-1" />
-                            Grade: {submission.grade}/100
+                            {localeText(language, 'الدرجة:', 'Grade:')} {submission.grade}/100
                           </Badge>
                           <Button
                             variant="outline"
@@ -262,7 +264,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
                               })
                             }}
                           >
-                            View / Edit
+                            {localeText(language, 'عرض / تعديل', 'View / Edit')}
                           </Button>
                         </div>
                       ) : (
@@ -272,7 +274,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
                           onClick={() => setGradingSubmission(submission)}
                         >
                           <Edit className="h-4 w-4 ml-1" />
-                          Grade / تصحيح
+                          {localeText(language, 'تصحيح', 'Grade')}
                         </Button>
                       )}
                     </div>
@@ -288,64 +290,64 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
         <Modal
           isOpen={showCreateForm}
           onClose={() => setShowCreateForm(false)}
-          title="Create Writing Test / إنشاء اختبار كتابة"
+          title={localeText(language, 'إنشاء اختبار كتابة', 'Create writing test')}
         >
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Title (English) *
+                {localeText(language, 'العنوان (بالإنجليزية) *', 'Title (English) *')}
               </label>
               <input
                 type="text"
                 value={newTest.title}
                 onChange={(e) => setNewTest(prev => ({ ...prev, title: e.target.value }))}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
-                placeholder="Write about your favorite book"
+                placeholder={localeText(language, 'اكتب عن كتابك المفضل', 'Write about your favorite book')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Title (Arabic)
+                {localeText(language, 'العنوان (بالعربية)', 'Title (Arabic)')}
               </label>
               <input
                 type="text"
                 value={newTest.titleAr}
                 onChange={(e) => setNewTest(prev => ({ ...prev, titleAr: e.target.value }))}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
-                placeholder="اكتب عن كتابك المفضل"
+                placeholder={localeText(language, 'اكتب عن كتابك المفضل', 'Write about your favorite book')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Instructions (English)
+                {localeText(language, 'التعليمات (بالإنجليزية)', 'Instructions (English)')}
               </label>
               <textarea
                 value={newTest.instructions}
                 onChange={(e) => setNewTest(prev => ({ ...prev, instructions: e.target.value }))}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 rows={3}
-                placeholder="Write a paragraph about your favorite book and explain why you like it..."
+                placeholder={localeText(language, 'اكتب فقرة عن كتابك المفضل واشرح سبب إعجابك به...', 'Write a paragraph about your favorite book and explain why you like it...')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Instructions (Arabic)
+                {localeText(language, 'التعليمات (بالعربية)', 'Instructions (Arabic)')}
               </label>
               <textarea
                 value={newTest.instructionsAr}
                 onChange={(e) => setNewTest(prev => ({ ...prev, instructionsAr: e.target.value }))}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 rows={3}
-                placeholder="اكتب فقرة عن كتابك المفضل واشرح لماذا يعجبك..."
+                placeholder={localeText(language, 'اكتب فقرة عن كتابك المفضل واشرح لماذا يعجبك...', 'Write a paragraph about your favorite book and explain why you like it...')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Due Date (Optional)
+                {localeText(language, 'تاريخ الاستحقاق (اختياري)', 'Due date (optional)')}
               </label>
               <input
                 type="date"
@@ -362,14 +364,14 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
                 onClick={handleCreateTest}
                 disabled={!newTest.title || submitting}
               >
-                {submitting ? 'Creating...' : 'Create Test / إنشاء'}
+                {submitting ? localeText(language, 'جارٍ الإنشاء…', 'Creating…') : localeText(language, 'إنشاء اختبار', 'Create test')}
               </Button>
               <Button
                 variant="outline"
                 fullWidth
                 onClick={() => setShowCreateForm(false)}
               >
-                Cancel / إلغاء
+                {localeText(language, 'إلغاء', 'Cancel')}
               </Button>
             </div>
           </div>
@@ -383,11 +385,11 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
             setGradingSubmission(null)
             setGradeData({ grade: '', feedback: '', grammarErrors: [] })
           }}
-          title={`Grade Submission / تصحيح الإرسال`}
+          title={localeText(language, 'تصحيح الإرسال', 'Grade submission')}
         >
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Student Writing:</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{localeText(language, 'كتابة الطالب:', 'Student writing:')}</h3>
               <div className="p-4 bg-gray-50 rounded-lg max-h-64 overflow-y-auto">
                 <p className="text-gray-700 whitespace-pre-wrap">{gradingSubmission.content}</p>
               </div>
@@ -395,12 +397,12 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
 
             {gradingSubmission.manuscriptUrl && (
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Handwritten Answer:</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">{localeText(language, 'الإجابة المكتوبة بخط اليد:', 'Handwritten answer:')}</h3>
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                   {gradingSubmission.manuscriptUrl.startsWith('data:image') ? (
                     <img
                       src={gradingSubmission.manuscriptUrl}
-                      alt="Handwritten submission"
+                      alt={localeText(language, 'إجابة مكتوبة بخط اليد', 'Handwritten submission')}
                       className="max-h-96 rounded border border-gray-300 w-full object-contain"
                     />
                   ) : (
@@ -410,7 +412,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
                       rel="noopener noreferrer"
                       className="text-[#10B981] hover:underline font-medium"
                     >
-                      📎 View Manuscript File
+                      📎 {localeText(language, 'عرض ملف المخطوطة', 'View manuscript file')}
                     </a>
                   )}
                 </div>
@@ -419,7 +421,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Grade (0-100) *
+                {localeText(language, 'الدرجة (0–100) *', 'Grade (0–100) *')}
               </label>
               <input
                 type="number"
@@ -434,21 +436,21 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Feedback (Optional)
+                {localeText(language, 'ملاحظات (اختياري)', 'Feedback (optional)')}
               </label>
               <textarea
                 value={gradeData.feedback}
                 onChange={(e) => setGradeData(prev => ({ ...prev, feedback: e.target.value }))}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 rows={4}
-                placeholder="Great work! Your writing is clear and well-organized..."
+                placeholder={localeText(language, 'عمل رائع! كتابتك واضحة ومنظمة جيداً...', 'Great work! Your writing is clear and well-organized...')}
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  Grammar Corrections (Optional)
+                  {localeText(language, 'تصحيحات نحوية (اختياري)', 'Grammar corrections (optional)')}
                 </label>
                 <Button
                   variant="outline"
@@ -456,7 +458,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
                   onClick={addGrammarError}
                 >
                   <Plus className="h-4 w-4 ml-1" />
-                  Add Error
+                  {localeText(language, 'إضافة خطأ', 'Add error')}
                 </Button>
               </div>
 
@@ -468,21 +470,21 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
                       value={error.text}
                       onChange={(e) => updateGrammarError(index, 'text', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                      placeholder="Error text (e.g., 'I goed to school')"
+                      placeholder={localeText(language, 'نص الخطأ (مثال: I goed to school)', "Error text (e.g., 'I goed to school')")}
                     />
                     <input
                       type="text"
                       value={error.correction}
                       onChange={(e) => updateGrammarError(index, 'correction', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                      placeholder="Correction (e.g., 'I went to school')"
+                      placeholder={localeText(language, 'التصحيح (مثال: I went to school)', "Correction (e.g., 'I went to school')")}
                     />
                     <input
                       type="text"
                       value={error.explanation}
                       onChange={(e) => updateGrammarError(index, 'explanation', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                      placeholder="Explanation (e.g., 'Past tense of go is went')"
+                      placeholder={localeText(language, 'التوضيح (مثال: Past tense of go is went)', "Explanation (e.g., 'Past tense of go is went')")}
                     />
                     <Button
                       variant="outline"
@@ -490,7 +492,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
                       onClick={() => removeGrammarError(index)}
                     >
                       <Trash2 className="h-4 w-4 ml-1" />
-                      Remove
+                      {localeText(language, 'إزالة', 'Remove')}
                     </Button>
                   </div>
                 ))}
@@ -504,7 +506,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
                 onClick={handleGradeSubmission}
                 disabled={!gradeData.grade || submitting}
               >
-                {submitting ? 'Saving...' : 'Save Grade / حفظ الدرجة'}
+                {submitting ? localeText(language, 'جارٍ الحفظ…', 'Saving…') : localeText(language, 'حفظ الدرجة', 'Save grade')}
               </Button>
               <Button
                 variant="outline"
@@ -514,7 +516,7 @@ export default function WritingTestsTab({ teacherProfileId }: { teacherProfileId
                   setGradeData({ grade: '', feedback: '', grammarErrors: [] })
                 }}
               >
-                Cancel / إلغاء
+                {localeText(language, 'إلغاء', 'Cancel')}
               </Button>
             </div>
           </div>

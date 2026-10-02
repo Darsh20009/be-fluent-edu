@@ -4,6 +4,8 @@ import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import pageStyles from '@/app/phase4/phase4.module.css'
 import styles from './WhatsAppCRMWorkspace.module.css'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText, localeDirection } from '@/lib/locale'
 
 type Account = {
   id: string
@@ -67,11 +69,11 @@ async function api<T = Record<string, unknown>>(path: string, options?: RequestI
       : data
     const message = typeof apiError.message === 'string'
       ? apiError.message
-      : 'تعذّر إكمال الطلب. حاول مرة أخرى.'
+      : 'REQUEST_FAILED'
     throw Object.assign(
       new Error(message),
       {
-        code: typeof apiError.code === 'string' ? apiError.code : undefined,
+        code: typeof apiError.code === 'string' ? apiError.code : 'REQUEST_FAILED',
         status: response.status,
       },
     ) as RequestError
@@ -79,55 +81,60 @@ async function api<T = Record<string, unknown>>(path: string, options?: RequestI
   return data as T
 }
 
-function errorMessage(error: unknown) {
-  if (!(error instanceof Error)) return 'تعذّر إكمال الطلب. حاول مرة أخرى.'
+function errorMessage(error: unknown, language: 'ar' | 'en') {
+  const t = (ar: string, en: string) => localeText(language, ar, en)
+  if (!(error instanceof Error)) return t('تعذّر إكمال الطلب. حاول مرة أخرى.', 'The request could not be completed. Please try again.')
   const code = (error as RequestError).code
   const translated: Record<string, string> = {
-    ACCOUNT_NOT_CONNECTED: 'اربط الرقم أولًا قبل اختياره لاستقبال رموز التحقق.',
-    CONNECT_FAILED: 'تعذّر بدء اتصال واتساب. راجع حالة المزوّد ثم حاول مرة أخرى.',
-    DATABASE_UNAVAILABLE: 'قاعدة البيانات غير متاحة حاليًا. لم يتم حفظ أي تغيير.',
-    LOGOUT_FAILED: 'تعذّر فصل الرقم. حاول مرة أخرى.',
-    PROVIDER_UNAVAILABLE: 'مزوّد واتساب غير جاهز. تحقّق من إعداد Baileys وحفظ الجلسة.',
-    RECONNECT_LIMIT: 'وصل الرقم إلى حد محاولات إعادة الربط. افصل الجلسة ثم امسح رمزًا جديدًا.',
+    ACCOUNT_NOT_CONNECTED: t('اربط الرقم أولًا قبل اختياره لاستقبال رموز التحقق.', 'Connect the number before selecting it to receive verification codes.'),
+    CONNECT_FAILED: t('تعذّر بدء اتصال واتساب. راجع حالة المزوّد ثم حاول مرة أخرى.', 'Could not start the WhatsApp connection. Check the provider status and try again.'),
+    DATABASE_UNAVAILABLE: t('قاعدة البيانات غير متاحة حاليًا. لم يتم حفظ أي تغيير.', 'The database is currently unavailable. No changes were saved.'),
+    LOGOUT_FAILED: t('تعذّر فصل الرقم. حاول مرة أخرى.', 'Could not disconnect the number. Please try again.'),
+    PROVIDER_UNAVAILABLE: t('مزوّد واتساب غير جاهز. تحقّق من إعداد Baileys وحفظ الجلسة.', 'The WhatsApp provider is not ready. Check the Baileys and session persistence configuration.'),
+    RECONNECT_LIMIT: t('وصل الرقم إلى حد محاولات إعادة الربط. افصل الجلسة ثم امسح رمزًا جديدًا.', 'The number reached its reconnection limit. Disconnect the session, then scan a new QR code.'),
+    REQUEST_FAILED: t('تعذّر إكمال الطلب. حاول مرة أخرى.', 'The request could not be completed. Please try again.'),
   }
   return (code && translated[code]) || error.message
 }
 
-function statusLabel(status?: string) {
+function statusLabel(status: string | undefined, language: 'ar' | 'en') {
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const labels: Record<string, string> = {
-    CONNECTED: 'متصل',
-    CONNECTING: 'جارٍ الاتصال',
-    DISCONNECTED: 'غير مرتبط',
-    ERROR: 'تعذّر الاتصال',
-    LOGGED_OUT: 'تم فصل الربط',
-    PROVIDER_UNAVAILABLE: 'المزوّد غير متاح',
-    QR_REQUIRED: 'بانتظار مسح الرمز',
-    RECONNECTING: 'جارٍ إعادة الاتصال',
+    CONNECTED: t('متصل', 'Connected'),
+    CONNECTING: t('جارٍ الاتصال', 'Connecting'),
+    DISCONNECTED: t('غير مرتبط', 'Disconnected'),
+    ERROR: t('تعذّر الاتصال', 'Connection failed'),
+    LOGGED_OUT: t('تم فصل الربط', 'Disconnected'),
+    PROVIDER_UNAVAILABLE: t('المزوّد غير متاح', 'Provider unavailable'),
+    QR_REQUIRED: t('بانتظار مسح الرمز', 'Awaiting QR scan'),
+    RECONNECTING: t('جارٍ إعادة الاتصال', 'Reconnecting'),
   }
-  return status ? labels[status] || status : 'غير معروف'
+  return status ? labels[status] || status : t('غير معروف', 'Unknown')
 }
 
-function persistenceLabel(status?: string) {
-  if (status === 'PERSISTENCE_CONFIGURED') return 'حفظ الجلسة جاهز'
-  if (!status) return 'حالة حفظ الجلسة غير معروفة'
-  return 'حفظ الجلسة غير جاهز'
+function persistenceLabel(status: string | undefined, language: 'ar' | 'en') {
+  const t = (ar: string, en: string) => localeText(language, ar, en)
+  if (status === 'PERSISTENCE_CONFIGURED') return t('حفظ الجلسة جاهز', 'Session persistence ready')
+  if (!status) return t('حالة حفظ الجلسة غير معروفة', 'Session persistence status unknown')
+  return t('حفظ الجلسة غير جاهز', 'Session persistence unavailable')
 }
 
-function contactStatusLabel(status?: string) {
-  if (status === 'ACTIVE') return 'نشطة'
-  if (status === 'INACTIVE') return 'غير نشطة'
+function contactStatusLabel(status: string | undefined, language: 'ar' | 'en') {
+  if (status === 'ACTIVE') return localeText(language, 'نشطة', 'Active')
+  if (status === 'INACTIVE') return localeText(language, 'غير نشطة', 'Inactive')
   return status || ''
 }
 
-function deliveryLabel(value?: string) {
+function deliveryLabel(value: string | undefined, language: 'ar' | 'en') {
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const labels: Record<string, string> = {
-    FAILED: 'فشل الإرسال',
-    INBOUND: 'واردة',
-    OUTBOUND: 'صادرة',
-    PENDING: 'بانتظار الإرسال',
-    QUEUED: 'في الطابور',
-    SENT: 'أُرسلت',
-    DELIVERED: 'تم التسليم',
+    FAILED: t('فشل الإرسال', 'Failed'),
+    INBOUND: t('واردة', 'Incoming'),
+    OUTBOUND: t('صادرة', 'Outgoing'),
+    PENDING: t('بانتظار الإرسال', 'Pending'),
+    QUEUED: t('في الطابور', 'Queued'),
+    SENT: t('أُرسلت', 'Sent'),
+    DELIVERED: t('تم التسليم', 'Delivered'),
   }
   return value ? labels[value] || value : ''
 }
@@ -135,6 +142,8 @@ function deliveryLabel(value?: string) {
 const pendingStatuses = new Set(['CONNECTING', 'QR_REQUIRED', 'RECONNECTING'])
 
 export function WhatsAppCRMWorkspace() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [accounts, setAccounts] = useState<Account[]>([])
   const [accountsState, setAccountsState] = useState<LoadState>('loading')
   const [accountsError, setAccountsError] = useState('')
@@ -178,11 +187,11 @@ export function WhatsAppCRMWorkspace() {
         Object.entries(current).filter(([id]) => pendingIds.has(id)),
       ))
     } catch (error) {
-      const message = errorMessage(error)
+      const message = errorMessage(error, language)
       setAccountsError(message)
       setAccountsState((error as RequestError)?.status === 503 ? 'database' : 'error')
     }
-  }, [])
+  }, [language])
 
   const refreshContacts = useCallback(async () => {
     setContactsError('')
@@ -192,10 +201,10 @@ export function WhatsAppCRMWorkspace() {
       setContacts(items)
       setContactsState(items.length ? 'ready' : 'empty')
     } catch (error) {
-      setContactsError(errorMessage(error))
+      setContactsError(errorMessage(error, language))
       setContactsState((error as RequestError)?.status === 503 ? 'database' : 'error')
     }
-  }, [])
+  }, [language])
 
   const refreshConversations = useCallback(async () => {
     setConversationsError('')
@@ -205,10 +214,10 @@ export function WhatsAppCRMWorkspace() {
       setConversations(items)
       setConversationsState(items.length ? 'ready' : 'empty')
     } catch (error) {
-      setConversationsError(errorMessage(error))
+      setConversationsError(errorMessage(error, language))
       setConversationsState((error as RequestError)?.status === 503 ? 'database' : 'error')
     }
-  }, [])
+  }, [language])
 
   const refreshQueue = useCallback(async () => {
     setQueueError('')
@@ -216,19 +225,19 @@ export function WhatsAppCRMWorkspace() {
       setQueue(await api<QueueSummary>('/api/admin/whatsapp/queue'))
       setQueueState('ready')
     } catch (error) {
-      setQueueError(errorMessage(error))
+      setQueueError(errorMessage(error, language))
       setQueueState((error as RequestError)?.status === 503 ? 'database' : 'error')
     }
-  }, [])
+  }, [language])
 
   const refreshProvider = useCallback(async () => {
     setProviderError('')
     try {
       setProvider(await api<ProviderStatus>('/api/whatsapp/provider-status'))
     } catch (error) {
-      setProviderError(errorMessage(error))
+      setProviderError(errorMessage(error, language))
     }
-  }, [])
+  }, [language])
 
   const refreshAll = useCallback(() => {
     void refreshAccounts()
@@ -287,7 +296,7 @@ export function WhatsAppCRMWorkspace() {
           }
         } catch (error) {
           if (cancelled) return
-          const message = errorMessage(error)
+          const message = errorMessage(error, language)
           if ((error as RequestError)?.code === 'PROVIDER_UNAVAILABLE') {
             setProvider({ status: 'PROVIDER_UNAVAILABLE', reason: message })
           }
@@ -305,7 +314,7 @@ export function WhatsAppCRMWorkspace() {
       cancelled = true
       window.clearInterval(timer)
     }
-  }, [pendingAccountIds, providerUnavailable])
+  }, [language, pendingAccountIds, providerUnavailable])
 
   async function createAccount(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -321,9 +330,9 @@ export function WhatsAppCRMWorkspace() {
       setAccounts((current) => [account, ...current.filter((item) => item.id !== account.id)])
       setAccountsState('ready')
       setPhone('')
-      setNotice('أُضيف الرقم. اضغط «ربط واتساب» لبدء الاتصال وعرض رمز QR.')
+      setNotice(t('أُضيف الرقم. اضغط «ربط واتساب» لبدء الاتصال وعرض رمز QR.', 'Number added. Select “Connect WhatsApp” to start connecting and display the QR code.'))
     } catch (error) {
-      setNotice(errorMessage(error))
+      setNotice(errorMessage(error, language))
     } finally {
       setCreatingAccount(false)
     }
@@ -332,7 +341,7 @@ export function WhatsAppCRMWorkspace() {
   async function accountAction(account: Account, action: string) {
     if (action === 'LOGOUT' && account.status !== 'CONNECTED') {
       const confirmed = window.confirm(
-        'سيؤدي هذا إلى مسح جلسة واتساب المحفوظة لهذا الرقم، وستحتاج إلى مسح رمز QR جديد. سيبقى سجل المحادثات محفوظًا.',
+      t('سيؤدي هذا إلى مسح جلسة واتساب المحفوظة لهذا الرقم، وستحتاج إلى مسح رمز QR جديد. سيبقى سجل المحادثات محفوظًا.', 'This will clear the saved WhatsApp session for this number. You will need to scan a new QR code. Conversation history will be preserved.'),
       )
       if (!confirmed) return
     }
@@ -350,13 +359,13 @@ export function WhatsAppCRMWorkspace() {
           ...item,
           isOtpSender: item.id === account.id,
         })))
-        setNotice('تم اختيار هذا الرقم لإرسال رموز التحقق.')
+        setNotice(t('تم اختيار هذا الرقم لإرسال رموز التحقق.', 'This number is now selected to send verification codes.'))
       } else if (action === 'LOGOUT') {
         setQrByAccount((current) => ({ ...current, [account.id]: null }))
         setAccounts((current) => current.map((item) => item.id === account.id
           ? { ...item, status: data.status || 'LOGGED_OUT', isOtpSender: false }
           : item))
-        setNotice('تم فصل الرقم. يمكنك إعادة ربطه ومسح رمز QR جديد.')
+        setNotice(t('تم فصل الرقم. يمكنك إعادة ربطه ومسح رمز QR جديد.', 'Number disconnected. You can reconnect it by scanning a new QR code.'))
       } else {
         const providerStatus = data.provider?.status
         const nextStatus = providerStatus && providerStatus !== 'DISCONNECTED'
@@ -365,7 +374,7 @@ export function WhatsAppCRMWorkspace() {
         setAccounts((current) => current.map((item) => item.id === account.id
           ? { ...item, status: nextStatus }
           : item))
-        setNotice('بدأ الاتصال. سيظهر رمز QR هنا عند جاهزيته.')
+        setNotice(t('بدأ الاتصال. سيظهر رمز QR هنا عند جاهزيته.', 'Connection started. The QR code will appear here when ready.'))
         void refreshProvider()
       }
       if (action === 'CONNECT' || action === 'RECONNECT') {
@@ -374,7 +383,7 @@ export function WhatsAppCRMWorkspace() {
         void refreshAccounts(true)
       }
     } catch (error) {
-      setNotice(errorMessage(error))
+      setNotice(errorMessage(error, language))
       void refreshProvider()
       void refreshAccounts(true)
     } finally {
@@ -393,7 +402,7 @@ export function WhatsAppCRMWorkspace() {
         setMessages(Array.isArray(data.items) ? data.items : [])
       }
     } catch (error) {
-      if (messageRequestId.current === requestId) setNotice(errorMessage(error))
+      if (messageRequestId.current === requestId) setNotice(errorMessage(error, language))
     } finally {
       if (messageRequestId.current === requestId) setMessagesLoading(false)
     }
@@ -415,7 +424,7 @@ export function WhatsAppCRMWorkspace() {
       await refreshConversations()
       await openConversation(conversation.id)
     } catch (error) {
-      setNotice(errorMessage(error))
+      setNotice(errorMessage(error, language))
     }
   }
 
@@ -436,9 +445,9 @@ export function WhatsAppCRMWorkspace() {
         refreshConversations(),
         refreshQueue(),
       ])
-      setNotice('أُضيفت الرسالة إلى طابور الإرسال.')
+      setNotice(t('أُضيفت الرسالة إلى طابور الإرسال.', 'Message added to the sending queue.'))
     } catch (error) {
-      setNotice(errorMessage(error))
+      setNotice(errorMessage(error, language))
     } finally {
       setSendingMessage(false)
     }
@@ -447,17 +456,17 @@ export function WhatsAppCRMWorkspace() {
   const providerStatus = provider?.status as string | undefined
 
   return (
-    <div className={styles.workspace}>
+    <div className={styles.workspace} dir={localeDirection(language)}>
       <section className={`${pageStyles.notice} ${styles.providerNotice}`} aria-labelledby="provider-status-heading">
         <div className={styles.providerTopline}>
           <div>
-            <h2 id="provider-status-heading" className={styles.sectionTitle}>حالة مزوّد واتساب</h2>
+            <h2 id="provider-status-heading" className={styles.sectionTitle}>{t('حالة مزوّد واتساب', 'WhatsApp provider status')}</h2>
             <p className={styles.statusLine} role="status">
               {providerError
                 ? providerError
                 : provider
-                  ? statusLabel(providerStatus)
-                  : 'جارٍ التحقق من حالة المزوّد…'}
+                  ? statusLabel(providerStatus, language)
+                  : t('جارٍ التحقق من حالة المزوّد…', 'Checking provider status…')}
               {provider?.reason ? ` · ${provider.reason}` : ''}
             </p>
           </div>
@@ -466,14 +475,14 @@ export function WhatsAppCRMWorkspace() {
               className={`${pageStyles.button} ${styles.primaryButton}`}
               href="#whatsapp-accounts"
             >
-              الأرقام والربط
+              {t('الأرقام والربط', 'Numbers & connections')}
             </a>
             <button className={pageStyles.button} type="button" onClick={refreshAll}>
-              تحديث البيانات
+              {t('تحديث البيانات', 'Refresh data')}
             </button>
           </div>
         </div>
-        <p className={styles.helpText}>لإضافة رقم أو بدء الربط، افتح «الأرقام والربط» أدناه. يظهر رمز QR داخل بطاقة الرقم بعد الضغط على «ربط واتساب».</p>
+        <p className={styles.helpText}>{t('لإضافة رقم أو بدء الربط، افتح «الأرقام والربط» أدناه. يظهر رمز QR داخل بطاقة الرقم بعد الضغط على «ربط واتساب».', 'To add a number or connect, use “Numbers & connections” below. A QR code appears on the number card after selecting “Connect WhatsApp”.')}</p>
       </section>
 
       {notice && <div className={pageStyles.notice} role="status">{notice}</div>}
@@ -482,16 +491,16 @@ export function WhatsAppCRMWorkspace() {
         <section id="whatsapp-accounts" className={`${pageStyles.card} ${styles.accountsCard}`} aria-labelledby="accounts-heading" tabIndex={-1}>
           <div className={styles.sectionHeader}>
             <div>
-              <h2 id="accounts-heading" className={styles.sectionTitle}>الأرقام والربط</h2>
-              <p className={styles.helpText}>أضف رقم واتساب، ثم اربطه بمسح رمز QR من الهاتف.</p>
+              <h2 id="accounts-heading" className={styles.sectionTitle}>{t('الأرقام والربط', 'Numbers & connections')}</h2>
+              <p className={styles.helpText}>{t('أضف رقم واتساب، ثم اربطه بمسح رمز QR من الهاتف.', 'Add a WhatsApp number, then connect it by scanning its QR code with your phone.')}</p>
             </div>
             <button className={pageStyles.button} type="button" onClick={() => void refreshAccounts()}>
-              تحديث الأرقام
+              {t('تحديث الأرقام', 'Refresh numbers')}
             </button>
           </div>
 
           <form className={styles.addAccountForm} onSubmit={createAccount}>
-            <label className={styles.srOnly} htmlFor="whatsapp-phone">رقم واتساب بالصيغة الدولية</label>
+            <label className={styles.srOnly} htmlFor="whatsapp-phone">{t('رقم واتساب بالصيغة الدولية', 'WhatsApp number in international format')}</label>
             <input
               id="whatsapp-phone"
               className={pageStyles.input}
@@ -500,15 +509,15 @@ export function WhatsAppCRMWorkspace() {
               autoComplete="tel"
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
-              placeholder="مثال: +966 5X XXX XXXX"
-              aria-label="رقم واتساب بالصيغة الدولية"
+              placeholder={t('مثال: +966 5X XXX XXXX', 'Example: +966 5X XXX XXXX')}
+              aria-label={t('رقم واتساب بالصيغة الدولية', 'WhatsApp number in international format')}
             />
             <button
               className={`${pageStyles.button} ${styles.primaryButton}`}
               type="submit"
               disabled={!phone.trim() || creatingAccount}
             >
-              {creatingAccount ? 'جارٍ الإضافة…' : 'إضافة رقم'}
+              {creatingAccount ? t('جارٍ الإضافة…', 'Adding…') : t('إضافة رقم', 'Add number')}
             </button>
           </form>
 
@@ -516,14 +525,14 @@ export function WhatsAppCRMWorkspace() {
             <div className={pageStyles.error} role="alert">
               <p>{accountsError}</p>
               <button className={pageStyles.button} type="button" onClick={() => void refreshAccounts()}>
-                إعادة المحاولة
+                {t('إعادة المحاولة', 'Try again')}
               </button>
             </div>
           )}
 
-          {accountsState === 'loading' && <div className={pageStyles.skeleton} aria-label="جارٍ تحميل الأرقام" />}
+          {accountsState === 'loading' && <div className={pageStyles.skeleton} aria-label={t('جارٍ تحميل الأرقام', 'Loading numbers')} />}
           {accountsState === 'empty' && (
-            <div className={pageStyles.empty}>لا توجد أرقام بعد. أضف رقمًا لبدء ربط واتساب وإدارة المحادثات.</div>
+            <div className={pageStyles.empty}>{t('لا توجد أرقام بعد. أضف رقمًا لبدء ربط واتساب وإدارة المحادثات.', 'No numbers yet. Add a number to connect WhatsApp and manage conversations.')}</div>
           )}
 
           {accounts.length > 0 && (
@@ -537,12 +546,12 @@ export function WhatsAppCRMWorkspace() {
                     ? 'RECONNECT'
                     : 'CONNECT'
                 const actionLabel = account.status === 'CONNECTED'
-                  ? 'فصل الربط'
+                  ? t('فصل الربط', 'Disconnect')
                   : account.status === 'ERROR'
-                    ? 'إعادة الربط'
+                    ? t('إعادة الربط', 'Reconnect')
                     : isPending
-                      ? 'جارٍ الربط…'
-                      : 'ربط واتساب'
+                      ? t('جارٍ الربط…', 'Connecting…')
+                      : t('ربط واتساب', 'Connect WhatsApp')
 
                 return (
                   <article className={styles.account} key={account.id}>
@@ -550,19 +559,19 @@ export function WhatsAppCRMWorkspace() {
                       <div>
                         <strong className={styles.phoneNumber} dir="ltr">{account.phoneNumber}</strong>
                         <p className={styles.accountMeta}>
-                          {statusLabel(account.status)} · {persistenceLabel(account.authPersistenceStatus)}
-                          {account.isOtpSender ? ' · مرسل رموز التحقق' : ''}
+                          {statusLabel(account.status, language)} · {persistenceLabel(account.authPersistenceStatus, language)}
+                          {account.isOtpSender ? ` · ${t('مرسل رموز التحقق', 'Verification code sender')}` : ''}
                         </p>
                       </div>
                       <div className={styles.accountActions}>
-                        <span className={pageStyles.badge}>{statusLabel(account.status)}</span>
+                        <span className={pageStyles.badge}>{statusLabel(account.status, language)}</span>
                         <button
                           className={`${pageStyles.button} ${account.status === 'CONNECTED' ? '' : styles.primaryButton}`}
                           type="button"
                           disabled={isBusy || isPending || (providerUnavailable && action !== 'LOGOUT')}
                           onClick={() => void accountAction(account, action)}
                         >
-                          {isBusy ? 'جارٍ التنفيذ…' : actionLabel}
+                          {isBusy ? t('جارٍ التنفيذ…', 'Working…') : actionLabel}
                         </button>
                         {account.status === 'QR_REQUIRED' && (
                           <button
@@ -571,7 +580,7 @@ export function WhatsAppCRMWorkspace() {
                             disabled={isBusy}
                             onClick={() => void accountAction(account, 'LOGOUT')}
                           >
-                            إلغاء الرمز
+                            {t('إلغاء الرمز', 'Cancel QR code')}
                           </button>
                         )}
                         {account.status === 'CONNECTED' && !account.isOtpSender && (
@@ -581,7 +590,7 @@ export function WhatsAppCRMWorkspace() {
                             disabled={isBusy}
                             onClick={() => void accountAction(account, 'SET_OTP_SENDER')}
                           >
-                            استخدام لرموز التحقق
+                            {t('استخدام لرموز التحقق', 'Use for verification codes')}
                           </button>
                         )}
                       </div>
@@ -594,21 +603,21 @@ export function WhatsAppCRMWorkspace() {
                             <Image
                               className={styles.qrImage}
                               src={qrByAccount[account.id] || ''}
-                              alt={`رمز ربط واتساب للرقم ${account.phoneNumber}`}
+                              alt={t(`رمز ربط واتساب للرقم ${account.phoneNumber}`, `WhatsApp connection QR code for ${account.phoneNumber}`)}
                               width={240}
                               height={240}
                               unoptimized
                             />
                             <div>
-                              <strong>امسح الرمز من تطبيق واتساب</strong>
-                              <p className={styles.helpText}>افتح الأجهزة المرتبطة في الهاتف واختر ربط جهاز.</p>
+                              <strong>{t('امسح الرمز من تطبيق واتساب', 'Scan this code in WhatsApp')}</strong>
+                              <p className={styles.helpText}>{t('افتح الأجهزة المرتبطة في الهاتف واختر ربط جهاز.', 'On your phone, open Linked devices and select Link a device.')}</p>
                             </div>
                           </>
                         ) : (
                           <p className={styles.helpText}>
                             {qrErrors[account.id] || (account.status === 'CONNECTING'
-                              ? 'جارٍ تجهيز الاتصال…'
-                              : 'جارٍ تجهيز رمز QR…')}
+                              ? t('جارٍ تجهيز الاتصال…', 'Preparing connection…')
+                              : t('جارٍ تجهيز رمز QR…', 'Preparing QR code…'))}
                           </p>
                         )}
                       </div>
@@ -622,15 +631,15 @@ export function WhatsAppCRMWorkspace() {
 
         <section className={pageStyles.card} aria-labelledby="contacts-heading">
           <div className={styles.sectionHeader}>
-            <h2 id="contacts-heading" className={styles.sectionTitle}>جهات الاتصال</h2>
+            <h2 id="contacts-heading" className={styles.sectionTitle}>{t('جهات الاتصال', 'Contacts')}</h2>
             <button className={pageStyles.button} type="button" onClick={() => void refreshContacts()}>
-              تحديث
+              {t('تحديث', 'Refresh')}
             </button>
           </div>
-          {contactsState === 'loading' && <div className={pageStyles.skeleton} aria-label="جارٍ تحميل جهات الاتصال" />}
+          {contactsState === 'loading' && <div className={pageStyles.skeleton} aria-label={t('جارٍ تحميل جهات الاتصال', 'Loading contacts')} />}
           {contactsError && <div className={pageStyles.error} role="alert">{contactsError}</div>}
           {contactsState === 'empty' && (
-            <div className={pageStyles.empty}>ستظهر جهات الاتصال بعد ربط رقم واتساب واستقبال الرسائل.</div>
+            <div className={pageStyles.empty}>{t('ستظهر جهات الاتصال بعد ربط رقم واتساب واستقبال الرسائل.', 'Contacts will appear after you connect a WhatsApp number and receive messages.')}</div>
           )}
           {contacts.length > 0 && (
             <div className={styles.contactList}>
@@ -638,14 +647,14 @@ export function WhatsAppCRMWorkspace() {
                 <div className={styles.contactRow} key={contact.id}>
                   <div>
                     <strong>{contact.displayName || contact.phoneNumber}</strong>
-                    <p className={styles.accountMeta}>{contactStatusLabel(contact.status)}</p>
+                    <p className={styles.accountMeta}>{contactStatusLabel(contact.status, language)}</p>
                   </div>
                   <button
                     className={pageStyles.button}
                     type="button"
                     onClick={() => void startConversation(contact)}
                   >
-                    فتح المحادثة
+                    {t('فتح المحادثة', 'Open conversation')}
                   </button>
                 </div>
               ))}
@@ -656,24 +665,24 @@ export function WhatsAppCRMWorkspace() {
         <section className={`${pageStyles.card} ${styles.wide}`} aria-labelledby="conversations-heading">
           <div className={styles.sectionHeader}>
             <div>
-              <h2 id="conversations-heading" className={styles.sectionTitle}>المحادثات</h2>
-              <p className={styles.helpText}>اختر محادثة لقراءة الرسائل وإضافة رد إلى طابور الإرسال.</p>
+              <h2 id="conversations-heading" className={styles.sectionTitle}>{t('المحادثات', 'Conversations')}</h2>
+              <p className={styles.helpText}>{t('اختر محادثة لقراءة الرسائل وإضافة رد إلى طابور الإرسال.', 'Select a conversation to read messages and add a reply to the sending queue.')}</p>
             </div>
             <button className={pageStyles.button} type="button" onClick={() => void refreshConversations()}>
-              تحديث
+              {t('تحديث', 'Refresh')}
             </button>
           </div>
-          {conversationsState === 'loading' && <div className={pageStyles.skeleton} aria-label="جارٍ تحميل المحادثات" />}
+          {conversationsState === 'loading' && <div className={pageStyles.skeleton} aria-label={t('جارٍ تحميل المحادثات', 'Loading conversations')} />}
           {conversationsError && <div className={pageStyles.error} role="alert">{conversationsError}</div>}
           {conversationsState === 'empty' && (
-            <div className={pageStyles.empty}>لا توجد محادثات بعد. افتح محادثة من قائمة جهات الاتصال.</div>
+            <div className={pageStyles.empty}>{t('لا توجد محادثات بعد. افتح محادثة من قائمة جهات الاتصال.', 'No conversations yet. Open a conversation from the contacts list.')}</div>
           )}
           {conversations.length > 0 && (
             <div className={styles.conversationList}>
               {conversations.map((conversation) => {
                 const name = conversation.contact?.displayName
                   || conversation.contact?.normalizedPhone
-                  || 'محادثة واتساب'
+                  || t('محادثة واتساب', 'WhatsApp conversation')
                 return (
                   <button
                     className={`${styles.conversationButton} ${selectedConversation === conversation.id ? styles.selectedConversation : ''}`}
@@ -683,9 +692,9 @@ export function WhatsAppCRMWorkspace() {
                     onClick={() => void openConversation(conversation.id)}
                   >
                     <strong>{name}</strong>
-                    <span>{conversation.status === 'OPEN' ? 'مفتوحة' : conversation.status}</span>
-                    <small>{conversation.unreadCount || 0} غير مقروءة</small>
-                    <p>{conversation.messages?.[0]?.body || 'لا توجد رسائل بعد'}</p>
+                    <span>{conversation.status === 'OPEN' ? t('مفتوحة', 'Open') : conversation.status}</span>
+                    <small>{conversation.unreadCount || 0} {t('غير مقروءة', 'unread')}</small>
+                    <p>{conversation.messages?.[0]?.body || t('لا توجد رسائل بعد', 'No messages yet')}</p>
                   </button>
                 )
               })}
@@ -695,34 +704,34 @@ export function WhatsAppCRMWorkspace() {
           {selectedConversation && (
             <div className={styles.messageWorkspace}>
               <div className={styles.messageList} aria-live="polite">
-                {messagesLoading && <p className={styles.helpText}>جارٍ تحميل الرسائل…</p>}
+                {messagesLoading && <p className={styles.helpText}>{t('جارٍ تحميل الرسائل…', 'Loading messages…')}</p>}
                 {!messagesLoading && messages.length === 0 && (
-                  <div className={pageStyles.empty}>لا توجد رسائل في هذه المحادثة.</div>
+                  <div className={pageStyles.empty}>{t('لا توجد رسائل في هذه المحادثة.', 'No messages in this conversation.')}</div>
                 )}
                 {messages.map((message) => (
                   <article className={styles.message} key={message.id} dir="auto">
                     <p>{message.body}</p>
                     <small className={styles.messageMeta}>
-                      {deliveryLabel(message.direction)} · {deliveryLabel(message.deliveryStatus)}
+                      {deliveryLabel(message.direction, language)} · {deliveryLabel(message.deliveryStatus, language)}
                     </small>
                   </article>
                 ))}
               </div>
               <form className={styles.sendForm} onSubmit={sendMessage}>
-                <label className={styles.srOnly} htmlFor="whatsapp-message">اكتب ردًا</label>
+                <label className={styles.srOnly} htmlFor="whatsapp-message">{t('اكتب ردًا', 'Write a reply')}</label>
                 <input
                   id="whatsapp-message"
                   className={pageStyles.input}
                   value={messageDraft}
                   onChange={(event) => setMessageDraft(event.target.value)}
-                  placeholder="اكتب ردًا"
+                  placeholder={t('اكتب ردًا', 'Write a reply')}
                 />
                 <button
                   className={`${pageStyles.button} ${styles.primaryButton}`}
                   type="submit"
                   disabled={!messageDraft.trim() || sendingMessage}
                 >
-                  {sendingMessage ? 'جارٍ الإضافة…' : 'إضافة إلى طابور الإرسال'}
+                  {sendingMessage ? t('جارٍ الإضافة…', 'Adding…') : t('إضافة إلى طابور الإرسال', 'Add to sending queue')}
                 </button>
               </form>
             </div>
@@ -731,26 +740,26 @@ export function WhatsAppCRMWorkspace() {
 
         <section className={pageStyles.card} aria-labelledby="queue-heading">
           <div className={styles.sectionHeader}>
-            <h2 id="queue-heading" className={styles.sectionTitle}>طابور الإرسال</h2>
+            <h2 id="queue-heading" className={styles.sectionTitle}>{t('طابور الإرسال', 'Sending queue')}</h2>
             <button className={pageStyles.button} type="button" onClick={() => void refreshQueue()}>
-              تحديث
+              {t('تحديث', 'Refresh')}
             </button>
           </div>
-          {queueState === 'loading' && <div className={pageStyles.skeleton} aria-label="جارٍ تحميل الطابور" />}
+          {queueState === 'loading' && <div className={pageStyles.skeleton} aria-label={t('جارٍ تحميل الطابور', 'Loading queue')} />}
           {queueError && <div className={pageStyles.error} role="alert">{queueError}</div>}
           {queue && (
             <>
               <div className={styles.queueCounts}>
-                <div><strong>{queue.counts?.pending ?? 0}</strong><span>بانتظار الإرسال</span></div>
-                <div><strong>{queue.counts?.failed ?? 0}</strong><span>فشل</span></div>
-                <div><strong>{queue.counts?.sent ?? 0}</strong><span>أُرسلت</span></div>
+                <div><strong>{queue.counts?.pending ?? 0}</strong><span>{t('بانتظار الإرسال', 'Pending')}</span></div>
+                <div><strong>{queue.counts?.failed ?? 0}</strong><span>{t('فشل', 'Failed')}</span></div>
+                <div><strong>{queue.counts?.sent ?? 0}</strong><span>{t('أُرسلت', 'Sent')}</span></div>
               </div>
               <p className={styles.helpText}>
-                الفاصل بين الرسائل {queue.pacingMs ?? '—'} مللي ثانية · حد المحاولات {queue.maxAttempts ?? '—'}
+                {t('الفاصل بين الرسائل', 'Message interval')} {queue.pacingMs ?? '—'} {t('مللي ثانية', 'ms')} · {t('حد المحاولات', 'Attempt limit')} {queue.maxAttempts ?? '—'}
               </p>
             </>
           )}
-          {queueState === 'error' && !queueError && <div className={pageStyles.empty}>حالة الطابور غير متاحة.</div>}
+          {queueState === 'error' && !queueError && <div className={pageStyles.empty}>{t('حالة الطابور غير متاحة.', 'Queue status is unavailable.')}</div>}
         </section>
       </div>
     </div>

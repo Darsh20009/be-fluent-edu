@@ -139,7 +139,11 @@ export function phase6DatabaseGuard() {
 }
 
 export function qmeetProviderStatus() {
-  return process.env.QMEET_API_KEY && process.env.QMEET_API_BASE_URL
-    ? { configured: true, status: 'AVAILABLE' as const }
-    : { configured: false, status: 'PROVIDER_UNAVAILABLE' as const }
+  const missing = [
+    !process.env.QMEET_API_BASE_URL ? 'QMEET_API_BASE_URL' : null,
+    !process.env.QMEET_API_KEY ? 'QMEET_API_KEY' : null,
+  ].filter((name): name is string => name !== null)
+  return missing.length === 0
+    ? { configured: true, status: 'AVAILABLE' as const, missing }
+    : { configured: false, status: 'PROVIDER_UNAVAILABLE' as const, missing }
 }

@@ -8,6 +8,8 @@ import Badge from '@/components/ui/Badge'
 import Alert from '@/components/ui/Alert'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Button from '@/components/ui/Button'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 interface Session {
   id: string
@@ -32,6 +34,8 @@ interface Session {
 
 export default function SessionsTab({ isActive }: { isActive: boolean }) {
   const router = useRouter()
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
   const [now, setNow] = useState(new Date())
@@ -84,10 +88,10 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
 
   if (!isActive) {
     return (
-      <div dir="rtl">
-        <h2 className="text-3xl font-black text-gray-900 mb-6">حصصي المباشرة</h2>
+      <div>
+        <h2 className="text-3xl font-black text-gray-900 mb-6">{t('حصصي المباشرة', 'My live classes')}</h2>
         <Alert variant="warning">
-          <p>قم بتفعيل حسابك لحجز الحصص والوصول للبث المباشر.</p>
+          <p>{t('قم بتفعيل حسابك لحجز الحصص والوصول للبث المباشر.', 'Activate your account to book classes and access live sessions.')}</p>
         </Alert>
       </div>
     )
@@ -102,17 +106,17 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
   }
 
   return (
-    <div className="space-y-10" dir="rtl">
+    <div className="space-y-10">
       <div>
-        <h2 className="text-3xl font-black text-gray-900">حصصي المباشرة</h2>
-        <p className="text-gray-500 mt-1">تابع حصصك المجدولة وانضم للبث المباشر</p>
+        <h2 className="text-3xl font-black text-gray-900">{t('حصصي المباشرة', 'My live classes')}</h2>
+        <p className="text-gray-500 mt-1">{t('تابع حصصك المجدولة وانضم للبث المباشر', 'Track your scheduled classes and join live sessions')}</p>
       </div>
 
       {activeSessions.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-emerald-600">
             <div className="w-2 h-2 bg-emerald-600 rounded-full animate-ping" />
-            <h3 className="text-xl font-black">الحصص الجارية الآن</h3>
+            <h3 className="text-xl font-black">{t('الحصص الجارية الآن', 'Live now')}</h3>
           </div>
           <div className="grid gap-4">
             {activeSessions.map((session) => (
@@ -131,7 +135,7 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
                       <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 font-medium">
                         <div className="flex items-center gap-1.5">
                           <User className="w-4 h-4" />
-                          <span>المعلم: {session.session.teacher.user.name}</span>
+                          <span>{t('المعلم: ', 'Teacher: ')}{session.session.teacher.user.name}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Clock className="w-4 h-4" />
@@ -150,7 +154,7 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
                         onClick={() => window.open(session.session.externalLink!, '_blank')}
                       >
                         <ExternalLink className="h-5 w-5 ml-2" />
-                        انضم عبر الرابط الخارجي
+                        {t('انضم عبر الرابط الخارجي', 'Join via external link')}
                       </Button>
                     ) : (
                       <Button 
@@ -159,7 +163,7 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
                         onClick={() => router.push(`/session/${session.session.id}`)}
                       >
                         <Play className="h-5 w-5 ml-2" />
-                        انضم للحصة الآن
+                        {t('انضم للحصة الآن', 'Join class now')}
                       </Button>
                     )}
                   </div>
@@ -173,13 +177,13 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
       <div className="space-y-6">
         <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
           <Calendar className="w-5 h-5 text-[#10B981]" />
-          الحصص القادمة ({upcomingSessions.length})
+          {t(`الحصص القادمة (${upcomingSessions.length})`, `Upcoming classes (${upcomingSessions.length})`)}
         </h3>
         {upcomingSessions.length === 0 ? (
           <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-[2rem] p-12 text-center">
             <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="font-black text-gray-900">لا توجد حصص قادمة</p>
-            <p className="text-sm text-gray-400 mt-1">بمجرد جدولة حصة جديدة ستظهر هنا</p>
+            <p className="font-black text-gray-900">{t('لا توجد حصص قادمة', 'No upcoming classes')}</p>
+            <p className="text-sm text-gray-400 mt-1">{t('ستظهر الحصص هنا عند جدولة حصة جديدة', 'Newly scheduled classes will appear here')}</p>
           </div>
         ) : (
           <div className="grid gap-4">
@@ -221,22 +225,22 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
                       <div className="bg-[#10B981]/5 px-6 py-3 rounded-2xl border border-[#10B981]/10 text-center">
                         <div className="flex items-center gap-2 text-[#10B981] mb-1 justify-center">
                           <Timer className="w-3.5 h-3.5" />
-                          <span className="text-[10px] font-black uppercase tracking-widest">يبدأ خلال</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest">{t('يبدأ خلال', 'Starts in')}</span>
                         </div>
                         <div className="flex items-center gap-3">
                           {days > 0 && (
                             <div className="text-center">
                               <span className="block text-lg font-black text-gray-900 leading-none">{days}</span>
-                              <span className="text-[8px] font-bold text-gray-400 uppercase">يوم</span>
+                              <span className="text-[8px] font-bold text-gray-400 uppercase">{t('يوم', 'days')}</span>
                             </div>
                           )}
                           <div className="text-center">
                             <span className="block text-lg font-black text-gray-900 leading-none">{hours}</span>
-                            <span className="text-[8px] font-bold text-gray-400 uppercase">ساعة</span>
+                            <span className="text-[8px] font-bold text-gray-400 uppercase">{t('ساعة', 'hours')}</span>
                           </div>
                           <div className="text-center">
                             <span className="block text-lg font-black text-gray-900 leading-none">{minutes}</span>
-                            <span className="text-[8px] font-bold text-gray-400 uppercase">دقيقة</span>
+                            <span className="text-[8px] font-bold text-gray-400 uppercase">{t('دقيقة', 'minutes')}</span>
                           </div>
                         </div>
                       </div>
@@ -246,7 +250,7 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
                         disabled 
                         className="!rounded-2xl border-gray-200 text-gray-400 font-black px-6"
                       >
-                        بانتظار الموعد
+                        {t('بانتظار الموعد', 'Scheduled')}
                       </Button>
                     </div>
                   </div>
@@ -260,7 +264,7 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
       <div className="space-y-6">
         <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
           <CheckCircle className="w-5 h-5 text-gray-400" />
-          الحصص السابقة
+          {t('الحصص السابقة', 'Past classes')}
         </h3>
         <div className="grid gap-3">
           {pastSessions.slice(0, 5).map((session) => (
@@ -280,17 +284,17 @@ export default function SessionsTab({ isActive }: { isActive: boolean }) {
                 {session.attended === true ? (
                   <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase">
                     <CheckCircle className="w-3 h-3" />
-                    حضور
+                    {t('حضور', 'Attended')}
                   </div>
                 ) : session.attended === false ? (
                   <div className="flex items-center gap-1.5 px-3 py-1 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-black uppercase">
                     <XCircle className="w-3 h-3" />
-                    غياب
+                    {t('غياب', 'Missed')}
                   </div>
                 ) : (
                   <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-[10px] font-black uppercase">
                     <Clock className="w-3 h-3" />
-                    انتظار
+                    {t('انتظار', 'Pending')}
                   </div>
                 )}
               </div>

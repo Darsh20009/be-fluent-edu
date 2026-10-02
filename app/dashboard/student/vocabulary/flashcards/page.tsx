@@ -17,6 +17,8 @@ import {
   Upload
 } from 'lucide-react'
 import Link from 'next/link'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 interface FlashCard {
   id: string
@@ -40,6 +42,8 @@ interface Stats {
 }
 
 export default function FlashcardsPage() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [cards, setCards] = useState<FlashCard[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
@@ -130,7 +134,7 @@ export default function FlashcardsPage() {
       <div className="min-h-screen bg-[#F5F5DC] flex items-center justify-center">
         <div className="text-center">
           <Layers className="h-12 w-12 text-purple-600 animate-pulse mx-auto mb-4" />
-          <p className="text-gray-600 text-lg">جاري تحميل البطاقات...</p>
+          <p className="text-gray-600 text-lg">{t('جاري تحميل البطاقات...', 'Loading flashcards...')}</p>
         </div>
       </div>
     )
@@ -139,7 +143,7 @@ export default function FlashcardsPage() {
   const currentCard = cards[currentIndex]
 
   return (
-    <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8" dir="rtl">
+    <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8">
       <audio ref={audioRef} className="hidden" />
       
       <div className="max-w-4xl mx-auto">
@@ -149,7 +153,7 @@ export default function FlashcardsPage() {
             className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
           >
             <ChevronRight className="h-5 w-5" />
-            <span>العودة</span>
+            <span>{t('العودة', 'Back')}</span>
           </Link>
           
           <button
@@ -157,7 +161,7 @@ export default function FlashcardsPage() {
             className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
           >
             <Plus className="h-5 w-5" />
-            <span>إضافة كلمة</span>
+            <span>{t('إضافة كلمة', 'Add a word')}</span>
           </button>
         </div>
 
@@ -167,10 +171,10 @@ export default function FlashcardsPage() {
           className="text-center mb-8"
         >
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            بطاقات التكرار
+            {t('بطاقات التكرار', 'Flashcards')}
           </h1>
           <p className="text-gray-600">
-            راجع كلماتك باستخدام نظام التكرار المتباعد
+            {t('راجع كلماتك باستخدام نظام التكرار المتباعد', 'Review your words with spaced repetition')}
           </p>
         </motion.div>
 
@@ -179,26 +183,26 @@ export default function FlashcardsPage() {
             <div className="bg-white rounded-xl p-4 text-center shadow-sm">
               <Clock className="h-6 w-6 text-orange-500 mx-auto mb-2" />
               <p className="text-2xl font-bold text-gray-800">{stats.dueForReview}</p>
-              <p className="text-sm text-gray-500">للمراجعة</p>
+              <p className="text-sm text-gray-500">{t('للمراجعة', 'Due')}</p>
             </div>
             <div className="bg-white rounded-xl p-4 text-center shadow-sm">
               <Star className="h-6 w-6 text-yellow-500 mx-auto mb-2" />
               <p className="text-2xl font-bold text-gray-800">{stats.mastered}</p>
-              <p className="text-sm text-gray-500">تم إتقانها</p>
+              <p className="text-sm text-gray-500">{t('تم إتقانها', 'Mastered')}</p>
             </div>
             <div className="bg-white rounded-xl p-4 text-center shadow-sm">
               <Brain className="h-6 w-6 text-purple-500 mx-auto mb-2" />
               <p className="text-2xl font-bold text-gray-800">{stats.totalWords}</p>
-              <p className="text-sm text-gray-500">إجمالي</p>
+              <p className="text-sm text-gray-500">{t('إجمالي', 'Total')}</p>
             </div>
           </div>
         )}
 
         <div className="flex justify-center gap-2 mb-8">
           {[
-            { id: 'review', label: 'للمراجعة' },
-            { id: 'new', label: 'جديدة' },
-            { id: 'all', label: 'الكل' }
+            { id: 'review', label: t('للمراجعة', 'Due') },
+            { id: 'new', label: t('جديدة', 'New') },
+            { id: 'all', label: t('الكل', 'All') }
           ].map((m) => (
             <button
               key={m.id}
@@ -221,17 +225,17 @@ export default function FlashcardsPage() {
             className="bg-white rounded-2xl p-12 text-center shadow-sm"
           >
             <Layers className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">لا توجد بطاقات</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">{t('لا توجد بطاقات', 'No flashcards')}</h3>
             <p className="text-gray-500 mb-6">
               {mode === 'review' 
-                ? 'لا توجد كلمات تحتاج مراجعة حالياً'
-                : 'أضف كلمات جديدة لبدء التعلم'}
+                ? t('لا توجد كلمات تحتاج مراجعة حالياً', 'No words are due for review right now')
+                : t('أضف كلمات جديدة لبدء التعلم', 'Add new words to start learning')}
             </p>
             <button
               onClick={() => setShowAddForm(true)}
               className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700"
             >
-              إضافة كلمة جديدة
+              {t('إضافة كلمة جديدة', 'Add a new word')}
             </button>
           </motion.div>
         ) : (
@@ -267,7 +271,7 @@ export default function FlashcardsPage() {
                   >
                     <Volume2 className="h-6 w-6 text-purple-600" />
                   </button>
-                  <p className="text-gray-400 mt-4">اضغط للقلب</p>
+                  <p className="text-gray-400 mt-4">{t('اضغط للقلب', 'Tap to flip')}</p>
                 </div>
 
                 <div 
@@ -298,28 +302,28 @@ export default function FlashcardsPage() {
                   className="flex flex-col items-center gap-2 px-6 py-4 bg-red-100 text-red-700 rounded-xl hover:bg-red-200 transition-colors"
                 >
                   <X className="h-8 w-8" />
-                  <span className="font-medium">لم أعرفها</span>
+                  <span className="font-medium">{t('لم أعرفها', 'Forgot')}</span>
                 </button>
                 <button
                   onClick={() => handleResponse(3)}
                   className="flex flex-col items-center gap-2 px-6 py-4 bg-yellow-100 text-yellow-700 rounded-xl hover:bg-yellow-200 transition-colors"
                 >
                   <RotateCcw className="h-8 w-8" />
-                  <span className="font-medium">صعبة</span>
+                  <span className="font-medium">{t('صعبة', 'Hard')}</span>
                 </button>
                 <button
                   onClick={() => handleResponse(4)}
                   className="flex flex-col items-center gap-2 px-6 py-4 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors"
                 >
                   <Check className="h-8 w-8" />
-                  <span className="font-medium">جيدة</span>
+                  <span className="font-medium">{t('جيدة', 'Good')}</span>
                 </button>
                 <button
                   onClick={() => handleResponse(5)}
                   className="flex flex-col items-center gap-2 px-6 py-4 bg-green-100 text-green-700 rounded-xl hover:bg-green-200 transition-colors"
                 >
                   <Star className="h-8 w-8" />
-                  <span className="font-medium">سهلة</span>
+                  <span className="font-medium">{t('سهلة', 'Easy')}</span>
                 </button>
               </motion.div>
             )}
@@ -348,46 +352,46 @@ export default function FlashcardsPage() {
                 className="bg-white rounded-2xl p-6 w-full max-w-md"
                 onClick={(e) => e.stopPropagation()}
               >
-                <h3 className="text-xl font-bold text-gray-800 mb-4">إضافة كلمة جديدة</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-4">{t('إضافة كلمة جديدة', 'Add a new word')}</h3>
                 
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      الكلمة بالإنجليزي
+                      {t('الكلمة بالإنجليزي', 'Word in English')}
                     </label>
                     <input
                       type="text"
                       value={newWord.word}
                       onChange={(e) => setNewWord({ ...newWord, word: e.target.value })}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="مثال: beautiful"
+                      placeholder={t('مثال: beautiful', 'Example: beautiful')}
                       dir="ltr"
                     />
                   </div>
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      المعنى بالعربي
+                      {t('المعنى بالعربي', 'Meaning in Arabic')}
                     </label>
                     <input
                       type="text"
                       value={newWord.arabic}
                       onChange={(e) => setNewWord({ ...newWord, arabic: e.target.value })}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="مثال: جميل"
+                      placeholder={t('مثال: جميل', 'Example: beautiful')}
                     />
                   </div>
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      مثال (اختياري)
+                      {t('مثال (اختياري)', 'Example (optional)')}
                     </label>
                     <input
                       type="text"
                       value={newWord.example}
                       onChange={(e) => setNewWord({ ...newWord, example: e.target.value })}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="مثال: The sunset is beautiful"
+                      placeholder={t('مثال: The sunset is beautiful', 'Example: The sunset is beautiful')}
                       dir="ltr"
                     />
                   </div>
@@ -398,14 +402,14 @@ export default function FlashcardsPage() {
                     onClick={() => setShowAddForm(false)}
                     className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50"
                   >
-                    إلغاء
+                    {t('إلغاء', 'Cancel')}
                   </button>
                   <button
                     onClick={handleAddWord}
                     disabled={!newWord.word || !newWord.arabic}
                     className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    إضافة
+                    {t('إضافة', 'Add')}
                   </button>
                 </div>
               </motion.div>

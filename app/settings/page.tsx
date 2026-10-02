@@ -7,11 +7,14 @@ import { Settings, Sun, Moon, Globe, Palette, ArrowRight, Languages } from 'luci
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import Alert from '@/components/ui/Alert'
+import { localeText } from '@/lib/locale'
+import LanguageToggle from '@/components/LanguageToggle'
 
 export const dynamic = 'force-dynamic'
 
 export default function SettingsPage() {
   const { theme, language, setTheme, setLanguage } = useTheme()
+  const tr = (ar: string, en: string) => localeText(language, ar, en)
   const [saved, setSaved] = useState(false)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
@@ -31,16 +34,16 @@ export default function SettingsPage() {
     }
   }, [saved, theme, language])
 
-  const t = {
+  const copy = {
     ar: {
       title: 'الإعدادات',
-      subtitle: 'Settings',
+      subtitle: 'الإعدادات',
       themeSection: 'المظهر',
-      themeDesc: 'Theme',
+      themeDesc: 'المظهر',
       lightMode: 'الوضع الفاتح',
       darkMode: 'الوضع الداكن',
       languageSection: 'اللغة',
-      languageDesc: 'Language',
+      languageDesc: 'اللغة',
       arabic: 'العربية',
       english: 'English',
       saveButton: 'حفظ التغييرات',
@@ -48,13 +51,13 @@ export default function SettingsPage() {
     },
     en: {
       title: 'Settings',
-      subtitle: 'الإعدادات',
+      subtitle: 'Settings',
       themeSection: 'Appearance',
-      themeDesc: 'المظهر',
+      themeDesc: 'Theme',
       lightMode: 'Light Mode',
       darkMode: 'Dark Mode',
       languageSection: 'Language',
-      languageDesc: 'اللغة',
+      languageDesc: 'Language',
       arabic: 'العربية',
       english: 'English',
       saveButton: 'Save Changes',
@@ -62,7 +65,7 @@ export default function SettingsPage() {
     }
   }
 
-  const text = t[language] || t['ar']
+  const text = copy[language] || copy.ar
 
   if (!mounted) {
     return null
@@ -74,6 +77,7 @@ export default function SettingsPage() {
       <div className="max-w-3xl mx-auto">
       <div className="mb-8 border-b border-[#d6d2c3] pb-6">
         <div className="flex items-center gap-4 mb-2">
+          <LanguageToggle />
           <Button
             variant="ghost"
             size="sm"
@@ -86,7 +90,7 @@ export default function SettingsPage() {
             <Settings className="h-6 w-6 text-[#f7f5ed]" />
           </div>
           <div>
-            <p className="text-[10px] tracking-[.18em] uppercase text-[#718075] mb-1">Be Fluent / preferences</p>
+            <p className="text-[10px] tracking-[.18em] uppercase text-[#718075] mb-1">Be Fluent / {tr('التفضيلات', 'preferences')}</p>
             <h1 className="text-3xl font-bold">{text.title}</h1>
             <p className="text-[#69756c] text-sm">{text.subtitle}</p>
           </div>
@@ -208,7 +212,7 @@ export default function SettingsPage() {
       </Card>
 
       <footer className="mt-8 text-center text-xs text-[#718075] pb-4">
-        Be Fluent Academy · English made present
+        {tr('أكاديمية Be Fluent · اجعل الإنجليزية حاضرة', 'Be Fluent Academy · English made present')}
       </footer>
       </div>
     </div>

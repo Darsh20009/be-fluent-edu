@@ -6,6 +6,8 @@ import {
   ChevronLeft, ChevronRight, SlidersHorizontal, Search,
   TrendingUp, UserPlus, CheckCircle2, XCircle, Clock, Users
 } from 'lucide-react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText, localeDirection } from '@/lib/locale'
 
 interface Lead {
   id: string
@@ -38,6 +40,8 @@ const LEVEL_COLORS: Record<string, string> = {
 }
 
 export default function LeadsTab() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [leads,    setLeads]    = useState<Lead[]>([])
   const [stats,    setStats]    = useState<Stats>({})
   const [loading,  setLoading]  = useState(true)
@@ -88,7 +92,7 @@ export default function LeadsTab() {
   }
 
   const deleteLead = async (id: string) => {
-    if (!confirm('هل تريد حذف هذا الطلب؟')) return
+    if (!confirm(t('هل تريد حذف هذا الطلب؟', 'Are you sure you want to delete this request?'))) return
     await fetch('/api/admin/leads', {
       method:'DELETE', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ id }),
@@ -110,14 +114,14 @@ export default function LeadsTab() {
     )}`
 
   const statCards = [
-    { label: 'إجمالي الطلبات', value: total, icon: Users, color: 'text-slate-600', bg: 'bg-slate-50' },
-    { label: 'طلبات جديدة',   value: stats.NEW || 0, icon: UserPlus,    color: 'text-blue-600',    bg: 'bg-blue-50'    },
-    { label: 'تم التواصل',    value: stats.CONTACTED || 0, icon: Clock, color: 'text-amber-600',   bg: 'bg-amber-50'   },
-    { label: 'تم التحويل',    value: stats.CONVERTED || 0, icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: t('إجمالي الطلبات', 'Total requests'), value: total, icon: Users, color: 'text-slate-600', bg: 'bg-slate-50' },
+    { label: t('طلبات جديدة', 'New requests'),   value: stats.NEW || 0, icon: UserPlus,    color: 'text-blue-600',    bg: 'bg-blue-50'    },
+    { label: t('تم التواصل', 'Contacted'),    value: stats.CONTACTED || 0, icon: Clock, color: 'text-amber-600',   bg: 'bg-amber-50'   },
+    { label: t('تم التحويل', 'Converted'),    value: stats.CONVERTED || 0, icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50' },
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={localeDirection(language)}>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -140,11 +144,11 @@ export default function LeadsTab() {
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div className="flex flex-wrap gap-2">
             {[
-              { id:'all',       label:'الكل'       },
-              { id:'NEW',       label:'جديد'       },
-              { id:'CONTACTED', label:'تم التواصل' },
-              { id:'CONVERTED', label:'تم التحويل' },
-              { id:'REJECTED',  label:'مرفوض'      },
+              { id:'all',       label:t('الكل', 'All') },
+              { id:'NEW',       label:t('جديد', 'New') },
+              { id:'CONTACTED', label:t('تم التواصل', 'Contacted') },
+              { id:'CONVERTED', label:t('تم التحويل', 'Converted') },
+              { id:'REJECTED',  label:t('مرفوض', 'Rejected') },
             ].map(f => (
               <button key={f.id} onClick={() => { setFilter(f.id); setPage(1) }}
                 className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors
@@ -161,7 +165,7 @@ export default function LeadsTab() {
           <div className="relative w-full sm:w-64">
             <Search className="absolute top-1/2 -translate-y-1/2 start-3 w-4 h-4 text-slate-400" />
             <input value={search} onChange={e=>setSearch(e.target.value)}
-              placeholder="ابحث بالاسم أو الهاتف..."
+              placeholder={t('ابحث بالاسم أو الهاتف...', 'Search by name or phone…')}
               className="w-full ps-9 pe-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-400" />
           </div>
           <button onClick={fetchLeads} className="p-2.5 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
@@ -175,13 +179,13 @@ export default function LeadsTab() {
         {loading ? (
           <div className="py-20 text-center">
             <RefreshCw className="w-8 h-8 text-slate-300 animate-spin mx-auto mb-3" />
-            <p className="text-slate-400 font-medium">جاري التحميل...</p>
+            <p className="text-slate-400 font-medium">{t('جاري التحميل...', 'Loading…')}</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-20 text-center">
             <p className="text-5xl mb-4">📭</p>
-            <p className="text-slate-400 font-bold text-lg">لا توجد طلبات حتى الآن</p>
-            <p className="text-slate-300 text-sm mt-1">الطلبات الجديدة ستظهر هنا عند تسجيل الطلاب في الصفحة الرئيسية</p>
+            <p className="text-slate-400 font-bold text-lg">{t('لا توجد طلبات حتى الآن', 'No requests yet')}</p>
+            <p className="text-slate-300 text-sm mt-1">{t('ستظهر الطلبات الجديدة هنا عند تسجيل الطلاب في الصفحة الرئيسية', 'New requests will appear here when students register on the homepage')}</p>
           </div>
         ) : (
           <>
@@ -189,13 +193,13 @@ export default function LeadsTab() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/50">
-                    <th className="text-right py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider">الطالب</th>
-                    <th className="text-right py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider">التواصل</th>
-                    <th className="text-right py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider">المستوى</th>
-                    <th className="text-right py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider">الباقة</th>
-                    <th className="text-right py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider">الحالة</th>
-                    <th className="text-right py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider">التاريخ</th>
-                    <th className="text-right py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider">إجراءات</th>
+                    <th className="py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider">{t('الطالب', 'Student')}</th>
+                    <th className="py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider">{t('التواصل', 'Contact')}</th>
+                    <th className="py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider">{t('المستوى', 'Level')}</th>
+                    <th className="py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider">{t('الباقة', 'Package')}</th>
+                    <th className="py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider">{t('الحالة', 'Status')}</th>
+                    <th className="py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider">{t('التاريخ', 'Date')}</th>
+                    <th className="py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider">{t('إجراءات', 'Actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -244,9 +248,9 @@ export default function LeadsTab() {
                         {/* Plan + Price */}
                         <td className="py-4 px-5">
                           <div>
-                            <p className="text-xs font-bold text-slate-600">{lead.plan === 'bundle' ? '⚡ باقة' : 'شهري'}</p>
+                            <p className="text-xs font-bold text-slate-600">{lead.plan === 'bundle' ? `⚡ ${t('باقة', 'Bundle')}` : t('شهري', 'Monthly')}</p>
                             {lead.price && (
-                              <p className="text-xs text-slate-400">{lead.price.toLocaleString()} جنيه</p>
+                              <p className="text-xs text-slate-400">{lead.price.toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')} {t('جنيه', 'EGP')}</p>
                             )}
                           </div>
                         </td>
@@ -258,20 +262,20 @@ export default function LeadsTab() {
                             onChange={e => updateStatus(lead.id, e.target.value)}
                             disabled={saving}
                             className={`px-3 py-1.5 rounded-xl text-xs font-bold border cursor-pointer focus:outline-none transition-colors ${statusCfg.bg} ${statusCfg.color}`}>
-                            <option value="NEW">جديد</option>
-                            <option value="CONTACTED">تم التواصل</option>
-                            <option value="CONVERTED">تم التحويل</option>
-                            <option value="REJECTED">مرفوض</option>
+                            <option value="NEW">{t('جديد', 'New')}</option>
+                            <option value="CONTACTED">{t('تم التواصل', 'Contacted')}</option>
+                            <option value="CONVERTED">{t('تم التحويل', 'Converted')}</option>
+                            <option value="REJECTED">{t('مرفوض', 'Rejected')}</option>
                           </select>
                         </td>
 
                         {/* Date */}
                         <td className="py-4 px-5">
                           <p className="text-xs text-slate-400">
-                            {new Date(lead.createdAt).toLocaleDateString('ar-EG', { year:'numeric', month:'short', day:'numeric' })}
+                            {new Date(lead.createdAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { year:'numeric', month:'short', day:'numeric' })}
                           </p>
                           <p className="text-[10px] text-slate-300">
-                            {new Date(lead.createdAt).toLocaleTimeString('ar-EG', { hour:'2-digit', minute:'2-digit' })}
+                            {new Date(lead.createdAt).toLocaleTimeString(language === 'ar' ? 'ar-EG' : 'en-US', { hour:'2-digit', minute:'2-digit' })}
                           </p>
                         </td>
 
@@ -283,7 +287,7 @@ export default function LeadsTab() {
                                 <input
                                   value={editNote}
                                   onChange={e => setEditNote(e.target.value)}
-                                  placeholder="أضف ملاحظة..."
+                                  placeholder={t('أضف ملاحظة...', 'Add a note…')}
                                   className="flex-1 px-2 py-1 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-emerald-400"
                                 />
                                 <button onClick={() => saveNote(lead.id)}
@@ -299,7 +303,7 @@ export default function LeadsTab() {
                               <button
                                 onClick={() => { setEditId(lead.id); setEditNote(lead.notes || '') }}
                                 className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                                title={lead.notes || 'أضف ملاحظة'}>
+                                 title={lead.notes || t('أضف ملاحظة', 'Add a note')}>
                                 <SlidersHorizontal className="w-3.5 h-3.5" />
                               </button>
                             )}
@@ -322,7 +326,7 @@ export default function LeadsTab() {
             {/* Pagination */}
             {pages > 1 && (
               <div className="flex items-center justify-between px-5 py-4 border-t border-slate-100">
-                <p className="text-sm text-slate-400">{total} طلب إجمالاً</p>
+                <p className="text-sm text-slate-400">{total} {t('طلب إجمالاً', 'requests total')}</p>
                 <div className="flex items-center gap-2">
                   <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page===1}
                     className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 transition-colors">

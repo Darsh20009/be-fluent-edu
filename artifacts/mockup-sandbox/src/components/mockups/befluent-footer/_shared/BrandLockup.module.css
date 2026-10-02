@@ -1,0 +1,28 @@
+.wordmark,
+.staticWordmark {
+  display: inline-flex;
+  white-space: nowrap;
+}
+
+.character {
+  opacity: 0;
+  animation: typeCharacter 1ms steps(1, end) var(--brand-char-delay, 0ms) both;
+}
+
+.staticWordmark .character {
+  opacity: 1;
+  animation: none;
+}
+
+@keyframes typeCharacter {
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wordmark .character {
+    opacity: 1;
+    animation: none;
+  }
+}

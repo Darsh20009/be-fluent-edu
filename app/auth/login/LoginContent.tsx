@@ -14,11 +14,15 @@ import AppHeader from '@/components/layout/AppHeader'
 import LanguageToggle from '@/components/LanguageToggle'
 import { useTranslation } from '@/lib/hooks/useTranslation'
 import BrandLockup from '@/components/brand/BrandLockup'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 export default function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { t } = useTranslation()
+  const { language } = useTheme()
+  const text = (ar: string, en: string) => localeText(language, ar, en)
   const [formData, setFormData] = useState({
     emailOrPhone: '',
     password: '',
@@ -47,13 +51,13 @@ export default function LoginContent() {
       })
 
       if (result?.error) {
-        setError('Invalid email/phone or password / البريد الإلكتروني/رقم الهاتف أو كلمة المرور غير صحيحة')
+        setError(text('البريد الإلكتروني/رقم الهاتف أو كلمة المرور غير صحيحة', 'Invalid email/phone or password'))
         setLoading(false)
         return
       }
 
       if (!result?.ok) {
-        setError('Login failed / فشل تسجيل الدخول')
+        setError(text('فشل تسجيل الدخول', 'Login failed'))
         setLoading(false)
         return
       }
@@ -81,7 +85,7 @@ export default function LoginContent() {
       }
     } catch (err: any) {
       console.error('Login error:', err)
-      setError('An error occurred during login / حدث خطأ أثناء تسجيل الدخول')
+      setError(text('حدث خطأ أثناء تسجيل الدخول', 'An error occurred during login'))
       setLoading(false)
     }
   }
@@ -95,7 +99,7 @@ export default function LoginContent() {
   }
 
   return (
-    <div dir="rtl" className="min-h-[100dvh] bg-[#f4f6f0] flex flex-col">
+    <div dir={language === 'ar' ? 'rtl' : 'ltr'} className="min-h-[100dvh] bg-[#f4f6f0] flex flex-col">
       <AppHeader variant="marketing">
         <Link
           href="/auth/register"
@@ -140,7 +144,7 @@ export default function LoginContent() {
 
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <Input
-              label="Email or Phone / البريد الإلكتروني أو الهاتف"
+              label={text('البريد الإلكتروني أو الهاتف', 'Email or phone')}
               type="text"
               placeholder="your@email.com or +966..."
               value={formData.emailOrPhone}
@@ -174,7 +178,7 @@ export default function LoginContent() {
                 disabled={loading}
               />
               <label htmlFor="rememberMe" className="text-sm text-gray-700 cursor-pointer">
-                Keep me logged in for 90 days / أبقني مسجلاً في الدخول لمدة 90 يوماً
+                {text('أبقني مسجلاً في الدخول لمدة 90 يوماً', 'Keep me logged in for 90 days')}
               </label>
             </div>
 
@@ -190,7 +194,7 @@ export default function LoginContent() {
             </Button>
 
             <p className="text-center text-gray-600 mt-4 text-xs sm:text-sm">
-              Don't have an account?{' '}
+              {text('ليس لديك حساب؟', "Don't have an account?")}{' '}
               <Link href="/auth/register" className="font-semibold text-[#147050] hover:text-[#0e5940]">
                 {t('register')}
               </Link>
@@ -198,7 +202,7 @@ export default function LoginContent() {
 
             <p className="text-center text-gray-600 mt-2 text-xs sm:text-sm">
               <Link href="/auth/forgot-password" className="font-semibold text-[#147050] hover:text-[#0e5940]">
-                نسيت كلمة المرور / Forgot Password?
+                {text('نسيت كلمة المرور', 'Forgot password?')}
               </Link>
             </p>
           </form>

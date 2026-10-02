@@ -7,6 +7,9 @@ import Button from '@/components/ui/Button'
 import { toast } from 'react-hot-toast'
 import SessionLoginModal from './SessionLoginModal'
 import SessionPasswordModal from './SessionPasswordModal'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
+import LanguageToggle from '@/components/LanguageToggle'
 
 interface SessionClientProps {
   sessionId: string
@@ -43,6 +46,8 @@ interface MeetVideoProps {
 }
 
 export default function SessionClient({ sessionId, user, isAuthenticated }: SessionClientProps) {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const router = useRouter()
   const routerRef = useRef(router)
   const [session, setSession] = useState<SessionData | null>(null)
@@ -101,12 +106,12 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
         setSession(data)
         setShowPasswordModal(false)
       } else {
-        toast.error('الجلسة غير موجودة أو لا تملك صلاحية الوصول')
+        toast.error(t('الجلسة غير موجودة أو لا تملك صلاحية الوصول', 'Session not found or you do not have access'))
         router.push('/dashboard')
       }
     } catch (error) {
       console.error('Error fetching session:', error)
-      toast.error('خطأ في تحميل الجلسة')
+      toast.error(t('خطأ في تحميل الجلسة', 'Error loading session'))
       router.push('/dashboard')
     } finally {
       setLoading(false)
@@ -145,11 +150,10 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
 
   if (loading || refreshing) {
     return (
-      <div className="min-h-[100dvh] bg-[#f4f1e8] flex items-center justify-center p-6" dir="rtl">
+      <div className="min-h-[100dvh] bg-[#f4f1e8] flex items-center justify-center p-6" dir={language === 'ar' ? 'rtl' : 'ltr'}>
         <div className="w-full max-w-md border border-[#d9d6c8] bg-[#fbfaf5] p-8 text-center shadow-[0_20px_60px_rgba(25,52,43,.08)]">
           <div className="mx-auto mb-5 h-10 w-10 border-2 border-[#174c3c]/20 border-t-[#174c3c] rounded-full animate-spin" />
-          <p className="text-sm font-medium text-[#19372d]">يتم تجهيز مساحة التعلّم</p>
-          <p className="mt-1 text-xs text-[#6b756d]">Preparing your learning space</p>
+          <p className="text-sm font-medium text-[#19372d]">{t('يتم تجهيز مساحة التعلّم', 'Preparing your learning space')}</p>
         </div>
       </div>
     )
@@ -160,7 +164,7 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
   }
 
   return (
-    <div className="fixed inset-0 bg-[#18211d] flex flex-col" dir="rtl">
+    <div className="fixed inset-0 bg-[#18211d] flex flex-col" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="bg-[#f7f5ed] border-b border-[#d6d2c3] px-4 sm:px-7 py-3 flex items-center justify-between z-50">
         <div className="flex items-center gap-3 sm:gap-5 min-w-0">
@@ -171,15 +175,15 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
             className="bg-transparent text-[#19372d] hover:bg-[#e8eee7] border-[#bfc8bd] rounded-none shrink-0"
           >
             <ArrowLeft className="h-4 w-4 ml-2" />
-            <span className="hidden sm:inline">الخروج</span>
+            <span className="hidden sm:inline">{t('الخروج', 'Exit')}</span>
           </Button>
           <div className="min-w-0">
-            <p className="text-[10px] tracking-[.22em] uppercase text-[#718075] mb-0.5">Be Fluent / Live room</p>
+            <p className="text-[10px] tracking-[.22em] uppercase text-[#718075] mb-0.5">Be Fluent / {t('غرفة مباشرة', 'Live room')}</p>
             <h1 className="text-base sm:text-lg font-bold text-[#17352c] truncate">
               {session.title}
             </h1>
             <p className="text-xs text-[#637168]">
-              {session.teacher.name} <span className="mx-1">·</span> {new Date(session.startTime).toLocaleTimeString('ar-EG', { 
+              {session.teacher.name} <span className="mx-1">·</span> {new Date(session.startTime).toLocaleTimeString(language === 'ar' ? 'ar-EG' : 'en-US', {
                 hour: '2-digit', 
                 minute: '2-digit' 
               })}
@@ -195,7 +199,8 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
           )}
           <div className="flex items-center gap-2 text-[#174c3c]">
             <Circle className="h-2.5 w-2.5 fill-[#b54c39] text-[#b54c39] animate-pulse" />
-            <span className="text-xs font-bold tracking-wide">مباشر</span>
+            <span className="text-xs font-bold tracking-wide">{t('مباشر', 'LIVE')}</span>
+            <LanguageToggle />
           </div>
         </div>
       </div>
@@ -209,14 +214,13 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
                 <Video className="h-8 w-8 text-[#174c3c]" />
               </div>
               <h2 className="text-2xl font-bold text-[#19372d] mb-3">
-                لم تبدأ الحصة بعد
+                {t('لم تبدأ الحصة بعد', 'The session has not started yet')}
               </h2>
               <p className="text-[#667268] mb-5 leading-relaxed">
-                يمكنك الانضمام قبل موعد الحصة بعشر دقائق.
-                <span className="block mt-1 text-sm" dir="ltr">You can join 10 minutes before the scheduled time.</span>
+                {t('يمكنك الانضمام قبل موعد الحصة بعشر دقائق.', 'You can join 10 minutes before the scheduled time.')}
               </p>
               <div className="text-[#174c3c] font-mono text-xl bg-[#edf1e9] p-4 border border-[#c8d3c7]" dir="ltr">
-                {new Date(session.startTime).toLocaleTimeString('ar-EG', { 
+                {new Date(session.startTime).toLocaleTimeString(language === 'ar' ? 'ar-EG' : 'en-US', {
                   hour: '2-digit', 
                   minute: '2-digit' 
                 })}
@@ -230,18 +234,17 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
                 <Video className="h-8 w-8 text-[#174c3c]" />
               </div>
               <h2 className="text-2xl font-bold text-[#19372d] mb-3">
-                {session.externalLinkType || 'جلسة خارجية'}
+                {session.externalLinkType || t('جلسة خارجية', 'External session')}
               </h2>
               <p className="text-[#667268] mb-8 leading-relaxed">
-                تقام هذه الحصة عبر منصة خارجية. اضغط أدناه للانتقال إلى الاجتماع.
-                <span className="block mt-1 text-sm" dir="ltr">This session is hosted on an external platform.</span>
+                {t('تقام هذه الحصة عبر منصة خارجية. اضغط أدناه للانتقال إلى الاجتماع.', 'This session is hosted on an external platform. Click below to join the meeting.')}
               </p>
               <Button
                 size="lg"
                 className="w-full bg-[#174c3c] hover:bg-[#0f392c] text-[#f7f5ed] py-6 text-lg font-bold rounded-none"
                 onClick={() => window.open(session.externalLink, '_blank')}
               >
-                دخول الحصة
+                {t('دخول الحصة', 'Join session')}
               </Button>
             </div>
           </div>
@@ -252,11 +255,10 @@ export default function SessionClient({ sessionId, user, isAuthenticated }: Sess
                  <Video className="h-8 w-8 text-[#a65b45]" />
               </div>
                <h2 className="text-2xl font-bold text-[#19372d] mb-3">
-                 لا يوجد رابط للحصة
+                  {t('لا يوجد رابط للحصة', 'No session link')}
               </h2>
                <p className="text-[#667268] mb-4 leading-relaxed">
-                 لم يتم توفير رابط لهذه الحصة بعد. يرجى التواصل مع المعلم.
-                 <span className="block mt-1 text-sm" dir="ltr">No meeting link has been provided for this session yet.</span>
+                  {t('لم يتم توفير رابط لهذه الحصة بعد. يرجى التواصل مع المعلم.', 'No meeting link has been provided for this session yet. Please contact your teacher.')}
               </p>
             </div>
           </div>

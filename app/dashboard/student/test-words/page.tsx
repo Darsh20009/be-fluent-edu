@@ -6,6 +6,8 @@ import { Check, X, Trophy, Brain, BookOpen, Keyboard, ArrowRight } from 'lucide-
 import Button from '@/components/ui/Button'
 import { toast } from 'react-hot-toast'
 import Input from '@/components/ui/Input'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeDirection, localeText } from '@/lib/locale'
 
 interface Word {
   id: string
@@ -26,6 +28,8 @@ interface Question {
 }
 
 export default function TestWordsPage() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [mode, setMode] = useState<TestMode | null>(null)
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -45,7 +49,7 @@ export default function TestWordsPage() {
       const knownWords = data.words.filter((w: Word) => w.known)
 
       if (knownWords.length < 5) {
-        toast.error('تحتاج على الأقل 5 كلمات معروفة لبدء الاختبار')
+        toast.error(t('تحتاج إلى 5 كلمات معروفة على الأقل لبدء الاختبار', 'You need at least 5 known words to start the test'))
         setMode(null)
         setLoading(false)
         return
@@ -87,7 +91,7 @@ export default function TestWordsPage() {
       setTestComplete(false)
     } catch (error) {
       console.error('Error loading words:', error)
-      toast.error('حدث خطأ في تحميل الكلمات')
+      toast.error(t('حدث خطأ في تحميل الكلمات', 'An error occurred while loading words'))
       setMode(null)
     }
     setLoading(false)
@@ -138,22 +142,22 @@ export default function TestWordsPage() {
 
   if (!hasSubscription) {
     return (
-      <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8 flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8 flex items-center justify-center" dir={localeDirection(language)}>
         <div className="max-w-md text-center bg-white rounded-2xl p-8 shadow-lg border-2 border-[#E5E7EB]">
           <div className="mb-4 flex justify-center">
             <div className="bg-orange-500 p-4 rounded-full">
               <Trophy className="h-12 w-12 text-white" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-[#10B981] mb-3">Premium Feature</h2>
+          <h2 className="text-2xl font-bold text-[#10B981] mb-3">{t('ميزة مميزة', 'Premium feature')}</h2>
           <p className="text-gray-700 mb-6">
-            هذه الميزة متاحة فقط للمشتركين / This feature is only available for subscribers
+            {t('هذه الميزة متاحة للمشتركين فقط', 'This feature is available to subscribers only')}
           </p>
           <button
             onClick={() => window.location.href = '/dashboard/student?tab=packages'}
             className="w-full bg-gradient-to-r from-[#10B981] to-[#059669] text-white py-3 rounded-xl font-bold hover:shadow-lg transition-all"
           >
-            ✨ اشترك الآن / Subscribe Now ✨
+            ✨ {t('اشترك الآن', 'Subscribe now')} ✨
           </button>
         </div>
       </div>
@@ -162,16 +166,16 @@ export default function TestWordsPage() {
 
   if (!mode) {
     return (
-      <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8">
+      <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8" dir={localeDirection(language)}>
         <div className="max-w-4xl mx-auto">
           <div className="mb-8 text-center">
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="bg-blue-600 p-3 rounded-xl">
                 <Brain className="h-10 w-10 text-white" />
               </div>
-              <h1 className="text-4xl font-bold text-black">اختبر نفسك</h1>
+              <h1 className="text-4xl font-bold text-black">{t('اختبر نفسك', 'Test yourself')}</h1>
             </div>
-            <p className="text-black text-lg">Test Your Vocabulary Knowledge</p>
+            <p className="text-black text-lg">{t('اختبر حصيلتك من المفردات', 'Test your vocabulary knowledge')}</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -185,9 +189,8 @@ export default function TestWordsPage() {
               className="bg-white border-2 border-blue-600 rounded-2xl p-8 text-left shadow-lg hover:shadow-xl transition-all"
             >
               <BookOpen className="h-12 w-12 text-blue-600 mb-4" />
-              <h3 className="text-2xl font-bold text-black mb-2">اختيار من متعدد</h3>
-              <p className="text-black opacity-70">Multiple Choice Test</p>
-              <p className="text-black text-sm mt-3">اختر الإجابة الصحيحة من 4 خيارات</p>
+              <h3 className="text-2xl font-bold text-black mb-2">{t('اختيار من متعدد', 'Multiple choice')}</h3>
+              <p className="text-black text-sm mt-3">{t('اختر الإجابة الصحيحة من 4 خيارات', 'Choose the correct answer from 4 options')}</p>
             </motion.button>
 
             <motion.button
@@ -200,9 +203,8 @@ export default function TestWordsPage() {
               className="bg-white border-2 border-blue-600 rounded-2xl p-8 text-left shadow-lg hover:shadow-xl transition-all"
             >
               <Keyboard className="h-12 w-12 text-blue-600 mb-4" />
-              <h3 className="text-2xl font-bold text-black mb-2">اختبار الكتابة</h3>
-              <p className="text-black opacity-70">Writing Test</p>
-              <p className="text-black text-sm mt-3">اكتب الإجابة الصحيحة بنفسك</p>
+              <h3 className="text-2xl font-bold text-black mb-2">{t('اختبار الكتابة', 'Writing test')}</h3>
+              <p className="text-black text-sm mt-3">{t('اكتب الإجابة الصحيحة بنفسك', 'Type the correct answer yourself')}</p>
             </motion.button>
           </div>
         </div>
@@ -212,8 +214,8 @@ export default function TestWordsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F5F5DC] flex items-center justify-center">
-        <div className="text-black text-2xl">جاري تحميل الأسئلة...</div>
+      <div className="min-h-screen bg-[#F5F5DC] flex items-center justify-center" dir={localeDirection(language)}>
+        <div className="text-black text-2xl">{t('جاري تحميل الأسئلة...', 'Loading questions...')}</div>
       </div>
     )
   }
@@ -221,7 +223,7 @@ export default function TestWordsPage() {
   if (testComplete) {
     const percentage = Math.round((score / questions.length) * 100)
     return (
-      <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8">
+      <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8" dir={localeDirection(language)}>
         <div className="max-w-2xl mx-auto">
           <motion.div
             initial={{ scale: 0 }}
@@ -229,10 +231,10 @@ export default function TestWordsPage() {
             className="bg-white border-2 border-blue-600 rounded-3xl p-12 text-center shadow-xl"
           >
             <Trophy className="h-24 w-24 text-blue-600 mx-auto mb-6" />
-            <h2 className="text-4xl font-bold text-black mb-4">انتهى الاختبار!</h2>
+            <h2 className="text-4xl font-bold text-black mb-4">{t('انتهى الاختبار!', 'Test complete!')}</h2>
             <div className="text-6xl font-bold text-blue-600 mb-4">{percentage}%</div>
             <p className="text-2xl text-black mb-8">
-              {score} من {questions.length} إجابة صحيحة
+              {t(`${score} من ${questions.length} إجابة صحيحة`, `${score} of ${questions.length} correct answers`)}
             </p>
 
             <div className="space-y-3 mb-8">
@@ -256,7 +258,7 @@ export default function TestWordsPage() {
                     )}
                   </div>
                   <div className="text-sm text-black opacity-70 mt-1">
-                    الإجابة: {q.correctAnswer}
+                    {t('الإجابة: ', 'Answer: ')}{q.correctAnswer}
                   </div>
                 </div>
               ))}
@@ -271,14 +273,14 @@ export default function TestWordsPage() {
                   setTestComplete(false)
                 }}
               >
-                اختبار جديد
+                {t('اختبار جديد', 'New test')}
               </Button>
               <Button
                 variant="secondary"
                 size="lg"
                 onClick={() => window.location.href = '/dashboard/student'}
               >
-                العودة للوحة التحكم
+                {t('العودة للوحة التحكم', 'Back to dashboard')}
               </Button>
             </div>
           </motion.div>
@@ -290,15 +292,15 @@ export default function TestWordsPage() {
   const currentQuestion = questions[currentIndex]
 
   return (
-    <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8">
+    <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8" dir={localeDirection(language)}>
       <div className="max-w-3xl mx-auto">
         {/* Progress */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-2">
             <span className="text-black font-semibold">
-              السؤال {currentIndex + 1} من {questions.length}
+              {t(`السؤال ${currentIndex + 1} من ${questions.length}`, `Question ${currentIndex + 1} of ${questions.length}`)}
             </span>
-            <span className="text-black font-semibold">النقاط: {score}</span>
+            <span className="text-black font-semibold">{t('النقاط: ', 'Points: ')}{score}</span>
           </div>
           <div className="w-full bg-white rounded-full h-3 border-2 border-blue-600">
             <div
@@ -325,7 +327,7 @@ export default function TestWordsPage() {
               </h3>
               <p className="text-black opacity-70">
                 {currentQuestion.type === 'en-to-ar' 
-                  ? 'ما معنى هذه الكلمة بالعربي؟'
+                  ? t('ما معنى هذه الكلمة بالعربية؟', 'What does this word mean in Arabic?')
                   : 'What is the English word for this?'}
               </p>
             </div>
@@ -361,7 +363,7 @@ export default function TestWordsPage() {
                 <Input
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
-                  placeholder="اكتب الإجابة هنا..."
+                  placeholder={t('اكتب الإجابة هنا...', 'Type your answer...')}
                   disabled={showResult}
                   inputSize="lg"
                   className="mb-4 text-black"
@@ -378,7 +380,7 @@ export default function TestWordsPage() {
                   onClick={() => handleAnswer(userAnswer)}
                   disabled={!userAnswer.trim() || showResult}
                 >
-                  تأكيد <ArrowRight className="h-5 w-5 mr-2" />
+                  {t('تأكيد', 'Submit')} <ArrowRight className="h-5 w-5 mr-2" />
                 </Button>
               </div>
             )}
@@ -400,12 +402,12 @@ export default function TestWordsPage() {
                     <X className="h-8 w-8 text-red-600" />
                   )}
                   <span className={`text-2xl font-bold ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-                    {isCorrect ? 'صحيح!' : 'خطأ!'}
+                    {isCorrect ? t('صحيح!', 'Correct!') : t('خطأ!', 'Incorrect!')}
                   </span>
                 </div>
                 {!isCorrect && (
                   <p className="text-black">
-                    الإجابة الصحيحة: <strong>{currentQuestion.correctAnswer}</strong>
+                    {t('الإجابة الصحيحة: ', 'Correct answer: ')}<strong>{currentQuestion.correctAnswer}</strong>
                   </p>
                 )}
               </motion.div>

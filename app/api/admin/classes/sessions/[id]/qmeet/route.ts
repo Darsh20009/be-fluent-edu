@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { isNextResponse, requirePermission } from '@/lib/auth-helpers'
 import { recordAuditEvent } from '@/lib/audit'
 import { QMeetClientProvider } from '@/lib/qmeet/provider'
-import { phase6DatabaseGuard, qmeetCreateSchema } from '@/lib/phase6'
+import { phase6DatabaseGuard, qmeetCreateSchema, qmeetProviderStatus } from '@/lib/phase6'
 import { validationError } from '@/lib/phase5'
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -32,7 +32,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
   const provider = new QMeetClientProvider()
   if (!provider.isConfigured()) {
-    return NextResponse.json({ ok: false, error: { code: 'PROVIDER_UNAVAILABLE', message: 'QMeet is not configured' } }, { status: 503 })
+    const missing = qmeetProviderStatus().missing
+    return NextResponse.json({ ok: false, error: { code: 'PROVIDER_UNAVAILABLE', message: `QMeet setup is incomplete. Missing: ${missing.join(', ')}`, missing } }, { status: 503 })
   }
 
   await prisma.qMeetMeeting.upsert({

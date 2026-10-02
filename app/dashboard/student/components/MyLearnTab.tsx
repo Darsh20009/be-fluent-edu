@@ -11,6 +11,8 @@ import Badge from '@/components/ui/Badge'
 import { exportWordsToExcel } from '@/lib/utils/exportToExcel'
 import { toast } from 'react-hot-toast'
 import ConfirmModal from '@/components/ui/ConfirmModal'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeDirection, localeText } from '@/lib/locale'
 
 interface Word {
   id: string
@@ -23,6 +25,8 @@ interface Word {
 }
 
 export default function MyLearnTab({ isActive }: { isActive: boolean }) {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [words, setWords] = useState<Word[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
@@ -118,12 +122,12 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
 
       if (response.ok) {
         setWords(words.filter(w => w.id !== wordId))
-        toast.success('تم حذف الكلمة')
+        toast.success(t('تم حذف الكلمة', 'Word deleted'))
       } else {
-        toast.error('فشل حذف الكلمة')
+        toast.error(t('فشل حذف الكلمة', 'Failed to delete word'))
       }
     } catch (error) {
-      toast.error('خطأ في الحذف')
+      toast.error(t('خطأ في الحذف', 'Error deleting word'))
     }
   }
 
@@ -144,7 +148,7 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
       setSelectedWords(new Set())
     } catch (error) {
       console.error('Error deleting words:', error)
-      toast.error('خطأ في حذف بعض الكلمات. يرجى المحاولة مرة أخرى.')
+      toast.error(t('خطأ في حذف بعض الكلمات. يرجى المحاولة مرة أخرى.', 'Some words could not be deleted. Please try again.'))
     }
   }
 
@@ -183,7 +187,7 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
       }
     } catch (error) {
       console.error('Translation error:', error)
-      toast.error('فشل الترجمة')
+      toast.error(t('فشل الترجمة', 'Translation failed'))
     } finally {
       setTranslating(false)
     }
@@ -212,13 +216,13 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
 
       if (response.ok) {
         const data = await response.json()
-        toast.success(`تم استيراد ${data.count} كلمة بنجاح! `)
+        toast.success(t(`تم استيراد ${data.count} كلمة بنجاح!`, `Successfully imported ${data.count} words!`))
         fetchWords()
         setShowImportForm(false)
       }
     } catch (error) {
       console.error('Import error:', error)
-      toast.error('فشل استيراد الكلمات')
+      toast.error(t('فشل استيراد الكلمات', 'Failed to import words'))
     } finally {
       setImporting(false)
       if (fileInputRef.current) {
@@ -231,20 +235,20 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
     return (
       <div>
         <h2 className="text-3xl font-bold text-[#10B981] mb-6">
-          MyLearn - My Words / كلماتي
+          {t('كلماتي', 'My words')}
         </h2>
         <Alert variant="warning">
-          <p>Activate your account to access this feature / قم بتفعيل حسابك للوصول لهذه الميزة</p>
+          <p>{t('قم بتفعيل حسابك للوصول لهذه الميزة', 'Activate your account to access this feature')}</p>
         </Alert>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={localeDirection(language)}>
       <div className="flex items-center justify-between flex-wrap gap-4">
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-          MyLearn - My Words / كلماتي
+          {t('كلماتي', 'My words')}
         </h2>
         <div className="flex gap-2 flex-wrap">
           {words.length > 0 && (
@@ -255,7 +259,7 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
                 size="sm"
               >
                 <CheckSquare className="h-4 w-4 mr-2" />
-                {selectedWords.size === words.length ? 'Deselect All / إلغاء الكل' : 'Select All / تحديد الكل'}
+                {selectedWords.size === words.length ? t('إلغاء تحديد الكل', 'Deselect all') : t('تحديد الكل', 'Select all')}
               </Button>
               {selectedWords.size > 0 && (
                 <Button
@@ -265,7 +269,7 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
                   className="border-red-500 text-red-600 hover:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Selected ({selectedWords.size}) / حذف المحدد
+                  {t(`حذف المحدد (${selectedWords.size})`, `Delete selected (${selectedWords.size})`)}
                 </Button>
               )}
             </>
@@ -275,7 +279,7 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
             onClick={() => setShowImportForm(!showImportForm)}
           >
             <Upload className="h-4 w-4 mr-2" />
-            Import / استيراد
+            {t('استيراد', 'Import')}
           </Button>
           <Button
             variant="outline"
@@ -283,7 +287,7 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
             disabled={words.filter(w => !w.known).length === 0}
           >
             <FileDown className="h-4 w-4 mr-2" />
-            Export Unknown / تصدير غير المحفوظة
+            {t('تصدير الكلمات غير المعروفة', 'Export unknown')}
           </Button>
           <Button
             variant="outline"
@@ -291,14 +295,14 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
             disabled={words.length === 0}
           >
             <FileDown className="h-4 w-4 mr-2" />
-            Export All / تصدير الكل
+            {t('تصدير الكل', 'Export all')}
           </Button>
           <Button
             variant="primary"
             onClick={() => setShowAddForm(!showAddForm)}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Word / أضف كلمة
+            {t('أضف كلمة', 'Add word')}
           </Button>
         </div>
       </div>
@@ -306,13 +310,10 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
       {showImportForm && (
         <Card variant="elevated">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-            Import Words / استيراد الكلمات
+            {t('استيراد الكلمات', 'Import words')}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            Upload a text file with one English word per line (max 100 words). Words will be automatically translated to Arabic.
-          </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4" dir="rtl">
-            قم برفع ملف نصي يحتوي على كلمة إنجليزية واحدة في كل سطر (حد أقصى 100 كلمة). سيتم ترجمة الكلمات تلقائيًا إلى العربية.
+            {t('ارفع ملفاً نصياً يحتوي على كلمة إنجليزية واحدة في كل سطر (بحد أقصى 100 كلمة). ستُترجم الكلمات تلقائياً إلى العربية.', 'Upload a text file with one English word per line (max 100 words). Words will be automatically translated into Arabic.')}
           </p>
           <input
             ref={fileInputRef}
@@ -326,7 +327,7 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
             <div className="mt-4 text-center">
               <LoadingSpinner size="md" />
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                Importing and translating words...
+                {t('جارٍ استيراد الكلمات وترجمتها...', 'Importing and translating words...')}
               </p>
             </div>
           )}
@@ -335,20 +336,20 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
 
       {showAddForm && (
         <Card variant="elevated">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Add New Word / أضف كلمة جديدة</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{t('أضف كلمة جديدة', 'Add new word')}</h3>
           <div className="space-y-4">
             <Input
-              label="English Word / الكلمة بالإنجليزية"
+              label={t('الكلمة بالإنجليزية', 'English word')}
               value={newWord.englishWord}
               onChange={(e) => setNewWord({ ...newWord, englishWord: e.target.value })}
               placeholder="e.g., Hello"
             />
             <div>
               <Input
-                label="Arabic Meaning / المعنى بالعربية"
+                label={t('المعنى بالعربية', 'Arabic meaning')}
                 value={newWord.arabicMeaning}
                 onChange={(e) => setNewWord({ ...newWord, arabicMeaning: e.target.value })}
-                placeholder="مثال: مرحباً"
+                placeholder={t('مثال: مرحباً', 'e.g., مرحباً')}
               />
               <Button
                 variant="outline"
@@ -358,11 +359,11 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
                 className="mt-2"
               >
                 <Languages className="h-4 w-4 mr-2" />
-                {translating ? 'Translating...' : 'Auto Translate / ترجمة تلقائية'}
+                {translating ? t('جارٍ الترجمة...', 'Translating...') : t('ترجمة تلقائية', 'Auto translate')}
               </Button>
             </div>
             <Input
-              label="Example Sentence (Optional) / جملة توضيحية (اختياري)"
+              label={t('جملة توضيحية (اختياري)', 'Example sentence (optional)')}
               value={newWord.exampleSentence}
               onChange={(e) => setNewWord({ ...newWord, exampleSentence: e.target.value })}
               placeholder="e.g., Hello, how are you?"
@@ -373,13 +374,13 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
                 onClick={handleAddWord}
                 disabled={submitting || !newWord.englishWord || !newWord.arabicMeaning}
               >
-                {submitting ? 'Adding...' : 'Add / إضافة'}
+                {submitting ? t('جارٍ الإضافة...', 'Adding...') : t('إضافة', 'Add')}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setShowAddForm(false)}
               >
-                Cancel / إلغاء
+                {t('إلغاء', 'Cancel')}
               </Button>
             </div>
           </div>
@@ -392,8 +393,7 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
         </div>
       ) : words.length === 0 ? (
         <Alert variant="info">
-          <p>No words saved yet. Start adding words to build your vocabulary!</p>
-          <p>لم تقم بحفظ أي كلمات بعد. ابدأ بإضافة كلمات لبناء مفرداتك!</p>
+          <p>{t('لم تقم بحفظ أي كلمات بعد. ابدأ بإضافة كلمات لبناء مفرداتك!', 'No words saved yet. Start adding words to build your vocabulary!')}</p>
         </Alert>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
@@ -416,7 +416,7 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
                     {word.known && (
                       <Badge variant="success" size="sm">
                         <Check className="h-3 w-3 mr-1" />
-                        Known
+                        {t('معروفة', 'Known')}
                       </Badge>
                     )}
                   </div>
@@ -434,12 +434,12 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
                       {word.known ? (
                         <>
                           <X className="h-4 w-4 mr-1" />
-                          Mark Unknown / غير محفوظة
+                          {t('إلغاء علامة معروفة', 'Mark unknown')}
                         </>
                       ) : (
                         <>
                           <Check className="h-4 w-4 mr-1" />
-                          Mark Known / محفوظة
+                          {t('تعليم كمعروفة', 'Mark known')}
                         </>
                       )}
                     </Button>
@@ -460,10 +460,7 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
 
       <div className="text-center text-gray-600">
         <p className="text-lg font-semibold">
-          Total Words: {words.length} | Known: {words.filter(w => w.known).length}
-        </p>
-        <p className="text-sm">
-          إجمالي الكلمات: {words.length} | محفوظة: {words.filter(w => w.known).length}
+          {t(`إجمالي الكلمات: ${words.length} | معروفة: ${words.filter(w => w.known).length}`, `Total words: ${words.length} | Known: ${words.filter(w => w.known).length}`)}
         </p>
       </div>
 
@@ -471,14 +468,14 @@ export default function MyLearnTab({ isActive }: { isActive: boolean }) {
         isOpen={confirmModal.open}
         onClose={() => setConfirmModal({ open: false, type: 'single' })}
         onConfirm={confirmModal.type === 'bulk' ? doDeleteSelected : doDeleteWord}
-        title="حذف الكلمة"
+        title={t('حذف الكلمة', 'Delete word')}
         message={
           confirmModal.type === 'bulk'
-            ? `هل أنت متأكد من حذف ${selectedWords.size} كلمة؟ لا يمكن التراجع عن هذا الإجراء.`
-            : 'هل أنت متأكد من حذف هذه الكلمة؟ لا يمكن التراجع عن هذا الإجراء.'
+            ? t(`هل أنت متأكد من حذف ${selectedWords.size} كلمة؟ لا يمكن التراجع عن هذا الإجراء.`, `Are you sure you want to delete ${selectedWords.size} words? This cannot be undone.`)
+            : t('هل أنت متأكد من حذف هذه الكلمة؟ لا يمكن التراجع عن هذا الإجراء.', 'Are you sure you want to delete this word? This cannot be undone.')
         }
-        confirmText="حذف"
-        cancelText="إلغاء"
+        confirmText={t('حذف', 'Delete')}
+        cancelText={t('إلغاء', 'Cancel')}
         variant="danger"
       />
     </div>

@@ -7,6 +7,8 @@ import Badge from '@/components/ui/Badge'
 import Alert from '@/components/ui/Alert'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Button from '@/components/ui/Button'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 interface Student {
   id: string
@@ -30,6 +32,7 @@ interface Student {
 }
 
 export default function StudentsTab({ teacherProfileId }: { teacherProfileId: string }) {
+  const { language } = useTheme()
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -72,17 +75,16 @@ export default function StudentsTab({ teacherProfileId }: { teacherProfileId: st
   return (
     <div className="space-y-6">
       <h2 className="text-3xl font-bold text-[#10B981]">
-        My Students / طلابي
+        {localeText(language, 'طلابي', 'My students')}
       </h2>
 
       <div>
         <h3 className="text-xl font-semibold text-gray-900 mb-4">
-          Active Students / طلاب نشطون ({activeStudents.length})
+          {localeText(language, 'الطلاب النشطون', 'Active students')} ({activeStudents.length})
         </h3>
         {activeStudents.length === 0 ? (
           <Alert variant="info">
-            <p>No active students yet.</p>
-            <p>لا يوجد طلاب نشطون بعد.</p>
+            <p>{localeText(language, 'لا يوجد طلاب نشطون بعد.', 'No active students yet.')}</p>
           </Alert>
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
@@ -97,7 +99,7 @@ export default function StudentsTab({ teacherProfileId }: { teacherProfileId: st
                       <h3 className="text-lg font-bold text-gray-900 truncate">{student.name}</h3>
                       <Badge variant="success">
                         <CheckCircle className="h-3 w-3 mr-1" />
-                        Active / نشط
+                        {localeText(language, 'نشط', 'Active')}
                       </Badge>
                     </div>
                     
@@ -120,17 +122,17 @@ export default function StudentsTab({ teacherProfileId }: { teacherProfileId: st
                           {student.activeSubscription.packageTitle}
                         </div>
                         <div className="text-xs text-blue-700">
-                          حصص متبقية: {student.activeSubscription.lessonsRemaining} | 
-                          ينتهي: {new Date(student.activeSubscription.endDate).toLocaleDateString('ar-EG')}
+                          {localeText(language, 'حصص متبقية', 'Lessons remaining')}: {student.activeSubscription.lessonsRemaining} |
+                          {localeText(language, 'ينتهي', 'Expires')}: {new Date(student.activeSubscription.endDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
                         </div>
                       </div>
                     )}
                     
                     <div className="grid grid-cols-3 gap-2">
                       <div className="bg-gray-50 rounded-lg p-2 text-center">
-                        <div className="text-xs text-gray-600 mb-1">المستوى</div>
+                        <div className="text-xs text-gray-600 mb-1">{localeText(language, 'المستوى', 'Level')}</div>
                         <div className="text-sm font-bold text-[#10B981]">
-                          {student.studentProfile?.levelCurrent || 'غير محدد'}
+                          {student.studentProfile?.levelCurrent || localeText(language, 'غير محدد', 'Not set')}
                         </div>
                       </div>
                       <div className="bg-gray-50 rounded-lg p-2 text-center">
@@ -138,14 +140,14 @@ export default function StudentsTab({ teacherProfileId }: { teacherProfileId: st
                         <div className="text-sm font-bold text-gray-900">
                           {student.sessionsCount || 0}
                         </div>
-                        <div className="text-xs text-gray-600">الحصص</div>
+                        <div className="text-xs text-gray-600">{localeText(language, 'الحصص', 'Sessions')}</div>
                       </div>
                       <div className="bg-gray-50 rounded-lg p-2 text-center">
                         <Trophy className="h-4 w-4 mx-auto text-yellow-600 mb-1" />
                         <div className="text-sm font-bold text-gray-900">
                           {student.wordsCount || 0}
                         </div>
-                        <div className="text-xs text-gray-600">الكلمات</div>
+                        <div className="text-xs text-gray-600">{localeText(language, 'الكلمات', 'Words')}</div>
                       </div>
                     </div>
                   </div>
@@ -159,7 +161,7 @@ export default function StudentsTab({ teacherProfileId }: { teacherProfileId: st
       {inactiveStudents.length > 0 && (
         <div>
           <h3 className="text-xl font-semibold text-gray-900 mb-4">
-            Inactive Students / طلاب غير نشطين ({inactiveStudents.length})
+            {localeText(language, 'الطلاب غير النشطين', 'Inactive students')} ({inactiveStudents.length})
           </h3>
           <div className="space-y-4">
             {inactiveStudents.map((student) => (
@@ -173,7 +175,7 @@ export default function StudentsTab({ teacherProfileId }: { teacherProfileId: st
                       <h3 className="text-lg font-bold text-gray-700">{student.name}</h3>
                       <Badge variant="warning">
                         <XCircle className="h-3 w-3 mr-1" />
-                        Pending Activation
+                        {localeText(language, 'بانتظار التفعيل', 'Pending activation')}
                       </Badge>
                     </div>
                     <p className="text-sm text-gray-600">{student.email}</p>

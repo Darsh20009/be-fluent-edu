@@ -7,6 +7,9 @@ import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Alert from '@/components/ui/Alert'
+import { Phase4Nav } from '@/app/phase4/nav'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeDirection, localeText } from '@/lib/locale'
 
 interface SessionData {
   id: string
@@ -20,6 +23,7 @@ interface SessionData {
 }
 
 export default function TeacherSessionsPage() {
+  const { language } = useTheme()
   const [sessions, setSessions] = useState<SessionData[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -46,7 +50,7 @@ export default function TeacherSessionsPage() {
         setSessions(data)
       }
     } catch (err) {
-      setError('Failed to load sessions')
+      setError(localeText(language, 'تعذر تحميل الحصص.', 'Failed to load sessions.'))
     } finally {
       setLoading(false)
     }
@@ -61,13 +65,13 @@ export default function TeacherSessionsPage() {
       })
 
       if (response.ok) {
-        setSuccess('Session updated successfully')
+        setSuccess(localeText(language, 'تم تحديث الحصة بنجاح.', 'Session updated successfully.'))
         setEditingId(null)
         fetchSessions()
         setTimeout(() => setSuccess(''), 3000)
       }
     } catch (err) {
-      setError('Failed to update session')
+      setError(localeText(language, 'تعذر تحديث الحصة.', 'Failed to update session.'))
     }
   }
 
@@ -78,13 +82,13 @@ export default function TeacherSessionsPage() {
       })
 
       if (response.ok) {
-        setSuccess('Session deleted successfully')
+        setSuccess(localeText(language, 'تم حذف الحصة بنجاح.', 'Session deleted successfully.'))
         setDeleteConfirm(null)
         fetchSessions()
         setTimeout(() => setSuccess(''), 3000)
       }
     } catch (err) {
-      setError('Failed to delete session')
+      setError(localeText(language, 'تعذر حذف الحصة.', 'Failed to delete session.'))
     }
   }
 
@@ -97,15 +101,16 @@ export default function TeacherSessionsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5 bg-[#f4f1e9] p-4 text-[#1f2924] sm:p-6" dir="rtl">
+    <div className="mx-auto max-w-6xl space-y-5 bg-[#f4f1e9] p-4 text-[#1f2924] sm:p-6" dir={localeDirection(language)}>
       <div className="border-b border-[#d7d4ca] pb-5">
-        <p className="mb-1 text-[10px] font-bold tracking-[0.18em] text-[#758178]">TEACHING OPERATIONS</p>
+        <p className="mb-1 text-[10px] font-bold tracking-[0.18em] text-[#758178]">{localeText(language, 'إدارة التدريس', 'TEACHING OPERATIONS')}</p>
         <h1 className="mb-2 text-3xl font-black tracking-tight text-[#174d3a]">
-          My Sessions / حصصي
+          {localeText(language, 'حصصي', 'My sessions')}
         </h1>
         <p className="text-sm text-[#667168]">
-          Manage your sessions - edit, delete, or schedule new ones
+          {localeText(language, 'أدر حصصك: عدّلها أو احذفها أو جدْول حصصاً جديدة.', 'Manage your sessions: edit, delete, or schedule new ones.')}
         </p>
+        <Phase4Nav area="teacher" />
       </div>
 
       {error && <Alert variant="error"><p>{error}</p></Alert>}
@@ -113,8 +118,8 @@ export default function TeacherSessionsPage() {
 
       {sessions.length === 0 ? (
         <Alert variant="info">
-          <p>No sessions scheduled yet.</p>
-          <p>قم بإنشاء حصص جديدة</p>
+          <p>{localeText(language, 'لم تتم جدولة أي حصص بعد.', 'No sessions scheduled yet.')}</p>
+          <p>{localeText(language, 'قم بإنشاء حصص جديدة', 'Create new sessions')}</p>
         </Alert>
       ) : (
         <div className="grid gap-4">
@@ -128,17 +133,17 @@ export default function TeacherSessionsPage() {
                   <div className="space-y-2 text-sm text-[#667168]">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      <span>{new Date(session.startTime).toLocaleDateString('ar-EG')}</span>
+                        <span>{new Date(session.startTime).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4" />
                       <span>
-                        {new Date(session.startTime).toLocaleTimeString('ar-EG', {
+                        {new Date(session.startTime).toLocaleTimeString(language === 'ar' ? 'ar-EG' : 'en-US', {
                           hour: '2-digit',
                           minute: '2-digit'
                         })}
                         {' - '}
-                        {new Date(session.endTime).toLocaleTimeString('ar-EG', {
+                        {new Date(session.endTime).toLocaleTimeString(language === 'ar' ? 'ar-EG' : 'en-US', {
                           hour: '2-digit',
                           minute: '2-digit'
                         })}
@@ -147,7 +152,7 @@ export default function TeacherSessionsPage() {
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
                       <span>
-                        {session.SessionStudent.length} Student{session.SessionStudent.length !== 1 ? 's' : ''}
+                        {session.SessionStudent.length} {localeText(language, 'طالب', session.SessionStudent.length !== 1 ? 'Students' : 'Student')}
                         {session.SessionStudent.length > 0 && `: ${session.SessionStudent.map(s => s.User.name).join(', ')}`}
                       </span>
                     </div>
@@ -179,7 +184,7 @@ export default function TeacherSessionsPage() {
                       onClick={() => window.open(session.externalLink!, '_blank')}
                        className="!rounded-none !bg-[#174d3a] hover:!bg-[#123c2d]"
                     >
-                      Join External / انضمام خارجي
+                      {localeText(language, 'انضمام خارجي', 'Join external')}
                     </Button>
                   )}
                   <Button
@@ -210,11 +215,11 @@ export default function TeacherSessionsPage() {
 
               {/* Edit Modal */}
               {editingId === session.id && (
-                <Modal isOpen={true} onClose={() => setEditingId(null)} title="Edit Session">
+                <Modal isOpen={true} onClose={() => setEditingId(null)} title={localeText(language, 'تعديل الحصة', 'Edit session')}>
                   <div className="space-y-4">
                     <input
                       type="text"
-                      placeholder="Session Title"
+                      placeholder={localeText(language, 'عنوان الحصة', 'Session title')}
                       value={editData.title}
                       onChange={e => setEditData({ ...editData, title: e.target.value })}
                        className="w-full border border-[#c9c7bc] bg-[#f8f6f0] p-2 text-[#1f2924] outline-none focus:border-[#174d3a]"
@@ -232,7 +237,7 @@ export default function TeacherSessionsPage() {
                        className="w-full border border-[#c9c7bc] bg-[#f8f6f0] p-2 text-[#1f2924] outline-none focus:border-[#174d3a]"
                     />
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">External Meeting Link (Optional)</label>
+                       <label className="text-sm font-medium">{localeText(language, 'رابط الاجتماع الخارجي (اختياري)', 'External meeting link (optional)')}</label>
                       <input
                         type="url"
                         placeholder="https://zoom.us/j/..."
@@ -242,7 +247,7 @@ export default function TeacherSessionsPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Link Type</label>
+                      <label className="text-sm font-medium">{localeText(language, 'نوع الرابط', 'Link type')}</label>
                       <select
                         value={editData.externalLinkType || 'OTHER'}
                         onChange={e => setEditData({ ...editData, externalLinkType: e.target.value })}
@@ -251,12 +256,12 @@ export default function TeacherSessionsPage() {
                         <option value="ZOOM">Zoom</option>
                         <option value="GOOGLE_MEET">Google Meet</option>
                         <option value="TEAMS">Microsoft Teams</option>
-                        <option value="OTHER">Other</option>
+                        <option value="OTHER">{localeText(language, 'أخرى', 'Other')}</option>
                       </select>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="primary" onClick={() => handleEdit(session)}>Save</Button>
-                      <Button variant="secondary" onClick={() => setEditingId(null)}>Cancel</Button>
+                      <Button variant="primary" onClick={() => handleEdit(session)}>{localeText(language, 'حفظ', 'Save')}</Button>
+                      <Button variant="secondary" onClick={() => setEditingId(null)}>{localeText(language, 'إلغاء', 'Cancel')}</Button>
                     </div>
                   </div>
                 </Modal>
@@ -264,17 +269,17 @@ export default function TeacherSessionsPage() {
 
               {/* Delete Confirmation */}
               {deleteConfirm === session.id && (
-                <Modal isOpen={true} onClose={() => setDeleteConfirm(null)} title="Delete Session?">
+                <Modal isOpen={true} onClose={() => setDeleteConfirm(null)} title={localeText(language, 'حذف الحصة؟', 'Delete session?')}>
                   <div className="space-y-4">
-                    <p>Are you sure you want to delete this session? هل أنت متأكد من حذف هذه الحصة؟</p>
+                    <p>{localeText(language, 'هل أنت متأكد من حذف هذه الحصة؟', 'Are you sure you want to delete this session?')}</p>
                     <div className="flex gap-2">
                       <Button
                         variant="danger"
                         onClick={() => handleDelete(session.id)}
                       >
-                        Delete / حذف
+                        {localeText(language, 'حذف', 'Delete')}
                       </Button>
-                      <Button variant="secondary" onClick={() => setDeleteConfirm(null)}>Cancel / إلغاء</Button>
+                      <Button variant="secondary" onClick={() => setDeleteConfirm(null)}>{localeText(language, 'إلغاء', 'Cancel')}</Button>
                     </div>
                   </div>
                 </Modal>

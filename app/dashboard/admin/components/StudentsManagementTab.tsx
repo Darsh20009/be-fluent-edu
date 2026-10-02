@@ -9,6 +9,8 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Alert from '@/components/ui/Alert'
 import Modal from '@/components/ui/Modal'
 import { toast } from 'react-hot-toast'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText, localeDirection } from '@/lib/locale'
 
 interface Student {
   id: string
@@ -45,6 +47,8 @@ interface Teacher {
 }
 
 export default function StudentsManagementTab() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [students, setStudents] = useState<Student[]>([])
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [loading, setLoading] = useState(true)
@@ -108,7 +112,7 @@ export default function StudentsManagementTab() {
       })
 
       if (res.ok) {
-        toast.success('تم إصدار الشهادة بنجاح! / Certificate issued successfully!')
+        toast.success(t('تم إصدار الشهادة بنجاح!', 'Certificate issued successfully!'))
         setCertModalStudent(null)
         setCertLevel('')
       } else {
@@ -125,7 +129,7 @@ export default function StudentsManagementTab() {
 
   async function handleAssignTeacher() {
     if (!selectedStudent || !selectedTeacherId) {
-      toast.error('يرجى اختيار مدرس / Please select a teacher')
+      toast.error(t('يرجى اختيار مدرس', 'Please select a teacher'))
       return
     }
 
@@ -141,7 +145,7 @@ export default function StudentsManagementTab() {
       })
 
       if (response.ok) {
-        toast.success('تم تعيين المدرس بنجاح! / Teacher assigned successfully!')
+        toast.success(t('تم تعيين المدرس بنجاح!', 'Teacher assigned successfully!'))
         setSelectedStudent(null)
         setSelectedTeacherId('')
         await fetchData()
@@ -166,16 +170,16 @@ export default function StudentsManagementTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={localeDirection(language)}>
       <h2 className="text-3xl font-bold text-[#10B981]">
-        Students Management / إدارة الطلاب
+        {t('إدارة الطلاب', 'Students management')}
       </h2>
 
       <div className="grid md:grid-cols-3 gap-4">
         <Card variant="elevated">
           <div className="text-center">
             <p className="text-3xl font-bold text-[#10B981]">{students.length}</p>
-            <p className="text-sm text-gray-600">Total Students / إجمالي الطلاب</p>
+            <p className="text-sm text-gray-600">{t('إجمالي الطلاب', 'Total students')}</p>
           </div>
         </Card>
         <Card variant="elevated">
@@ -186,7 +190,7 @@ export default function StudentsManagementTab() {
                 return activeSub !== undefined
               }).length}
             </p>
-            <p className="text-sm text-gray-600">With Teacher / مع مدرس</p>
+            <p className="text-sm text-gray-600">{t('معلم معيّن', 'With teacher')}</p>
           </div>
         </Card>
         <Card variant="elevated">
@@ -198,7 +202,7 @@ export default function StudentsManagementTab() {
                 return hasSubscription && !hasTeacher
               }).length}
             </p>
-            <p className="text-sm text-gray-600">Without Teacher / بدون مدرس</p>
+            <p className="text-sm text-gray-600">{t('بدون معلم', 'Without teacher')}</p>
           </div>
         </Card>
       </div>
@@ -206,39 +210,39 @@ export default function StudentsManagementTab() {
       {selectedStudent && (
         <Card variant="elevated" className="bg-blue-50 border-blue-300">
           <h3 className="text-lg font-bold text-gray-900 mb-4">
-            Assign Teacher / تعيين مدرس
+            {t('تعيين مدرس', 'Assign teacher')}
           </h3>
           <div className="space-y-4">
             <div>
               <p className="font-semibold text-gray-900 mb-1">
-                Student / الطالب: {selectedStudent.name}
+                {t('الطالب:', 'Student:')} {selectedStudent.name}
               </p>
               <p className="text-sm text-gray-600">{selectedStudent.email}</p>
               {selectedStudent.Subscription.length > 0 && selectedStudent.Subscription[0] && (
                 <p className="text-sm text-gray-600 mt-1">
-                  📦 {selectedStudent.Subscription[0].Package.title} / {selectedStudent.Subscription[0].Package.titleAr}
+                  📦 {language === 'ar' ? selectedStudent.Subscription[0].Package.titleAr || selectedStudent.Subscription[0].Package.title : selectedStudent.Subscription[0].Package.title}
                 </p>
               )}
               {selectedStudent.Subscription.length === 0 && (
                 <p className="text-sm text-red-600 mt-1">
-                  ⚠️ No active subscription / لا يوجد اشتراك نشط
+                  ⚠️ {t('لا يوجد اشتراك نشط', 'No active subscription')}
                 </p>
               )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Teacher / اختر المدرس *
+                {t('اختر المدرس *', 'Select teacher *')}
               </label>
               <select
                 value={selectedTeacherId}
                 onChange={(e) => setSelectedTeacherId(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981]"
               >
-                <option value="">Select a teacher...</option>
+                <option value="">{t('اختر مدرسًا...', 'Select a teacher…')}</option>
                 {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
-                    {teacher.User.name} - {teacher.specialization || 'No specialization'}
+                    {teacher.User.name} - {teacher.specialization || t('لا يوجد تخصص', 'No specialization')}
                   </option>
                 ))}
               </select>
@@ -251,7 +255,7 @@ export default function StudentsManagementTab() {
                 disabled={!selectedTeacherId || processing}
               >
                 <UserCheck className="h-4 w-4 ml-2" />
-                {processing ? 'Processing...' : 'Assign / تعيين'}
+                {processing ? t('جارٍ التنفيذ...', 'Processing…') : t('تعيين', 'Assign')}
               </Button>
               <Button
                 variant="outline"
@@ -260,7 +264,7 @@ export default function StudentsManagementTab() {
                   setSelectedTeacherId('')
                 }}
               >
-                Cancel / إلغاء
+                {t('إلغاء', 'Cancel')}
               </Button>
             </div>
           </div>
@@ -269,7 +273,7 @@ export default function StudentsManagementTab() {
 
       <div>
         <h3 className="text-xl font-semibold text-gray-900 mb-4">
-          All Students / جميع الطلاب ({students.length})
+          {t('جميع الطلاب', 'All students')} ({students.length})
         </h3>
         <div className="space-y-4">
           {students.map((student) => {
@@ -285,12 +289,12 @@ export default function StudentsManagementTab() {
                       {hasTeacher ? (
                         <Badge variant="success">
                           <UserCheck className="h-3 w-3 mr-1" />
-                          With Teacher
+                          {t('معلم معيّن', 'With teacher')}
                         </Badge>
                       ) : (
                         <Badge variant="warning">
                           <Users className="h-3 w-3 mr-1" />
-                          No Teacher
+                          {t('بدون معلم', 'No teacher')}
                         </Badge>
                       )}
                     </div>
@@ -301,18 +305,18 @@ export default function StudentsManagementTab() {
                     {subscription && (
                       <div className="mt-2 space-y-1">
                         <p className="text-sm text-gray-700">
-                          <strong>Package:</strong> {subscription.Package.title} / {subscription.Package.titleAr}
+                          <strong>{t('الباقة:', 'Package:')}</strong> {language === 'ar' ? subscription.Package.titleAr || subscription.Package.title : subscription.Package.title}
                         </p>
                         {hasTeacher && subscription.AssignedTeacher && (
                           <p className="text-sm text-blue-600">
-                            👨‍🏫 <strong>Teacher:</strong> {subscription.AssignedTeacher.User.name}
+                            👨‍🏫 <strong>{t('المعلم:', 'Teacher:')}</strong> {subscription.AssignedTeacher.User.name}
                           </p>
                         )}
                       </div>
                     )}
 
                     <p className="text-xs text-gray-500 mt-2">
-                      Joined: {new Date(student.createdAt).toLocaleDateString('ar-EG')}
+                      {t('تاريخ الانضمام:', 'Joined:')} {new Date(student.createdAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
                     </p>
                   </div>
 
@@ -326,7 +330,7 @@ export default function StudentsManagementTab() {
                       }}
                       className="border-green-500 text-green-600 hover:bg-green-50"
                     >
-                      WhatsApp / واتساب
+                      {t('واتساب', 'WhatsApp')}
                     </Button>
                     <Button
                       variant="outline"
@@ -335,7 +339,7 @@ export default function StudentsManagementTab() {
                       disabled={!subscription}
                     >
                       <BookOpen className="h-4 w-4 ml-2" />
-                      {hasTeacher ? 'Change Teacher' : 'Assign Teacher'}
+                      {hasTeacher ? t('تغيير المعلم', 'Change teacher') : t('تعيين معلم', 'Assign teacher')}
                     </Button>
                     <Button
                       variant="outline"
@@ -344,11 +348,11 @@ export default function StudentsManagementTab() {
                       onClick={() => setCertModalStudent(student)}
                     >
                       <Award className="h-4 w-4 ml-2" />
-                      Issue Certificate
+                      {t('إصدار شهادة', 'Issue certificate')}
                     </Button>
                     {!subscription && (
                       <p className="text-xs text-red-600 mt-1">
-                        No subscription / لا يوجد اشتراك
+                        {t('لا يوجد اشتراك', 'No subscription')}
                       </p>
                     )}
                   </div>
@@ -361,7 +365,7 @@ export default function StudentsManagementTab() {
         {students.length === 0 && (
           <Alert variant="info">
             <Users className="h-5 w-5" />
-            <p>No students found</p>
+            <p>{t('لم يتم العثور على طلاب', 'No students found')}</p>
           </Alert>
         )}
       </div>
@@ -371,24 +375,24 @@ export default function StudentsManagementTab() {
         <Modal
           isOpen={!!certModalStudent}
           onClose={() => setCertModalStudent(null)}
-          title="Issue Certificate / إصدار شهادة"
+          title={t('إصدار شهادة', 'Issue certificate')}
         >
           <div className="space-y-4 p-4">
             <div>
-              <p className="font-bold text-gray-900 mb-1">Student: {certModalStudent.name}</p>
+              <p className="font-bold text-gray-900 mb-1">{t('الطالب:', 'Student:')} {certModalStudent.name}</p>
               <p className="text-sm text-gray-500">{certModalStudent.email}</p>
             </div>
             
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                Level / المستوى *
+                {t('المستوى *', 'Level *')}
               </label>
               <select
                 value={certLevel}
                 onChange={(e) => setCertLevel(e.target.value)}
                 className="w-full px-4 py-3 border-2 border-emerald-100 rounded-xl focus:border-emerald-500 outline-none transition-colors"
               >
-                <option value="">Select Level...</option>
+                <option value="">{t('اختر المستوى...', 'Select level…')}</option>
                 {levels.map(l => (
                   <option key={l} value={l}>{l}</option>
                 ))}
@@ -404,12 +408,12 @@ export default function StudentsManagementTab() {
                 {issuingCert ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin ml-2" />
-                    Issuing...
+                    {t('جارٍ الإصدار...', 'Issuing…')}
                   </>
                 ) : (
                   <>
                     <Plus className="h-4 w-4 ml-2" />
-                    Issue Now / إصدار الآن
+                    {t('إصدار الآن', 'Issue now')}
                   </>
                 )}
               </Button>
@@ -417,7 +421,7 @@ export default function StudentsManagementTab() {
                 variant="outline"
                 onClick={() => setCertModalStudent(null)}
               >
-                Cancel
+                {t('إلغاء', 'Cancel')}
               </Button>
             </div>
           </div>

@@ -25,6 +25,7 @@ import {
 import { useTheme } from '@/lib/contexts/ThemeContext';
 import BrandLockup from '@/components/brand/BrandLockup';
 import LatestCouponPopup from '@/components/LatestCouponPopup';
+import { MarketingFooter } from '@/components/marketing/MarketingFrame';
 
 type PackageItem = {
   id: string | number;
@@ -155,6 +156,8 @@ export default function HomePage() {
             <Link href="/about-path" className="inline-flex min-h-11 items-center transition-colors hover:text-[#246448]">{tr('عن المنهج', 'Our approach')}</Link>
             <Link href="/learning-path" className="inline-flex min-h-11 items-center transition-colors hover:text-[#246448]">{tr('مسار التعلم', 'Learning path')}</Link>
             <Link href="/packages" className="inline-flex min-h-11 items-center transition-colors hover:text-[#246448]">{tr('الباقات', 'Packages')}</Link>
+            <Link href="/grammar" className="inline-flex min-h-11 items-center transition-colors hover:text-[#246448]">{tr('القواعد', 'Grammar')}</Link>
+            <Link href="/placement-test" className="inline-flex min-h-11 items-center transition-colors hover:text-[#246448]">{tr('اختبار المستوى', 'Placement test')}</Link>
             <Link href="/contact" className="inline-flex min-h-11 items-center transition-colors hover:text-[#246448]">{tr('تواصل معنا', 'Contact')}</Link>
           </nav>
 
@@ -191,6 +194,8 @@ export default function HomePage() {
               <Link href="/about-path" onClick={closeMenu} className="rounded px-3 py-3 text-sm font-semibold hover:bg-[#f1f5ef]">{tr('عن المنهج', 'Our approach')}</Link>
               <Link href="/learning-path" onClick={closeMenu} className="rounded px-3 py-3 text-sm font-semibold hover:bg-[#f1f5ef]">{tr('مسار التعلم', 'Learning path')}</Link>
               <Link href="/packages" onClick={closeMenu} className="rounded px-3 py-3 text-sm font-semibold hover:bg-[#f1f5ef]">{tr('الباقات', 'Packages')}</Link>
+              <Link href="/grammar" onClick={closeMenu} className="rounded px-3 py-3 text-sm font-semibold hover:bg-[#f1f5ef]">{tr('القواعد', 'Grammar')}</Link>
+              <Link href="/placement-test" onClick={closeMenu} className="rounded px-3 py-3 text-sm font-semibold hover:bg-[#f1f5ef]">{tr('اختبار المستوى', 'Placement test')}</Link>
               <Link href="/contact" onClick={closeMenu} className="rounded px-3 py-3 text-sm font-semibold hover:bg-[#f1f5ef]">{tr('تواصل معنا', 'Contact')}</Link>
               <div className="mt-2 grid grid-cols-2 gap-2 border-t border-[#e7ebe5] pt-4">
                 <Link href={accountHref} onClick={closeMenu} className="rounded border border-[#d9e0d9] px-3 py-3 text-center text-xs font-bold">{accountLabel}</Link>
@@ -501,23 +506,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className={`border-t ${isDark ? 'border-[#344239] bg-[#111915]' : 'border-[#e4eae3] bg-[#fffefa]'}`}>
-        <div className="mx-auto flex max-w-[1240px] flex-col gap-6 px-5 py-8 sm:px-8 md:flex-row md:items-center md:justify-between">
-          <div className={isArabic ? 'text-right' : 'text-left'}>
-            <Link href="/" className="inline-block" aria-label="Be Fluent home">
-              <BrandLockup size="sm" tagline={tr('إنجليزية تُستخدم في الحياة.', 'ENGLISH FOR REAL LIFE.')} />
-            </Link>
-          </div>
-          <nav className="flex flex-wrap gap-x-5 gap-y-3 text-[11px] font-semibold text-[#5f6e64]" aria-label={tr('روابط التذييل', 'Footer navigation')}>
-            <Link href="/about-path" className="hover:text-[#28694b]">{tr('عن المنهج', 'Our approach')}</Link>
-            <Link href="/learning-path" className="hover:text-[#28694b]">{tr('مسار التعلم', 'Learning path')}</Link>
-            <Link href="/packages" className="hover:text-[#28694b]">{tr('الباقات', 'Packages')}</Link>
-            <Link href="/contact" className="hover:text-[#28694b]">{tr('تواصل معنا', 'Contact')}</Link>
-            <Link href={accountHref} className="hover:text-[#28694b]">{accountLabel}</Link>
-          </nav>
-          <p className="text-[11px] text-[#89958c]">© Be Fluent</p>
-        </div>
-      </footer>
+      <MarketingFooter />
       <LatestCouponPopup />
     </main>
   );

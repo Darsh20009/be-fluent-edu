@@ -8,6 +8,8 @@ import Alert from '@/components/ui/Alert'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 interface Manuscript {
   id: string
@@ -28,6 +30,7 @@ interface Manuscript {
 }
 
 export default function ManuscriptsTab({ teacherProfileId }: { teacherProfileId: string }) {
+  const { language } = useTheme()
   const [manuscripts, setManuscripts] = useState<Manuscript[]>([])
   const [loading, setLoading] = useState(true)
   const [viewingManuscript, setViewingManuscript] = useState<Manuscript | null>(null)
@@ -67,15 +70,14 @@ export default function ManuscriptsTab({ teacherProfileId }: { teacherProfileId:
   return (
     <div className="space-y-6">
       <h2 className="text-3xl font-bold text-[#10B981]">
-        Student Manuscripts / مخطوطات الطلاب
+        {localeText(language, 'مخطوطات الطلاب', 'Student manuscripts')}
       </h2>
 
       {manuscripts.length === 0 ? (
         <Alert variant="info">
           <FileText className="h-5 w-5 mr-2 inline" />
           <div className="inline-block">
-            <p>No pending manuscripts to review.</p>
-            <p>لا توجد مخطوطات معلقة للمراجعة.</p>
+            <p>{localeText(language, 'لا توجد مخطوطات معلقة للمراجعة.', 'No pending manuscripts to review.')}</p>
           </div>
         </Alert>
       ) : (
@@ -95,12 +97,12 @@ export default function ManuscriptsTab({ teacherProfileId }: { teacherProfileId:
                     <span>📧 {manuscript.User.email}</span>
                   </div>
                   <p className="text-xs text-gray-500 mt-2">
-                    Submitted: {new Date(manuscript.submittedAt).toLocaleString('ar-EG')}
+                     {localeText(language, 'تاريخ الإرسال:', 'Submitted:')} {new Date(manuscript.submittedAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}
                   </p>
                 </div>
                 <Badge variant="warning">
                   <FileText className="h-3 w-3 mr-1" />
-                  Pending Review
+                  {localeText(language, 'بانتظار المراجعة', 'Pending review')}
                 </Badge>
               </div>
 
@@ -116,7 +118,7 @@ export default function ManuscriptsTab({ teacherProfileId }: { teacherProfileId:
                 onClick={() => setViewingManuscript(manuscript)}
               >
                 <Eye className="h-4 w-4 mr-2" />
-                View Manuscript & Grade / عرض المخطوطة والتقييم
+                {localeText(language, 'عرض المخطوطة والتقييم', 'View manuscript & grade')}
               </Button>
             </Card>
           ))}
@@ -131,24 +133,24 @@ export default function ManuscriptsTab({ teacherProfileId }: { teacherProfileId:
         >
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Test: {viewingManuscript.WritingTest.title}</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{localeText(language, 'الاختبار:', 'Test:')} {viewingManuscript.WritingTest.title}</h3>
               <p className="text-sm text-gray-600 mb-4">{viewingManuscript.WritingTest.titleAr}</p>
             </div>
 
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Student Writing:</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{localeText(language, 'كتابة الطالب:', 'Student writing:')}</h3>
               <div className="p-4 bg-gray-50 rounded-lg max-h-48 overflow-y-auto">
                 <p className="text-gray-700 whitespace-pre-wrap text-sm">{viewingManuscript.content}</p>
               </div>
             </div>
 
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Handwritten Manuscript:</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{localeText(language, 'المخطوطة المكتوبة بخط اليد:', 'Handwritten manuscript:')}</h3>
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                 {viewingManuscript.manuscriptUrl.startsWith('data:image') ? (
                   <img
                     src={viewingManuscript.manuscriptUrl}
-                    alt="Student manuscript"
+                    alt={localeText(language, 'مخطوطة الطالب', 'Student manuscript')}
                     className="max-h-96 w-full object-contain rounded"
                   />
                 ) : (
@@ -158,7 +160,7 @@ export default function ManuscriptsTab({ teacherProfileId }: { teacherProfileId:
                     rel="noopener noreferrer"
                     className="text-[#10B981] hover:underline font-medium"
                   >
-                    📎 Download Manuscript
+                    📎 {localeText(language, 'تنزيل المخطوطة', 'Download manuscript')}
                   </a>
                 )}
               </div>
@@ -166,7 +168,7 @@ export default function ManuscriptsTab({ teacherProfileId }: { teacherProfileId:
 
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-gray-700">
-                💡 To grade this submission, go to the <strong>Writing Tests</strong> tab and select the test "{viewingManuscript.WritingTest.title}" to add your grade and feedback.
+                💡 {localeText(language, 'لتصحيح هذا الإرسال، انتقل إلى تبويب', 'To grade this submission, go to the')} <strong>{localeText(language, 'اختبارات الكتابة', 'Writing Tests')}</strong> {localeText(language, 'واختر الاختبار', 'tab and select the test')} "{viewingManuscript.WritingTest.title}" {localeText(language, 'لإضافة الدرجة والملاحظات.', 'to add your grade and feedback.')}
               </p>
             </div>
 
@@ -175,7 +177,7 @@ export default function ManuscriptsTab({ teacherProfileId }: { teacherProfileId:
               fullWidth
               onClick={() => setViewingManuscript(null)}
             >
-              Close / إغلاق
+              {localeText(language, 'إغلاق', 'Close')}
             </Button>
           </div>
         </Modal>

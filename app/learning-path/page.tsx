@@ -4,6 +4,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Target, Coffee, ClipboardList, Users, ShieldCheck, Zap, Clock, UserPlus } from 'lucide-react';
 import { MarketingFrame } from '@/components/marketing/MarketingFrame';
+import { useTheme } from '@/lib/contexts/ThemeContext';
+import { localeText } from '@/lib/locale';
 
 const pathSteps = [
   { 
@@ -57,23 +59,34 @@ const pathSteps = [
 ];
 
 export default function LearningPathPage() {
+  const { language } = useTheme();
+  const t = (ar: string, en: string) => localeText(language, ar, en);
+  const stepTitles = ['Goal setting', 'Trial lesson', 'Personalized plan', 'Two-teacher support', 'Assessment', 'Quick quizzes'];
+  const stepDescriptions = [
+    'We begin with a consultation to define your English goals—work, study, or travel.',
+    'Experience our learning system with an expert teacher who assesses your current level.',
+    'A learning plan designed around your strengths and needs for the fastest progress.',
+    'A lead teacher for lessons and a support teacher to keep you motivated around the clock.',
+    'Accurate monthly tests measure your progress at each level (A1–C1).',
+    'Two weekly quizzes help keep your knowledge fresh and build quick recall.',
+  ];
   return (
     <MarketingFrame>
       
       {/* Hero Section */}
-      <section className="relative border-b border-[#dfe5dd] bg-[#f4f6f0] py-16 sm:py-20">
+      <section dir={language === 'ar' ? 'rtl' : 'ltr'} className="relative border-b border-[#dfe5dd] bg-[#f4f6f0] py-16 sm:py-20">
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <p className="text-[10px] font-bold tracking-[.2em] text-[#147050]">THE LEARNING PATH</p>
+            <p className="text-[10px] font-bold tracking-[.2em] text-[#147050]">{t('مسار التعلم', 'THE LEARNING PATH')}</p>
             <h1 className="mt-3 text-4xl font-black text-[#1e2b29] mb-6 leading-tight md:text-5xl">
-              خريطة <span className="text-[#147050]">التعلم العملية</span>
+              {t('خريطة', 'Your')} <span className="text-[#147050]">{t('التعلم العملية', 'practical learning path')}</span>
             </h1>
             <p className="max-w-3xl mx-auto leading-8 text-[#66736e]">
-              لماذا تختار Be Fluent؟ لأننا لا نقدم مجرد دروس، بل نبني لك طريقاً متكاملاً نحو الطلاقة يبدأ من تحديد أهدافك وحتى الاحتراف.
+              {t('لماذا تختار Be Fluent؟ لأننا لا نقدم مجرد دروس، بل نبني لك طريقاً متكاملاً نحو الطلاقة يبدأ من تحديد أهدافك وحتى الاحتراف.', 'Why choose Be Fluent? We do more than teach lessons—we build a complete path to fluency, from setting goals to mastery.')}
             </p>
           </motion.div>
         </div>
@@ -119,8 +132,8 @@ export default function LearningPathPage() {
                     </div>
                     <span className="font-mono text-3xl font-black text-[#dbe3dc]">0{step.id}</span>
                   </div>
-                  <h3 className="mb-2 text-lg font-bold text-[#1e2b29]">{step.title}</h3>
-                  <p className="text-sm leading-relaxed text-[#68756f]">{step.description}</p>
+                  <h3 className="mb-2 text-lg font-bold text-[#1e2b29]">{language === 'ar' ? step.title : stepTitles[index]}</h3>
+                  <p className="text-sm leading-relaxed text-[#68756f]">{language === 'ar' ? step.description : stepDescriptions[index]}</p>
                 </motion.div>
               ))}
             </div>
@@ -132,8 +145,8 @@ export default function LearningPathPage() {
       <section className="border-y border-[#dfe5dd] bg-[#f4f6f0] py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="mb-4 text-3xl font-black text-[#1e2b29] md:text-4xl">نظام يناسب التزامك</h2>
-            <p className="text-[#68756f]">طريقتان واضحتان للتعلم، بنفس المتابعة الجادة.</p>
+            <h2 className="mb-4 text-3xl font-black text-[#1e2b29] md:text-4xl">{t('نظام يناسب التزامك', 'A plan that fits your schedule')}</h2>
+            <p className="text-[#68756f]">{t('طريقتان واضحتان للتعلم، بنفس المتابعة الجادة.', 'Two clear ways to learn, with the same dedicated support.')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
@@ -147,22 +160,22 @@ export default function LearningPathPage() {
                   <Clock className="w-8 h-8" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-[#1e2b29]">الدروس الخاصة</h3>
-                  <span className="text-sm font-bold text-[#147050]">دعم فردي كامل</span>
+                    <h3 className="text-2xl font-bold text-[#1e2b29]">{t('الدروس الخاصة', 'Private lessons')}</h3>
+                    <span className="text-sm font-bold text-[#147050]">{t('دعم فردي كامل', 'One-to-one support')}</span>
                 </div>
               </div>
               <ul className="space-y-4">
                 <li className="flex items-center gap-3 text-[#53615c]">
                   <div className="h-1.5 w-1.5 bg-[#147050]"></div>
-                  <span>مرونة تامة في اختيار وتعديل أوقات الحصص</span>
+                  <span>{t('مرونة تامة في اختيار وتعديل أوقات الحصص', 'Full flexibility to choose and change lesson times')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-[#53615c]">
                   <div className="h-1.5 w-1.5 bg-[#147050]"></div>
-                  <span>دعم مباشر 24/7 من المعلم الأساسي والمساعد</span>
+                  <span>{t('دعم مباشر 24/7 من المعلم الأساسي والمساعد', '24/7 support from your lead and support teachers')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-[#53615c]">
                   <div className="h-1.5 w-1.5 bg-[#147050]"></div>
-                  <span>تعديل الخطة الدراسية بناءً على سرعتك الشخصية</span>
+                  <span>{t('تعديل الخطة الدراسية بناءً على سرعتك الشخصية', 'A learning plan adapted to your personal pace')}</span>
                 </li>
               </ul>
             </motion.div>
@@ -177,22 +190,22 @@ export default function LearningPathPage() {
                   <UserPlus className="w-8 h-8" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-[#1e2b29]">الحصص الجماعية</h3>
-                  <span className="text-sm font-bold text-[#147050]">تفاعل اجتماعي محفز</span>
+                    <h3 className="text-2xl font-bold text-[#1e2b29]">{t('الحصص الجماعية', 'Group lessons')}</h3>
+                    <span className="text-sm font-bold text-[#147050]">{t('تفاعل اجتماعي محفز', 'Motivating social interaction')}</span>
                 </div>
               </div>
               <ul className="space-y-4">
                 <li className="flex items-center gap-3 text-[#53615c]">
                   <div className="h-1.5 w-1.5 bg-[#147050]"></div>
-                  <span>مجموعات صغيرة جداً (بحد أقصى 3 طلاب فقط) لضمان المشاركة</span>
+                  <span>{t('مجموعات صغيرة جداً (بحد أقصى 3 طلاب فقط) لضمان المشاركة', 'Very small groups (maximum 3 learners) to ensure everyone participates')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-[#53615c]">
                   <div className="h-1.5 w-1.5 bg-[#147050]"></div>
-                  <span>بيئة تنافسية ودية تساعد على كسر حاجز الخوف من التحدث</span>
+                  <span>{t('بيئة تنافسية ودية تساعد على كسر حاجز الخوف من التحدث', 'A friendly, lively environment that helps you overcome speaking anxiety')}</span>
                 </li>
                 <li className="flex items-center gap-3 text-[#53615c]">
                   <div className="h-1.5 w-1.5 bg-[#147050]"></div>
-                  <span>تكلفة اقتصادية مع الحفاظ على جودة التعليم العالية</span>
+                  <span>{t('تكلفة اقتصادية مع الحفاظ على جودة التعليم العالية', 'Affordable pricing without compromising teaching quality')}</span>
                 </li>
               </ul>
             </motion.div>

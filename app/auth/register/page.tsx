@@ -35,6 +35,8 @@ import Alert from '@/components/ui/Alert'
 import LanguageToggle from '@/components/LanguageToggle'
 import { useTranslation } from '@/lib/hooks/useTranslation'
 import { PLACEMENT_TEST_QUESTIONS, calculateLevel, getLevelDescription, getTotalPossibleScore } from '@/lib/placement-test-questions'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 type Step = 'name' | 'email' | 'password' | 'details' | 'package' | 'payment' | 'result'
 
@@ -60,6 +62,8 @@ const SECTION_INFO = {
 export default function RegisterPage() {
   const router = useRouter()
   const { t } = useTranslation()
+  const { language } = useTheme()
+  const tr = (ar: string, en: string) => localeText(language, ar, en)
   const [currentStep, setCurrentStep] = useState<Step>('name')
   const [formData, setFormData] = useState({
     name: '',
@@ -104,24 +108,24 @@ export default function RegisterPage() {
     switch (currentStep) {
       case 'name':
         if (!formData.name.trim() || formData.name.trim().length < 2) {
-          setError('الرجاء إدخال اسمك الكامل / Please enter your full name')
+          setError(tr('الرجاء إدخال اسمك الكامل', 'Please enter your full name'))
           return false
         }
         return true
       
       case 'email':
         if (!formData.email.trim() && !formData.phone.trim()) {
-          setError('الرجاء إدخال البريد الإلكتروني أو رقم الهاتف / Please enter email or phone')
+          setError(tr('الرجاء إدخال البريد الإلكتروني أو رقم الهاتف', 'Please enter your email or phone'))
           return false
         }
         if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-          setError('البريد الإلكتروني غير صالح / Invalid email format')
+          setError(tr('البريد الإلكتروني غير صالح', 'Invalid email format'))
           return false
         }
         if (formData.phone.trim()) {
           const phoneRegex = /^\+?[0-9]{10,15}$/
           if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
-            setError('رقم الهاتف غير صالح / Invalid phone number')
+            setError(tr('رقم الهاتف غير صالح', 'Invalid phone number'))
             return false
           }
         }
@@ -129,25 +133,25 @@ export default function RegisterPage() {
       
       case 'password':
         if (formData.password.length < 6) {
-          setError('كلمة المرور يجب أن تكون 6 أحرف على الأقل / Password must be at least 6 characters')
+          setError(tr('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'Password must be at least 6 characters'))
           return false
         }
         if (formData.password !== formData.confirmPassword) {
-          setError('كلمات المرور غير متطابقة / Passwords do not match')
+          setError(tr('كلمات المرور غير متطابقة', 'Passwords do not match'))
           return false
         }
         return true
       
       case 'package':
         if (!formData.packageId) {
-          setError('الرجاء اختيار باقة / Please select a package')
+          setError(tr('الرجاء اختيار باقة', 'Please select a package'))
           return false
         }
         return true
 
       case 'payment':
         if (!formData.receiptUrl) {
-          setError('الرجاء رفع صورة الإيصال / Please upload the receipt image')
+          setError(tr('الرجاء رفع صورة الإيصال', 'Please upload the receipt image'))
           return false
         }
         return true
@@ -252,7 +256,15 @@ export default function RegisterPage() {
         setCurrentStep('result')
       }
     } catch (err: any) {
-      setError(err.message)
+      const apiMessage = typeof err?.message === 'string' ? err.message : ''
+      const knownApiErrors: Record<string, [string, string]> = {
+        'User with this email already exists / هذا البريد الإلكتروني مسجل بالفعل': ['هذا البريد الإلكتروني مسجل بالفعل', 'An account with this email already exists'],
+        'User with this phone number already exists / رقم الهاتف هذا مسجل بالفعل': ['رقم الهاتف هذا مسجل بالفعل', 'An account with this phone number already exists'],
+        'Invalid data': ['البيانات المدخلة غير صالحة. تحقق من المعلومات وحاول مرة أخرى.', 'The submitted data is invalid. Check your information and try again.'],
+        'Registration failed': ['فشل التسجيل. حاول مرة أخرى.', 'Registration failed. Please try again.'],
+      }
+      const localizedError = knownApiErrors[apiMessage]
+      setError(localizedError ? tr(localizedError[0], localizedError[1]) : apiMessage || tr('حدث خطأ غير متوقع أثناء التسجيل.', 'An unexpected error occurred during registration.'))
     } finally {
       setLoading(false)
     }
@@ -282,14 +294,14 @@ export default function RegisterPage() {
               >
                 <User className="w-10 h-10 text-white" />
               </motion.div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">مرحباً بك</h2>
-              <p className="text-gray-600">لنبدأ بالتعرف عليك</p>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">{tr('مرحباً بك', 'Welcome')}</h2>
+              <p className="text-gray-600">{tr('لنبدأ بالتعرف عليك', 'Let’s get to know you')}</p>
             </div>
             
             <Input
               type="text"
-              label="الاسم الكامل / Full Name"
-              placeholder="أدخل اسمك الكامل"
+              label={tr('الاسم الكامل', 'Full name')}
+              placeholder={tr('أدخل اسمك الكامل', 'Enter your full name')}
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -318,19 +330,19 @@ export default function RegisterPage() {
               >
                 <Mail className="w-10 h-10 text-white" />
               </motion.div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">أهلاً {formData.name.split(' ')[0]}</h2>
-              <p className="text-gray-600">كيف يمكننا التواصل معك؟</p>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">{tr('أهلاً', 'Hello')}{formData.name ? ` ${formData.name.split(' ')[0]}` : ''}</h2>
+              <p className="text-gray-600">{tr('كيف يمكننا التواصل معك؟', 'How can we contact you?')}</p>
             </div>
             
             <Input
               type="email"
-              label="البريد الإلكتروني / Email"
+              label={tr('البريد الإلكتروني', 'Email')}
               placeholder="your.email@example.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               leftIcon={<Mail className="h-5 w-5" />}
               inputSize="lg"
-              hint="اختياري إذا أدخلت رقم الهاتف"
+              hint={tr('اختياري إذا أدخلت رقم الهاتف', 'Optional if you provide a phone number')}
             />
             
             <div className="relative">
@@ -338,19 +350,19 @@ export default function RegisterPage() {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">أو / or</span>
+                <span className="px-2 bg-white text-gray-500">{tr('أو', 'or')}</span>
               </div>
             </div>
             
             <Input
               type="tel"
-              label="رقم الواتساب / WhatsApp"
+              label={tr('رقم الواتساب', 'WhatsApp number')}
               placeholder="+20... or +966..."
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               leftIcon={<Phone className="h-5 w-5" />}
               inputSize="lg"
-              hint="اختياري إذا أدخلت البريد الإلكتروني"
+              hint={tr('اختياري إذا أدخلت البريد الإلكتروني', 'Optional if you provide an email address')}
             />
           </motion.div>
         )
@@ -373,25 +385,25 @@ export default function RegisterPage() {
               >
                 <Lock className="w-10 h-10 text-white" />
               </motion.div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">حماية حسابك</h2>
-              <p className="text-gray-600">أنشئ كلمة مرور قوية</p>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">{tr('حماية حسابك', 'Secure your account')}</h2>
+              <p className="text-gray-600">{tr('أنشئ كلمة مرور قوية', 'Create a strong password')}</p>
             </div>
             
             <Input
               type="password"
-              label="كلمة المرور / Password"
+              label={tr('كلمة المرور', 'Password')}
               placeholder="••••••••"
               required
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               leftIcon={<Lock className="h-5 w-5" />}
               inputSize="lg"
-              hint="6 أحرف على الأقل"
+              hint={tr('6 أحرف على الأقل', 'At least 6 characters')}
             />
             
             <Input
               type="password"
-              label="تأكيد كلمة المرور / Confirm Password"
+              label={tr('تأكيد كلمة المرور', 'Confirm password')}
               placeholder="••••••••"
               required
               value={formData.confirmPassword}
@@ -420,13 +432,13 @@ export default function RegisterPage() {
               >
                 <Target className="w-10 h-10 text-white" />
               </motion.div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">أخبرنا المزيد عنك</h2>
-              <p className="text-gray-600">لتخصيص تجربة التعلم</p>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">{tr('أخبرنا المزيد عنك', 'Tell us more about yourself')}</h2>
+              <p className="text-gray-600">{tr('لتخصيص تجربة التعلم', 'To personalize your learning experience')}</p>
             </div>
             
             <Input
               type="number"
-              label="العمر / Age"
+              label={tr('العمر', 'Age')}
               placeholder="18"
               required
               value={formData.age}
@@ -439,13 +451,13 @@ export default function RegisterPage() {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                هدفك من تعلم الإنجليزية / Your Goal *
+                {tr('هدفك من تعلم الإنجليزية', 'Your English learning goal')} *
               </label>
               <textarea
                 required
                 value={formData.goal}
                 onChange={(e) => setFormData({ ...formData, goal: e.target.value })}
-                placeholder="مثال: أريد تحسين محادثتي للعمل..."
+                placeholder={tr('مثال: أريد تحسين محادثتي للعمل...', 'For example: I want to improve my English for work...')}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent resize-none"
                 rows={3}
               />
@@ -453,14 +465,14 @@ export default function RegisterPage() {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                وقت الدراسة المفضل / Preferred Time *
+                {tr('وقت الدراسة المفضل', 'Preferred study time')} *
               </label>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { value: 'morning', label: 'صباحاً' },
-                  { value: 'afternoon', label: 'ظهراً' },
-                  { value: 'evening', label: 'مساءً' },
-                  { value: 'flexible', label: 'مرن' }
+                  { value: 'morning', label: tr('صباحاً', 'Morning') },
+                  { value: 'afternoon', label: tr('ظهراً', 'Afternoon') },
+                  { value: 'evening', label: tr('مساءً', 'Evening') },
+                  { value: 'flexible', label: tr('مرن', 'Flexible') }
                 ].map(option => (
                   <button
                     key={option.value}
@@ -490,8 +502,8 @@ export default function RegisterPage() {
             className="space-y-6"
           >
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">اختر باقتك</h2>
-              <p className="text-gray-600">اختر الخطة المناسبة لاحتياجاتك</p>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">{tr('اختر باقتك', 'Choose your package')}</h2>
+              <p className="text-gray-600">{tr('اختر الخطة المناسبة لاحتياجاتك', 'Choose a plan that suits your needs')}</p>
             </div>
             <div className="grid gap-4">
               {packages.map((pkg) => (
@@ -499,7 +511,7 @@ export default function RegisterPage() {
                   key={pkg.id}
                   type="button"
                   onClick={() => setFormData({ ...formData, packageId: pkg.id })}
-                  className={`p-4 rounded-xl border-2 text-right transition-all flex justify-between items-center ${
+                  className={`p-4 rounded-xl border-2 text-start transition-all flex justify-between items-center ${
                     formData.packageId === pkg.id
                       ? 'border-[#10B981] bg-emerald-50'
                       : 'border-gray-200 hover:border-gray-300'
@@ -509,8 +521,8 @@ export default function RegisterPage() {
                     {pkg.price} EGP
                   </div>
                   <div>
-                    <div className="font-bold">{pkg.titleAr}</div>
-                    <div className="text-xs text-gray-500">{pkg.lessonsCount} درس</div>
+                    <div className="font-bold">{language === 'ar' ? pkg.titleAr : pkg.title}</div>
+                    <div className="text-xs text-gray-500">{pkg.lessonsCount} {tr('درس', 'lessons')}</div>
                   </div>
                 </button>
               ))}
@@ -528,8 +540,8 @@ export default function RegisterPage() {
             className="space-y-6"
           >
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">الدفع</h2>
-              <p className="text-gray-600">حول المبلغ إلى الرقم التالي: <span className="font-bold text-emerald-600">+20 10 91515594</span></p>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">{tr('الدفع', 'Payment')}</h2>
+              <p className="text-gray-600">{tr('حول المبلغ إلى الرقم التالي:', 'Transfer the amount to the following number:')} <span className="font-bold text-emerald-600">+20 10 91515594</span></p>
               <div className="flex justify-center gap-4 mt-4">
                 <span className="text-xs bg-gray-100 px-2 py-1 rounded">Vodafone Cash</span>
                 <span className="text-xs bg-gray-100 px-2 py-1 rounded">Etisalat Cash</span>
@@ -538,11 +550,11 @@ export default function RegisterPage() {
             </div>
 
             <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100 text-sm">
-              <p className="text-emerald-800 text-center">بمجرد التحويل، يرجى رفع صورة إيصال الدفع للتفعيل</p>
+              <p className="text-emerald-800 text-center">{tr('بمجرد التحويل، يرجى رفع صورة إيصال الدفع للتفعيل', 'After the transfer, upload a payment receipt to activate your account.')}</p>
             </div>
 
             <div className="space-y-4">
-              <label className="block text-sm font-medium text-gray-700">إيصال الدفع / Payment Receipt</label>
+              <label className="block text-sm font-medium text-gray-700">{tr('إيصال الدفع', 'Payment receipt')}</label>
               <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-8 hover:border-emerald-500 transition-colors cursor-pointer relative">
                 <input
                   type="file"
@@ -566,7 +578,7 @@ export default function RegisterPage() {
                       const data = await response.json()
                       setFormData({ ...formData, receiptUrl: data.url })
                     } catch (err) {
-                      setError('فشل رفع الملف / Upload failed')
+                      setError(tr('فشل رفع الملف', 'Upload failed'))
                     } finally {
                       setUploading(false)
                     }
@@ -575,8 +587,8 @@ export default function RegisterPage() {
                 {formData.receiptUrl ? (
                   <div className="text-center">
                     <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-2" />
-                    <p className="text-emerald-600 font-medium">تم اختيار الملف</p>
-                    <p className="text-xs text-gray-500 mt-1">انقر للتغيير</p>
+                    <p className="text-emerald-600 font-medium">{tr('تم اختيار الملف', 'File selected')}</p>
+                    <p className="text-xs text-gray-500 mt-1">{tr('انقر للتغيير', 'Click to change')}</p>
                   </div>
                 ) : (
                   <div className="text-center">
@@ -585,7 +597,7 @@ export default function RegisterPage() {
                     ) : (
                       <>
                         <Upload className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                        <p className="text-gray-600">انقر لرفع الإيصال</p>
+                        <p className="text-gray-600">{tr('انقر لرفع الإيصال', 'Click to upload receipt')}</p>
                       </>
                     )}
                   </div>
@@ -595,7 +607,7 @@ export default function RegisterPage() {
             
             {loading && (
               <div className="text-center text-sm text-emerald-600 animate-pulse">
-                جاري معالجة الطلب...
+                {tr('جاري معالجة الطلب...', 'Processing your request...')}
               </div>
             )}
           </motion.div>
@@ -613,13 +625,13 @@ export default function RegisterPage() {
             <div className="w-24 h-24 mx-auto mb-4 bg-emerald-100 rounded-full flex items-center justify-center">
               <CheckCircle className="w-12 h-12 text-emerald-600" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-800">تم التسجيل بنجاح!</h2>
+            <h2 className="text-3xl font-bold text-gray-800">{tr('تم التسجيل بنجاح!', 'Registration complete!')}</h2>
             <p className="text-gray-600 max-w-sm mx-auto">
-              شكراً لتسجيلك. يتم الآن مراجعة إيصال الدفع من قبل الإدارة. سنقوم بتفعيل حسابك خلال 24 ساعة.
+              {tr('شكراً لتسجيلك. يتم الآن مراجعة إيصال الدفع من قبل الإدارة. سنقوم بتفعيل حسابك خلال 24 ساعة.', 'Thank you for registering. Your payment receipt is being reviewed, and your account will be activated within 24 hours.')}
             </p>
             <Link href="/auth/login" className="block w-full">
               <Button variant="primary" size="lg" fullWidth>
-                العودة لتسجيل الدخول
+                {tr('العودة لتسجيل الدخول', 'Return to sign in')}
               </Button>
             </Link>
           </motion.div>
@@ -631,7 +643,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div dir="rtl" className="min-h-[100dvh] bg-[#f4f6f0] flex flex-col">
+    <div dir={language === 'ar' ? 'rtl' : 'ltr'} className="min-h-[100dvh] bg-[#f4f6f0] flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-6">
         <div className="w-full max-w-lg">
           <div className="flex items-center justify-between mb-6">
@@ -658,7 +670,7 @@ export default function RegisterPage() {
           {currentStep !== 'result' && (
             <div className="mb-6">
               <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-                <span>الخطوة {currentStepIndex + 1} من {STEPS.length - 1}</span>
+                <span>{tr('الخطوة', 'Step')} {currentStepIndex + 1} {tr('من', 'of')} {STEPS.length - 1}</span>
                 <span>{Math.round(progress)}%</span>
               </div>
                <div className="h-1.5 w-full bg-[#dfe5dd]">
@@ -695,7 +707,7 @@ export default function RegisterPage() {
                   size="lg"
                    className="bg-[#147050] font-semibold text-white hover:bg-[#0e5940]"
                 >
-                  التالي
+                  {tr('التالي', 'Next')}
                   <ArrowLeft className="w-5 h-5 mr-2" />
                 </Button>
               </div>
@@ -703,9 +715,9 @@ export default function RegisterPage() {
           </div>
 
           <p className="mt-6 text-center text-gray-600 text-sm">
-            لديك حساب بالفعل؟{' '}
+            {tr('لديك حساب بالفعل؟', 'Already have an account?')}{' '}
              <Link href="/auth/login" className="font-semibold text-[#147050] hover:text-[#0e5940]">
-              تسجيل الدخول
+              {tr('تسجيل الدخول', 'Sign in')}
             </Link>
           </p>
         </div>

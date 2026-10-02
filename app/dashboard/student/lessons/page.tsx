@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { BookOpen, Play, FileText, CheckCircle, Clock, Filter, ChevronLeft } from 'lucide-react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeDirection, localeText } from '@/lib/locale'
 
 interface Lesson {
   id: string
@@ -26,6 +28,8 @@ interface Lesson {
 }
 
 export default function LessonsPage() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const { data: session, status } = useSession()
   const router = useRouter()
   const [lessons, setLessons] = useState<Lesson[]>([])
@@ -67,7 +71,8 @@ export default function LessonsPage() {
       INTERMEDIATE: { en: 'Intermediate', ar: 'متوسط', color: 'bg-yellow-100 text-yellow-700' },
       ADVANCED: { en: 'Advanced', ar: 'متقدم', color: 'bg-red-100 text-red-700' }
     }
-    return labels[level] || { en: level, ar: level, color: 'bg-gray-100 text-gray-700' }
+    const label = labels[level] || { en: level, ar: level, color: 'bg-gray-100 text-gray-700' }
+    return { ...label, displayed: language === 'ar' ? label.ar : label.en }
   }
 
   const categories = [...new Set(lessons.map(l => l.category).filter(Boolean))]
@@ -81,7 +86,7 @@ export default function LessonsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] p-4 sm:p-6">
+    <div className="min-h-screen bg-[#F9FAFB] p-4 sm:p-6" dir={localeDirection(language)}>
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <button
@@ -91,8 +96,7 @@ export default function LessonsPage() {
             <ChevronLeft className="w-5 h-5 text-[#10B981]" />
           </button>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#10B981]">الدروس التعليمية</h1>
-            <p className="text-gray-600">Lessons</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#10B981]">{t('الدروس التعليمية', 'Lessons')}</h1>
           </div>
         </div>
 
@@ -104,10 +108,10 @@ export default function LessonsPage() {
               onChange={(e) => setSelectedLevel(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
             >
-              <option value="">جميع المستويات</option>
-              <option value="BEGINNER">مبتدئ</option>
-              <option value="INTERMEDIATE">متوسط</option>
-              <option value="ADVANCED">متقدم</option>
+              <option value="">{t('جميع المستويات', 'All levels')}</option>
+              <option value="BEGINNER">{t('مبتدئ', 'Beginner')}</option>
+              <option value="INTERMEDIATE">{t('متوسط', 'Intermediate')}</option>
+              <option value="ADVANCED">{t('متقدم', 'Advanced')}</option>
             </select>
             
             {categories.length > 0 && (
@@ -116,7 +120,7 @@ export default function LessonsPage() {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
               >
-                <option value="">جميع الفئات</option>
+                <option value="">{t('جميع الفئات', 'All categories')}</option>
                 {categories.map((cat) => (
                   <option key={cat} value={cat || ''}>{cat}</option>
                 ))}
@@ -128,8 +132,8 @@ export default function LessonsPage() {
         {lessons.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-12 text-center">
             <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">لا توجد دروس متاحة</h3>
-            <p className="text-gray-500">سيتم إضافة دروس جديدة قريباً</p>
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">{t('لا توجد دروس متاحة', 'No lessons available')}</h3>
+            <p className="text-gray-500">{t('ستتم إضافة دروس جديدة قريباً', 'New lessons will be added soon')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -149,7 +153,7 @@ export default function LessonsPage() {
                     {lesson.thumbnailUrl ? (
                       <img
                         src={lesson.thumbnailUrl}
-                        alt={lesson.titleAr}
+                        alt={language === 'ar' ? lesson.titleAr || lesson.title : lesson.title}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -169,23 +173,22 @@ export default function LessonsPage() {
                     {isCompleted && (
                       <div className="absolute top-3 left-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
                         <CheckCircle className="w-3 h-3" />
-                        <span>مكتمل</span>
+                        <span>{t('مكتمل', 'Completed')}</span>
                       </div>
                     )}
                     
                     <div className="absolute top-3 right-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${levelInfo.color}`}>
-                        {levelInfo.ar}
+                        {levelInfo.displayed}
                       </span>
                     </div>
                   </div>
 
                   <div className="p-4">
-                    <h3 className="font-bold text-lg text-gray-800 mb-1 line-clamp-1">{lesson.titleAr}</h3>
-                    <p className="text-sm text-gray-500 mb-3">{lesson.title}</p>
+                    <h3 className="font-bold text-lg text-gray-800 mb-1 line-clamp-1">{language === 'ar' ? lesson.titleAr || lesson.title : lesson.title}</h3>
                     
-                    {lesson.descriptionAr && (
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{lesson.descriptionAr}</p>
+                    {(language === 'ar' ? lesson.descriptionAr : lesson.description) && (
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{language === 'ar' ? lesson.descriptionAr : lesson.description}</p>
                     )}
 
                     <div className="flex items-center justify-between text-sm text-gray-500">
@@ -193,12 +196,12 @@ export default function LessonsPage() {
                         {lesson.videoUrl && (
                           <span className="flex items-center gap-1">
                             <Play className="w-4 h-4" />
-                            فيديو
+                            {t('فيديو', 'Video')}
                           </span>
                         )}
                         <span className="flex items-center gap-1">
                           <FileText className="w-4 h-4" />
-                          {lesson.exerciseCount} تمرين
+                          {t(`${lesson.exerciseCount} تمرين`, `${lesson.exerciseCount} exercises`)}
                         </span>
                       </div>
                       

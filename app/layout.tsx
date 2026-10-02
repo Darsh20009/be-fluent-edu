@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -30,13 +31,15 @@ export const viewport: Viewport = {
   colorScheme: 'light dark',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const initialLanguage = cookieStore.get('language')?.value === 'en' ? 'en' : 'ar';
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang={initialLanguage} dir={initialLanguage === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
       <head>
         {/* Preload critical assets immediately */}
         <link rel="icon" type="image/png" sizes="32x32" href="/brand/be-fluent-icon-2026-32.png" />
@@ -73,15 +76,15 @@ export default function RootLayout({
         />
         <ServiceWorkerRegister />
         <SessionProvider>
-          <ThemeProvider>
+          <ThemeProvider initialLanguage={initialLanguage}>
             <Toaster
               position="top-center"
               toastOptions={{
                 duration: 3000,
                 style: {
                   fontFamily: 'inherit',
-                  direction: 'rtl',
-                  textAlign: 'right',
+                  direction: 'inherit',
+                  textAlign: 'start',
                 },
                 success: {
                   style: {

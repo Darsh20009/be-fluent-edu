@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import AdminDashboardClient from './AdminDashboardClient'
+import { getServerLanguage } from '@/lib/server-locale'
+import { localeDirection } from '@/lib/locale'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,8 +14,10 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   if (!['ADMIN', 'ASSISTANT', 'MANAGER'].includes(session.user.role)) {
     redirect('/dashboard')
   }
+  const language = await getServerLanguage()
 
   return (
+    <div dir={localeDirection(language)}>
     <AdminDashboardClient
       user={{
         name: session.user.name || 'Be Fluent',
@@ -23,5 +27,6 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     >
       {children}
     </AdminDashboardClient>
+    </div>
   )
 }

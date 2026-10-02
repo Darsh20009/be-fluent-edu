@@ -22,6 +22,9 @@ import CouponsTab from './components/CouponsTab'
 import PageEditorTab from './components/PageEditorTab'
 import LeadsTab from './components/LeadsTab'
 import ThemeToggle from '@/components/ThemeToggle'
+import LanguageToggle from '@/components/LanguageToggle'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText, localeDirection } from '@/lib/locale'
 
 interface Props {
   user: { name: string; email: string; role: string }
@@ -103,6 +106,22 @@ const MANAGER_MENU = [
 ]
 
 export default function AdminDashboardClient({ user, children }: Props) {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
+  const sidebarOffscreen = language === 'ar' ? 'translate-x-full' : '-translate-x-full'
+  const translateLabel = (label: string) => t(label, ({
+    'الرئيسية': 'Home', 'لوحة التحكم': 'Dashboard', 'الأشخاص': 'People',
+    'ملفات الأشخاص': 'People profiles', 'المستخدمون': 'Users', 'الطلاب': 'Students',
+    'التعلّم والمتابعة': 'Learning & tracking', 'الحصص': 'Classes', 'المستويات': 'Levels',
+    'التغذية الراجعة': 'Feedback', 'الواجبات': 'Homework', 'الدروس': 'Lessons',
+    'اختبار تحديد المستوى': 'Placement test', 'محرر الصفحات': 'Page editor',
+    'غرف المحادثة': 'Speaking rooms', 'ذكاء التعلّم': 'Learning intelligence',
+    'الطلبات والماليات': 'Requests & finance', 'طلبات الحجز': 'Booking requests',
+    'الباقات والمجموعات': 'Packages & groups', 'مراجعة دفعات الاشتراك': 'Subscription payments',
+    'الكوبونات': 'Coupons', 'التواصل': 'Communication', 'البريد المباشر': 'Direct email',
+    'النظام': 'System', 'السجلات وإعدادات النظام': 'System logs & settings',
+    'مساحة المدير': 'Manager workspace',
+  } as Record<string, string>)[label] || label)
   const router = useRouter()
   const pathname = usePathname()
   const [activeTab, setActiveTab] = useState('home')
@@ -162,6 +181,14 @@ export default function AdminDashboardClient({ user, children }: Props) {
   const navigateToTab = (tab: string) => {
     setActiveTab(tab)
     setSidebarOpen(false)
+    if (tab === 'whatsapp-route') {
+      router.push('/dashboard/admin/whatsapp')
+      return
+    }
+    if (tab === 'classes-route') {
+      router.push('/dashboard/admin/classes')
+      return
+    }
     if (!isDashboardRoot) router.push(`/dashboard/admin?tab=${encodeURIComponent(tab)}`)
     const group = MENU_GROUPS.find(section => section.items.some(item => item.id === tab))
     if (group) {
@@ -177,24 +204,24 @@ export default function AdminDashboardClient({ user, children }: Props) {
   const activeRouteItem = MENU_GROUPS.flatMap(g => g.items).find(i =>
     'href' in i && i.href ? routeMatches(pathname, i.href) : false,
   )
-  const activeLabel = activeRouteItem?.label || MENU_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || 'لوحة التحكم'
+  const activeLabel = translateLabel(activeRouteItem?.label || MENU_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || 'لوحة التحكم')
   const pendingSubscriptions = typeof stats?.pendingSubscriptions === 'number' && Number.isFinite(stats.pendingSubscriptions)
     ? stats.pendingSubscriptions
     : null
 
   return (
-    <div className="min-h-[100dvh] bg-[#f5f7f4] text-[#26332e]" dir="rtl">
+    <div className="min-h-[100dvh] bg-[#f5f7f4] text-[#26332e]" dir={localeDirection(language)}>
       {sidebarOpen && (
         <button
           type="button"
-          aria-label="إغلاق القائمة"
+          aria-label={t('إغلاق القائمة', 'Close menu')}
           className="fixed inset-0 z-40 bg-[#172b21]/35 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      <aside className={`fixed inset-y-0 right-0 z-50 flex w-[min(320px,88vw)] flex-col border-l border-[#e0e6e1] bg-white transition-transform duration-200 lg:sticky lg:top-0 lg:h-[100dvh] lg:w-[270px] lg:shrink-0 lg:translate-x-0 ${
-        sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
+      <aside className={`fixed inset-y-0 ${language === 'ar' ? 'right-0 border-l' : 'left-0 border-r'} z-50 flex w-[min(320px,88vw)] flex-col border-[#e0e6e1] bg-white transition-transform duration-200 lg:sticky lg:top-0 lg:h-[100dvh] lg:w-[270px] lg:shrink-0 lg:translate-x-0 ${
+        sidebarOpen ? 'translate-x-0' : `${sidebarOffscreen} lg:translate-x-0`
       }`}>
         <div className="flex min-h-[76px] items-center justify-between border-b border-[#e8ece8] px-5">
           <Link href="/" className="flex items-center gap-3">
@@ -203,12 +230,12 @@ export default function AdminDashboardClient({ user, children }: Props) {
             </span>
             <span>
               <span className="block text-sm font-extrabold text-[#26332e]">Be Fluent</span>
-              <span className="mt-1 block text-[11px] font-medium text-[#76827a]">مساحة الإدارة</span>
+              <span className="mt-1 block text-[11px] font-medium text-[#76827a]">{t('مساحة الإدارة', 'Admin workspace')}</span>
             </span>
           </Link>
           <button
             type="button"
-            aria-label="إغلاق القائمة"
+            aria-label={t('إغلاق القائمة', 'Close menu')}
             className="grid min-h-11 min-w-11 place-items-center rounded-lg text-[#68756e] hover:bg-[#f3f6f3] lg:hidden"
             onClick={() => setSidebarOpen(false)}
           >
@@ -222,14 +249,14 @@ export default function AdminDashboardClient({ user, children }: Props) {
           </span>
           <span className="min-w-0">
             <span className="block truncate text-sm font-bold text-[#2d3a32]">{user.name}</span>
-            <span className="mt-1 block truncate text-xs text-[#718078]">{user.role === 'ADMIN' ? 'مدير النظام' : user.role === 'MANAGER' ? 'مدير' : 'مساعد'}</span>
+            <span className="mt-1 block truncate text-xs text-[#718078]">{user.role === 'ADMIN' ? t('مدير النظام', 'System administrator') : user.role === 'MANAGER' ? t('مدير', 'Manager') : t('مساعد', 'Assistant')}</span>
           </span>
         </div>
 
-        <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4" aria-label={isManager ? 'تنقل المدير' : 'التنقل الرئيسي للإدارة'}>
+        <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4" aria-label={isManager ? t('تنقل المدير', 'Manager navigation') : t('التنقل الرئيسي للإدارة', 'Main admin navigation')}>
           {isManager ? (
             <section className="space-y-1">
-              <h2 className="px-3 pb-2 text-[11px] font-semibold text-[#839087]">مساحة المدير</h2>
+              <h2 className="px-3 pb-2 text-[11px] font-semibold text-[#839087]">{t('مساحة المدير', 'Manager workspace')}</h2>
               {MANAGER_MENU.map(item => {
                 const Icon = item.icon
                 const selected = routeMatches(pathname, item.href)
@@ -239,12 +266,12 @@ export default function AdminDashboardClient({ user, children }: Props) {
                     href={item.href}
                     aria-current={selected ? 'page' : undefined}
                     onClick={() => setSidebarOpen(false)}
-                    className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-right text-sm transition-colors ${
+                    className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-start text-sm transition-colors ${
                       selected ? 'bg-[#edf5ef] font-bold text-[#225d41]' : 'text-[#5c6961] hover:bg-[#f5f7f5] hover:text-[#225d41]'
                     }`}
                   >
                     <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
-                    <span className="flex-1">{item.label}</span>
+                    <span className="flex-1">{translateLabel(item.label)}</span>
                   </Link>
                 )
               })}
@@ -260,13 +287,13 @@ export default function AdminDashboardClient({ user, children }: Props) {
                     ? routeMatches(pathname, item.href)
                     : isDashboardRoot && activeTab === item.id
                   const showBadge = item.id === 'subscriptions'
-                  const classes = `flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-right text-sm transition-colors ${
+                  const classes = `flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-start text-sm transition-colors ${
                     selected ? 'bg-[#edf5ef] font-bold text-[#225d41]' : 'text-[#5c6961] hover:bg-[#f5f7f5] hover:text-[#225d41]'
                   }`
                   const content = (
                     <>
                       <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
-                      <span className="flex-1">{item.label}</span>
+                      <span className="flex-1">{translateLabel(item.label)}</span>
                       {showBadge && pendingSubscriptions !== null && pendingSubscriptions > 0 && (
                         <span className="min-w-6 rounded-full bg-[#f5f1e7] px-2 py-1 text-center text-[11px] font-bold tabular-nums text-[#80662d]">
                           {pendingSubscriptions}
@@ -305,7 +332,7 @@ export default function AdminDashboardClient({ user, children }: Props) {
             if (group.id === 'overview') {
               return (
                 <section key={group.id}>
-                  <h2 className="px-3 pb-2 text-[11px] font-semibold text-[#839087]">{group.label}</h2>
+                  <h2 className="px-3 pb-2 text-[11px] font-semibold text-[#839087]">{translateLabel(group.label)}</h2>
                   {items}
                 </section>
               )
@@ -318,10 +345,10 @@ export default function AdminDashboardClient({ user, children }: Props) {
                   aria-expanded={expanded}
                   aria-controls={`admin-nav-${group.id}`}
                   onClick={() => setExpandedGroups(current => ({ ...current, [group.id]: !expanded }))}
-                  className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-right text-sm font-semibold text-[#5c6961] hover:bg-[#f5f7f5] hover:text-[#225d41]"
+                  className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-start text-sm font-semibold text-[#5c6961] hover:bg-[#f5f7f5] hover:text-[#225d41]"
                 >
                   <GroupIcon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
-                  <span className="flex-1">{group.label}</span>
+                  <span className="flex-1">{translateLabel(group.label)}</span>
                   <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />
                 </button>
                 <div id={`admin-nav-${group.id}`} className="mt-1 space-y-1 pr-3" hidden={!expanded}>{items}</div>
@@ -334,7 +361,7 @@ export default function AdminDashboardClient({ user, children }: Props) {
           {!isManager && (
             <Link href="/dashboard/teacher" className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-semibold text-[#5c6961] hover:bg-[#f5f7f5] hover:text-[#225d41]">
               <GraduationCap size={18} aria-hidden="true" />
-              لوحة المعلم
+              {t('لوحة المعلم', 'Teacher dashboard')}
             </Link>
           )}
           <button
@@ -343,18 +370,18 @@ export default function AdminDashboardClient({ user, children }: Props) {
             className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-semibold text-[#80534b] hover:bg-[#faf3f1]"
           >
             <LogOut size={18} aria-hidden="true" />
-            تسجيل الخروج
+            {t('تسجيل الخروج', 'Sign out')}
           </button>
         </div>
       </aside>
 
-      <div className="min-h-[100dvh] lg:-mt-[100dvh] lg:mr-[270px]">
+      <div className={`min-h-[100dvh] lg:-mt-[100dvh] ${language === 'ar' ? 'lg:mr-[270px]' : 'lg:ml-[270px]'}`}>
         <header className="sticky top-0 z-30 border-b border-[#e0e6e1] bg-white/95">
           <div className="mx-auto flex min-h-[68px] max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-6">
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
-                aria-label="فتح القائمة"
+                aria-label={t('فتح القائمة', 'Open menu')}
                 aria-expanded={sidebarOpen}
                 className="grid min-h-11 min-w-11 place-items-center rounded-lg border border-[#e0e6e1] text-[#315f49] hover:bg-[#f2f7f2] lg:hidden"
                 onClick={() => setSidebarOpen(true)}
@@ -363,18 +390,19 @@ export default function AdminDashboardClient({ user, children }: Props) {
               </button>
               <div className="min-w-0">
                 <div className="mb-1 hidden items-center gap-1.5 text-[11px] font-medium text-[#89938d] sm:flex">
-                  <span>الإدارة</span>
-                  <ChevronRight size={13} aria-hidden="true" />
+                  <span>{t('الإدارة', 'Administration')}</span>
+                  <ChevronRight className={language === 'ar' ? 'rotate-180' : undefined} size={13} aria-hidden="true" />
                   <span className="truncate text-[#477557]">{activeLabel}</span>
                 </div>
                 <h1 className="truncate text-lg font-bold text-[#26332e] sm:text-xl">{activeLabel}</h1>
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <LanguageToggle />
               <ThemeToggle />
-              <span className="hidden text-left sm:block">
+              <span className="hidden text-start sm:block">
                 <span className="block text-xs font-bold text-[#344239]">{user.name}</span>
-                <span className="mt-1 block text-[11px] text-[#718078]">{user.role === 'ADMIN' ? 'مدير النظام' : user.role === 'MANAGER' ? 'مدير' : 'مساعد'}</span>
+                <span className="mt-1 block text-[11px] text-[#718078]">{user.role === 'ADMIN' ? t('مدير النظام', 'System administrator') : user.role === 'MANAGER' ? t('مدير', 'Manager') : t('مساعد', 'Assistant')}</span>
               </span>
               <span className="grid h-10 w-10 place-items-center rounded-full bg-[#e6f0e8] text-sm font-extrabold text-[#286547]">
                 {user.name?.charAt(0).toUpperCase()}

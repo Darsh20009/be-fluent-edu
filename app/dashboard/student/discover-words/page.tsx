@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, X, Star, Sparkles, Brain, Trophy, ArrowRight, Volume2, Filter, ChevronDown, Image as ImageIcon, BookOpen, Layers } from 'lucide-react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 interface Word {
   word: string
@@ -21,6 +23,8 @@ interface Category {
 }
 
 export default function DiscoverWordsPage() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [words, setWords] = useState<Word[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [level, setLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('beginner')
@@ -119,7 +123,7 @@ export default function DiscoverWordsPage() {
 
   const getCategoryName = (catId: string) => {
     const cat = categories.find(c => c.id === catId)
-    return cat ? cat.name : catId
+    return cat ? (language === 'ar' ? cat.name : cat.nameEn) : catId
   }
 
   if (loading) {
@@ -131,8 +135,7 @@ export default function DiscoverWordsPage() {
             <div className="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
             <BookOpen className="absolute inset-0 m-auto h-10 w-10 text-blue-600" />
           </div>
-          <p className="text-xl text-gray-700 font-medium">جاري تحميل الكلمات...</p>
-          <p className="text-gray-500 mt-2">Loading words...</p>
+          <p className="text-xl text-gray-700 font-medium">{t('جاري تحميل الكلمات...', 'Loading words...')}</p>
         </div>
       </div>
     )
@@ -151,10 +154,10 @@ export default function DiscoverWordsPage() {
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Trophy className="h-10 w-10 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">أحسنت</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('أحسنت', 'Well done')}</h2>
           <p className="text-gray-600 mb-6">
-            لقد راجعت جميع الكلمات المتاحة في هذا المستوى
-            {category !== 'all' && ` وهذه الفئة (${getCategoryName(category)})`}!
+            {t('لقد راجعت جميع الكلمات المتاحة في هذا المستوى', 'You reviewed all available words at this level')}
+            {category !== 'all' && ` ${t('وهذه الفئة', 'and in this category')} (${getCategoryName(category)})`}!
           </p>
           <div className="flex gap-3 justify-center">
             <button
@@ -164,13 +167,13 @@ export default function DiscoverWordsPage() {
               }}
               className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
             >
-              جميع الفئات
+              {t('جميع الفئات', 'All categories')}
             </button>
             <button
               onClick={() => loadWords()}
               className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
             >
-              إعادة المحاولة
+              {t('إعادة المحاولة', 'Try again')}
             </button>
           </div>
         </motion.div>
@@ -193,7 +196,7 @@ export default function DiscoverWordsPage() {
                 <Brain className="h-7 w-7 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">اكتشف الكلمات</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('اكتشف الكلمات', 'Discover words')}</h1>
                 <p className="text-gray-500 text-sm">Discover New Words</p>
               </div>
             </div>
@@ -202,12 +205,12 @@ export default function DiscoverWordsPage() {
               <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 px-5 py-3 rounded-xl text-center">
                 <Star className="h-5 w-5 mx-auto mb-1 text-amber-500" />
                 <div className="text-xl font-bold text-gray-900">{score}</div>
-                <div className="text-xs text-gray-500">النقاط</div>
+                <div className="text-xs text-gray-500">{t('النقاط', 'Points')}</div>
               </div>
               <div className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 px-5 py-3 rounded-xl text-center">
                 <Sparkles className="h-5 w-5 mx-auto mb-1 text-purple-500" />
                 <div className="text-xl font-bold text-gray-900">{streak}</div>
-                <div className="text-xs text-gray-500">التتابع</div>
+                <div className="text-xs text-gray-500">{t('التتابع', 'Streak')}</div>
               </div>
             </div>
           </div>
@@ -232,9 +235,9 @@ export default function DiscoverWordsPage() {
                     : 'bg-white text-gray-700 border border-gray-200 hover:border-blue-300 hover:bg-blue-50'
                 }`}
               >
-                {lvl === 'beginner' && 'مبتدئ'}
-                {lvl === 'intermediate' && 'متوسط'}
-                {lvl === 'advanced' && 'متقدم'}
+                {lvl === 'beginner' && t('مبتدئ', 'Beginner')}
+                {lvl === 'intermediate' && t('متوسط', 'Intermediate')}
+                {lvl === 'advanced' && t('متقدم', 'Advanced')}
               </button>
             ))}
           </div>
@@ -246,7 +249,7 @@ export default function DiscoverWordsPage() {
               className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
             >
               <Filter className="h-4 w-4" />
-              <span>تصفية حسب الفئة</span>
+              <span>{t('تصفية حسب الفئة', 'Filter by category')}</span>
               <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
             </button>
           </div>
@@ -270,7 +273,7 @@ export default function DiscoverWordsPage() {
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
                     >
-                      جميع الفئات
+                      {t('جميع الفئات', 'All categories')}
                     </button>
                     {categories.map((cat) => (
                       <button
@@ -295,11 +298,11 @@ export default function DiscoverWordsPage() {
           <div className="flex justify-center gap-4 text-sm text-gray-500">
             <span className="flex items-center gap-1">
               <Layers className="h-4 w-4" />
-              {totalWords} كلمة متاحة
+              {t(`${totalWords} كلمة متاحة`, `${totalWords} words available`)}
             </span>
             <span className="flex items-center gap-1">
               <Check className="h-4 w-4 text-green-500" />
-              {knownWords} كلمة تعرفها
+              {t(`${knownWords} كلمة تعرفها`, `${knownWords} words known`)}
             </span>
           </div>
         </motion.div>
@@ -322,7 +325,7 @@ export default function DiscoverWordsPage() {
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="flex flex-col items-center gap-2">
                         <ImageIcon className="h-12 w-12 text-gray-300 animate-pulse" />
-                        <span className="text-gray-400 text-sm">جاري تحميل الصورة...</span>
+                        <span className="text-gray-400 text-sm">{t('جاري تحميل الصورة...', 'Loading image...')}</span>
                       </div>
                     </div>
                   )}
@@ -383,7 +386,7 @@ export default function DiscoverWordsPage() {
                     <button
                       onClick={() => speakWord(currentWord.word)}
                       className="p-2 bg-blue-100 hover:bg-blue-200 rounded-full transition-colors"
-                      title="نطق الكلمة"
+                      title={t('نطق الكلمة', 'Pronounce word')}
                     >
                       <Volume2 className="h-5 w-5 text-blue-600" />
                     </button>
@@ -404,7 +407,7 @@ export default function DiscoverWordsPage() {
                     className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
                   >
                     <BookOpen className="h-4 w-4" />
-                    {showExample ? 'إخفاء المثال' : 'عرض مثال'}
+                    {showExample ? t('إخفاء المثال', 'Hide example') : t('عرض مثال', 'Show example')}
                   </button>
                 </div>
 
@@ -425,7 +428,7 @@ export default function DiscoverWordsPage() {
                           >
                             <Volume2 className="h-4 w-4 text-blue-600" />
                           </button>
-                          <span className="text-xs text-blue-600 font-medium">مثال</span>
+                          <span className="text-xs text-blue-600 font-medium">{t('مثال', 'Example')}</span>
                         </div>
                         <p className="text-gray-700 italic text-lg">"{currentWord.example}"</p>
                       </div>
@@ -442,7 +445,7 @@ export default function DiscoverWordsPage() {
                     className="flex-1 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all"
                   >
                     <X className="h-6 w-6" />
-                    <span>لا أعرفها</span>
+                    <span>{t('لا أعرفها', 'I don’t know it')}</span>
                   </motion.button>
 
                   <motion.button
@@ -452,7 +455,7 @@ export default function DiscoverWordsPage() {
                     className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all"
                   >
                     <Check className="h-6 w-6" />
-                    <span>أعرفها!</span>
+                    <span>{t('أعرفها!', 'I know it!')}</span>
                   </motion.button>
                 </div>
               </div>
@@ -466,7 +469,7 @@ export default function DiscoverWordsPage() {
             transition={{ delay: 0.3 }}
             className="mt-6 text-center text-sm text-gray-500 bg-white/50 rounded-xl p-4"
           >
-            <p>جميع الكلمات تُضاف تلقائياً لقائمة "كلماتي" للمراجعة لاحقاً</p>
+            <p>{t('جميع الكلمات تُضاف تلقائياً لقائمة "كلماتي" للمراجعة لاحقاً', 'All words are automatically added to “My Words” for later review')}</p>
           </motion.div>
         </div>
       </div>

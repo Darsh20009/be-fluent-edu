@@ -8,6 +8,8 @@ import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Alert from '@/components/ui/Alert'
 import { toast } from 'react-hot-toast'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText, localeDirection } from '@/lib/locale'
 
 type SubscriptionStatus = 'PENDING' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED'
 type PaymentMethod = 'BANK_TRANSFER' | 'E_WALLET'
@@ -60,6 +62,8 @@ interface Teacher {
 }
 
 export default function SubscriptionsTab() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [loading, setLoading] = useState(true)
@@ -98,7 +102,7 @@ export default function SubscriptionsTab() {
 
   async function handleApprove() {
     if (!selectedSub || !selectedTeacher) {
-      toast.error('يرجى اختيار مدرس / Please select a teacher')
+      toast.error(t('يرجى اختيار مدرس', 'Please select a teacher'))
       return
     }
 
@@ -119,14 +123,14 @@ export default function SubscriptionsTab() {
         setSelectedSub(null)
         setSelectedTeacher('')
         setAdminNotes('')
-        toast.success('تمت الموافقة على الاشتراك وتعيين المدرس! / Subscription approved!')
+        toast.success(t('تمت الموافقة على الاشتراك وتعيين المدرس!', 'Subscription approved and teacher assigned!'))
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Failed to approve subscription')
+        toast.error(error.error || t('فشلت الموافقة على الاشتراك', 'Failed to approve subscription'))
       }
     } catch (error) {
       console.error('Error approving subscription:', error)
-      toast.error('Error approving subscription')
+      toast.error(t('حدث خطأ أثناء الموافقة على الاشتراك', 'Error approving subscription'))
     } finally {
       setProcessing(null)
     }
@@ -145,14 +149,14 @@ export default function SubscriptionsTab() {
 
       if (response.ok) {
         await fetchData()
-        toast.success('تم رفض الاشتراك / Subscription rejected')
+        toast.success(t('تم رفض الاشتراك', 'Subscription rejected'))
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Failed to reject subscription')
+        toast.error(error.error || t('فشل رفض الاشتراك', 'Failed to reject subscription'))
       }
     } catch (error) {
       console.error('Error rejecting subscription:', error)
-      toast.error('Error rejecting subscription')
+      toast.error(t('حدث خطأ أثناء رفض الاشتراك', 'Error rejecting subscription'))
     } finally {
       setProcessing(null)
     }
@@ -167,9 +171,9 @@ export default function SubscriptionsTab() {
       })
       if (response.ok) {
         fetchData()
-        toast.success('تم تحديث الرصيد / Balance updated')
+        toast.success(t('تم تحديث الرصيد', 'Balance updated'))
       } else {
-        toast.error('Failed to update balance')
+        toast.error(t('فشل تحديث الرصيد', 'Failed to update balance'))
       }
     } catch (err) {
       console.error('Error updating balance:', err)
@@ -179,13 +183,13 @@ export default function SubscriptionsTab() {
   function getStatusBadge(status: SubscriptionStatus) {
     switch (status) {
       case 'PENDING':
-        return <Badge variant="warning"><Clock className="h-3 w-3 mr-1" />Pending</Badge>
+        return <Badge variant="warning"><Clock className="h-3 w-3 mr-1" />{t('قيد الانتظار', 'Pending')}</Badge>
       case 'UNDER_REVIEW':
-        return <Badge variant="info"><AlertCircle className="h-3 w-3 mr-1" />Under Review</Badge>
+        return <Badge variant="info"><AlertCircle className="h-3 w-3 mr-1" />{t('قيد المراجعة', 'Under review')}</Badge>
       case 'APPROVED':
-        return <Badge variant="success"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>
+        return <Badge variant="success"><CheckCircle className="h-3 w-3 mr-1" />{t('موافق عليها', 'Approved')}</Badge>
       case 'REJECTED':
-        return <Badge variant="error"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>
+        return <Badge variant="error"><XCircle className="h-3 w-3 mr-1" />{t('مرفوضة', 'Rejected')}</Badge>
     }
   }
 
@@ -202,18 +206,17 @@ export default function SubscriptionsTab() {
   const rejected = subscriptions.filter(s => s.status === 'REJECTED')
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={localeDirection(language)}>
       <h2 className="text-3xl font-bold text-[#10B981]">
-        Subscription Management / إدارة الاشتراكات
+        {t('إدارة الاشتراكات', 'Subscription management')}
       </h2>
 
       {pendingReview.length > 0 && (
         <Alert variant="warning" className="bg-orange-50 border-orange-300">
           <AlertCircle className="h-5 w-5" />
           <div>
-            <p className="font-semibold">⚠️ {pendingReview.length} subscription(s) awaiting review / اشتراك(ات) تنتظر المراجعة</p>
-            <p className="text-sm">Please review and take action (approve or reject) on the pending subscriptions below.</p>
-            <p className="text-sm">يرجى مراجعة واتخاذ إجراء (الموافقة أو الرفض) على الاشتراكات المعلقة أدناه.</p>
+            <p className="font-semibold">⚠️ {t(`${pendingReview.length} اشتراك بانتظار المراجعة`, `${pendingReview.length} subscription(s) awaiting review`)}</p>
+            <p className="text-sm">{t('يرجى مراجعة الاشتراكات المعلقة أدناه واتخاذ إجراء بشأنها (الموافقة أو الرفض).', 'Please review and take action (approve or reject) on the pending subscriptions below.')}</p>
           </div>
         </Alert>
       )}
@@ -222,58 +225,58 @@ export default function SubscriptionsTab() {
         <Card variant="elevated">
           <div className="text-center">
             <p className="text-3xl font-bold text-orange-600">{pendingReview.length}</p>
-            <p className="text-sm text-gray-600">Pending Review / قيد المراجعة</p>
+            <p className="text-sm text-gray-600">{t('قيد المراجعة', 'Pending review')}</p>
           </div>
         </Card>
         <Card variant="elevated">
           <div className="text-center">
             <p className="text-3xl font-bold text-green-600">{approved.length}</p>
-            <p className="text-sm text-gray-600">Approved / موافق عليها</p>
+            <p className="text-sm text-gray-600">{t('موافق عليها', 'Approved')}</p>
           </div>
         </Card>
         <Card variant="elevated">
           <div className="text-center">
             <p className="text-3xl font-bold text-red-600">{rejected.length}</p>
-            <p className="text-sm text-gray-600">Rejected / مرفوضة</p>
+            <p className="text-sm text-gray-600">{t('مرفوضة', 'Rejected')}</p>
           </div>
         </Card>
       </div>
 
       {selectedSub && (
         <Card variant="elevated" className="bg-blue-50 border-blue-300">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Approve & Assign Teacher / الموافقة وتعيين المدرس</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-4">{t('الموافقة وتعيين المدرس', 'Approve & assign teacher')}</h3>
           <div className="space-y-4">
             <div>
-              <p className="font-semibold text-gray-900 mb-1">Student: {selectedSub.User.name}</p>
-              <p className="text-sm text-gray-600">Package: {selectedSub.Package.title} / {selectedSub.Package.titleAr}</p>
+              <p className="font-semibold text-gray-900 mb-1">{t('الطالب:', 'Student:')} {selectedSub.User.name}</p>
+              <p className="text-sm text-gray-600">{t('الباقة:', 'Package:')} {language === 'ar' ? selectedSub.Package.titleAr || selectedSub.Package.title : selectedSub.Package.title}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Assign Teacher / تعيين المدرس *
+                {t('تعيين المدرس *', 'Assign teacher *')}
               </label>
               <select
                 value={selectedTeacher}
                 onChange={(e) => setSelectedTeacher(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981]"
               >
-                <option value="">Select a teacher...</option>
+                <option value="">{t('اختر مدرسًا...', 'Select a teacher…')}</option>
                 {teachers.map((teacher) => (
                   <option key={teacher.id} value={teacher.id}>
-                    {teacher.User.name} - {teacher.specialization || 'No specialization'}
+                    {teacher.User.name} - {teacher.specialization || t('لا يوجد تخصص', 'No specialization')}
                   </option>
                 ))}
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Admin Notes (Optional) / ملاحظات المدير
+                {t('ملاحظات المدير (اختياري)', 'Admin notes (optional)')}
               </label>
               <textarea
                 value={adminNotes}
                 onChange={(e) => setAdminNotes(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981]"
                 rows={3}
-                placeholder="Add any notes..."
+                placeholder={t('أضف ملاحظات...', 'Add any notes…')}
               />
             </div>
             <div className="flex gap-2">
@@ -283,7 +286,7 @@ export default function SubscriptionsTab() {
                 disabled={!selectedTeacher || processing === selectedSub.id}
               >
                 <CheckCircle className="h-4 w-4 ml-2" />
-                {processing === selectedSub.id ? 'Processing...' : 'Approve / موافقة'}
+                {processing === selectedSub.id ? t('جارٍ التنفيذ...', 'Processing…') : t('موافقة', 'Approve')}
               </Button>
               <Button
                 variant="outline"
@@ -293,7 +296,7 @@ export default function SubscriptionsTab() {
                   setAdminNotes('')
                 }}
               >
-                Cancel / إلغاء
+                {t('إلغاء', 'Cancel')}
               </Button>
             </div>
           </div>
@@ -304,13 +307,13 @@ export default function SubscriptionsTab() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
             <div className="p-4 border-b flex justify-between items-center">
-              <h3 className="text-lg font-bold">Payment Receipt / إيصال الدفع</h3>
+              <h3 className="text-lg font-bold">{t('إيصال الدفع', 'Payment receipt')}</h3>
               <Button variant="outline" size="sm" onClick={() => setViewingReceipt(null)}>
-                Close / إغلاق
+                {t('إغلاق', 'Close')}
               </Button>
             </div>
             <div className="p-4">
-              <img src={viewingReceipt} alt="Payment Receipt" className="w-full" />
+              <img src={viewingReceipt} alt={t('إيصال الدفع', 'Payment receipt')} className="w-full" />
             </div>
           </div>
         </div>
@@ -318,12 +321,12 @@ export default function SubscriptionsTab() {
 
       <div>
         <h3 className="text-xl font-semibold text-gray-900 mb-4">
-          Pending Review / قيد المراجعة ({pendingReview.length})
+          {t('قيد المراجعة', 'Pending review')} ({pendingReview.length})
         </h3>
         {pendingReview.length === 0 ? (
           <Alert variant="success">
             <CheckCircle className="h-5 w-5" />
-            <p>No subscriptions pending review!</p>
+            <p>{t('لا توجد اشتراكات بانتظار المراجعة!', 'No subscriptions pending review!')}</p>
           </Alert>
         ) : (
           <div className="space-y-4">
@@ -343,16 +346,16 @@ export default function SubscriptionsTab() {
 
                   <div className="bg-blue-50 p-3 rounded-lg">
                     <p className="font-semibold text-gray-900">
-                      {sub.Package.title} / {sub.Package.titleAr}
+                      {language === 'ar' ? sub.Package.titleAr || sub.Package.title : sub.Package.title}
                     </p>
                     <p className="text-sm text-gray-700">
-                      💰 {sub.Package.price} EGP • 📚 {sub.Package.lessonsCount} lessons • ⏱️ {Math.ceil(sub.Package.durationDays / 30)} month(s)
+                      💰 {sub.Package.price} EGP • 📚 {sub.Package.lessonsCount} {t('دروس', 'lessons')} • ⏱️ {Math.ceil(sub.Package.durationDays / 30)} {t('شهر', 'months')}
                     </p>
                   </div>
 
                   <div className="bg-gray-50 p-3 rounded-lg text-sm">
-                    <p><strong>Payment Method:</strong> {sub.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer' : `E-Wallet (${sub.eWalletProvider || 'Cash'})`}</p>
-                    <p><strong>Requested:</strong> {new Date(sub.createdAt).toLocaleString('ar-EG')}</p>
+                    <p><strong>{t('طريقة الدفع:', 'Payment method:')}</strong> {sub.paymentMethod === 'BANK_TRANSFER' ? t('تحويل بنكي', 'Bank transfer') : `${t('محفظة إلكترونية', 'E-wallet')} (${sub.eWalletProvider || t('نقدي', 'Cash')})`}</p>
+                    <p><strong>{t('تاريخ الطلب:', 'Requested:')}</strong> {new Date(sub.createdAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}</p>
                   </div>
 
                   <div className="flex gap-2 flex-wrap">
@@ -363,7 +366,7 @@ export default function SubscriptionsTab() {
                       disabled={!!processing}
                     >
                       <User className="h-4 w-4 ml-2" />
-                      Assign & Approve / تعيين وموافقة
+                      {t('تعيين وموافقة', 'Assign & approve')}
                     </Button>
                     <Button
                       variant="outline"
@@ -372,7 +375,7 @@ export default function SubscriptionsTab() {
                       disabled={!!processing}
                     >
                       <XCircle className="h-4 w-4 ml-2" />
-                      Reject / رفض
+                      {t('رفض', 'Reject')}
                     </Button>
                     {sub.receiptUrl && (
                       <Button
@@ -381,7 +384,7 @@ export default function SubscriptionsTab() {
                         onClick={() => setViewingReceipt(sub.receiptUrl)}
                       >
                         <Eye className="h-4 w-4 ml-2" />
-                        View Receipt / عرض الإيصال
+                        {t('عرض الإيصال', 'View receipt')}
                       </Button>
                     )}
                   </div>
@@ -395,7 +398,7 @@ export default function SubscriptionsTab() {
       {approved.length > 0 && (
         <div>
           <h3 className="text-xl font-semibold text-gray-900 mb-4">
-            Approved / موافق عليها ({approved.length})
+            {t('موافق عليها', 'Approved')} ({approved.length})
           </h3>
           <div className="space-y-4">
             {approved.slice(0, 10).map((sub) => (
@@ -409,10 +412,10 @@ export default function SubscriptionsTab() {
                     <p className="text-sm text-gray-600 mb-2">{sub.User.email}</p>
                     <div className="flex items-center justify-between mb-2">
                       <p className="font-medium text-gray-900">
-                        {sub.Package.title} / {sub.Package.titleAr}
+                        {language === 'ar' ? sub.Package.titleAr || sub.Package.title : sub.Package.title}
                       </p>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-gray-500">Balance:</span>
+                        <span className="text-xs font-bold text-gray-500">{t('الرصيد:', 'Balance:')}</span>
                         <Badge variant="primary">{sub.lessonsAvailable}</Badge>
                         <div className="flex gap-1">
                           <button
@@ -433,12 +436,12 @@ export default function SubscriptionsTab() {
                     <p className="text-sm text-gray-600">{sub.Package.price} EGP</p>
                     {sub.AssignedTeacher && (
                       <p className="text-sm text-blue-600 mt-1">
-                        👨‍🏫 Teacher: {sub.AssignedTeacher.User.name}
+                         👨‍🏫 {t('المعلم:', 'Teacher:')} {sub.AssignedTeacher.User.name}
                       </p>
                     )}
                     {sub.startDate && sub.endDate && (
                       <p className="text-xs text-gray-500 mt-2">
-                        📅 {new Date(sub.startDate).toLocaleDateString('ar-EG')} - {new Date(sub.endDate).toLocaleDateString('ar-EG')}
+                         📅 {new Date(sub.startDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')} - {new Date(sub.endDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
                       </p>
                     )}
                   </div>

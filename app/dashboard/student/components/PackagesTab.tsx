@@ -9,6 +9,8 @@ import Badge from '@/components/ui/Badge'
 import Alert from '@/components/ui/Alert'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { ShoppingCart, Package, Calendar, BookOpen, Check, X } from 'lucide-react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 interface Package {
   id: string
@@ -51,6 +53,8 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const router = useRouter()
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
 
   useEffect(() => {
     fetchData()
@@ -201,7 +205,7 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
               tier === 'BASIC' ? 'bg-white text-[#10B981] shadow-sm' : 'text-gray-500'
             }`}
           >
-            Basic (جروب)
+            {t('باقة جماعية', 'Group')}
           </button>
           <button
             onClick={() => setTier('GOLD')}
@@ -209,7 +213,7 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
               tier === 'GOLD' ? 'bg-[#1F2937] text-white shadow-sm' : 'text-gray-500'
             }`}
           >
-            Gold (برايفت)
+            {t('باقة خاصة', 'Private')}
           </button>
         </div>
       </div>
@@ -219,13 +223,13 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShoppingCart className="w-5 h-5" />
-              <span>لديك {cart.items.length} باقة في السلة</span>
+              <span>{t(`لديك ${cart.items.length} باقة في السلة`, `You have ${cart.items.length} package(s) in your cart`)}</span>
             </div>
             <Button
               onClick={() => router.push('/dashboard/student/cart')}
               size="sm"
             >
-              عرض السلة
+              {t('عرض السلة', 'View cart')}
             </Button>
           </div>
         </Alert>
@@ -243,7 +247,7 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="text-xl font-bold text-gray-900 mb-1">
-                      {pkg.titleAr || pkg.title}
+                       {language === 'ar' ? pkg.titleAr || pkg.title : pkg.title}
                     </h3>
                   </div>
                 </div>
@@ -251,16 +255,16 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
                 <div className="space-y-3 mb-6">
                   <div className="flex items-center gap-2 text-gray-700">
                     <Package className="w-4 h-4" />
-                    <span className="text-sm">{pkg.lessonsCount} حصة</span>
+                    <span className="text-sm">{t(`${pkg.lessonsCount} حصة`, `${pkg.lessonsCount} classes`)}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-700">
                     <Calendar className="w-4 h-4" />
-                    <span className="text-sm">صالحة لمدة {pkg.durationDays} يوم</span>
+                    <span className="text-sm">{t(`صالحة لمدة ${pkg.durationDays} يوم`, `Valid for ${pkg.durationDays} days`)}</span>
                   </div>
                 </div>
 
                 <div className="text-3xl font-bold text-[#10B981] mb-6">
-                  {pkg.price} جنيه
+                  {pkg.price} {t('جنيه', 'EGP')}
                 </div>
               </div>
 
@@ -268,17 +272,17 @@ export default function PackagesTab({ isActive, onCartUpdate }: PackagesTabProps
                 {hasSubscription ? (
                   <Button fullWidth variant="success" disabled>
                     <Check className="w-4 h-4 ml-2" />
-                    مشترك بالفعل
+                    {t('مشترك بالفعل', 'Already subscribed')}
                   </Button>
                 ) : inCart ? (
                   <Button fullWidth variant="outline" onClick={() => removeFromCart(pkg.id)} loading={isLoading}>
                     <X className="w-4 h-4 ml-2" />
-                    إزالة
+                    {t('إزالة', 'Remove')}
                   </Button>
                 ) : (
                   <Button fullWidth onClick={() => addToCart(pkg.id)} loading={isLoading}>
                     <ShoppingCart className="w-4 h-4 ml-2" />
-                    أضف للسلة
+                    {t('أضف للسلة', 'Add to cart')}
                   </Button>
                 )}
               </div>

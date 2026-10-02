@@ -8,6 +8,8 @@ import {
   ArrowLeft, Check, HelpCircle, FileText, Layers
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText, localeDirection } from '@/lib/locale'
 
 /* ─── Types ───────────────────────────────────────────────── */
 type Level = 'A1' | 'A2' | 'B1' | 'B2' | 'C1'
@@ -72,6 +74,14 @@ const emptyQuestion = (): Partial<Question> => ({
 
 /* ──────────────────────────────────────────────────────────── */
 export default function PlacementTestTab() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
+  const qTypeLabel = (value: string) => {
+    const type = Q_TYPES.find((item) => item.value === value)
+    if (!type) return value
+    const english: Record<string, string> = { MCQ: 'Multiple choice', TRUE_FALSE: 'True or false', FILL_BLANK: 'Fill in the blank', WRITTEN: 'Written response' }
+    return t(type.label, english[value] || type.label)
+  }
   const [activeView, setActiveView] = useState<'bank' | 'results' | 'settings'>('bank')
   const [questions, setQuestions] = useState<Question[]>([])
   const [results, setResults] = useState<TestResult[]>([])
@@ -110,7 +120,7 @@ export default function PlacementTestTab() {
           options: q.options ? (typeof q.options === 'string' ? JSON.parse(q.options) : q.options) : []
         })))
       }
-    } catch { toast.error('فشل تحميل الأسئلة') }
+    } catch { toast.error(t('فشل تحميل الأسئلة', 'Failed to load questions')) }
     finally { setLoading(false) }
   }
 
@@ -141,9 +151,9 @@ export default function PlacementTestTab() {
 
   /* ── Save question ─────────────────────────────────────────── */
   async function handleSave() {
-    if (!editingQ.question?.trim()) { toast.error('أدخل نص السؤال'); return }
+    if (!editingQ.question?.trim()) { toast.error(t('أدخل نص السؤال', 'Enter the question text')); return }
     if (editingQ.questionType === 'MCQ' && (!editingQ.options || editingQ.options.filter(o=>o.trim()).length < 2)) {
-      toast.error('أضف خيارين على الأقل'); return
+      toast.error(t('أضف خيارين على الأقل', 'Add at least two options')); return
     }
     setSaving(true)
     try {
@@ -156,24 +166,24 @@ export default function PlacementTestTab() {
       const method = isEditing ? 'PUT' : 'POST'
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       if (!res.ok) throw new Error()
-      toast.success(isEditing ? 'تم تعديل السؤال ✓' : 'تم إضافة السؤال ✓')
+      toast.success(isEditing ? t('تم تعديل السؤال ✓', 'Question updated ✓') : t('تم إضافة السؤال ✓', 'Question added ✓'))
       setShowForm(false)
       setIsEditing(null)
       setEditingQ(emptyQuestion())
       fetchQuestions()
-    } catch { toast.error('فشل حفظ السؤال') }
+    } catch { toast.error(t('فشل حفظ السؤال', 'Failed to save question')) }
     finally { setSaving(false) }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('هل أنت متأكد من حذف هذا السؤال؟')) return
+    if (!confirm(t('هل أنت متأكد من حذف هذا السؤال؟', 'Are you sure you want to delete this question?'))) return
     setDeleting(id)
     try {
       const res = await fetch(`/api/admin/placement-test/questions/${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error()
-      toast.success('تم حذف السؤال')
+      toast.success(t('تم حذف السؤال', 'Question deleted'))
       setQuestions(q => q.filter(x => x.id !== id))
-    } catch { toast.error('فشل الحذف') }
+    } catch { toast.error(t('فشل الحذف', 'Delete failed')) }
     finally { setDeleting(null) }
   }
 
@@ -201,15 +211,15 @@ export default function PlacementTestTab() {
 
   /* ────────────────────────────────────────────────────────────── */
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-6" dir={localeDirection(language)}>
       {/* ── Header ─────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
             <ClipboardList className="w-6 h-6 text-emerald-600" />
-            بنك الأسئلة واختبار تحديد المستوى
+            {t('بنك الأسئلة واختبار تحديد المستوى', 'Question bank and placement test')}
           </h2>
-          <p className="text-sm text-gray-500 mt-0.5">إدارة الأسئلة، مراجعة النتائج، وضبط إعدادات الاختبار</p>
+          <p className="text-sm text-gray-500 mt-0.5">{t('إدارة الأسئلة، مراجعة النتائج، وضبط إعدادات الاختبار', 'Manage questions, review results, and configure test settings')}</p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => { fetchQuestions(); fetchResults() }}
@@ -222,7 +232,7 @@ export default function PlacementTestTab() {
       {/* ── Stats Cards ────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
-          <p className="text-xs font-bold text-gray-500 mb-1">إجمالي الأسئلة</p>
+          <p className="text-xs font-bold text-gray-500 mb-1">{t('إجمالي الأسئلة', 'Total questions')}</p>
           <p className="text-3xl font-black text-gray-900">{stats.total}</p>
           <div className="mt-2 flex flex-wrap gap-1">
             {LEVELS.map(l => (
@@ -233,28 +243,28 @@ export default function PlacementTestTab() {
           </div>
         </div>
         <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
-          <p className="text-xs font-bold text-gray-500 mb-1">إجمالي الاختبارات</p>
+          <p className="text-xs font-bold text-gray-500 mb-1">{t('إجمالي الاختبارات', 'Total tests')}</p>
           <p className="text-3xl font-black text-blue-600">{stats.results}</p>
-          <p className="text-xs text-gray-400 mt-1">من الطلاب المسجلين</p>
+          <p className="text-xs text-gray-400 mt-1">{t('من الطلاب المسجلين', 'From registered students')}</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
-          <p className="text-xs font-bold text-gray-500 mb-1">متوسط وأعلى</p>
+          <p className="text-xs font-bold text-gray-500 mb-1">{t('متوسط وأعلى', 'Intermediate and above')}</p>
           <p className="text-3xl font-black text-green-600">{stats.advanced}</p>
-          <p className="text-xs text-gray-400 mt-1">مستوى B1 فأعلى</p>
+          <p className="text-xs text-gray-400 mt-1">{t('مستوى B1 فأعلى', 'Level B1 and above')}</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
-          <p className="text-xs font-bold text-gray-500 mb-1">المبتدئون</p>
+          <p className="text-xs font-bold text-gray-500 mb-1">{t('المبتدئون', 'Beginners')}</p>
           <p className="text-3xl font-black text-orange-600">{stats.beginner}</p>
-          <p className="text-xs text-gray-400 mt-1">مستوى A1 أو A2</p>
+          <p className="text-xs text-gray-400 mt-1">{t('مستوى A1 أو A2', 'Level A1 or A2')}</p>
         </div>
       </div>
 
       {/* ── View Tabs ──────────────────────────────────────────── */}
       <div className="flex gap-1 bg-gray-100 p-1 rounded-2xl w-fit">
         {[
-          { key: 'bank', label: 'بنك الأسئلة', icon: BookOpen },
-          { key: 'results', label: 'نتائج الطلاب', icon: Users },
-          { key: 'settings', label: 'إعدادات الاختبار', icon: Settings },
+          { key: 'bank', label: t('بنك الأسئلة', 'Question bank'), icon: BookOpen },
+          { key: 'results', label: t('نتائج الطلاب', 'Student results'), icon: Users },
+          { key: 'settings', label: t('إعدادات الاختبار', 'Test settings'), icon: Settings },
         ].map(({ key, label, icon: Icon }) => (
           <button key={key} onClick={() => setActiveView(key as any)}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
@@ -275,7 +285,7 @@ export default function PlacementTestTab() {
               <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-100">
                 <h3 className="font-black text-gray-900 flex items-center gap-2">
                   {isEditing ? <Edit3 className="w-4 h-4 text-emerald-600" /> : <Plus className="w-4 h-4 text-emerald-600" />}
-                  {isEditing ? 'تعديل السؤال' : 'إضافة سؤال جديد'}
+                  {isEditing ? t('تعديل السؤال', 'Edit question') : t('إضافة سؤال جديد', 'Add a new question')}
                 </h3>
                 <button onClick={cancelForm} className="p-1.5 hover:bg-gray-100 rounded-lg transition">
                   <X className="w-5 h-5 text-gray-500" />
@@ -285,42 +295,42 @@ export default function PlacementTestTab() {
                 {/* Question text */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold text-gray-500 block mb-1.5">السؤال (إنجليزي) *</label>
+                    <label className="text-xs font-bold text-gray-500 block mb-1.5">{t('السؤال (إنجليزي) *', 'Question (English) *')}</label>
                     <textarea value={editingQ.question || ''} onChange={e => setEditingQ(q=>({...q,question:e.target.value}))}
                       rows={3} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none resize-none"
                       placeholder="Type the question in English..." />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-gray-500 block mb-1.5">السؤال (عربي) — اختياري</label>
+                    <label className="text-xs font-bold text-gray-500 block mb-1.5">{t('السؤال (عربي) — اختياري', 'Question (Arabic) — optional')}</label>
                     <textarea value={editingQ.questionAr || ''} onChange={e => setEditingQ(q=>({...q,questionAr:e.target.value}))}
                       rows={3} className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none resize-none"
-                      placeholder="ترجمة السؤال بالعربي (اختياري)..." />
+                      placeholder={t('ترجمة السؤال بالعربي (اختياري)...', 'Arabic question translation (optional)…')} />
                   </div>
                 </div>
 
                 {/* Meta */}
                 <div className="grid sm:grid-cols-4 gap-4">
                   <div>
-                    <label className="text-xs font-bold text-gray-500 block mb-1.5">المستوى *</label>
+                    <label className="text-xs font-bold text-gray-500 block mb-1.5">{t('المستوى *', 'Level *')}</label>
                     <select value={editingQ.level || 'A1'} onChange={e => setEditingQ(q=>({...q,level:e.target.value as Level}))}
                       className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none bg-white">
                       {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-gray-500 block mb-1.5">نوع السؤال *</label>
+                    <label className="text-xs font-bold text-gray-500 block mb-1.5">{t('نوع السؤال *', 'Question type *')}</label>
                     <select value={editingQ.questionType || 'MCQ'} onChange={e => setEditingQ(q=>({...q,questionType:e.target.value as QType}))}
                       className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none bg-white">
-                      {Q_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                      {Q_TYPES.map(type => <option key={type.value} value={type.value}>{qTypeLabel(type.value)}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-gray-500 block mb-1.5">النقاط</label>
+                    <label className="text-xs font-bold text-gray-500 block mb-1.5">{t('النقاط', 'Points')}</label>
                     <input type="number" min={1} max={10} value={editingQ.points || 1} onChange={e => setEditingQ(q=>({...q,points:Number(e.target.value)}))}
                       className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none" />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-gray-500 block mb-1.5">التصنيف</label>
+                    <label className="text-xs font-bold text-gray-500 block mb-1.5">{t('التصنيف', 'Category')}</label>
                     <input type="text" value={editingQ.category || ''} onChange={e => setEditingQ(q=>({...q,category:e.target.value}))}
                       className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none"
                       placeholder="Grammar, Vocabulary..." />
@@ -330,7 +340,7 @@ export default function PlacementTestTab() {
                 {/* MCQ Options */}
                 {editingQ.questionType === 'MCQ' && (
                   <div>
-                    <label className="text-xs font-bold text-gray-500 block mb-2">خيارات الإجابة *</label>
+                    <label className="text-xs font-bold text-gray-500 block mb-2">{t('خيارات الإجابة *', 'Answer options *')}</label>
                     <div className="space-y-2">
                       {(editingQ.options || ['','']).map((opt, i) => (
                         <div key={i} className="flex items-center gap-2">
@@ -340,14 +350,14 @@ export default function PlacementTestTab() {
                                 ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg'
                                 : 'border-gray-200 text-gray-400 hover:border-emerald-300'
                             }`}
-                            title="اضغط لتعيين هذا الخيار كإجابة صحيحة">
+                            title={t('اضغط لتعيين هذا الخيار كإجابة صحيحة', 'Click to mark this option as correct')}>
                             {editingQ.correctAnswer === opt && opt ? <Check className="w-4 h-4" /> : String.fromCharCode(65+i)}
                           </button>
                           <input type="text" value={opt} onChange={e => updateOption(i, e.target.value)}
                             className={`flex-1 px-3 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none ${
                               editingQ.correctAnswer === opt && opt ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200'
                             }`}
-                            placeholder={`الخيار ${String.fromCharCode(65+i)}`} />
+                            placeholder={t(`الخيار ${String.fromCharCode(65+i)}`, `Option ${String.fromCharCode(65+i)}`)} />
                           {(editingQ.options?.length || 0) > 2 && (
                             <button onClick={() => removeOption(i)} className="p-2 hover:bg-red-100 text-red-400 hover:text-red-600 rounded-lg transition">
                               <X className="w-3.5 h-3.5" />
@@ -359,12 +369,12 @@ export default function PlacementTestTab() {
                     <div className="flex items-center gap-2 mt-3">
                       {(editingQ.options?.length || 0) < 6 && (
                         <button onClick={addOption} className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-bold text-gray-600 transition">
-                          <Plus className="w-3 h-3" /> إضافة خيار
+                          <Plus className="w-3 h-3" /> {t('إضافة خيار', 'Add option')}
                         </button>
                       )}
                       {editingQ.correctAnswer && (
                         <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
-                          <Check className="w-3 h-3" /> الإجابة الصحيحة: "{editingQ.correctAnswer}"
+                          <Check className="w-3 h-3" /> {t('الإجابة الصحيحة:', 'Correct answer:')} &quot;{editingQ.correctAnswer}&quot;
                         </span>
                       )}
                     </div>
@@ -374,7 +384,7 @@ export default function PlacementTestTab() {
                 {/* True/False */}
                 {editingQ.questionType === 'TRUE_FALSE' && (
                   <div>
-                    <label className="text-xs font-bold text-gray-500 block mb-2">الإجابة الصحيحة</label>
+                    <label className="text-xs font-bold text-gray-500 block mb-2">{t('الإجابة الصحيحة', 'Correct answer')}</label>
                     <div className="flex gap-3">
                       {['True', 'False'].map(opt => (
                         <button key={opt} onClick={() => setEditingQ(q=>({...q,correctAnswer:opt}))}
@@ -383,7 +393,7 @@ export default function PlacementTestTab() {
                               ? opt === 'True' ? 'bg-green-500 text-white border-green-500' : 'bg-red-500 text-white border-red-500'
                               : 'border-gray-200 text-gray-600 hover:border-gray-300'
                           }`}>
-                          {opt === 'True' ? '✓ صح (True)' : '✗ خطأ (False)'}
+                          {opt === 'True' ? t('✓ صح', '✓ True') : t('✗ خطأ', '✗ False')}
                         </button>
                       ))}
                     </div>
@@ -394,31 +404,31 @@ export default function PlacementTestTab() {
                 {(editingQ.questionType === 'FILL_BLANK' || editingQ.questionType === 'WRITTEN') && (
                   <div>
                     <label className="text-xs font-bold text-gray-500 block mb-1.5">
-                      {editingQ.questionType === 'FILL_BLANK' ? 'الكلمة / العبارة الصحيحة' : 'الإجابة النموذجية (اختياري)'}
+                      {editingQ.questionType === 'FILL_BLANK' ? t('الكلمة / العبارة الصحيحة', 'Correct word / phrase') : t('الإجابة النموذجية (اختياري)', 'Model answer (optional)')}
                     </label>
                     <input type="text" value={editingQ.correctAnswer || ''} onChange={e => setEditingQ(q=>({...q,correctAnswer:e.target.value}))}
                       className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none"
-                      placeholder={editingQ.questionType === 'FILL_BLANK' ? 'الإجابة الصحيحة...' : 'نموذج الإجابة (للمراجعة)...'} />
+                      placeholder={editingQ.questionType === 'FILL_BLANK' ? t('الإجابة الصحيحة...', 'Correct answer…') : t('نموذج الإجابة (للمراجعة)...', 'Model answer (for review)…')} />
                   </div>
                 )}
 
                 {/* Explanation */}
                 <div>
-                  <label className="text-xs font-bold text-gray-500 block mb-1.5">شرح الإجابة (اختياري)</label>
+                  <label className="text-xs font-bold text-gray-500 block mb-1.5">{t('شرح الإجابة (اختياري)', 'Answer explanation (optional)')}</label>
                   <textarea value={editingQ.explanation || ''} onChange={e => setEditingQ(q=>({...q,explanation:e.target.value}))}
                     rows={2} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none resize-none"
-                    placeholder="شرح يظهر للطالب بعد الإجابة..." />
+                    placeholder={t('شرح يظهر للطالب بعد الإجابة...', 'Explanation shown to students after answering…')} />
                 </div>
 
                 {/* Save */}
                 <div className="flex items-center justify-end gap-3 pt-2">
                   <button onClick={cancelForm} className="px-5 py-2.5 border border-gray-200 text-gray-600 rounded-xl font-bold text-sm hover:bg-gray-50 transition">
-                    إلغاء
+                    {t('إلغاء', 'Cancel')}
                   </button>
                   <button onClick={handleSave} disabled={saving}
                     className="flex items-center gap-2 px-7 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-200 transition disabled:opacity-60">
                     <Save className="w-4 h-4" />
-                    {saving ? 'جاري الحفظ...' : isEditing ? 'حفظ التعديلات' : 'إضافة السؤال'}
+                    {saving ? t('جاري الحفظ...', 'Saving…') : isEditing ? t('حفظ التعديلات', 'Save changes') : t('إضافة السؤال', 'Add question')}
                   </button>
                 </div>
               </div>
@@ -431,30 +441,30 @@ export default function PlacementTestTab() {
               <button onClick={() => { setShowForm(true); setIsEditing(null); setEditingQ(emptyQuestion()) }}
                 className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-200 transition">
                 <Plus className="w-4 h-4" />
-                إضافة سؤال جديد
+              {t('إضافة سؤال جديد', 'Add a new question')}
               </button>
             )}
             <div className="relative flex-1">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input type="text" value={searchQ} onChange={e => setSearchQ(e.target.value)}
                 className="w-full pr-10 pl-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none"
-                placeholder="ابحث في الأسئلة..." />
+                placeholder={t('ابحث في الأسئلة...', 'Search questions…')} />
             </div>
             <select value={filterLevel} onChange={e => setFilterLevel(e.target.value)}
               className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:ring-2 focus:ring-emerald-400 outline-none bg-white">
-              <option value="ALL">كل المستويات</option>
+              <option value="ALL">{t('كل المستويات', 'All levels')}</option>
               {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
             </select>
             <select value={filterType} onChange={e => setFilterType(e.target.value)}
               className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:ring-2 focus:ring-emerald-400 outline-none bg-white">
-              <option value="ALL">كل الأنواع</option>
-              {Q_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              <option value="ALL">{t('كل الأنواع', 'All types')}</option>
+              {Q_TYPES.map(type => <option key={type.value} value={type.value}>{qTypeLabel(type.value)}</option>)}
             </select>
           </div>
 
           {/* Results count */}
           <div className="flex items-center justify-between text-sm text-gray-500">
-            <span>عرض <span className="font-bold text-gray-800">{filtered.length}</span> من {questions.length} سؤال</span>
+            <span>{t('عرض', 'Showing')} <span className="font-bold text-gray-800">{filtered.length}</span> {t('من', 'of')} {questions.length} {t('سؤال', 'questions')}</span>
             <div className="flex gap-2">
               {LEVELS.map(l => (
                 <button key={l} onClick={() => setFilterLevel(l === filterLevel ? 'ALL' : l)}
@@ -475,14 +485,14 @@ export default function PlacementTestTab() {
           ) : filtered.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-gray-200">
               <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-gray-500">لا توجد أسئلة</h3>
+              <h3 className="text-lg font-bold text-gray-500">{t('لا توجد أسئلة', 'No questions found')}</h3>
               <p className="text-gray-400 text-sm mt-1">
-                {questions.length === 0 ? 'اضغط على "إضافة سؤال جديد" لبدء بناء بنك الأسئلة' : 'لا توجد أسئلة تطابق بحثك'}
+                {questions.length === 0 ? t('اضغط على "إضافة سؤال جديد" لبدء بناء بنك الأسئلة', 'Click "Add a new question" to start building the question bank') : t('لا توجد أسئلة تطابق بحثك', 'No questions match your search')}
               </p>
               {questions.length === 0 && (
                 <button onClick={() => setShowForm(true)}
                   className="mt-4 flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-sm mx-auto">
-                  <Plus className="w-4 h-4" /> إضافة أول سؤال
+                  <Plus className="w-4 h-4" /> {t('إضافة أول سؤال', 'Add the first question')}
                 </button>
               )}
             </div>
@@ -504,10 +514,10 @@ export default function PlacementTestTab() {
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <span className="hidden sm:block text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-lg">
-                        {Q_TYPES.find(t => t.value === q.questionType)?.label || q.questionType}
+                        {qTypeLabel(q.questionType)}
                       </span>
                       <span className="text-xs font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200">
-                        {q.points} نقطة
+                        {q.points} {t('نقطة', 'points')}
                       </span>
                       <button onClick={() => setExpandedQ(p => p === q.id ? null : q.id)}
                         className="p-1.5 hover:bg-gray-100 rounded-lg transition">
@@ -528,13 +538,13 @@ export default function PlacementTestTab() {
                     <div className="px-5 pb-5 border-t border-gray-100 pt-4 space-y-3">
                       {q.questionAr && (
                         <div className="p-3 bg-gray-50 rounded-xl">
-                          <p className="text-xs font-bold text-gray-400 mb-1">السؤال بالعربي:</p>
+                          <p className="text-xs font-bold text-gray-400 mb-1">{t('السؤال بالعربي:', 'Question in Arabic:')}</p>
                           <p className="text-sm text-gray-700">{q.questionAr}</p>
                         </div>
                       )}
                       {q.options && q.options.length > 0 && (
                         <div>
-                          <p className="text-xs font-bold text-gray-400 mb-2">الخيارات:</p>
+                          <p className="text-xs font-bold text-gray-400 mb-2">{t('الخيارات:', 'Options:')}</p>
                           <div className="grid sm:grid-cols-2 gap-2">
                             {q.options.map((opt, i) => (
                               <div key={i} className={`flex items-center gap-2 p-2.5 rounded-xl border text-sm ${
@@ -556,12 +566,12 @@ export default function PlacementTestTab() {
                       {q.correctAnswer && q.questionType !== 'MCQ' && (
                         <div className="flex items-center gap-2 p-3 bg-emerald-50 rounded-xl border border-emerald-200">
                           <Check className="w-4 h-4 text-emerald-600" />
-                          <span className="text-sm font-bold text-emerald-700">الإجابة الصحيحة: {q.correctAnswer}</span>
+                          <span className="text-sm font-bold text-emerald-700">{t('الإجابة الصحيحة:', 'Correct answer:')} {q.correctAnswer}</span>
                         </div>
                       )}
                       {q.explanation && (
                         <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
-                          <p className="text-xs font-bold text-blue-400 mb-1">الشرح:</p>
+                          <p className="text-xs font-bold text-blue-400 mb-1">{t('الشرح:', 'Explanation:')}</p>
                           <p className="text-sm text-blue-700">{q.explanation}</p>
                         </div>
                       )}
@@ -585,8 +595,8 @@ export default function PlacementTestTab() {
           {results.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-gray-200">
               <ClipboardList className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-gray-500">لا توجد نتائج حتى الآن</h3>
-              <p className="text-gray-400 text-sm">سيتم عرض نتائج الطلاب هنا بعد إجراء الاختبار</p>
+              <h3 className="text-lg font-bold text-gray-500">{t('لا توجد نتائج حتى الآن', 'No results yet')}</h3>
+              <p className="text-gray-400 text-sm">{t('ستظهر نتائج الطلاب هنا بعد إجراء الاختبار', 'Student results will appear here after a test is completed')}</p>
             </div>
           ) : (
             <>
@@ -596,7 +606,7 @@ export default function PlacementTestTab() {
                   return (
                     <div key={l} className={`p-4 rounded-2xl bg-gradient-to-br ${LEVEL_BG[l]} text-white`}>
                       <div className="text-3xl font-black">{count}</div>
-                      <div className="text-white/80 text-sm font-bold mt-1">مستوى {l}</div>
+                      <div className="text-white/80 text-sm font-bold mt-1">{t('مستوى', 'Level')} {l}</div>
                     </div>
                   )
                 })}
@@ -605,11 +615,11 @@ export default function PlacementTestTab() {
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-5 py-3 text-right text-xs font-black text-gray-600">الطالب</th>
-                      <th className="px-5 py-3 text-center text-xs font-black text-gray-600">المستوى</th>
-                      <th className="px-5 py-3 text-center text-xs font-black text-gray-600">النتيجة</th>
-                      <th className="px-5 py-3 text-center text-xs font-black text-gray-600">التاريخ</th>
-                      <th className="px-5 py-3 text-center text-xs font-black text-gray-600">تفاصيل</th>
+                      <th className="px-5 py-3 text-start text-xs font-black text-gray-600">{t('الطالب', 'Student')}</th>
+                      <th className="px-5 py-3 text-center text-xs font-black text-gray-600">{t('المستوى', 'Level')}</th>
+                      <th className="px-5 py-3 text-center text-xs font-black text-gray-600">{t('النتيجة', 'Score')}</th>
+                      <th className="px-5 py-3 text-center text-xs font-black text-gray-600">{t('التاريخ', 'Date')}</th>
+                      <th className="px-5 py-3 text-center text-xs font-black text-gray-600">{t('تفاصيل', 'Details')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -638,7 +648,7 @@ export default function PlacementTestTab() {
                         <td className="px-5 py-3 text-center">
                           <button onClick={() => setSelectedResult(r)}
                             className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-bold transition">
-                            عرض
+                            {t('عرض', 'View')}
                           </button>
                         </td>
                       </tr>
@@ -662,7 +672,7 @@ export default function PlacementTestTab() {
           <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className={`p-6 bg-gradient-to-r ${LEVEL_BG[selectedResult.level] || 'from-gray-500 to-gray-600'} text-white`}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-black">نتيجة الاختبار</h3>
+                <h3 className="text-xl font-black">{t('نتيجة الاختبار', 'Test result')}</h3>
                 <button onClick={() => setSelectedResult(null)} className="p-1.5 bg-white/20 hover:bg-white/30 rounded-xl transition">
                   <X className="w-5 h-5" />
                 </button>
@@ -675,19 +685,19 @@ export default function PlacementTestTab() {
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 rounded-xl p-3">
-                  <p className="text-xs text-gray-500 font-bold mb-1">الطالب</p>
+                  <p className="text-xs text-gray-500 font-bold mb-1">{t('الطالب', 'Student')}</p>
                   <p className="font-bold text-gray-900 text-sm">{selectedResult.userName}</p>
                 </div>
                 <div className="bg-gray-50 rounded-xl p-3">
-                  <p className="text-xs text-gray-500 font-bold mb-1">البريد الإلكتروني</p>
+                  <p className="text-xs text-gray-500 font-bold mb-1">{t('البريد الإلكتروني', 'Email')}</p>
                   <p className="font-bold text-gray-900 text-sm break-all">{selectedResult.userEmail}</p>
                 </div>
                 <div className="bg-gray-50 rounded-xl p-3">
-                  <p className="text-xs text-gray-500 font-bold mb-1">تاريخ الاختبار</p>
+                  <p className="text-xs text-gray-500 font-bold mb-1">{t('تاريخ الاختبار', 'Test date')}</p>
                   <p className="font-bold text-gray-900 text-sm">{new Date(selectedResult.completedAt).toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 </div>
                 <div className={`rounded-xl p-3 ${LEVEL_COLORS[selectedResult.level]}`}>
-                  <p className="text-xs font-bold opacity-70 mb-1">المستوى المحدد</p>
+                  <p className="text-xs font-bold opacity-70 mb-1">{t('المستوى المحدد', 'Assigned level')}</p>
                   <p className="font-black text-2xl">{selectedResult.level}</p>
                 </div>
               </div>
@@ -701,6 +711,8 @@ export default function PlacementTestTab() {
 
 /* ── Test Settings Panel ────────────────────────────────── */
 function TestSettingsPanel() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [settings, setSettings] = useState({ questionsCount: 20, timeLimitMins: 30, passScore: 50, shuffleQuestions: true })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -722,8 +734,8 @@ function TestSettingsPanel() {
         body: JSON.stringify({ testType: 'PLACEMENT', ...settings })
       })
       if (!res.ok) throw new Error()
-      toast.success('تم حفظ الإعدادات ✓')
-    } catch { toast.error('فشل حفظ الإعدادات') }
+      toast.success(t('تم حفظ الإعدادات ✓', 'Settings saved ✓'))
+    } catch { toast.error(t('فشل حفظ الإعدادات', 'Failed to save settings')) }
     finally { setSaving(false) }
   }
 
@@ -734,31 +746,31 @@ function TestSettingsPanel() {
       <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
         <h3 className="font-black text-gray-900 mb-6 flex items-center gap-2">
           <Settings className="w-5 h-5 text-emerald-600" />
-          إعدادات اختبار تحديد المستوى
+          {t('إعدادات اختبار تحديد المستوى', 'Placement test settings')}
         </h3>
         <div className="grid sm:grid-cols-2 gap-6">
           <div>
-            <label className="text-sm font-bold text-gray-600 block mb-2">عدد الأسئلة في الاختبار</label>
+            <label className="text-sm font-bold text-gray-600 block mb-2">{t('عدد الأسئلة في الاختبار', 'Number of questions in the test')}</label>
             <input type="number" min={5} max={100} value={settings.questionsCount} onChange={e => setSettings(s=>({...s,questionsCount:Number(e.target.value)}))}
               className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none text-lg font-bold" />
-            <p className="text-xs text-gray-400 mt-1">عدد الأسئلة التي تظهر للطالب من بنك الأسئلة</p>
+            <p className="text-xs text-gray-400 mt-1">{t('عدد الأسئلة التي تظهر للطالب من بنك الأسئلة', 'Number of questions shown to the student from the question bank')}</p>
           </div>
           <div>
-            <label className="text-sm font-bold text-gray-600 block mb-2">مدة الاختبار (دقيقة)</label>
+            <label className="text-sm font-bold text-gray-600 block mb-2">{t('مدة الاختبار (دقيقة)', 'Test duration (minutes)')}</label>
             <input type="number" min={5} max={180} value={settings.timeLimitMins} onChange={e => setSettings(s=>({...s,timeLimitMins:Number(e.target.value)}))}
               className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none text-lg font-bold" />
-            <p className="text-xs text-gray-400 mt-1">الوقت الإجمالي المتاح لإتمام الاختبار</p>
+            <p className="text-xs text-gray-400 mt-1">{t('الوقت الإجمالي المتاح لإتمام الاختبار', 'Total time available to complete the test')}</p>
           </div>
           <div>
-            <label className="text-sm font-bold text-gray-600 block mb-2">درجة النجاح (%)</label>
+            <label className="text-sm font-bold text-gray-600 block mb-2">{t('درجة النجاح (%)', 'Passing score (%)')}</label>
             <input type="number" min={1} max={100} value={settings.passScore} onChange={e => setSettings(s=>({...s,passScore:Number(e.target.value)}))}
               className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none text-lg font-bold" />
-            <p className="text-xs text-gray-400 mt-1">الحد الأدنى للنجاح (مرجع فقط)</p>
+            <p className="text-xs text-gray-400 mt-1">{t('الحد الأدنى للنجاح (مرجع فقط)', 'Minimum passing score (reference only)')}</p>
           </div>
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
             <div>
-              <p className="text-sm font-bold text-gray-700">خلط ترتيب الأسئلة</p>
-              <p className="text-xs text-gray-400">كل طالب يحصل على ترتيب مختلف</p>
+              <p className="text-sm font-bold text-gray-700">{t('خلط ترتيب الأسئلة', 'Shuffle question order')}</p>
+              <p className="text-xs text-gray-400">{t('كل طالب يحصل على ترتيب مختلف', 'Each student receives a different order')}</p>
             </div>
             <button onClick={() => setSettings(s=>({...s,shuffleQuestions:!s.shuffleQuestions}))}
               className={`relative w-12 h-6 rounded-full transition-colors ${settings.shuffleQuestions ? 'bg-emerald-500' : 'bg-gray-300'}`}>
@@ -770,7 +782,7 @@ function TestSettingsPanel() {
           <button onClick={save} disabled={saving}
             className="flex items-center gap-2 px-7 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-200 transition disabled:opacity-60">
             <Save className="w-4 h-4" />
-            {saving ? 'جاري الحفظ...' : 'حفظ الإعدادات'}
+            {saving ? t('جاري الحفظ...', 'Saving…') : t('حفظ الإعدادات', 'Save settings')}
           </button>
         </div>
       </div>
@@ -779,15 +791,15 @@ function TestSettingsPanel() {
       <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
         <h4 className="font-black text-gray-900 mb-4 flex items-center gap-2">
           <Award className="w-5 h-5 text-amber-500" />
-          نظام تحديد المستوى
+          {t('نظام تحديد المستوى', 'Placement level scale')}
         </h4>
         <div className="space-y-2">
           {[
-            { level: 'A1', range: '0% - 20%', desc: 'مبتدئ تماماً', color: 'from-red-500 to-rose-600' },
-            { level: 'A2', range: '21% - 40%', desc: 'مبتدئ متقدم', color: 'from-orange-500 to-amber-600' },
-            { level: 'B1', range: '41% - 60%', desc: 'متوسط', color: 'from-yellow-500 to-amber-500' },
-            { level: 'B2', range: '61% - 80%', desc: 'متوسط متقدم', color: 'from-green-500 to-emerald-600' },
-            { level: 'C1', range: '81% - 100%', desc: 'متقدم', color: 'from-blue-500 to-indigo-600' },
+            { level: 'A1', range: '0% - 20%', desc: t('مبتدئ تماماً', 'Beginner'), color: 'from-red-500 to-rose-600' },
+            { level: 'A2', range: '21% - 40%', desc: t('مبتدئ متقدم', 'Elementary'), color: 'from-orange-500 to-amber-600' },
+            { level: 'B1', range: '41% - 60%', desc: t('متوسط', 'Intermediate'), color: 'from-yellow-500 to-amber-500' },
+            { level: 'B2', range: '61% - 80%', desc: t('متوسط متقدم', 'Upper-intermediate'), color: 'from-green-500 to-emerald-600' },
+            { level: 'C1', range: '81% - 100%', desc: t('متقدم', 'Advanced'), color: 'from-blue-500 to-indigo-600' },
           ].map(({ level, range, desc, color }) => (
             <div key={level} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
               <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} text-white flex items-center justify-center text-sm font-black`}>

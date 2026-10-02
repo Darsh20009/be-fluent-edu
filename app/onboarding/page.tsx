@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react'
 import { Check, ChevronLeft, ChevronRight, LoaderCircle } from 'lucide-react'
 import { useTheme } from '@/lib/contexts/ThemeContext'
 import BrandLockup from '@/components/brand/BrandLockup'
+import LanguageToggle from '@/components/LanguageToggle'
+import { localeText } from '@/lib/locale'
 
 type Gender = 'FEMALE' | 'MALE' | 'PREFER_NOT_TO_SAY'
 
@@ -19,7 +21,7 @@ export default function OnboardingPage() {
   const router = useRouter()
   const { language } = useTheme()
   const isArabic = language === 'ar'
-  const tr = (ar: string, en: string) => isArabic ? ar : en
+  const tr = (ar: string, en: string) => localeText(language, ar, en)
   const [step, setStep] = useState<1 | 2>(1)
   const [age, setAge] = useState('')
   const [gender, setGender] = useState<Gender | ''>('')
@@ -109,6 +111,7 @@ export default function OnboardingPage() {
   return (
     <main className="min-h-dvh bg-[#f5f7f3] px-4 py-8 sm:grid sm:place-items-center sm:px-6" dir={isArabic ? 'rtl' : 'ltr'}>
       <section className="mx-auto w-full max-w-[520px] border border-[#dce4dc] bg-white px-5 py-7 sm:px-9 sm:py-9">
+        <div className="mb-4 flex justify-end"><LanguageToggle /></div>
         <div className="mb-8">
           <BrandLockup
             size="md"

@@ -8,6 +8,9 @@ import {
   TrendingUp, Users, ArrowRight, Sparkles, Medal,
   BookOpen, Headphones, PenTool, MessageSquare, Clock
 } from 'lucide-react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
+import LanguageToggle from '@/components/LanguageToggle'
 
 interface Badge {
   id: string
@@ -46,15 +49,19 @@ interface UserStats {
   writingsSubmitted: number
   perfectScores: number
   levelTitle: string
+  levelTitleEn: string
 }
 
 export default function AchievementsPage() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const router = useRouter()
   const [stats, setStats] = useState<UserStats | null>(null)
   const [badges, setBadges] = useState<Badge[]>([])
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [userRank, setUserRank] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
+  const [apiError, setApiError] = useState(false)
   const [activeTab, setActiveTab] = useState<'overview' | 'badges' | 'leaderboard'>('overview')
   const [leaderboardType, setLeaderboardType] = useState<'xp' | 'streak' | 'level'>('xp')
 
@@ -67,6 +74,7 @@ export default function AchievementsPage() {
   }, [leaderboardType])
 
   const fetchData = async () => {
+    setApiError(false)
     try {
       const [statsRes, badgesRes, leaderboardRes] = await Promise.all([
         fetch('/api/gamification/stats'),
@@ -77,20 +85,27 @@ export default function AchievementsPage() {
       if (statsRes.ok) {
         const statsData = await statsRes.json()
         setStats(statsData.stats)
+      } else if (statsRes.status !== 401) {
+        setApiError(true)
       }
 
       if (badgesRes.ok) {
         const badgesData = await badgesRes.json()
         setBadges(badgesData.badges || [])
+      } else if (badgesRes.status !== 401) {
+        setApiError(true)
       }
 
       if (leaderboardRes.ok) {
         const leaderboardData = await leaderboardRes.json()
         setLeaderboard(leaderboardData.leaderboard || [])
         setUserRank(leaderboardData.userRank)
+      } else if (leaderboardRes.status !== 401) {
+        setApiError(true)
       }
     } catch (error) {
       console.error('Error fetching data:', error)
+      setApiError(true)
     } finally {
       setLoading(false)
     }
@@ -103,9 +118,12 @@ export default function AchievementsPage() {
         const data = await res.json()
         setLeaderboard(data.leaderboard || [])
         setUserRank(data.userRank)
+      } else if (res.status !== 401) {
+        setApiError(true)
       }
     } catch (error) {
       console.error('Error fetching leaderboard:', error)
+      setApiError(true)
     }
   }
 
@@ -134,6 +152,7 @@ export default function AchievementsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center">
+        <div className="fixed right-4 top-4"><LanguageToggle /></div>
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#10B981] border-t-transparent"></div>
       </div>
     )
@@ -141,13 +160,25 @@ export default function AchievementsPage() {
 
   if (!stats) {
     return (
-      <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center">
+      <div dir={language === 'ar' ? 'rtl' : 'ltr'} className="min-h-screen bg-[#F9FAFB] flex items-center justify-center">
+        <div className="fixed right-4 top-4"><LanguageToggle /></div>
         <div className="text-center">
           <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl text-gray-600 mb-4">يرجى تسجيل الدخول لعرض إنجازاتك</h2>
-          <Link href="/auth/login" className="text-[#10B981] hover:underline">
-            تسجيل الدخول
-          </Link>
+          {apiError ? (
+            <>
+              <h2 className="text-xl text-gray-600 mb-4">{t('تعذر تحميل إنجازاتك. تحقق من اتصالك وحاول مرة أخرى.', 'Could not load your achievements. Check your connection and try again.')}</h2>
+              <button onClick={() => { setApiError(false); setLoading(true); void fetchData() }} className="text-[#10B981] hover:underline">
+                {t('إعادة المحاولة', 'Try again')}
+              </button>
+            </>
+          ) : (
+            <>
+              <h2 className="text-xl text-gray-600 mb-4">{t('يرجى تسجيل الدخول لعرض إنجازاتك', 'Please sign in to view your achievements')}</h2>
+              <Link href="/auth/login" className="text-[#10B981] hover:underline">
+                {t('تسجيل الدخول', 'Sign in')}
+              </Link>
+            </>
+          )}
         </div>
       </div>
     )
@@ -157,24 +188,35 @@ export default function AchievementsPage() {
   const unearnedBadges = badges.filter(b => !b.earned)
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB]">
+    <div dir={language === 'ar' ? 'rtl' : 'ltr'} className="min-h-screen bg-[#F9FAFB]">
       <header className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Trophy className="w-8 h-8 text-[#10B981]" />
             <span className="text-xl font-bold text-[#10B981]">Be Fluent</span>
           </Link>
+          <div className="flex items-center gap-4">
+          <LanguageToggle />
           <Link 
             href="/dashboard/student" 
             className="flex items-center gap-2 text-gray-600 hover:text-[#10B981]"
           >
-            <span>لوحة التحكم</span>
+            <span>{t('لوحة التحكم', 'Dashboard')}</span>
             <ArrowRight className="w-5 h-5" />
           </Link>
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
+        {apiError && (
+          <div role="status" className="mb-6 flex flex-wrap items-center justify-between gap-3 border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <span>{t('تعذر تحميل بعض بيانات الإنجازات. حاول تحديثها.', 'Some achievement data could not be loaded. Please retry.')}</span>
+            <button onClick={() => { setApiError(false); void fetchData(); void fetchLeaderboard() }} className="font-semibold underline underline-offset-2">
+              {t('إعادة المحاولة', 'Retry')}
+            </button>
+          </div>
+        )}
         <div className="bg-gradient-to-br from-[#10B981] to-[#0066B8] rounded-2xl p-6 md:p-8 mb-8 text-white">
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="relative">
@@ -182,13 +224,13 @@ export default function AchievementsPage() {
                 <span className="text-4xl md:text-5xl font-bold">{stats.currentLevel}</span>
               </div>
               <div className="absolute -bottom-2 -right-2 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-bold">
-                {stats.levelTitle}
+                {language === 'ar' ? stats.levelTitle : stats.levelTitleEn}
               </div>
             </div>
             
             <div className="flex-1 text-center md:text-right">
-              <h1 className="text-2xl md:text-3xl font-bold mb-2">إنجازاتك</h1>
-              <p className="text-white/80 mb-4">استمر في التعلم لتحقيق المزيد من الإنجازات</p>
+              <h1 className="text-2xl md:text-3xl font-bold mb-2">{t('إنجازاتك', 'Your achievements')}</h1>
+              <p className="text-white/80 mb-4">{t('استمر في التعلم لتحقيق المزيد من الإنجازات', 'Keep learning to unlock more achievements')}</p>
               
               <div className="bg-white/20 rounded-full h-4 mb-2">
                 <div 
@@ -197,7 +239,7 @@ export default function AchievementsPage() {
                 />
               </div>
               <p className="text-sm text-white/80">
-                {stats.currentLevelXP.toLocaleString()} / {stats.xpToNextLevel.toLocaleString()} XP للمستوى التالي
+                {stats.currentLevelXP.toLocaleString()} / {stats.xpToNextLevel.toLocaleString()} XP {t('للمستوى التالي', 'to next level')}
               </p>
             </div>
 
@@ -205,17 +247,17 @@ export default function AchievementsPage() {
               <div className="bg-white/20 rounded-xl p-4 text-center min-w-[100px]">
                 <Zap className="w-6 h-6 mx-auto mb-1 text-yellow-300" />
                 <p className="text-2xl font-bold">{stats.totalXP.toLocaleString()}</p>
-                <p className="text-xs text-white/70">XP الإجمالي</p>
+                <p className="text-xs text-white/70">{t('إجمالي XP', 'Total XP')}</p>
               </div>
               <div className="bg-white/20 rounded-xl p-4 text-center min-w-[100px]">
                 <Flame className="w-6 h-6 mx-auto mb-1 text-orange-400" />
                 <p className="text-2xl font-bold">{stats.currentStreak}</p>
-                <p className="text-xs text-white/70">يوم متتالي</p>
+                <p className="text-xs text-white/70">{t('يوم متتالي', 'day streak')}</p>
               </div>
               <div className="bg-white/20 rounded-xl p-4 text-center min-w-[100px]">
                 <Trophy className="w-6 h-6 mx-auto mb-1 text-yellow-300" />
                 <p className="text-2xl font-bold">{earnedBadges.length}</p>
-                <p className="text-xs text-white/70">شارة</p>
+                <p className="text-xs text-white/70">{t('شارة', 'badges')}</p>
               </div>
             </div>
           </div>
@@ -223,9 +265,9 @@ export default function AchievementsPage() {
 
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           {[
-            { id: 'overview', label: 'نظرة عامة', icon: TrendingUp },
-            { id: 'badges', label: 'الشارات', icon: Award },
-            { id: 'leaderboard', label: 'المتصدرين', icon: Users },
+            { id: 'overview', label: t('نظرة عامة', 'Overview'), icon: TrendingUp },
+            { id: 'badges', label: t('الشارات', 'Badges'), icon: Award },
+            { id: 'leaderboard', label: t('المتصدرين', 'Leaderboard'), icon: Users },
           ].map(tab => (
             <button
               key={tab.id}
@@ -250,7 +292,7 @@ export default function AchievementsPage() {
                   <BookOpen className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">الكلمات المحفوظة</p>
+                  <p className="text-sm text-gray-500">{t('الكلمات المحفوظة', 'Words learned')}</p>
                   <p className="text-2xl font-bold text-gray-800">{stats.wordsLearned}</p>
                 </div>
               </div>
@@ -262,7 +304,7 @@ export default function AchievementsPage() {
                   <Target className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">الدروس المكتملة</p>
+                  <p className="text-sm text-gray-500">{t('الدروس المكتملة', 'Lessons completed')}</p>
                   <p className="text-2xl font-bold text-gray-800">{stats.lessonsCompleted}</p>
                 </div>
               </div>
@@ -274,7 +316,7 @@ export default function AchievementsPage() {
                   <PenTool className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">الكتابات المقدمة</p>
+                  <p className="text-sm text-gray-500">{t('الكتابات المقدمة', 'Writing submissions')}</p>
                   <p className="text-2xl font-bold text-gray-800">{stats.writingsSubmitted}</p>
                 </div>
               </div>
@@ -286,7 +328,7 @@ export default function AchievementsPage() {
                   <Star className="w-5 h-5 text-orange-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">الدرجات الكاملة</p>
+                  <p className="text-sm text-gray-500">{t('الدرجات الكاملة', 'Perfect scores')}</p>
                   <p className="text-2xl font-bold text-gray-800">{stats.perfectScores}</p>
                 </div>
               </div>
@@ -299,16 +341,16 @@ export default function AchievementsPage() {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <Flame className="w-5 h-5 text-orange-500" />
-                سلسلة التعلم
+                {t('سلسلة التعلم', 'Learning streak')}
               </h3>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-4xl font-bold text-[#10B981]">{stats.currentStreak}</p>
-                  <p className="text-gray-500">يوم متتالي</p>
+                  <p className="text-gray-500">{t('يوم متتالي', 'day streak')}</p>
                 </div>
                 <div className="text-left">
                   <p className="text-2xl font-bold text-gray-400">{stats.longestStreak}</p>
-                  <p className="text-gray-400 text-sm">أطول سلسلة</p>
+                   <p className="text-gray-400 text-sm">{t('أطول سلسلة', 'Longest streak')}</p>
                 </div>
               </div>
               <div className="mt-4 flex gap-1">
@@ -323,13 +365,13 @@ export default function AchievementsPage() {
                   />
                 ))}
               </div>
-              <p className="text-sm text-gray-500 mt-2 text-center">أيام هذا الأسبوع</p>
+              <p className="text-sm text-gray-500 mt-2 text-center">{t('أيام هذا الأسبوع', 'Days this week')}</p>
             </div>
 
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <Award className="w-5 h-5 text-yellow-500" />
-                أحدث الشارات
+                {t('أحدث الشارات', 'Recent badges')}
               </h3>
               {earnedBadges.length > 0 ? (
                 <div className="grid grid-cols-4 gap-3">
@@ -337,20 +379,20 @@ export default function AchievementsPage() {
                     <div 
                       key={badge.id}
                       className="text-center"
-                      title={badge.nameAr}
+                      title={language === 'ar' ? badge.nameAr : badge.name}
                     >
                       <div className="w-14 h-14 mx-auto rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center mb-1">
                         {getBadgeIcon(badge.icon)}
                       </div>
-                      <p className="text-xs text-gray-600 truncate">{badge.nameAr}</p>
+                      <p className="text-xs text-gray-600 truncate">{language === 'ar' ? badge.nameAr : badge.name}</p>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-4">
                   <Sparkles className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-500">لم تحصل على شارات بعد</p>
-                  <p className="text-sm text-gray-400">استمر في التعلم لتحصل على شارتك الأولى!</p>
+                  <p className="text-gray-500">{t('لم تحصل على شارات بعد', 'No badges earned yet')}</p>
+                  <p className="text-sm text-gray-400">{t('استمر في التعلم لتحصل على شارتك الأولى!', 'Keep learning to earn your first badge!')}</p>
                 </div>
               )}
             </div>
@@ -363,7 +405,7 @@ export default function AchievementsPage() {
               <div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                   <Trophy className="w-6 h-6 text-yellow-500" />
-                  الشارات المكتسبة ({earnedBadges.length})
+                  {t('الشارات المكتسبة', 'Earned badges')} ({earnedBadges.length})
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {earnedBadges.map(badge => (
@@ -374,11 +416,11 @@ export default function AchievementsPage() {
                       <div className="w-16 h-16 mx-auto rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center mb-3">
                         {getBadgeIcon(badge.icon)}
                       </div>
-                      <h4 className="font-bold text-gray-800 mb-1">{badge.nameAr}</h4>
-                      <p className="text-sm text-gray-500 mb-2">{badge.descriptionAr}</p>
+                      <h4 className="font-bold text-gray-800 mb-1">{language === 'ar' ? badge.nameAr : badge.name}</h4>
+                      <p className="text-sm text-gray-500 mb-2">{language === 'ar' ? badge.descriptionAr : badge.description}</p>
                       {badge.earnedAt && (
                         <p className="text-xs text-green-600">
-                          حصلت عليها في {new Date(badge.earnedAt).toLocaleDateString('ar-EG')}
+                          {t('حصلت عليها في', 'Earned on')} {new Date(badge.earnedAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
                         </p>
                       )}
                     </div>
@@ -391,7 +433,7 @@ export default function AchievementsPage() {
               <div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                   <Target className="w-6 h-6 text-gray-400" />
-                  شارات متاحة للحصول عليها ({unearnedBadges.length})
+                  {t('شارات متاحة للحصول عليها', 'Available badges')} ({unearnedBadges.length})
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {unearnedBadges.map(badge => (
@@ -402,8 +444,8 @@ export default function AchievementsPage() {
                       <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mb-3">
                         {getBadgeIcon(badge.icon)}
                       </div>
-                      <h4 className="font-bold text-gray-600 mb-1">{badge.nameAr}</h4>
-                      <p className="text-sm text-gray-400 mb-2">{badge.descriptionAr}</p>
+                      <h4 className="font-bold text-gray-600 mb-1">{language === 'ar' ? badge.nameAr : badge.name}</h4>
+                      <p className="text-sm text-gray-400 mb-2">{language === 'ar' ? badge.descriptionAr : badge.description}</p>
                       <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
                         <Zap className="w-3 h-3" />
                         +{badge.xpReward} XP
@@ -417,7 +459,7 @@ export default function AchievementsPage() {
             {badges.length === 0 && (
               <div className="text-center py-12">
                 <Award className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">لا توجد شارات متاحة حالياً</p>
+                <p className="text-gray-500">{t('لا توجد شارات متاحة حالياً', 'No badges available')}</p>
               </div>
             )}
           </div>
@@ -428,8 +470,8 @@ export default function AchievementsPage() {
             <div className="p-4 border-b flex flex-wrap gap-2">
               {[
                 { id: 'xp', label: 'XP' },
-                { id: 'streak', label: 'السلسلة' },
-                { id: 'level', label: 'المستوى' },
+                { id: 'streak', label: t('السلسلة', 'Streak') },
+                { id: 'level', label: t('المستوى', 'Level') },
               ].map(type => (
                 <button
                   key={type.id}
@@ -452,8 +494,8 @@ export default function AchievementsPage() {
                     {userRank}
                   </div>
                   <div>
-                    <p className="font-bold text-[#10B981]">ترتيبك الحالي</p>
-                    <p className="text-sm text-gray-500">من بين جميع المتعلمين</p>
+                    <p className="font-bold text-[#10B981]">{t('ترتيبك الحالي', 'Your current rank')}</p>
+                    <p className="text-sm text-gray-500">{t('من بين جميع المتعلمين', 'Among all learners')}</p>
                   </div>
                 </div>
               </div>
@@ -480,7 +522,7 @@ export default function AchievementsPage() {
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-gray-800">{entry.userName}</p>
-                    <p className="text-sm text-gray-500">المستوى {entry.currentLevel}</p>
+                    <p className="text-sm text-gray-500">{t('المستوى', 'Level')} {entry.currentLevel}</p>
                   </div>
                   <div className="text-left">
                     {leaderboardType === 'xp' && (
@@ -489,11 +531,11 @@ export default function AchievementsPage() {
                     {leaderboardType === 'streak' && (
                       <p className="font-bold text-orange-500 flex items-center gap-1">
                         <Flame className="w-4 h-4" />
-                        {entry.currentStreak} يوم
+                        {entry.currentStreak} {t('يوم', 'days')}
                       </p>
                     )}
                     {leaderboardType === 'level' && (
-                      <p className="font-bold text-[#10B981]">المستوى {entry.currentLevel}</p>
+                    <p className="font-bold text-[#10B981]">{t('المستوى', 'Level')} {entry.currentLevel}</p>
                     )}
                   </div>
                 </div>
@@ -502,7 +544,7 @@ export default function AchievementsPage() {
               {leaderboard.length === 0 && (
                 <div className="p-8 text-center">
                   <Users className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-500">لا يوجد متعلمين في لوحة المتصدرين حالياً</p>
+                  <p className="text-gray-500">{t('لا يوجد متعلمون في لوحة المتصدرين حالياً', 'No learners on the leaderboard yet')}</p>
                 </div>
               )}
             </div>
@@ -512,7 +554,7 @@ export default function AchievementsPage() {
 
       <footer className="bg-[#10B981] text-white py-6 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <p>© 2024 Be Fluent. جميع الحقوق محفوظة</p>
+          <p>© 2024 Be Fluent. {t('جميع الحقوق محفوظة', 'All rights reserved')}</p>
         </div>
       </footer>
     </div>

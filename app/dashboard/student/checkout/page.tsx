@@ -9,6 +9,8 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Alert from '@/components/ui/Alert'
 import Badge from '@/components/ui/Badge'
 import { toast } from 'react-hot-toast'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 interface Package {
   id: string
@@ -23,6 +25,8 @@ type PaymentMethod = 'BANK_TRANSFER' | 'E_WALLET'
 type EWalletProvider = 'INSTAPAY' | 'ETISALAT_CASH'
 
 function CheckoutContent() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const router = useRouter()
   const searchParams = useSearchParams()
   const packageId = searchParams.get('packageId')
@@ -63,13 +67,13 @@ function CheckoutContent() {
       if (response.ok) {
         const data = await response.json()
         setAppliedCoupon({ code: data.code, discount: parseInt(data.discount) })
-        toast.success('Coupon applied! / تم تطبيق الكوبون')
+        toast.success(t('تم تطبيق الكوبون', 'Coupon applied!'))
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Invalid coupon / كوبون غير صالح')
+        toast.error(error.error || t('كوبون غير صالح', 'Invalid coupon'))
       }
     } catch (error) {
-      toast.error('Error applying coupon')
+      toast.error(t('حدث خطأ أثناء تطبيق الكوبون', 'Error applying coupon'))
     }
   }
 
@@ -88,7 +92,7 @@ function CheckoutContent() {
         const data = await response.json()
         setPkg(data)
       } else {
-        toast.error('الباقة غير موجودة / Package not found')
+        toast.error(t('الباقة غير موجودة', 'Package not found'))
         router.push('/dashboard/student/cart')
       }
     } catch (error) {
@@ -101,7 +105,7 @@ function CheckoutContent() {
   async function handleCreateSubscription() {
     if (!paymentMethod || !pkg) return
     if (paymentMethod === 'E_WALLET' && !eWalletProvider) {
-      toast.error('يرجى اختيار مزود المحفظة الإلكترونية / Please select an e-wallet provider')
+      toast.error(t('يرجى اختيار مزود المحفظة الإلكترونية', 'Please select an e-wallet provider'))
       return
     }
 
@@ -124,11 +128,11 @@ function CheckoutContent() {
         setStep('receipt')
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Failed to create subscription')
+        toast.error(error.error || t('فشل إنشاء الاشتراك', 'Failed to create subscription'))
       }
     } catch (error) {
       console.error('Error creating subscription:', error)
-      toast.error('خطأ في إنشاء الاشتراك / Error creating subscription')
+      toast.error(t('خطأ في إنشاء الاشتراك', 'Error creating subscription'))
     } finally {
       setSubmitting(false)
     }
@@ -152,11 +156,11 @@ function CheckoutContent() {
         setStep('success')
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Failed to upload receipt')
+        toast.error(error.error || t('فشل رفع الإيصال', 'Failed to upload receipt'))
       }
     } catch (error) {
       console.error('Error uploading receipt:', error)
-      toast.error('خطأ في رفع الإيصال / Error uploading receipt')
+      toast.error(t('خطأ في رفع الإيصال', 'Error uploading receipt'))
     } finally {
       setSubmitting(false)
     }
@@ -177,8 +181,8 @@ function CheckoutContent() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#10B981] mb-2">Checkout / الدفع</h1>
-        <p className="text-gray-600">Complete your subscription purchase</p>
+        <h1 className="text-3xl font-bold text-[#10B981] mb-2">{t('الدفع', 'Checkout')}</h1>
+        <p className="text-gray-600">{t('أكمل عملية شراء الاشتراك', 'Complete your subscription purchase')}</p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
@@ -187,7 +191,7 @@ function CheckoutContent() {
             <>
               <Card variant="elevated">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">
-                  Select Payment Method / اختر طريقة الدفع
+                  {t('اختر طريقة الدفع', 'Select payment method')}
                 </h2>
 
                 <div className="space-y-4">
@@ -204,8 +208,8 @@ function CheckoutContent() {
                         paymentMethod === 'BANK_TRANSFER' ? 'text-[#10B981]' : 'text-gray-600'
                       }`} />
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">Bank Transfer / تحويل بنكي</h3>
-                        <p className="text-sm text-gray-600">Transfer to our bank account</p>
+                        <h3 className="font-semibold text-gray-900">{t('تحويل بنكي', 'Bank transfer')}</h3>
+                        <p className="text-sm text-gray-600">{t('حوّل المبلغ إلى حسابنا البنكي', 'Transfer to our bank account')}</p>
                       </div>
                       {paymentMethod === 'BANK_TRANSFER' && (
                         <CheckCircle className="h-5 w-5 text-[#10B981]" />
@@ -226,8 +230,8 @@ function CheckoutContent() {
                         paymentMethod === 'E_WALLET' ? 'text-[#10B981]' : 'text-gray-600'
                       }`} />
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">E-Wallet / محفظة إلكترونية</h3>
-                        <p className="text-sm text-gray-600">Pay via InstaPay or Etisalat Cash</p>
+                        <h3 className="font-semibold text-gray-900">{t('محفظة إلكترونية', 'E-wallet')}</h3>
+                        <p className="text-sm text-gray-600">{t('ادفع عبر إنستا باي أو اتصالات كاش', 'Pay via InstaPay or Etisalat Cash')}</p>
                       </div>
                       {paymentMethod === 'E_WALLET' && (
                         <CheckCircle className="h-5 w-5 text-[#10B981]" />
@@ -278,7 +282,7 @@ function CheckoutContent() {
                     onClick={handleCreateSubscription}
                     disabled={!paymentMethod || (paymentMethod === 'E_WALLET' && !eWalletProvider) || submitting}
                   >
-                    {submitting ? 'Processing...' : 'Upload Receipt / رفع الإيصال'}
+                    {submitting ? t('جارٍ المعالجة...', 'Processing...') : t('رفع الإيصال', 'Upload receipt')}
                   </Button>
                 </div>
               </Card>
@@ -291,17 +295,16 @@ function CheckoutContent() {
               {paymentMethod === 'BANK_TRANSFER' && (
                 <Card variant="elevated" className="mb-6">
                   <h2 className="text-xl font-bold text-gray-900 mb-4">
-                    Bank Transfer Details / تفاصيل التحويل البنكي
+                    {t('تفاصيل التحويل البنكي', 'Bank transfer details')}
                   </h2>
                   <Alert variant="info">
                     <div>
-                      <p className="font-semibold mb-3">Please transfer to / يرجى التحويل إلى:</p>
+                      <p className="font-semibold mb-3">{t('يرجى التحويل إلى:', 'Please transfer to:')}</p>
                       <div className="space-y-2 text-sm bg-blue-50 p-3 rounded">
-                        <p><strong>Bank Account Number / رقم الحساب البنكي:</strong><br/>eg0123456789</p>
-                        <p><strong>Amount / المبلغ:</strong><br/>{pkg.price} SAR</p>
+                        <p><strong>{t('رقم الحساب البنكي:', 'Bank account number:')}</strong><br/>eg0123456789</p>
+                        <p><strong>{t('المبلغ:', 'Amount:')}</strong><br/>{pkg.price} SAR</p>
                       </div>
-                      <p className="text-xs text-gray-600 mt-3">After completing the transfer, please upload a clear photo of the receipt below.</p>
-                      <p className="text-xs text-gray-600">بعد إتمام التحويل، يرجى رفع صورة واضحة للإيصال أدناه.</p>
+                      <p className="text-xs text-gray-600">{t('بعد إتمام التحويل، يرجى رفع صورة واضحة للإيصال أدناه.', 'After completing the transfer, please upload a clear photo of the receipt below.')}</p>
                     </div>
                   </Alert>
                 </Card>
@@ -310,18 +313,17 @@ function CheckoutContent() {
               {paymentMethod === 'E_WALLET' && (
                 <Card variant="elevated" className="mb-6">
                   <h2 className="text-xl font-bold text-gray-900 mb-4">
-                    E-Wallet Payment Details / تفاصيل دفع المحفظة الإلكترونية
+                    {t('تفاصيل دفع المحفظة الإلكترونية', 'E-wallet payment details')}
                   </h2>
                   <Alert variant="info">
                     <div>
-                      <p className="font-semibold mb-3">Please send payment to / يرجى إرسال الدفع إلى:</p>
+                      <p className="font-semibold mb-3">{t('يرجى إرسال الدفع إلى:', 'Please send payment to:')}</p>
                       <div className="space-y-2 text-sm bg-blue-50 p-3 rounded">
-                        <p><strong>Provider / المزود:</strong><br/>{eWalletProvider === 'INSTAPAY' ? 'InstaPay' : 'Etisalat Cash'}</p>
-                        <p><strong>Wallet Number / رقم المحفظة:</strong><br/>01155201921</p>
-                        <p><strong>Amount / المبلغ:</strong><br/>{pkg.price} SAR</p>
+                        <p><strong>{t('المزود:', 'Provider:')}</strong><br/>{eWalletProvider === 'INSTAPAY' ? 'InstaPay' : 'Etisalat Cash'}</p>
+                        <p><strong>{t('رقم المحفظة:', 'Wallet number:')}</strong><br/>01155201921</p>
+                        <p><strong>{t('المبلغ:', 'Amount:')}</strong><br/>{pkg.price} SAR</p>
                       </div>
-                      <p className="text-xs text-gray-600 mt-3">After completing the transfer, please upload a clear screenshot of the confirmation below.</p>
-                      <p className="text-xs text-gray-600">بعد إتمام التحويل، يرجى رفع صورة واضحة لتأكيد العملية أدناه.</p>
+                      <p className="text-xs text-gray-600">{t('بعد إتمام التحويل، يرجى رفع صورة واضحة لتأكيد العملية أدناه.', 'After completing the transfer, please upload a clear screenshot of the confirmation below.')}</p>
                     </div>
                   </Alert>
                 </Card>
@@ -329,22 +331,21 @@ function CheckoutContent() {
 
               <Card variant="elevated">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">
-                  Upload Payment Proof / رفع إثبات الدفع
+                  {t('رفع إثبات الدفع', 'Upload payment proof')}
                 </h2>
 
                 <Alert variant="warning" className="mb-4">
                   <AlertCircle className="h-5 w-5" />
                   <div>
-                    <p className="font-semibold">Important / مهم:</p>
-                    <p className="text-sm">Please upload a clear photo or screenshot of your payment receipt for verification.</p>
-                    <p className="text-sm">يرجى رفع صورة واضحة أو لقطة شاشة لإثبات الدفع للتحقق.</p>
+                    <p className="font-semibold">{t('مهم:', 'Important:')}</p>
+                    <p className="text-sm">{t('يرجى رفع صورة واضحة أو لقطة شاشة لإثبات الدفع للتحقق.', 'Please upload a clear photo or screenshot of your payment receipt for verification.')}</p>
                   </div>
                 </Alert>
 
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Payment Receipt / إيصال الدفع
+                      {t('إيصال الدفع', 'Payment receipt')}
                     </label>
                     <input
                       type="file"
@@ -354,7 +355,7 @@ function CheckoutContent() {
                     />
                     {receiptFile && (
                       <p className="text-sm text-green-600 mt-2">
-                        ✓ File selected: {receiptFile.name}
+                         ✓ {t('تم اختيار الملف: ', 'File selected: ')}{receiptFile.name}
                       </p>
                     )}
                   </div>
@@ -365,10 +366,10 @@ function CheckoutContent() {
                     onClick={handleUploadReceipt}
                     disabled={!receiptFile || submitting}
                   >
-                    {submitting ? 'Uploading...' : (
+                    {submitting ? t('جارٍ الرفع...', 'Uploading...') : (
                       <>
                         <Upload className="h-4 w-4 ml-2" />
-                        Submit Receipt / إرسال الإيصال
+                        {t('إرسال الإيصال', 'Submit receipt')}
                       </>
                     )}
                   </Button>
@@ -385,13 +386,10 @@ function CheckoutContent() {
                 </div>
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Subscription Submitted! / تم إرسال الاشتراك!
+                {t('تم إرسال الاشتراك!', 'Subscription submitted!')}
               </h2>
               <p className="text-gray-700 mb-6">
-                Your subscription is now under review. We will verify your payment and activate your subscription within 24 hours.
-              </p>
-              <p className="text-gray-700 mb-6">
-                اشتراكك الآن قيد المراجعة. سنتحقق من دفعتك وننشط اشتراكك خلال 24 ساعة.
+                {t('اشتراكك الآن قيد المراجعة. سنتحقق من دفعتك وننشط اشتراكك خلال 24 ساعة.', 'Your subscription is now under review. We will verify your payment and activate your subscription within 24 hours.')}
               </p>
               <div className="space-y-3">
                 <Button
@@ -399,7 +397,7 @@ function CheckoutContent() {
                   fullWidth
                   onClick={() => router.push('/dashboard/student')}
                 >
-                  Back to Dashboard / العودة للوحة التحكم
+                  {t('العودة للوحة التحكم', 'Back to dashboard')}
                 </Button>
               </div>
             </Card>
@@ -408,40 +406,40 @@ function CheckoutContent() {
 
         <div>
           <Card variant="elevated" className="sticky top-4">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Order Summary / ملخص الطلب</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-4">{t('ملخص الطلب', 'Order summary')}</h3>
             <div className="space-y-3 mb-4">
               <div>
-                <p className="text-sm text-gray-600">Package / الباقة</p>
-                <p className="font-semibold text-gray-900">{pkg.title} / {pkg.titleAr}</p>
+                <p className="text-sm text-gray-600">{t('الباقة', 'Package')}</p>
+                <p className="font-semibold text-gray-900">{language === 'ar' ? pkg.titleAr || pkg.title : pkg.title}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Lessons / الحصص</p>
-                <p className="font-semibold text-gray-900">{pkg.lessonsCount} lessons</p>
+                <p className="text-sm text-gray-600">{t('الحصص', 'Lessons')}</p>
+                <p className="font-semibold text-gray-900">{pkg.lessonsCount} {t('حصص', 'lessons')}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Duration / المدة</p>
-                <p className="font-semibold text-gray-900">{Math.ceil(pkg.durationDays / 30)} month(s)</p>
+                <p className="text-sm text-gray-600">{t('المدة', 'Duration')}</p>
+                <p className="font-semibold text-gray-900">{Math.ceil(pkg.durationDays / 30)} {t('شهر', 'months')}</p>
               </div>
             </div>
             <div className="border-t pt-4 space-y-3">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-gray-700">Coupon Code / كود الخصم</label>
+              <label className="text-sm font-medium text-gray-700">{t('كود الخصم', 'Coupon code')}</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                    placeholder="ENTER CODE"
+                    placeholder={t('أدخل الرمز', 'ENTER CODE')}
                     className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500"
                   />
-                  <Button size="sm" onClick={() => handleApplyCoupon(couponCode)}>Apply</Button>
+                  <Button size="sm" onClick={() => handleApplyCoupon(couponCode)}>{t('تطبيق', 'Apply')}</Button>
                 </div>
                 
                 <button 
                   onClick={() => setShowCouponSelector(!showCouponSelector)}
                   className="text-xs text-emerald-600 font-bold hover:underline text-left mt-1"
                 >
-                  Explore our discounts / اكتشف خصوماتنا
+                  {t('اكتشف خصوماتنا', 'Explore our discounts')}
                 </button>
 
                 {showCouponSelector && availableCoupons.length > 0 && (
@@ -458,7 +456,7 @@ function CheckoutContent() {
                       >
                         <div>
                           <p className="font-bold text-emerald-700 text-sm">{c.code}</p>
-                          <p className="text-xs text-gray-500">Discount: {c.discount}%</p>
+                          <p className="text-xs text-gray-500">{t('الخصم: ', 'Discount: ')}{c.discount}%</p>
                         </div>
                         <Tag className="w-4 h-4 text-emerald-500" />
                       </div>
@@ -469,13 +467,13 @@ function CheckoutContent() {
 
               {appliedCoupon && (
                 <div className="flex items-center justify-between text-emerald-600 font-bold text-sm bg-emerald-50 p-2 rounded">
-                  <span>Discount Applied / تم تطبيق الخصم:</span>
+                  <span>{t('تم تطبيق الخصم:', 'Discount applied:')}</span>
                   <span>-{appliedCoupon.discount}%</span>
                 </div>
               )}
 
               <div className="flex items-center justify-between border-t pt-3">
-                <span className="text-lg font-bold text-gray-900">Total / الإجمالي</span>
+                <span className="text-lg font-bold text-gray-900">{t('الإجمالي', 'Total')}</span>
                 <span className="text-2xl font-bold text-[#10B981]">{finalPrice} SAR</span>
               </div>
             </div>
@@ -483,11 +481,11 @@ function CheckoutContent() {
             {paymentMethod && (
               <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                 <p className="text-sm text-gray-700">
-                  <strong>Payment Method:</strong>
+                  <strong>{t('طريقة الدفع:', 'Payment method:')}</strong>
                 </p>
                 <Badge variant="primary" className="mt-1">
-                  {paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer / تحويل بنكي' : 
-                   `E-Wallet: ${eWalletProvider === 'INSTAPAY' ? 'InstaPay' : 'Etisalat Cash'}`}
+                  {paymentMethod === 'BANK_TRANSFER' ? t('تحويل بنكي', 'Bank transfer') :
+                   `${t('محفظة إلكترونية: ', 'E-wallet: ')}${eWalletProvider === 'INSTAPAY' ? 'InstaPay' : 'Etisalat Cash'}`}
                 </Badge>
               </div>
             )}

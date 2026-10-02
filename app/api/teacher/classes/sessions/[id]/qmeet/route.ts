@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { canSession, isNextResponse, requireTeacher } from '@/lib/auth-helpers'
 import { recordAuditEvent } from '@/lib/audit'
 import { QMeetClientProvider } from '@/lib/qmeet/provider'
-import { phase6DatabaseGuard } from '@/lib/phase6'
+import { phase6DatabaseGuard, qmeetProviderStatus } from '@/lib/phase6'
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const blocked = phase6DatabaseGuard()
@@ -28,7 +28,10 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
   if (!session) return NextResponse.json({ ok: false, error: { code: 'NOT_FOUND', message: 'Assigned session not found' } }, { status: 404 })
   if (session.qmeetMeeting?.status === 'CREATED') return NextResponse.json({ status: 'CREATED', meeting: session.qmeetMeeting })
   const provider = new QMeetClientProvider()
-  if (!provider.isConfigured()) return NextResponse.json({ ok: false, error: { code: 'PROVIDER_UNAVAILABLE', message: 'QMeet is not configured' } }, { status: 503 })
+  if (!provider.isConfigured()) {
+    const missing = qmeetProviderStatus().missing
+    return NextResponse.json({ ok: false, error: { code: 'PROVIDER_UNAVAILABLE', message: `QMeet setup is incomplete. Missing: ${missing.join(', ')}`, missing } }, { status: 503 })
+  }
   await prisma.qMeetMeeting.upsert({ where: { sessionId: id }, create: { sessionId: id, status: 'REQUESTED' }, update: { status: 'REQUESTED' } })
   try {
     const result = await provider.createMeeting({ roomName: session.roomId ?? session.id, title: session.title, startTime: session.startTime.toISOString(), endTime: session.endTime.toISOString() })

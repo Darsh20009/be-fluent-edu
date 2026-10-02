@@ -4,6 +4,8 @@ import { useState, useEffect, use } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, Play, FileText, CheckCircle, BookOpen, Trophy, ArrowRight } from 'lucide-react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeDirection, localeText } from '@/lib/locale'
 import MultipleChoiceExercise from '@/components/exercises/MultipleChoiceExercise'
 import FillBlankExercise from '@/components/exercises/FillBlankExercise'
 import DragDropExercise from '@/components/exercises/DragDropExercise'
@@ -58,6 +60,8 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
   const resolvedParams = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [lesson, setLesson] = useState<Lesson | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'video' | 'article' | 'exercises'>('video')
@@ -82,9 +86,9 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
         setLesson(data)
         setExercisesScore(data.progress?.exercisesScore || null)
         
-        if (!data.videoUrl && data.articleContent) {
+        if (!data.videoUrl && (language === 'ar' ? data.articleContentAr : data.articleContent)) {
           setActiveTab('article')
-        } else if (!data.videoUrl && !data.articleContent && data.exercises.length > 0) {
+        } else if (!data.videoUrl && !(language === 'ar' ? data.articleContentAr : data.articleContent) && data.exercises.length > 0) {
           setActiveTab('exercises')
         }
       } else {
@@ -170,7 +174,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
   const currentExercise = lesson.exercises[currentExerciseIndex]
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB]">
+      <div className="min-h-screen bg-[#F9FAFB]" dir={localeDirection(language)}>
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center gap-3">
@@ -181,8 +185,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
               <ChevronLeft className="w-5 h-5 text-[#10B981]" />
             </button>
             <div className="flex-1">
-              <h1 className="text-lg sm:text-xl font-bold text-[#10B981]">{lesson.titleAr}</h1>
-              <p className="text-sm text-gray-500">{lesson.title}</p>
+              <h1 className="text-lg sm:text-xl font-bold text-[#10B981]">{language === 'ar' ? lesson.titleAr || lesson.title : lesson.title}</h1>
             </div>
             {exercisesScore !== null && (
               <div className="flex items-center gap-2 bg-[#10B981]/10 px-3 py-2 rounded-lg">
@@ -206,10 +209,10 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
               }`}
             >
               <Play className="w-4 h-4" />
-              الفيديو
+              {t('الفيديو', 'Video')}
             </button>
           )}
-          {lesson.articleContentAr && (
+          {(language === 'ar' ? lesson.articleContentAr : lesson.articleContent) && (
             <button
               onClick={() => setActiveTab('article')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
@@ -219,7 +222,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
               }`}
             >
               <FileText className="w-4 h-4" />
-              المقال
+              {t('المقال', 'Article')}
             </button>
           )}
           {lesson.exercises.length > 0 && (
@@ -232,7 +235,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
               }`}
             >
               <BookOpen className="w-4 h-4" />
-              التمارين ({lesson.exercises.length})
+              {t(`التمارين (${lesson.exercises.length})`, `Exercises (${lesson.exercises.length})`)}
             </button>
           )}
         </div>
@@ -246,35 +249,26 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                 className="w-full h-full"
                 onEnded={handleVideoEnded}
               >
-                متصفحك لا يدعم تشغيل الفيديو
+                {t('متصفحك لا يدعم تشغيل الفيديو', 'Your browser does not support video playback')}
               </video>
             </div>
-            {lesson.descriptionAr && (
+            {(language === 'ar' ? lesson.descriptionAr : lesson.description) && (
               <div className="p-4 border-t">
-                <h3 className="font-bold text-lg mb-2">وصف الدرس</h3>
-                <p className="text-gray-600">{lesson.descriptionAr}</p>
+                <h3 className="font-bold text-lg mb-2">{t('وصف الدرس', 'Lesson description')}</h3>
+                <p className="text-gray-600">{language === 'ar' ? lesson.descriptionAr : lesson.description}</p>
               </div>
             )}
           </div>
         )}
 
-        {activeTab === 'article' && lesson.articleContentAr && (
+        {activeTab === 'article' && (language === 'ar' ? lesson.articleContentAr : lesson.articleContent) && (
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div 
-              className="prose prose-lg max-w-none text-right"
-              dir="rtl"
-              dangerouslySetInnerHTML={{ __html: lesson.articleContentAr }}
+              className={`prose prose-lg max-w-none ${language === 'ar' ? 'text-right' : 'text-left'}`}
+              dir={localeDirection(language)}
+              dangerouslySetInnerHTML={{ __html: language === 'ar' ? lesson.articleContentAr || '' : lesson.articleContent || '' }}
               onMouseUp={handleArticleRead}
             />
-            {lesson.articleContent && (
-              <div className="mt-8 pt-6 border-t">
-                <h3 className="font-bold text-lg mb-4 text-gray-400">English Version</h3>
-                <div 
-                  className="prose prose-lg max-w-none text-gray-500"
-                  dangerouslySetInnerHTML={{ __html: lesson.articleContent }}
-                />
-              </div>
-            )}
           </div>
         )}
 
@@ -283,7 +277,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
             <div className="bg-white rounded-xl shadow-sm p-4 mb-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm text-gray-600">
-                  التمرين {currentExerciseIndex + 1} من {lesson.exercises.length}
+                  {t(`التمرين ${currentExerciseIndex + 1} من ${lesson.exercises.length}`, `Exercise ${currentExerciseIndex + 1} of ${lesson.exercises.length}`)}
                 </span>
                 <div className="flex gap-1">
                   {lesson.exercises.map((ex, idx) => (
@@ -326,14 +320,14 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                 className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ArrowRight className="w-4 h-4" />
-                السابق
+                {t('السابق', 'Previous')}
               </button>
               <button
                 onClick={() => setCurrentExerciseIndex(prev => Math.min(lesson.exercises.length - 1, prev + 1))}
                 disabled={currentExerciseIndex === lesson.exercises.length - 1}
                 className="flex items-center gap-2 px-4 py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#003A6A] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                التالي
+                {t('التالي', 'Next')}
                 <ArrowRight className="w-4 h-4 rotate-180" />
               </button>
             </div>

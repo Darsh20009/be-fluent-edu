@@ -12,6 +12,8 @@ import {
   MessageSquareText,
   Target,
 } from 'lucide-react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeDirection, localeText } from '@/lib/locale'
 
 type ResourceState = 'loading' | 'ready' | 'unavailable' | 'error'
 type Resource = { state: ResourceState; data?: unknown }
@@ -80,15 +82,15 @@ function getItems<T extends object>(data: unknown): T[] {
     : []
 }
 
-function getLabel(item: { title?: string; name?: string; sessionTitle?: string; assignmentTitle?: string }) {
-  return String(item.title || item.name || item.sessionTitle || item.assignmentTitle || 'عنصر تعلّم')
+function getLabel(item: { title?: string; name?: string; sessionTitle?: string; assignmentTitle?: string }, language: 'ar' | 'en') {
+  return String(item.title || item.name || item.sessionTitle || item.assignmentTitle || localeText(language, 'عنصر تعلّم', 'Learning item'))
 }
 
-function formatDate(value?: string | Date | null) {
+function formatDate(value: string | Date | null | undefined, language: 'ar' | 'en') {
   if (!value) return ''
   const date = new Date(value)
   if (Number.isNaN(date.valueOf())) return ''
-  return date.toLocaleString('ar-SA', {
+  return date.toLocaleString(language === 'ar' ? 'ar-SA' : 'en-US', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -120,19 +122,19 @@ function Panel({
   )
 }
 
-function ResourceMessage({ resource, retry }: { resource: Resource; retry: () => void }) {
+function ResourceMessage({ resource, retry, language }: { resource: Resource; retry: () => void; language: 'ar' | 'en' }) {
   if (resource.state === 'loading') {
-    return <div className="h-16 animate-pulse rounded-xl" style={{ background: 'var(--surface-muted)' }} aria-label="جارٍ التحميل" aria-busy="true" />
+    return <div className="h-16 animate-pulse rounded-xl" style={{ background: 'var(--surface-muted)' }} aria-label={localeText(language, 'جارٍ التحميل', 'Loading')} aria-busy="true" />
   }
   if (resource.state === 'unavailable') {
-    return <p className="text-sm leading-6" style={{ color: 'var(--muted)' }}>الخدمة غير متاحة حالياً. حاول مرة أخرى لاحقاً.</p>
+    return <p className="text-sm leading-6" style={{ color: 'var(--muted)' }}>{localeText(language, 'الخدمة غير متاحة حالياً. حاول مرة أخرى لاحقاً.', 'This service is currently unavailable. Please try again later.')}</p>
   }
   if (resource.state === 'error') {
     return (
       <div role="alert">
-        <p className="text-sm leading-6" style={{ color: 'var(--muted)' }}>تعذر تحميل هذه المعلومات. لن نعرض بيانات غير مؤكدة.</p>
+        <p className="text-sm leading-6" style={{ color: 'var(--muted)' }}>{localeText(language, 'تعذر تحميل هذه المعلومات. لن نعرض بيانات غير مؤكدة.', 'Could not load this information. We will not show unverified data.')}</p>
         <button type="button" onClick={retry} className="mt-2 min-h-11 text-sm font-bold underline underline-offset-4" style={{ color: 'var(--primary)' }}>
-          إعادة المحاولة
+          {localeText(language, 'إعادة المحاولة', 'Try again')}
         </button>
       </div>
     )
@@ -149,6 +151,8 @@ function TextLink({ href, children }: { href: string; children: ReactNode }) {
 }
 
 export default function RedesignedHomeTab() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [snapshot, setSnapshot] = useState<Snapshot>({
     classes: loadingResource,
     homework: loadingResource,
@@ -209,12 +213,12 @@ export default function RedesignedHomeTab() {
   const isActionError = actionResource.state === 'error' || actionResource.state === 'unavailable'
 
   return (
-    <div className="space-y-5 sm:space-y-6" dir="rtl">
+    <div className="space-y-5 sm:space-y-6" dir={localeDirection(language)}>
       <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="text-xs font-bold" style={{ color: 'var(--primary)' }}>مساحتك التعليمية</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">تعلّمك اليوم</h1>
-          <p className="mt-2 text-sm leading-6" style={{ color: 'var(--muted)' }}>خطوة واحدة واضحة، ثم واصل من حيث توقفت.</p>
+          <p className="text-xs font-bold" style={{ color: 'var(--primary)' }}>{t('مساحتك التعليمية', 'Your learning space')}</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">{t('تعلّمك اليوم', 'Your learning today')}</h1>
+          <p className="mt-2 text-sm leading-6" style={{ color: 'var(--muted)' }}>{t('خطوة واحدة واضحة، ثم واصل من حيث توقفت.', 'One clear step at a time. Pick up where you left off.')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {(profile?.officialLevel?.name || profile?.officialStage?.name) && (
@@ -223,17 +227,17 @@ export default function RedesignedHomeTab() {
             </span>
           )}
           <Link href="/dashboard/student/learning" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold text-white" style={{ background: 'var(--primary)' }}>
-            خطتي التعليمية <ArrowLeft size={16} aria-hidden="true" />
+            {t('خطتي التعليمية', 'My learning plan')} <ArrowLeft size={16} aria-hidden="true" />
           </Link>
         </div>
       </header>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="ملخص التعلم">
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label={t('ملخص التعلم', 'Learning summary')}>
         {[
-          { icon: CalendarDays, label: 'الحصة القادمة', value: nextClass ? formatDate(nextClass.startTime) : snapshot.classes.state === 'loading' ? 'جارٍ التحميل' : 'لا توجد حصة قادمة', href: '/dashboard/student/classes' },
-          { icon: ClipboardCheck, label: 'واجبات تحتاج متابعة', value: snapshot.homework.state === 'loading' ? 'جارٍ التحميل' : String(pendingHomework.length), href: '/dashboard/student/homework' },
-          { icon: MessageSquareText, label: 'ملاحظات المدرس', value: snapshot.feedback.state === 'loading' ? 'جارٍ التحميل' : feedback ? 'لديك ملاحظة منشورة' : 'لا توجد ملاحظات جديدة', href: '/dashboard/student/feedback' },
-          { icon: BookOpen, label: 'تقدّمك المسجل', value: snapshot.profile.state === 'loading' ? 'جارٍ التحميل' : hasProgress ? `${masteryCount} مهارات مسجلة` : 'بانتظار تسجيل التقدم', href: '/dashboard/student/learning' },
+          { icon: CalendarDays, label: t('الحصة القادمة', 'Next class'), value: nextClass ? formatDate(nextClass.startTime, language) : snapshot.classes.state === 'loading' ? t('جارٍ التحميل', 'Loading') : t('لا توجد حصة قادمة', 'No upcoming class'), href: '/dashboard/student/classes' },
+          { icon: ClipboardCheck, label: t('واجبات تحتاج متابعة', 'Homework to follow up'), value: snapshot.homework.state === 'loading' ? t('جارٍ التحميل', 'Loading') : String(pendingHomework.length), href: '/dashboard/student/homework' },
+          { icon: MessageSquareText, label: t('ملاحظات المدرس', 'Teacher feedback'), value: snapshot.feedback.state === 'loading' ? t('جارٍ التحميل', 'Loading') : feedback ? t('لديك ملاحظة منشورة', 'You have published feedback') : t('لا توجد ملاحظات جديدة', 'No new feedback'), href: '/dashboard/student/feedback' },
+          { icon: BookOpen, label: t('تقدّمك المسجل', 'Recorded progress'), value: snapshot.profile.state === 'loading' ? t('جارٍ التحميل', 'Loading') : hasProgress ? `${masteryCount} ${t('مهارات مسجلة', 'skills recorded')}` : t('بانتظار تسجيل التقدم', 'Waiting for progress to be recorded'), href: '/dashboard/student/learning' },
         ].map(({ icon: Icon, label, value, href }) => (
           <Link key={label} href={href} className="min-h-[118px] rounded-2xl border p-4 transition-colors hover:bg-[var(--surface-muted)]" style={{ background: 'var(--surface)', color: 'var(--foreground)', borderColor: 'var(--border)' }}>
             <div className="flex items-center justify-between gap-3">
@@ -253,56 +257,56 @@ export default function RedesignedHomeTab() {
               <span className="grid h-8 w-8 place-items-center rounded-full" style={{ background: 'var(--surface)', color: 'var(--primary)' }}>
                 {recommendation ? <Target size={16} aria-hidden="true" /> : <CheckCircle2 size={16} aria-hidden="true" />}
               </span>
-              {recommendation ? 'توصية لك' : 'الخطوة التالية'}
+              {recommendation ? t('توصية لك', 'Recommended for you') : t('الخطوة التالية', 'Next step')}
             </div>
             <h2 id="student-next-step" className="text-xl font-bold leading-8 sm:text-2xl">
-              {isActionPending ? 'نجهّز خطوتك التالية' : actionTitle || 'لا توجد خطوة جديدة اليوم'}
+              {isActionPending ? t('نجهّز خطوتك التالية', 'Preparing your next step') : actionTitle || t('لا توجد خطوة جديدة اليوم', 'No new steps today')}
             </h2>
             {actionReason && <p className="mt-2 max-w-2xl text-sm leading-7" style={{ color: 'var(--muted)' }}>{actionReason}</p>}
-            {isActionPending && <div role="status" aria-busy="true" aria-label="جارٍ تحميل خطوة التعلّم" className="mt-4 h-3 w-48 animate-pulse rounded" style={{ background: 'var(--border)' }} />}
+            {isActionPending && <div role="status" aria-busy="true" aria-label={t('جارٍ تحميل خطوة التعلّم', 'Loading your learning step')} className="mt-4 h-3 w-48 animate-pulse rounded" style={{ background: 'var(--border)' }} />}
             {isActionError && (
               <div role="alert" className="mt-3">
-                <p className="text-sm" style={{ color: 'var(--muted)' }}>تعذر تحميل خطوتك الآن. لم نعرض بيانات غير مؤكدة.</p>
-                <button type="button" onClick={retry} className="mt-2 min-h-11 text-sm font-bold underline underline-offset-4" style={{ color: 'var(--primary)' }}>إعادة المحاولة</button>
+                <p className="text-sm" style={{ color: 'var(--muted)' }}>{t('تعذر تحميل خطوتك الآن. لم نعرض بيانات غير مؤكدة.', 'Could not load your step. No unverified data was shown.')}</p>
+                <button type="button" onClick={retry} className="mt-2 min-h-11 text-sm font-bold underline underline-offset-4" style={{ color: 'var(--primary)' }}>{t('إعادة المحاولة', 'Try again')}</button>
               </div>
             )}
-            {!isActionPending && !isActionError && !actionTitle && <p className="mt-2 text-sm" style={{ color: 'var(--muted)' }}>يمكنك الرجوع إلى خطتك التعليمية لاختيار ما تتابعه.</p>}
+            {!isActionPending && !isActionError && !actionTitle && <p className="mt-2 text-sm" style={{ color: 'var(--muted)' }}>{t('يمكنك الرجوع إلى خطتك التعليمية لاختيار ما تتابعه.', 'Return to your learning plan to choose what to work on.')}</p>}
           </div>
           {!isActionPending && !isActionError && actionTitle && (
             <Link href={actionHref} className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl px-5 text-sm font-bold text-white" style={{ background: 'var(--primary)' }}>
-              ابدأ الآن <ArrowLeft size={16} aria-hidden="true" />
+              {t('ابدأ الآن', 'Get started')} <ArrowLeft size={16} aria-hidden="true" />
             </Link>
           )}
         </div>
       </section>
 
       <section className="grid gap-4 xl:grid-cols-2">
-        <Panel title="الحصة القادمة" action={<TextLink href="/dashboard/student/classes">كل الحصص</TextLink>}>
-          <ResourceMessage resource={snapshot.classes} retry={retry} />
-          {snapshot.classes.state === 'ready' && !nextClass && <p className="text-sm" style={{ color: 'var(--muted)' }}>لا توجد حصة قادمة مسجلة.</p>}
+        <Panel title={t('الحصة القادمة', 'Next class')} action={<TextLink href="/dashboard/student/classes">{t('كل الحصص', 'All classes')}</TextLink>}>
+          <ResourceMessage resource={snapshot.classes} retry={retry} language={language} />
+          {snapshot.classes.state === 'ready' && !nextClass && <p className="text-sm" style={{ color: 'var(--muted)' }}>{t('لا توجد حصة قادمة مسجلة.', 'No upcoming class is scheduled.')}</p>}
           {snapshot.classes.state === 'ready' && nextClass && (
             <div className="flex items-start gap-3">
               <CalendarDays className="mt-1 shrink-0" size={19} style={{ color: 'var(--primary)' }} aria-hidden="true" />
               <div className="min-w-0">
-                <p className="font-bold">{getLabel(nextClass)}</p>
-                <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>{formatDate(nextClass.startTime)}</p>
-                {nextClass.TeacherProfile?.User?.name && <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>المدرس: {nextClass.TeacherProfile.User.name}</p>}
-                {nextClass.group?.nameAr && <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>المجموعة: {nextClass.group.nameAr}</p>}
+                <p className="font-bold">{getLabel(nextClass, language)}</p>
+                <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>{formatDate(nextClass.startTime, language)}</p>
+                {nextClass.TeacherProfile?.User?.name && <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>{t('المدرس: ', 'Teacher: ')}{nextClass.TeacherProfile.User.name}</p>}
+                {nextClass.group?.nameAr && <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>{t('المجموعة: ', 'Group: ')}{nextClass.group.name}</p>}
               </div>
             </div>
           )}
         </Panel>
 
-        <Panel title="الواجبات المطلوبة" action={<TextLink href="/dashboard/student/homework">عرض الواجبات</TextLink>}>
-          <ResourceMessage resource={snapshot.homework} retry={retry} />
-          {snapshot.homework.state === 'ready' && !pendingHomework.length && <p className="text-sm" style={{ color: 'var(--muted)' }}>لا توجد واجبات بانتظارك.</p>}
+        <Panel title={t('الواجبات المطلوبة', 'Required homework')} action={<TextLink href="/dashboard/student/homework">{t('عرض الواجبات', 'View homework')}</TextLink>}>
+          <ResourceMessage resource={snapshot.homework} retry={retry} language={language} />
+          {snapshot.homework.state === 'ready' && !pendingHomework.length && <p className="text-sm" style={{ color: 'var(--muted)' }}>{t('لا توجد واجبات بانتظارك.', 'You have no pending homework.')}</p>}
           {snapshot.homework.state === 'ready' && pendingHomework.length > 0 && (
             <ul className="divide-y" style={{ borderColor: 'var(--border)' }}>
               {pendingHomework.slice(0, 4).map((item, index) => (
                 <li key={String(item.id || index)} className="flex min-h-12 items-center justify-between gap-3 py-2">
-                  <span className="min-w-0 text-sm font-semibold">{getLabel(item)}</span>
+                    <span className="min-w-0 text-sm font-semibold">{getLabel(item, language)}</span>
                   <span className="shrink-0 rounded-full px-3 py-1 text-xs font-bold" style={{ background: 'var(--bf-green-soft)', color: 'var(--primary)' }}>
-                    {String(item.status).toUpperCase() === 'SUBMITTED' ? 'تم التسليم' : 'مطلوب'}
+                    {String(item.status).toUpperCase() === 'SUBMITTED' ? t('تم التسليم', 'Submitted') : t('مطلوب', 'Required')}
                   </span>
                 </li>
               ))}
@@ -310,29 +314,29 @@ export default function RedesignedHomeTab() {
           )}
         </Panel>
 
-        <Panel title="تقدّم التعلّم" action={<TextLink href="/dashboard/student/learning">التفاصيل</TextLink>}>
-          <ResourceMessage resource={snapshot.profile} retry={retry} />
-          {snapshot.profile.state === 'ready' && !hasProgress && <p className="text-sm" style={{ color: 'var(--muted)' }}>سيظهر تقدمك هنا بعد تسجيل بيانات التعلّم.</p>}
+        <Panel title={t('تقدّم التعلّم', 'Learning progress')} action={<TextLink href="/dashboard/student/learning">{t('التفاصيل', 'Details')}</TextLink>}>
+          <ResourceMessage resource={snapshot.profile} retry={retry} language={language} />
+          {snapshot.profile.state === 'ready' && !hasProgress && <p className="text-sm" style={{ color: 'var(--muted)' }}>{t('سيظهر تقدمك هنا بعد تسجيل بيانات التعلّم.', 'Your progress will appear here once learning data is recorded.')}</p>}
           {snapshot.profile.state === 'ready' && hasProgress && (
             <div className="flex items-start gap-3">
               <BookOpen className="mt-1 shrink-0" size={19} style={{ color: 'var(--primary)' }} aria-hidden="true" />
               <div>
-                <p className="font-bold">{profile?.officialLevel?.name || 'المستوى غير محدد'}{profile?.officialStage?.name ? ` · ${profile.officialStage.name}` : ''}</p>
-                {masteryCount > 0 && <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>{masteryCount} مهارات لها بيانات تقدّم</p>}
+                <p className="font-bold">{profile?.officialLevel?.name || t('المستوى غير محدد', 'Level not specified')}{profile?.officialStage?.name ? ` · ${profile.officialStage.name}` : ''}</p>
+                {masteryCount > 0 && <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>{masteryCount} {t('مهارات لها بيانات تقدّم', 'skills with progress data')}</p>}
               </div>
             </div>
           )}
           {profile?.goal && <p className="mt-4 flex items-start gap-2 text-sm leading-6"><Target className="mt-1 shrink-0" size={17} style={{ color: 'var(--primary)' }} aria-hidden="true" />{profile.goal}</p>}
         </Panel>
 
-        <Panel title="ملاحظات المدرس" action={<TextLink href="/dashboard/student/feedback">كل الملاحظات</TextLink>}>
-          <ResourceMessage resource={snapshot.feedback} retry={retry} />
-          {snapshot.feedback.state === 'ready' && !feedback && <p className="text-sm" style={{ color: 'var(--muted)' }}>لا توجد ملاحظات منشورة بعد.</p>}
+        <Panel title={t('ملاحظات المدرس', 'Teacher feedback')} action={<TextLink href="/dashboard/student/feedback">{t('كل الملاحظات', 'All feedback')}</TextLink>}>
+          <ResourceMessage resource={snapshot.feedback} retry={retry} language={language} />
+          {snapshot.feedback.state === 'ready' && !feedback && <p className="text-sm" style={{ color: 'var(--muted)' }}>{t('لا توجد ملاحظات منشورة بعد.', 'No feedback has been published yet.')}</p>}
           {snapshot.feedback.state === 'ready' && feedback && (
             <div className="flex items-start gap-3">
               <MessageSquareText className="mt-1 shrink-0" size={19} style={{ color: 'var(--primary)' }} aria-hidden="true" />
               <div className="min-w-0">
-                <p className="text-sm leading-6">{feedback.summary || 'تتوفر ملاحظات من حصتك الأخيرة.'}</p>
+                <p className="text-sm leading-6">{feedback.summary || t('تتوفر ملاحظات من حصتك الأخيرة.', 'Feedback from your last class is available.')}</p>
                 {feedback.session?.title && <p className="mt-2 text-xs" style={{ color: 'var(--muted)' }}>{feedback.session.title}</p>}
               </div>
             </div>
@@ -340,11 +344,11 @@ export default function RedesignedHomeTab() {
         </Panel>
 
         {hasTodayPlan && nextStep && (
-          <Panel title="خطة اليوم" action={<TextLink href="/dashboard/student/learning">افتح الخطة</TextLink>}>
+          <Panel title={t('خطة اليوم', 'Today’s plan')} action={<TextLink href="/dashboard/student/learning">{t('افتح الخطة', 'Open plan')}</TextLink>}>
             <div className="flex items-start gap-3">
               <ClipboardCheck className="mt-1 shrink-0" size={19} style={{ color: 'var(--primary)' }} aria-hidden="true" />
               <div className="min-w-0">
-                <p className="font-bold">{nextStep.title || 'خطوة التعلّم التالية'}</p>
+                <p className="font-bold">{nextStep.title || t('خطوة التعلّم التالية', 'Next learning step')}</p>
                 {nextStep.reason && <p className="mt-1 text-sm leading-6" style={{ color: 'var(--muted)' }}>{nextStep.reason}</p>}
               </div>
             </div>

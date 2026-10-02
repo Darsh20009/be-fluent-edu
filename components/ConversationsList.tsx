@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { MessageCircle, Loader2 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 interface Conversation {
   user: {
@@ -27,6 +29,8 @@ interface ConversationsListProps {
 
 export default function ConversationsList({ onSelectConversation, selectedUserId }: ConversationsListProps) {
   const { data: session } = useSession()
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -54,10 +58,10 @@ export default function ConversationsList({ onSelectConversation, selectedUserId
 
   const getRoleBadge = (role: string) => {
     switch (role) {
-      case 'TEACHER': return { text: 'مدرس', color: 'bg-[#e8eee7] text-[#174c3c]' }
-      case 'STUDENT': return { text: 'طالب', color: 'bg-[#f1eee4] text-[#585c4f]' }
-      case 'ADMIN': return { text: 'مدير', color: 'bg-[#f1e8df] text-[#8a513e]' }
-      default: return { text: 'مستخدم', color: 'bg-[#f1eee4] text-[#585c4f]' }
+      case 'TEACHER': return { text: t('مدرس', 'Teacher'), color: 'bg-[#e8eee7] text-[#174c3c]' }
+      case 'STUDENT': return { text: t('طالب', 'Student'), color: 'bg-[#f1eee4] text-[#585c4f]' }
+      case 'ADMIN': return { text: t('مدير', 'Admin'), color: 'bg-[#f1e8df] text-[#8a513e]' }
+      default: return { text: t('مستخدم', 'User'), color: 'bg-[#f1eee4] text-[#585c4f]' }
     }
   }
 
@@ -73,8 +77,8 @@ export default function ConversationsList({ onSelectConversation, selectedUserId
     return (
       <div className="flex flex-col items-center justify-center h-full bg-[#fbfaf5] text-[#69756c] p-8">
         <MessageCircle className="w-14 h-14 mb-4 text-[#afbdaf]" />
-        <p className="text-lg font-medium text-[#19372d]">لا توجد محادثات</p>
-        <p className="text-sm text-center mt-2">ابدأ محادثة جديدة مع مدرسك أو طلابك</p>
+        <p className="text-lg font-medium text-[#19372d]">{t('لا توجد محادثات', 'No conversations')}</p>
+        <p className="text-sm text-center mt-2">{t('ابدأ محادثة جديدة مع مدرسك أو طلابك', 'Start a new conversation with your teacher or classmates')}</p>
       </div>
     )
   }
@@ -89,7 +93,7 @@ export default function ConversationsList({ onSelectConversation, selectedUserId
           <button
             key={conv.user.id}
             onClick={() => onSelectConversation(conv.user)}
-            className={`w-full p-4 hover:bg-[#edf1e9] transition-colors text-right border ${
+            className={`w-full p-4 hover:bg-[#edf1e9] transition-colors text-start border ${
               isSelected ? 'bg-[#e8eee7] border-[#8fa493]' : 'bg-[#fbfaf5] border-transparent'
             }`}
           >
@@ -120,12 +124,12 @@ export default function ConversationsList({ onSelectConversation, selectedUserId
 
                 {conv.lastMessage && (
                   <div className="flex items-baseline justify-between">
-                    <p className="text-sm text-[#69756c] truncate" dir="rtl">
-                      {conv.lastMessage.fromUserId === session?.user?.id && 'أنت: '}
+                    <p className="text-sm text-[#69756c] truncate" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                      {conv.lastMessage.fromUserId === session?.user?.id && `${t('أنت:', 'You:')} `}
                       {conv.lastMessage.content}
                     </p>
                     <span className="text-xs text-[#8a948b] flex-shrink-0 mr-2">
-                      {new Date(conv.lastMessage.createdAt).toLocaleDateString('ar-EG', {
+                      {new Date(conv.lastMessage.createdAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
                         month: 'short',
                         day: 'numeric'
                       })}

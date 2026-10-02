@@ -17,6 +17,8 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeDirection, localeText } from '@/lib/locale'
 
 interface VideoItem {
   id: string
@@ -44,6 +46,8 @@ interface Question {
 
 export default function VideoLearningPage() {
   const router = useRouter()
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [videos, setVideos] = useState<VideoItem[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null)
@@ -98,7 +102,7 @@ export default function VideoLearningPage() {
       setQuestions(result.questions)
     } catch {
       console.error('AI video question request failed')
-      setQuestionError('تعذر إنشاء الأسئلة الآن. يرجى المحاولة مرة أخرى.')
+      setQuestionError(t('تعذر إنشاء الأسئلة الآن. يرجى المحاولة مرة أخرى.', 'Could not generate questions right now. Please try again.'))
     } finally {
       setLoadingQuestions(false)
     }
@@ -137,11 +141,11 @@ export default function VideoLearningPage() {
   const getLevelBadge = (level: string) => {
     switch (level) {
       case 'BEGINNER':
-        return <Badge variant="success">مبتدئ</Badge>
+        return <Badge variant="success">{t('مبتدئ', 'Beginner')}</Badge>
       case 'INTERMEDIATE':
-        return <Badge variant="warning">متوسط</Badge>
+        return <Badge variant="warning">{t('متوسط', 'Intermediate')}</Badge>
       case 'ADVANCED':
-        return <Badge variant="info">متقدم</Badge>
+        return <Badge variant="info">{t('متقدم', 'Advanced')}</Badge>
       default:
         return <Badge>{level}</Badge>
     }
@@ -160,7 +164,7 @@ export default function VideoLearningPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] p-4 md:p-6">
+      <div className="min-h-screen bg-[#F9FAFB] p-4 md:p-6" dir={localeDirection(language)}>
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <button
@@ -171,10 +175,10 @@ export default function VideoLearningPage() {
           </button>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-[#10B981]">
-              تعلم بالفيديو
+              {t('تعلم بالفيديو', 'Video learning')}
             </h1>
             <p className="text-gray-600">
-              Video Learning with AI Questions • مجاني
+              {t('تعلم بالفيديو مع أسئلة الذكاء الاصطناعي • مجاني', 'Video learning with AI questions • Free')}
             </p>
           </div>
         </div>
@@ -187,28 +191,28 @@ export default function VideoLearningPage() {
                 onClick={() => setFilterLevel('all')}
                 size="sm"
               >
-                الكل
+                {t('الكل', 'All')}
               </Button>
               <Button
                 variant={filterLevel === 'BEGINNER' ? 'primary' : 'outline'}
                 onClick={() => setFilterLevel('BEGINNER')}
                 size="sm"
               >
-                مبتدئ
+                {t('مبتدئ', 'Beginner')}
               </Button>
               <Button
                 variant={filterLevel === 'INTERMEDIATE' ? 'primary' : 'outline'}
                 onClick={() => setFilterLevel('INTERMEDIATE')}
                 size="sm"
               >
-                متوسط
+                {t('متوسط', 'Intermediate')}
               </Button>
               <Button
                 variant={filterLevel === 'ADVANCED' ? 'primary' : 'outline'}
                 onClick={() => setFilterLevel('ADVANCED')}
                 size="sm"
               >
-                متقدم
+                {t('متقدم', 'Advanced')}
               </Button>
             </div>
 
@@ -218,7 +222,7 @@ export default function VideoLearningPage() {
                   <div className="relative">
                     <img 
                       src={video.thumbnail} 
-                      alt={video.title}
+                      alt={language === 'ar' ? video.titleAr || video.title : video.title}
                       className="w-full h-40 object-cover"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = 'https://via.placeholder.com/320x180?text=Video'
@@ -231,17 +235,16 @@ export default function VideoLearningPage() {
                   </div>
                   <div className="p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-[#10B981]">{video.title}</h3>
+                      <h3 className="font-bold text-[#10B981]">{language === 'ar' ? video.titleAr || video.title : video.title}</h3>
                       {getLevelBadge(video.level)}
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">{video.titleAr}</p>
-                    <p className="text-sm text-gray-700 mb-4">{video.description}</p>
+                    <p className="text-sm text-gray-700 mb-4">{language === 'ar' ? video.descriptionAr || video.description : video.description}</p>
                     <Button 
                       onClick={() => generateQuestions(video)}
                       className="w-full flex items-center justify-center gap-2"
                     >
                       <Play className="w-4 h-4" />
-                      شاهد وتعلم
+                      {t('شاهد وتعلم', 'Watch and learn')}
                     </Button>
                   </div>
                 </Card>
@@ -261,8 +264,7 @@ export default function VideoLearningPage() {
                 />
               </div>
               <div className="p-4">
-                <h2 className="text-xl font-bold text-[#10B981]">{selectedVideo.title}</h2>
-                <p className="text-gray-600">{selectedVideo.titleAr}</p>
+                <h2 className="text-xl font-bold text-[#10B981]">{language === 'ar' ? selectedVideo.titleAr || selectedVideo.title : selectedVideo.title}</h2>
               </div>
             </Card>
 
@@ -270,8 +272,7 @@ export default function VideoLearningPage() {
               <Card className="p-8">
                 <div className="flex flex-col items-center gap-4">
                   <Loader2 className="w-12 h-12 animate-spin text-[#10B981]" />
-                  <p className="text-gray-600">جاري إنشاء الأسئلة بالذكاء الاصطناعي...</p>
-                  <p className="text-sm text-gray-500">Generating AI questions...</p>
+                  <p className="text-gray-600">{t('جاري إنشاء الأسئلة بالذكاء الاصطناعي...', 'Generating AI questions...')}</p>
                 </div>
               </Card>
             ) : questionError ? (
@@ -279,7 +280,7 @@ export default function VideoLearningPage() {
                 <XCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
                 <p className="text-gray-700 mb-4">{questionError}</p>
                 <Button onClick={() => selectedVideo && generateQuestions(selectedVideo)}>
-                  إعادة المحاولة
+                  {t('إعادة المحاولة', 'Try again')}
                 </Button>
               </Card>
             ) : questions.length > 0 && !quizCompleted ? (
@@ -287,10 +288,10 @@ export default function VideoLearningPage() {
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-500">
-                      السؤال {currentQuestionIndex + 1} من {questions.length}
+                      {t(`السؤال ${currentQuestionIndex + 1} من ${questions.length}`, `Question ${currentQuestionIndex + 1} of ${questions.length}`)}
                     </span>
                     <span className="text-sm font-bold text-[#10B981]">
-                      النقاط: {score}
+                      {t('النقاط: ', 'Points: ')}{score}
                     </span>
                   </div>
                   <div className="h-2 bg-gray-200 rounded-full">
@@ -313,8 +314,7 @@ export default function VideoLearningPage() {
                       return (
                         <div>
                           <div className="bg-[#10B981] text-white p-4 rounded-lg mb-4">
-                            <p className="text-lg">{q.question}</p>
-                            <p className="text-sm opacity-80 mt-2">{q.questionAr}</p>
+                            <p className="text-lg">{language === 'ar' ? q.questionAr || q.question : q.question}</p>
                           </div>
 
                           <div className="space-y-3">
@@ -348,8 +348,7 @@ export default function VideoLearningPage() {
                                     {option.id.toUpperCase()}
                                   </div>
                                   <div>
-                                    <p className="font-medium">{option.text}</p>
-                                    <p className="text-sm text-gray-600">{option.textAr}</p>
+                                    <p className="font-medium">{language === 'ar' ? option.textAr || option.text : option.text}</p>
                                   </div>
                                 </div>
                               </button>
@@ -371,21 +370,20 @@ export default function VideoLearningPage() {
                                   {selectedAnswer === q.correctAnswer ? (
                                     <>
                                       <CheckCircle className="w-5 h-5 text-green-600" />
-                                      <span className="font-bold text-green-700">إجابة صحيحة!</span>
+                                      <span className="font-bold text-green-700">{t('إجابة صحيحة!', 'Correct answer!')}</span>
                                     </>
                                   ) : (
                                     <>
                                       <XCircle className="w-5 h-5 text-red-600" />
-                                      <span className="font-bold text-red-700">إجابة خاطئة</span>
+                                      <span className="font-bold text-red-700">{t('إجابة خاطئة', 'Incorrect answer')}</span>
                                     </>
                                   )}
                                 </div>
-                                <p className="text-sm">{q.explanation}</p>
-                                <p className="text-sm text-gray-600 mt-1">{q.explanationAr}</p>
+                                <p className="text-sm">{language === 'ar' ? q.explanationAr || q.explanation : q.explanation}</p>
                               </div>
 
                               <Button onClick={handleNextQuestion} className="w-full mt-4">
-                                {currentQuestionIndex === questions.length - 1 ? 'إنهاء الاختبار' : 'السؤال التالي'}
+                                {currentQuestionIndex === questions.length - 1 ? t('إنهاء الاختبار', 'Finish test') : t('السؤال التالي', 'Next question')}
                               </Button>
                             </motion.div>
                           )}
@@ -399,33 +397,33 @@ export default function VideoLearningPage() {
               <Card className="p-8 text-center">
                 <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
                 <h2 className="text-2xl font-bold text-[#10B981] mb-2">
-                  أحسنت! / Well Done!
+                  {t('أحسنت!', 'Well done!')}
                 </h2>
                 <p className="text-gray-600 mb-4">
-                  لقد أكملت الاختبار بنجاح
+                  {t('لقد أكملت الاختبار بنجاح', 'You completed the test successfully')}
                 </p>
                 <div className="text-4xl font-bold text-[#10B981] mb-2">
                   {score} / {questions.length}
                 </div>
                 <p className="text-gray-500 mb-6">
-                  {Math.round((score / questions.length) * 100)}% صحيح
+                  {t(`${Math.round((score / questions.length) * 100)}% صحيح`, `${Math.round((score / questions.length) * 100)}% correct`)}
                 </p>
                 <div className="flex justify-center gap-4">
                   <Button variant="outline" onClick={() => setSelectedVideo(null)}>
-                    العودة للفيديوهات
+                    {t('العودة للفيديوهات', 'Back to videos')}
                   </Button>
                   <Button onClick={resetQuiz}>
-                    إعادة الاختبار
+                    {t('إعادة الاختبار', 'Retake test')}
                   </Button>
                 </div>
               </Card>
             ) : (
               <Card className="p-6 text-center">
                 <BookOpen className="w-12 h-12 text-[#10B981] mx-auto mb-4" />
-                <h3 className="font-bold text-lg mb-2">شاهد الفيديو أولاً</h3>
-                <p className="text-gray-600 mb-4">ثم ستظهر أسئلة لاختبار فهمك</p>
+                <h3 className="font-bold text-lg mb-2">{t('شاهد الفيديو أولاً', 'Watch the video first')}</h3>
+                <p className="text-gray-600 mb-4">{t('ثم ستظهر أسئلة لاختبار فهمك', 'Then questions will appear to test your understanding')}</p>
                 <Button onClick={() => generateQuestions(selectedVideo)}>
-                  ابدأ الاختبار الآن
+                  {t('ابدأ الاختبار الآن', 'Start the test now')}
                 </Button>
               </Card>
             )}

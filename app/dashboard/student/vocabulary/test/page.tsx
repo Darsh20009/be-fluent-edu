@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   GraduationCap, 
@@ -34,6 +36,8 @@ interface TestResult {
 }
 
 export default function VocabularyTestPage() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
@@ -68,7 +72,7 @@ export default function VocabularyTestPage() {
       const data = await res.json()
       
       if (data.error) {
-        toast.error(data.error || 'خطأ في تحميل البيانات')
+        toast.error(data.error || t('خطأ في تحميل البيانات', 'Error loading data'))
         setLoading(false)
         return
       }
@@ -125,7 +129,7 @@ export default function VocabularyTestPage() {
 
   if (!testStarted) {
     return (
-      <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8" dir="rtl">
+      <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <Link 
@@ -133,7 +137,7 @@ export default function VocabularyTestPage() {
               className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
             >
               <ChevronRight className="h-5 w-5" />
-              <span>العودة</span>
+              <span>{t('العودة', 'Back')}</span>
             </Link>
           </div>
 
@@ -146,20 +150,20 @@ export default function VocabularyTestPage() {
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <GraduationCap className="h-10 w-10 text-green-600" />
               </div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">اختبار المفردات</h1>
-              <p className="text-gray-600">اختبر معرفتك بالكلمات الإنجليزية</p>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('اختبار المفردات', 'Vocabulary test')}</h1>
+              <p className="text-gray-600">{t('اختبر معرفتك بالكلمات الإنجليزية', 'Test your knowledge of English words')}</p>
             </div>
 
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  نوع الأسئلة
+                  {t('نوع الأسئلة', 'Question type')}
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { id: 'multiple_choice', label: 'اختيار متعدد', icon: BookOpen },
-                    { id: 'writing', label: 'كتابة', icon: Pencil },
-                    { id: 'mixed', label: 'مختلط', icon: GraduationCap }
+                    { id: 'multiple_choice', label: t('اختيار متعدد', 'Multiple choice'), icon: BookOpen },
+                    { id: 'writing', label: t('كتابة', 'Written answer'), icon: Pencil },
+                    { id: 'mixed', label: t('مختلط', 'Mixed'), icon: GraduationCap }
                   ].map((m) => (
                     <button
                       key={m.id}
@@ -179,7 +183,7 @@ export default function VocabularyTestPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  مصدر الكلمات
+                  {t('مصدر الكلمات', 'Word source')}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -190,7 +194,7 @@ export default function VocabularyTestPage() {
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    كلماتي المحفوظة
+                    {t('كلماتي المحفوظة', 'My saved words')}
                   </button>
                   <button
                     onClick={() => setSettings({ ...settings, source: 'database' })}
@@ -200,7 +204,7 @@ export default function VocabularyTestPage() {
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    قاعدة الكلمات
+                    {t('قاعدة الكلمات', 'Word database')}
                   </button>
                 </div>
               </div>
@@ -208,7 +212,7 @@ export default function VocabularyTestPage() {
               {settings.source === 'database' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    المستوى
+                    {t('المستوى', 'Level')}
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {['beginner', 'intermediate', 'advanced'].map((l) => (
@@ -221,7 +225,7 @@ export default function VocabularyTestPage() {
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
                       >
-                        {l === 'beginner' ? 'مبتدئ' : l === 'intermediate' ? 'متوسط' : 'متقدم'}
+                        {l === 'beginner' ? t('مبتدئ', 'Beginner') : l === 'intermediate' ? t('متوسط', 'Intermediate') : t('متقدم', 'Advanced')}
                       </button>
                     ))}
                   </div>
@@ -230,7 +234,7 @@ export default function VocabularyTestPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  عدد الأسئلة: {settings.count}
+                  {t('عدد الأسئلة: ', 'Number of questions: ')}{settings.count}
                 </label>
                 <input
                   type="range"
@@ -252,7 +256,7 @@ export default function VocabularyTestPage() {
                 disabled={loading}
                 className="w-full py-4 bg-green-600 text-white rounded-xl font-bold text-lg hover:bg-green-700 transition-colors disabled:opacity-50"
               >
-                {loading ? 'جاري التحميل...' : 'ابدأ الاختبار'}
+                {loading ? t('جاري التحميل...', 'Loading...') : t('ابدأ الاختبار', 'Start test')}
               </button>
             </div>
           </motion.div>
@@ -263,7 +267,7 @@ export default function VocabularyTestPage() {
 
   if (testCompleted && results) {
     return (
-      <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8" dir="rtl">
+      <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8">
         <div className="max-w-2xl mx-auto">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -279,7 +283,7 @@ export default function VocabularyTestPage() {
             </div>
 
             <h2 className="text-3xl font-bold text-gray-800 mb-2">
-              {results.score >= 90 ? 'ممتاز!' : results.score >= 70 ? 'جيد جداً!' : 'حاول مرة أخرى'}
+              {results.score >= 90 ? t('ممتاز!', 'Excellent!') : results.score >= 70 ? t('جيد جداً!', 'Very good!') : t('حاول مرة أخرى', 'Try again')}
             </h2>
             
             <p className="text-6xl font-bold text-green-600 mb-4">
@@ -287,7 +291,7 @@ export default function VocabularyTestPage() {
             </p>
             
             <p className="text-gray-600 mb-8">
-              أجبت على {results.correctCount} من {results.totalQuestions} سؤال بشكل صحيح
+              {t(`أجبت على ${results.correctCount} من ${results.totalQuestions} سؤال بشكل صحيح`, `You answered ${results.correctCount} of ${results.totalQuestions} questions correctly`)}
             </p>
 
             <div className="space-y-3 mb-8 max-h-64 overflow-y-auto">
@@ -308,8 +312,8 @@ export default function VocabularyTestPage() {
                   </div>
                   {!r.correct && (
                     <div className="mt-2 text-sm">
-                      <p className="text-red-600">إجابتك: {r.userAnswer || 'لم تجب'}</p>
-                      <p className="text-green-600">الإجابة الصحيحة: {r.correctAnswer}</p>
+                      <p className="text-red-600">{t('إجابتك: ', 'Your answer: ')}{r.userAnswer || t('لم تجب', 'No answer')}</p>
+                      <p className="text-green-600">{t('الإجابة الصحيحة: ', 'Correct answer: ')}{r.correctAnswer}</p>
                     </div>
                   )}
                 </div>
@@ -322,13 +326,13 @@ export default function VocabularyTestPage() {
                 className="flex-1 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 flex items-center justify-center gap-2"
               >
                 <RotateCcw className="h-5 w-5" />
-                <span>اختبار جديد</span>
+                <span>{t('اختبار جديد', 'New test')}</span>
               </button>
               <Link
                 href="/dashboard/student/vocabulary"
                 className="flex-1 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 flex items-center justify-center"
               >
-                العودة للقائمة
+                {t('العودة للقائمة', 'Back to list')}
               </Link>
             </div>
           </motion.div>
@@ -341,12 +345,12 @@ export default function VocabularyTestPage() {
   const progress = ((currentIndex + 1) / questions.length) * 100
 
   return (
-    <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8" dir="rtl">
+    <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8">
       <div className="max-w-2xl mx-auto">
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-gray-600">
-              السؤال {currentIndex + 1} من {questions.length}
+              {t(`السؤال ${currentIndex + 1} من ${questions.length}`, `Question ${currentIndex + 1} of ${questions.length}`)}
             </span>
             <span className="text-sm text-gray-600">
               {Math.round(progress)}%
@@ -400,7 +404,7 @@ export default function VocabularyTestPage() {
                   type="text"
                   value={writingAnswer}
                   onChange={(e) => setWritingAnswer(e.target.value)}
-                  placeholder="اكتب الإجابة هنا..."
+                  placeholder={t('اكتب الإجابة هنا...', 'Type your answer here...')}
                   className="w-full p-4 border-2 border-gray-200 rounded-xl text-center text-xl focus:border-green-500 focus:ring-0"
                   autoFocus
                 />
@@ -412,7 +416,7 @@ export default function VocabularyTestPage() {
                   disabled={!writingAnswer.trim()}
                   className="w-full py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 disabled:opacity-50"
                 >
-                  تأكيد
+                  {t('تأكيد', 'Confirm')}
                 </button>
               </div>
             )}
@@ -430,7 +434,7 @@ export default function VocabularyTestPage() {
               disabled={loading}
               className="w-full py-4 bg-green-600 text-white rounded-xl font-bold text-lg hover:bg-green-700 transition-colors disabled:opacity-50"
             >
-              {loading ? 'جاري التصحيح...' : 'إنهاء الاختبار'}
+              {loading ? t('جاري التصحيح...', 'Checking...') : t('إنهاء الاختبار', 'Finish test')}
             </button>
           </motion.div>
         )}

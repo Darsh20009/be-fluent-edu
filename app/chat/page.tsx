@@ -6,12 +6,17 @@ import { useRouter } from 'next/navigation'
 import ChatBox from '@/components/ChatBox'
 import ConversationsList from '@/components/ConversationsList'
 import { MessageCircle, ArrowRight, Plus, X, Send, Users } from 'lucide-react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
+import LanguageToggle from '@/components/LanguageToggle'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export default function ChatPage() {
   const router = useRouter()
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const { data: session, status } = useSession()
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [showNewChatModal, setShowNewChatModal] = useState(false)
@@ -27,9 +32,10 @@ export default function ChatPage() {
   if (status === 'loading') {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center bg-[#f4f1e8]">
+        <div className="fixed right-4 top-4"><LanguageToggle /></div>
         <div className="text-center">
           <div className="w-11 h-11 border-2 border-[#174c3c]/20 border-t-[#174c3c] rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[#19372d] text-sm font-medium">جاري تحميل مساحة المحادثة...</p>
+          <p className="text-[#19372d] text-sm font-medium">{t('جاري تحميل مساحة المحادثة...', 'Loading your messages...')}</p>
         </div>
       </div>
     )
@@ -67,15 +73,15 @@ export default function ChatPage() {
 
   function getRoleBadge(role: string) {
     switch (role) {
-      case 'TEACHER': return { text: 'مدرس', color: 'bg-[#e8eee7] text-[#174c3c] border border-[#bed0bf]' }
-      case 'STUDENT': return { text: 'طالب', color: 'bg-[#f1eee4] text-[#585c4f] border border-[#d6d0bd]' }
-      case 'ADMIN': return { text: 'مدير', color: 'bg-[#f1e8df] text-[#8a513e] border border-[#dfcabc]' }
-      default: return { text: 'مستخدم', color: 'bg-[#f1eee4] text-[#585c4f] border border-[#d6d0bd]' }
+      case 'TEACHER': return { text: t('مدرس', 'Teacher'), color: 'bg-[#e8eee7] text-[#174c3c] border border-[#bed0bf]' }
+      case 'STUDENT': return { text: t('طالب', 'Student'), color: 'bg-[#f1eee4] text-[#585c4f] border border-[#d6d0bd]' }
+      case 'ADMIN': return { text: t('مدير', 'Admin'), color: 'bg-[#f1e8df] text-[#8a513e] border border-[#dfcabc]' }
+      default: return { text: t('مستخدم', 'User'), color: 'bg-[#f1eee4] text-[#585c4f] border border-[#d6d0bd]' }
     }
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#f4f1e8] text-[#19372d]" dir="rtl">
+    <div className="min-h-[100dvh] bg-[#f4f1e8] text-[#19372d]" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="bg-[#f7f5ed] border-b border-[#d6d2c3] p-4 sm:px-8">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -87,13 +93,14 @@ export default function ChatPage() {
               <ArrowRight className="h-5 w-5" />
             </button>
             <div>
-              <p className="text-[10px] tracking-[.2em] text-[#718075] uppercase mb-1">Be Fluent / Messages</p>
+              <p className="text-[10px] tracking-[.2em] text-[#718075] uppercase mb-1">Be Fluent / {t('الرسائل', 'Messages')}</p>
               <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-                المحادثات
+                {t('المحادثات', 'Messages')}
               </h1>
-              <p className="text-sm text-[#69756c] mt-1">مساحة خاصة للتواصل مع معلّمك وفريق التعلّم</p>
+              <p className="text-sm text-[#69756c] mt-1">{t('مساحة خاصة للتواصل مع معلّمك وفريق التعلّم', 'A private space to connect with your teacher and learning team')}</p>
             </div>
           </div>
+          <LanguageToggle />
         </div>
       </div>
 
@@ -105,12 +112,12 @@ export default function ChatPage() {
             <div className="bg-[#e8eee7] border-b border-[#d6d2c3] p-4 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2">
                 <MessageCircle className="h-5 w-5 text-[#174c3c]" />
-                <h2 className="font-bold text-base">محادثاتك</h2>
+                <h2 className="font-bold text-base">{t('محادثاتك', 'Your conversations')}</h2>
               </div>
               <button
                 onClick={() => setShowNewChatModal(true)}
                 className="bg-[#174c3c] text-[#f7f5ed] hover:bg-[#0f392c] p-2 transition-colors font-bold"
-                title="محادثة جديدة"
+                title={t('محادثة جديدة', 'New conversation')}
               >
                 <Plus className="h-5 w-5" />
               </button>
@@ -155,21 +162,21 @@ export default function ChatPage() {
               <div className="mb-6 p-6 bg-[#e8eee7] border border-[#ccd6ca]">
                 <Send className="w-12 h-12 text-[#174c3c]" />
               </div>
-              <h2 className="text-2xl font-bold text-[#19372d] mb-3">ابدأ من حيث يهم</h2>
-              <p className="text-[#69756c] mb-8 text-base max-w-md">اختر محادثة من القائمة أو ابدأ محادثة جديدة للتواصل المباشر.</p>
+              <h2 className="text-2xl font-bold text-[#19372d] mb-3">{t('ابدأ من حيث يهم', 'Start where it matters')}</h2>
+              <p className="text-[#69756c] mb-8 text-base max-w-md">{t('اختر محادثة من القائمة أو ابدأ محادثة جديدة للتواصل المباشر.', 'Choose a conversation or start a new one to connect directly.')}</p>
               
               <button
                 onClick={() => setShowNewChatModal(true)}
                 className="bg-[#174c3c] text-[#f7f5ed] px-7 py-3 hover:bg-[#0f392c] transition-colors flex items-center gap-3 font-bold"
               >
                 <Plus className="h-6 w-6" />
-                ابدأ محادثة جديدة
+                {t('ابدأ محادثة جديدة', 'Start a new conversation')}
               </button>
 
               {/* Quick Info */}
               <div className="mt-12 flex items-center gap-3 text-xs text-[#69756c]">
                 <Users className="h-4 w-4 text-[#174c3c]" />
-                <span>المراسلات خاصة ومتصلة بحسابك في الأكاديمية</span>
+                <span>{t('المراسلات خاصة ومتصلة بحسابك في الأكاديمية', 'Messages are private and linked to your academy account')}</span>
               </div>
             </div>
           )}
@@ -183,8 +190,8 @@ export default function ChatPage() {
             {/* Modal Header */}
             <div className="bg-[#174c3c] text-[#f7f5ed] p-6 flex items-center justify-between flex-shrink-0">
               <div>
-                <h2 className="text-2xl font-bold">اختر محادثة جديدة</h2>
-                <p className="text-sm text-[#d8e0d7] mt-1">اختر الشخص الذي تريد التحدث معه</p>
+                <h2 className="text-2xl font-bold">{t('اختر محادثة جديدة', 'Start a new conversation')}</h2>
+                <p className="text-sm text-[#d8e0d7] mt-1">{t('اختر الشخص الذي تريد التحدث معه', 'Choose who you would like to talk to')}</p>
               </div>
               <button
                 onClick={() => setShowNewChatModal(false)}
@@ -203,8 +210,8 @@ export default function ChatPage() {
               ) : availableContacts.length === 0 ? (
                 <div className="text-center py-12">
                   <MessageCircle className="h-16 w-16 text-[#b6c3b6] mx-auto mb-4" />
-                  <p className="text-[#19372d] font-semibold text-lg">لا توجد جهات اتصال متاحة</p>
-                  <p className="text-sm text-[#69756c] mt-2">تأكد من أن اشتراكك نشط.</p>
+                  <p className="text-[#19372d] font-semibold text-lg">{t('لا توجد جهات اتصال متاحة', 'No contacts available')}</p>
+                  <p className="text-sm text-[#69756c] mt-2">{t('تأكد من أن اشتراكك نشط.', 'Make sure your subscription is active.')}</p>
                 </div>
               ) : (
                 <div className="space-y-3">

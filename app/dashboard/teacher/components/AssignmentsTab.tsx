@@ -9,6 +9,8 @@ import {
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import ConfirmModal from '@/components/ui/ConfirmModal'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeDirection, localeText } from '@/lib/locale'
 
 /* ─── Types ─────────────────────────────────────────────── */
 type QType = 'TEXT' | 'MCQ' | 'VIDEO' | 'IMAGE' | 'FILE'
@@ -77,6 +79,7 @@ function parseStudentAnswers(sub: Assignment['Submission'][0]) {
 }
 
 function SubmissionFiles({ files }: { files: string[] }) {
+  const { language } = useTheme()
   const videos = files.filter(isVideoUrl)
   const images = files.filter(f => isImageUrl(f) && !isVideoUrl(f))
   const others = files.filter(f => !isVideoUrl(f) && !isImageUrl(f))
@@ -86,9 +89,9 @@ function SubmissionFiles({ files }: { files: string[] }) {
         <div key={i} className="rounded-xl overflow-hidden border border-gray-200">
           <div className="bg-gray-900 px-3 py-2 flex items-center gap-2">
             <Play className="w-3.5 h-3.5 text-red-400 fill-red-400 flex-shrink-0" />
-            <span className="text-xs font-bold text-gray-300 flex-1 truncate">{url.split('/').pop() || 'تسجيل الطالب'}</span>
+            <span className="text-xs font-bold text-gray-300 flex-1 truncate">{url.split('/').pop() || localeText(language, 'تسجيل الطالب', 'Student recording')}</span>
             <a href={url} download target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2 py-0.5 bg-white/10 hover:bg-white/20 rounded text-[10px] font-bold text-gray-400 transition">
-              <Download className="w-3 h-3" /> تحميل
+              <Download className="w-3 h-3" /> {localeText(language, 'تحميل', 'Download')}
             </a>
           </div>
           <video controls preload="metadata" className="w-full max-h-56 bg-black" src={url} />
@@ -111,7 +114,7 @@ function SubmissionFiles({ files }: { files: string[] }) {
         <a key={i} href={url} target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:border-emerald-400 hover:text-emerald-600 transition">
           <File className="w-3.5 h-3.5" />
-          {url.split('/').pop() || 'ملف'}
+          {url.split('/').pop() || localeText(language, 'ملف', 'File')}
           <Download className="w-3 h-3 mr-auto" />
         </a>
       ))}
@@ -121,6 +124,7 @@ function SubmissionFiles({ files }: { files: string[] }) {
 
 /* ─── Main Component ────────────────────────────────────── */
 export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId: string }) {
+  const { language } = useTheme()
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [sessions, setSessions] = useState<Session[]>([])
   const [students, setStudents] = useState<Student[]>([])
@@ -151,7 +155,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
       if (aRes.ok) setAssignments(await aRes.json())
       if (sRes.ok) setSessions(await sRes.json())
       if (stRes.ok) setStudents(await stRes.json())
-    } catch { toast.error('فشل تحميل البيانات') }
+    } catch { toast.error(localeText(language, 'فشل تحميل البيانات', 'Failed to load data')) }
     finally { setLoading(false) }
   }
 
@@ -163,9 +167,9 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
       if (res.ok) {
         const data = await res.json()
         setForm(f => ({ ...f, attachmentUrls: [...f.attachmentUrls, { url: data.url, name: file.name, size: file.size, type: file.type }] }))
-        toast.success('تم رفع الملف')
-      } else toast.error('فشل رفع الملف')
-    } catch { toast.error('خطأ في رفع الملف') }
+        toast.success(localeText(language, 'تم رفع الملف', 'File uploaded'))
+      } else toast.error(localeText(language, 'فشل رفع الملف', 'Failed to upload file'))
+    } catch { toast.error(localeText(language, 'خطأ في رفع الملف', 'Error uploading file')) }
     finally { setUploading(false) }
   }
 
@@ -180,16 +184,16 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
     setIsDeleting(id)
     try {
       const res = await fetch(`/api/teacher/assignments/${id}`, { method: 'DELETE' })
-      if (res.ok) { toast.success('تم حذف الواجب'); fetchData() }
-      else toast.error('فشل الحذف')
-    } catch { toast.error('خطأ في الحذف') }
+      if (res.ok) { toast.success(localeText(language, 'تم حذف الواجب', 'Assignment deleted')); fetchData() }
+      else toast.error(localeText(language, 'فشل الحذف', 'Failed to delete'))
+    } catch { toast.error(localeText(language, 'خطأ في الحذف', 'Error deleting assignment')) }
     finally { setIsDeleting(null) }
   }
 
   async function handleCreate() {
-    if (!form.title.trim()) return toast.error('أدخل عنوان الواجب')
+    if (!form.title.trim()) return toast.error(localeText(language, 'أدخل عنوان الواجب', 'Enter an assignment title'))
     const validQuestions = form.questions.filter(q => q.text.trim())
-    if (validQuestions.length === 0) return toast.error('أضف سؤالاً واحداً على الأقل')
+    if (validQuestions.length === 0) return toast.error(localeText(language, 'أضف سؤالاً واحداً على الأقل', 'Add at least one question'))
 
     setSubmitting(true)
     try {
@@ -221,18 +225,18 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
       })
       if (res.ok) {
-        toast.success('تم إنشاء الواجب بنجاح')
+        toast.success(localeText(language, 'تم إنشاء الواجب بنجاح', 'Assignment created successfully'))
         setForm({ ...emptyForm, questions: [emptyQuestion(0)] })
         setNextQId(1)
         setShowForm(false)
         fetchData()
-      } else toast.error('فشل إنشاء الواجب')
-    } catch { toast.error('خطأ في إنشاء الواجب') }
+      } else toast.error(localeText(language, 'فشل إنشاء الواجب', 'Failed to create assignment'))
+    } catch { toast.error(localeText(language, 'خطأ في إنشاء الواجب', 'Error creating assignment')) }
     finally { setSubmitting(false) }
   }
 
   async function handleGrade(submissionId: string) {
-    if (!gradeData.grade) return toast.error('أدخل الدرجة')
+    if (!gradeData.grade) return toast.error(localeText(language, 'أدخل الدرجة', 'Enter a grade'))
     setGradingId(submissionId)
     try {
       const res = await fetch(`/api/teacher/assignments/${submissionId}/grade`, {
@@ -240,10 +244,10 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
         body: JSON.stringify({ grade: parseFloat(gradeData.grade), feedback: gradeData.feedback })
       })
       if (res.ok) {
-        toast.success('تم تسليم الدرجة'); setSelectedSubmission(null)
+        toast.success(localeText(language, 'تم تسليم الدرجة', 'Grade submitted')); setSelectedSubmission(null)
         setGradeData({ grade: '', feedback: '' }); fetchData()
-      } else toast.error('فشل تسليم الدرجة')
-    } catch { toast.error('خطأ في التقييم') }
+      } else toast.error(localeText(language, 'فشل تسليم الدرجة', 'Failed to submit grade'))
+    } catch { toast.error(localeText(language, 'خطأ في التقييم', 'Error grading submission')) }
     finally { setGradingId(null) }
   }
 
@@ -265,57 +269,57 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" /></div>
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-6" dir={localeDirection(language)}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-black text-gray-900">الواجبات</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{assignments.length} واجب • {pendingCount} بانتظار التقييم</p>
+          <h2 className="text-2xl font-black text-gray-900">{localeText(language, 'الواجبات', 'Homework')}</h2>
+          <p className="text-sm text-gray-500 mt-0.5">{assignments.length} {localeText(language, 'واجب', 'assignments')} • {pendingCount} {localeText(language, 'بانتظار التقييم', 'awaiting grading')}</p>
         </div>
         <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-200 transition">
-          <Plus className="w-4 h-4" /> واجب جديد
+          <Plus className="w-4 h-4" /> {localeText(language, 'واجب جديد', 'New assignment')}
         </button>
       </div>
 
       {pendingCount > 0 && (
         <div className="flex items-center gap-3 p-4 bg-orange-50 border border-orange-200 rounded-2xl">
           <AlertCircle className="w-5 h-5 text-orange-600 flex-shrink-0" />
-          <p className="font-bold text-orange-800 text-sm">{pendingCount} تسليم بانتظار التقييم</p>
+          <p className="font-bold text-orange-800 text-sm">{pendingCount} {localeText(language, 'تسليم بانتظار التقييم', 'submissions awaiting grading')}</p>
         </div>
       )}
 
       {/* ── CREATE FORM ─────────────────────────────────── */}
       {showForm && (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden" dir="rtl">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden" dir={localeDirection(language)}>
           <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 flex items-center justify-between">
-            <h3 className="text-white font-black text-lg">إنشاء واجب جديد</h3>
+            <h3 className="text-white font-black text-lg">{localeText(language, 'إنشاء واجب جديد', 'Create new assignment')}</h3>
             <button onClick={() => setShowForm(false)} className="p-1.5 hover:bg-white/20 rounded-lg transition"><X className="w-5 h-5 text-white" /></button>
           </div>
 
           <div className="p-6 space-y-6">
             {/* Title */}
             <div>
-              <label className="text-xs font-bold text-gray-500 block mb-1.5">عنوان الواجب *</label>
+              <label className="text-xs font-bold text-gray-500 block mb-1.5">{localeText(language, 'عنوان الواجب *', 'Assignment title *')}</label>
               <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
-                placeholder="مثال: واجب درس المضارع التام" />
+                placeholder={localeText(language, 'مثال: واجب درس المضارع التام', 'Example: Present perfect lesson assignment')} />
             </div>
 
             {/* Description */}
             <div>
-              <label className="text-xs font-bold text-gray-500 block mb-1.5">التعليمات العامة (اختياري)</label>
+              <label className="text-xs font-bold text-gray-500 block mb-1.5">{localeText(language, 'التعليمات العامة (اختياري)', 'General instructions (optional)')}</label>
               <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none resize-none" rows={2}
-                placeholder="تعليمات عامة للواجب..." />
+                placeholder={localeText(language, 'تعليمات عامة للواجب...', 'General assignment instructions...')} />
             </div>
 
             {/* ── QUESTIONS BUILDER ─── */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <label className="text-xs font-bold text-gray-700 uppercase tracking-widest">الأسئلة ({form.questions.length})</label>
+                 <label className="text-xs font-bold text-gray-700 uppercase tracking-widest">{localeText(language, 'الأسئلة', 'Questions')} ({form.questions.length})</label>
                 <button type="button" onClick={addQuestion}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition">
-                  <Plus className="w-3.5 h-3.5" /> إضافة سؤال
+                   <Plus className="w-3.5 h-3.5" /> {localeText(language, 'إضافة سؤال', 'Add question')}
                 </button>
               </div>
 
@@ -340,7 +344,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                                 className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
                                   q.type === key ? `${c.bg} ${c.color} border ${c.border} shadow-sm` : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'
                                 }`}>
-                                <QIcon className="w-3 h-3" /> {c.label}
+                          <QIcon className="w-3 h-3" /> {localeText(language, c.label, ({ TEXT: 'Written', MCQ: 'Multiple choice', VIDEO: 'Video', IMAGE: 'Image', FILE: 'File' } as const)[key])}
                               </button>
                             )
                           })}
@@ -356,26 +360,26 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                       {/* Question body */}
                       <div className="p-4 space-y-3 bg-white">
                         <div>
-                          <label className="text-[11px] font-bold text-gray-400 block mb-1">نص السؤال *</label>
+                           <label className="text-[11px] font-bold text-gray-400 block mb-1">{localeText(language, 'نص السؤال *', 'Question text *')}</label>
                           <textarea value={q.text} onChange={e => updateQuestion(qi, { text: e.target.value })}
                             className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none resize-none"
                             rows={2} placeholder={
-                              q.type === 'TEXT' ? 'اكتب سؤالاً يتطلب إجابة كتابية...' :
-                              q.type === 'MCQ' ? 'اكتب سؤال الاختيار من متعدد...' :
-                              q.type === 'VIDEO' ? 'اكتب تعليمات التسجيل...' :
-                              q.type === 'IMAGE' ? 'اكتب تعليمات رفع الصورة...' :
-                              'اكتب تعليمات رفع الملف...'
+                              q.type === 'TEXT' ? localeText(language, 'اكتب سؤالاً يتطلب إجابة كتابية...', 'Write a question requiring a written answer...') :
+                              q.type === 'MCQ' ? localeText(language, 'اكتب سؤال الاختيار من متعدد...', 'Write a multiple-choice question...') :
+                              q.type === 'VIDEO' ? localeText(language, 'اكتب تعليمات التسجيل...', 'Enter recording instructions...') :
+                              q.type === 'IMAGE' ? localeText(language, 'اكتب تعليمات رفع الصورة...', 'Enter image upload instructions...') :
+                              localeText(language, 'اكتب تعليمات رفع الملف...', 'Enter file upload instructions...')
                             } />
                         </div>
 
                         {/* MCQ options */}
                         {q.type === 'MCQ' && (
                           <div className="space-y-2">
-                            <label className="text-[11px] font-bold text-gray-400">الخيارات (حدد الإجابة الصحيحة)</label>
+                            <label className="text-[11px] font-bold text-gray-400">{localeText(language, 'الخيارات (حدد الإجابة الصحيحة)', 'Options (select the correct answer)')}</label>
                             {q.opts.map((opt, oi) => (
                               <div key={oi} className={`flex items-center gap-2 p-2.5 rounded-xl border-2 transition ${q.ans === oi ? 'border-purple-500 bg-purple-50' : 'border-gray-100 bg-gray-50'}`}>
                                 <input type="radio" checked={q.ans === oi} onChange={() => updateQuestion(qi, { ans: oi })}
-                                  className="w-4 h-4 accent-purple-600 flex-shrink-0" title="الإجابة الصحيحة" />
+                                  className="w-4 h-4 accent-purple-600 flex-shrink-0" title={localeText(language, 'الإجابة الصحيحة', 'Correct answer')} />
                                 <span className={`text-xs font-black w-5 flex-shrink-0 ${q.ans === oi ? 'text-purple-700' : 'text-gray-400'}`}>
                                   {String.fromCharCode(65 + oi)}
                                 </span>
@@ -384,7 +388,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                                     updateQuestion(qi, { opts })
                                   }}
                                   className="flex-1 bg-transparent outline-none text-sm"
-                                  placeholder={`الخيار ${oi + 1}`} />
+                                  placeholder={`${localeText(language, 'الخيار', 'Option')} ${oi + 1}`} />
                                 {q.opts.length > 2 && (
                                   <button type="button" onClick={() => {
                                       const opts = q.opts.filter((_, idx) => idx !== oi)
@@ -399,7 +403,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                             {q.opts.length < 6 && (
                               <button type="button" onClick={() => updateQuestion(qi, { opts: [...q.opts, ''] })}
                                 className="text-xs text-purple-600 font-bold hover:underline flex items-center gap-1 mt-1">
-                                <Plus className="w-3 h-3" /> إضافة خيار
+                                <Plus className="w-3 h-3" /> {localeText(language, 'إضافة خيار', 'Add option')}
                               </button>
                             )}
                           </div>
@@ -409,9 +413,9 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                         {['VIDEO', 'IMAGE', 'FILE'].includes(q.type) && (
                           <div className={`flex items-center gap-2 p-3 rounded-xl ${cfg.bg} border ${cfg.border} text-xs font-bold ${cfg.color}`}>
                             <Icon className="w-4 h-4 flex-shrink-0" />
-                            {q.type === 'VIDEO' ? 'سيرفع الطالب ملف فيديو كإجابة' :
-                             q.type === 'IMAGE' ? 'سيرفع الطالب صورة كإجابة' :
-                             'سيرفع الطالب ملفاً كإجابة'}
+                            {q.type === 'VIDEO' ? localeText(language, 'سيرفع الطالب ملف فيديو كإجابة', 'The student will upload a video as their answer') :
+                             q.type === 'IMAGE' ? localeText(language, 'سيرفع الطالب صورة كإجابة', 'The student will upload an image as their answer') :
+                             localeText(language, 'سيرفع الطالب ملفاً كإجابة', 'The student will upload a file as their answer')}
                           </div>
                         )}
                       </div>
@@ -422,22 +426,22 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
 
               <button type="button" onClick={addQuestion}
                 className="w-full mt-3 py-3 border-2 border-dashed border-gray-200 rounded-2xl text-sm font-bold text-gray-400 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 transition flex items-center justify-center gap-2">
-                <Plus className="w-4 h-4" /> إضافة سؤال جديد
+                <Plus className="w-4 h-4" /> {localeText(language, 'إضافة سؤال جديد', 'Add a new question')}
               </button>
             </div>
 
             {/* Target */}
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-gray-500 block mb-1.5">الجلسة (اختياري)</label>
+                <label className="text-xs font-bold text-gray-500 block mb-1.5">{localeText(language, 'الجلسة (اختياري)', 'Session (optional)')}</label>
                 <select value={form.sessionId} onChange={e => setForm(f => ({ ...f, sessionId: e.target.value }))}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
-                  <option value="">للجميع (بث عام)</option>
+                  <option value="">{localeText(language, 'للجميع (بث عام)', 'Everyone (public)')}</option>
                   {sessions.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
                 </select>
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 block mb-1.5">تاريخ التسليم</label>
+                <label className="text-xs font-bold text-gray-500 block mb-1.5">{localeText(language, 'تاريخ التسليم', 'Due date')}</label>
                 <input type="datetime-local" value={form.dueDate} onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
               </div>
@@ -446,7 +450,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
             {/* Students */}
             {students.length > 0 && (
               <div>
-                <label className="text-xs font-bold text-gray-500 block mb-2">تعيين لطلاب محددين (اختياري)</label>
+                <label className="text-xs font-bold text-gray-500 block mb-2">{localeText(language, 'تعيين لطلاب محددين (اختياري)', 'Assign to specific students (optional)')}</label>
                 <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-3 bg-gray-50 rounded-xl border border-gray-200">
                   {students.map(st => {
                     const sel = form.selectedStudents.includes(st.id)
@@ -465,7 +469,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
 
             {/* Attachments */}
             <div>
-              <label className="text-xs font-bold text-gray-500 block mb-1.5">مرفقات للطالب (مواد مساعدة)</label>
+              <label className="text-xs font-bold text-gray-500 block mb-1.5">{localeText(language, 'مرفقات للطالب (مواد مساعدة)', 'Student attachments (supporting materials)')}</label>
               <div
                 className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition ${isDragging ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-emerald-400'}`}
                 onClick={() => fileRef.current?.click()}
@@ -473,8 +477,8 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={e => { e.preventDefault(); setIsDragging(false); Array.from(e.dataTransfer.files).forEach(handleFileUpload) }}>
                 <Upload className={`w-6 h-6 mx-auto mb-2 ${isDragging ? 'text-emerald-500' : 'text-gray-400'}`} />
-                <p className="text-sm font-bold text-gray-500">{uploading ? 'جاري الرفع...' : 'اسحب أو اضغط لرفع ملف'}</p>
-                <p className="text-xs text-gray-400 mt-1">صور، فيديو، PDF • حتى 50MB</p>
+                <p className="text-sm font-bold text-gray-500">{uploading ? localeText(language, 'جاري الرفع...', 'Uploading…') : localeText(language, 'اسحب أو اضغط لرفع ملف', 'Drag or click to upload a file')}</p>
+                <p className="text-xs text-gray-400 mt-1">{localeText(language, 'صور، فيديو، PDF • حتى 50MB', 'Images, video, PDF • up to 50MB')}</p>
                 <input ref={fileRef} type="file" className="hidden" multiple onChange={e => Array.from(e.target.files || []).forEach(handleFileUpload)} />
               </div>
               {form.attachmentUrls.length > 0 && (
@@ -496,10 +500,10 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
             <div className="flex gap-3 pt-2">
               <button onClick={handleCreate} disabled={submitting}
                 className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition disabled:opacity-50 shadow-lg shadow-emerald-200">
-                {submitting ? 'جاري الإنشاء...' : `إنشاء الواجب (${form.questions.filter(q => q.text.trim()).length} سؤال)`}
+                {submitting ? localeText(language, 'جاري الإنشاء...', 'Creating…') : `${localeText(language, 'إنشاء الواجب', 'Create assignment')} (${form.questions.filter(q => q.text.trim()).length} ${localeText(language, 'سؤال', 'questions')})`}
               </button>
               <button onClick={() => setShowForm(false)} className="px-5 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-200 transition">
-                إلغاء
+                {localeText(language, 'إلغاء', 'Cancel')}
               </button>
             </div>
           </div>
@@ -510,8 +514,8 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
       {assignments.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border border-dashed border-gray-200">
           <FileText className="w-12 h-12 text-gray-200 mb-4" />
-          <h3 className="text-lg font-black text-gray-900 mb-2">لا توجد واجبات بعد</h3>
-          <p className="text-sm text-gray-400">أنشئ أول واجب الآن</p>
+          <h3 className="text-lg font-black text-gray-900 mb-2">{localeText(language, 'لا توجد واجبات بعد', 'No assignments yet')}</h3>
+          <p className="text-sm text-gray-400">{localeText(language, 'أنشئ أول واجب الآن', 'Create your first assignment now')}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -546,17 +550,17 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                         )}
                         {questions.length > 0 && (
                           <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                            {questions.length} سؤال
+                            {questions.length} {localeText(language, 'سؤال', 'questions')}
                           </span>
                         )}
                         {ungraded > 0 && (
                           <span className="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">
-                            {ungraded} بانتظار التقييم
+                            {ungraded} {localeText(language, 'بانتظار التقييم', 'awaiting grading')}
                           </span>
                         )}
                         {assignment.Submission.length > 0 && ungraded === 0 && (
                           <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <CheckCircle className="w-3 h-3" /> تم التقييم
+                            <CheckCircle className="w-3 h-3" /> {localeText(language, 'تم التقييم', 'Graded')}
                           </span>
                         )}
                       </div>
@@ -565,7 +569,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button onClick={() => setExpandedAssignment(isExpanded ? null : assignment.id)}
                       className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-bold text-gray-600 transition">
-                      {assignment.Submission.length} تسليم
+                      {assignment.Submission.length} {localeText(language, 'تسليم', 'submissions')}
                       {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                     </button>
                     <button onClick={() => handleDelete(assignment.id)} disabled={isDeleting === assignment.id}
@@ -584,7 +588,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                         const QIcon = qcfg.icon
                         return (
                           <div key={i} className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border ${qcfg.border} ${qcfg.bg} text-xs font-bold ${qcfg.color}`}>
-                            <QIcon className="w-3 h-3" /> س{i + 1}: {q.text.slice(0, 30)}{q.text.length > 30 ? '...' : ''}
+                            <QIcon className="w-3 h-3" /> {localeText(language, 'س', 'Q')}{i + 1}: {q.text.slice(0, 30)}{q.text.length > 30 ? '...' : ''}
                           </div>
                         )
                       })}
@@ -595,11 +599,11 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                 {/* Submissions */}
                 {isExpanded && (
                   <div className="border-t border-gray-100 px-5 py-4">
-                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">التسليمات</p>
+                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">{localeText(language, 'التسليمات', 'Submissions')}</p>
                     {assignment.Submission.length === 0 ? (
                       <div className="p-6 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
                         <Clock className="w-7 h-7 text-gray-200 mx-auto mb-2" />
-                        <p className="text-sm font-bold text-gray-400">لم يسلّم أي طالب بعد</p>
+                        <p className="text-sm font-bold text-gray-400">{localeText(language, 'لم يسلّم أي طالب بعد', 'No students have submitted yet')}</p>
                       </div>
                     ) : (
                       <div className="space-y-3">
@@ -614,7 +618,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                                   </div>
                                   <div>
                                     <p className="text-sm font-black text-gray-900">{sub.User.name}</p>
-                                    <p className="text-[10px] text-gray-400">{new Date(sub.submittedAt).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+                                    <p className="text-[10px] text-gray-400">{new Date(sub.submittedAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
                                   </div>
                                 </div>
                                 {sub.grade !== null ? (
@@ -624,7 +628,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                                 ) : (
                                   <button onClick={() => { setSelectedSubmission(sub); setGradeData({ grade: '', feedback: '' }) }}
                                     className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-xl text-xs font-black hover:bg-orange-700 transition shadow-lg shadow-orange-200">
-                                    <Send className="w-3.5 h-3.5" /> تقييم
+                                    <Send className="w-3.5 h-3.5" /> {localeText(language, 'تقييم', 'Grade')}
                                   </button>
                                 )}
                               </div>
@@ -638,7 +642,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                                     return (
                                       <div key={ai} className="border border-gray-100 rounded-xl overflow-hidden">
                                         <div className={`px-3 py-1.5 flex items-center gap-2 ${qcfg.bg}`}>
-                                          <span className={`text-[10px] font-black ${qcfg.color}`}>س{ans.qi + 1}</span>
+                                          <span className={`text-[10px] font-black ${qcfg.color}`}>{localeText(language, 'س', 'Q')}{ans.qi + 1}</span>
                                           {qInfo && <span className="text-[10px] text-gray-500 truncate flex-1">{qInfo.text.slice(0, 50)}</span>}
                                         </div>
                                         <div className="p-3">
@@ -647,7 +651,7 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
                                           )}
                                           {ans.type === 'MCQ' && ans.opt !== undefined && (
                                             <p className="text-sm font-bold text-gray-700">
-                                              الإجابة: {String.fromCharCode(65 + ans.opt)}
+                                              {localeText(language, 'الإجابة:', 'Answer:')} {String.fromCharCode(65 + ans.opt)}
                                               {(() => {
                                                 const q = questions.find((_, i) => i === ans.qi) as any
                                                 return q?.opts ? ` — ${q.opts[ans.opt]}` : ''
@@ -694,10 +698,10 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
       {/* ── GRADE MODAL ──────────────────────────────────── */}
       {selectedSubmission && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" dir="rtl">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" dir={localeDirection(language)}>
             <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-4 rounded-t-2xl flex items-center justify-between sticky top-0 z-10">
               <div>
-                <h3 className="text-white font-black">تقييم تسليم الطالب</h3>
+                <h3 className="text-white font-black">{localeText(language, 'تقييم تسليم الطالب', 'Grade student submission')}</h3>
                 <p className="text-orange-100 text-xs font-bold mt-0.5">{selectedSubmission.User.name}</p>
               </div>
               <button onClick={() => setSelectedSubmission(null)} className="p-1.5 hover:bg-white/20 rounded-lg transition">
@@ -707,36 +711,36 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
             <div className="p-6 space-y-5">
               {/* Files */}
               {selectedSubmission.attachedFiles && (() => {
-                try { const f = JSON.parse(selectedSubmission.attachedFiles) as string[]; return f.length > 0 ? <><p className="text-xs font-black text-gray-500 mb-2 flex items-center gap-2"><Video className="w-3.5 h-3.5 text-red-500" /> مرفقات الطالب</p><SubmissionFiles files={f} /></> : null }
+                try { const f = JSON.parse(selectedSubmission.attachedFiles) as string[]; return f.length > 0 ? <><p className="text-xs font-black text-gray-500 mb-2 flex items-center gap-2"><Video className="w-3.5 h-3.5 text-red-500" /> {localeText(language, 'مرفقات الطالب', 'Student attachments')}</p><SubmissionFiles files={f} /></> : null }
                 catch { return null }
               })()}
               {/* Text answer */}
               {selectedSubmission.textAnswer && !selectedSubmission.textAnswer.startsWith('{') && (
                 <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                  <p className="text-xs font-bold text-gray-500 mb-2">إجابة الطالب:</p>
+                  <p className="text-xs font-bold text-gray-500 mb-2">{localeText(language, 'إجابة الطالب:', 'Student answer:')}</p>
                   <p className="text-sm text-gray-800 leading-relaxed">{selectedSubmission.textAnswer}</p>
                 </div>
               )}
               <div className="border-t border-gray-100 pt-4 space-y-4">
                 <div>
-                  <label className="text-xs font-bold text-gray-500 block mb-1.5">الدرجة (من 100) *</label>
+                  <label className="text-xs font-bold text-gray-500 block mb-1.5">{localeText(language, 'الدرجة (من 100) *', 'Grade (out of 100) *')}</label>
                   <input type="number" min="0" max="100" value={gradeData.grade} onChange={e => setGradeData(g => ({ ...g, grade: e.target.value }))}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-center font-black text-3xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none transition"
                     placeholder="0" />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-500 block mb-1.5">تعليق للطالب (اختياري)</label>
+                  <label className="text-xs font-bold text-gray-500 block mb-1.5">{localeText(language, 'تعليق للطالب (اختياري)', 'Feedback for student (optional)')}</label>
                   <textarea value={gradeData.feedback} onChange={e => setGradeData(g => ({ ...g, feedback: e.target.value }))}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-orange-400 outline-none resize-none" rows={3}
-                    placeholder="أضف ملاحظات..." />
+                    placeholder={localeText(language, 'أضف ملاحظات...', 'Add feedback...')} />
                 </div>
                 <div className="flex gap-3">
                   <button onClick={() => handleGrade(selectedSubmission.id)} disabled={!!gradingId}
                     className="flex-1 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-sm transition disabled:opacity-50 shadow-lg shadow-orange-200">
-                    {gradingId ? 'جاري الحفظ...' : 'تسليم التقييم'}
+                    {gradingId ? localeText(language, 'جاري الحفظ...', 'Saving…') : localeText(language, 'تسليم التقييم', 'Submit grade')}
                   </button>
                   <button onClick={() => setSelectedSubmission(null)} className="px-5 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-200 transition">
-                    إلغاء
+                    {localeText(language, 'إلغاء', 'Cancel')}
                   </button>
                 </div>
               </div>
@@ -748,10 +752,10 @@ export default function AssignmentsTab({ teacherProfileId }: { teacherProfileId:
         isOpen={deleteConfirm.open}
         onClose={() => setDeleteConfirm({ open: false, id: null })}
         onConfirm={doDelete}
-        title="حذف الواجب"
-        message="هل أنت متأكد من حذف هذا الواجب؟ سيتم حذف جميع التسليمات المرتبطة به."
-        confirmText="حذف"
-        cancelText="إلغاء"
+        title={localeText(language, 'حذف الواجب', 'Delete assignment')}
+        message={localeText(language, 'هل أنت متأكد من حذف هذا الواجب؟ سيتم حذف جميع التسليمات المرتبطة به.', 'Are you sure you want to delete this assignment? All associated submissions will also be deleted.')}
+        confirmText={localeText(language, 'حذف', 'Delete')}
+        cancelText={localeText(language, 'إلغاء', 'Cancel')}
         variant="danger"
       />
     </div>

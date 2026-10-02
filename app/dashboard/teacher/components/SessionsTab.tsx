@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 import { Calendar, Clock, Users, Plus, Video, Edit, Trash2, CheckCircle, XCircle, Clock3 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
@@ -37,6 +39,7 @@ interface Student {
 }
 
 export default function SessionsTab({ teacherProfileId }: { teacherProfileId: string }) {
+  const { language } = useTheme()
   const router = useRouter()
   const [sessions, setSessions] = useState<Session[]>([])
   const [students, setStudents] = useState<Student[]>([])
@@ -130,7 +133,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
       })
       if (res.ok) {
         fetchSessions()
-        toast.success('تم تحديث الحالة بنجاح')
+        toast.success(localeText(language, 'تم تحديث الحالة بنجاح', 'Status updated successfully'))
       }
     } catch (err) {
       console.error('Error updating status:', err)
@@ -140,15 +143,15 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
   async function handleCreateSession() {
     // Validate all required fields
     if (!newSession.title || !newSession.title.trim()) {
-      toast.error('يرجى إدخال عنوان الحصة')
+      toast.error(localeText(language, 'يرجى إدخال عنوان الحصة', 'Enter a session title'))
       return
     }
     if (!newSession.startTime) {
-      toast.error('يرجى اختيار وقت البداية')
+      toast.error(localeText(language, 'يرجى اختيار وقت البداية', 'Select a start time'))
       return
     }
     if (!newSession.endTime) {
-      toast.error('يرجى اختيار وقت النهاية')
+      toast.error(localeText(language, 'يرجى اختيار وقت النهاية', 'Select an end time'))
       return
     }
 
@@ -157,15 +160,15 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
     const endDate = new Date(newSession.endTime)
     
     if (isNaN(startDate.getTime())) {
-      toast.error('وقت بداية غير صحيح')
+      toast.error(localeText(language, 'وقت بداية غير صحيح', 'Invalid start time'))
       return
     }
     if (isNaN(endDate.getTime())) {
-      toast.error('وقت نهاية غير صحيح')
+      toast.error(localeText(language, 'وقت نهاية غير صحيح', 'Invalid end time'))
       return
     }
     if (startDate >= endDate) {
-      toast.error('يجب أن يكون وقت البداية قبل وقت النهاية')
+      toast.error(localeText(language, 'يجب أن يكون وقت البداية قبل وقت النهاية', 'The start time must be before the end time'))
       return
     }
 
@@ -209,11 +212,11 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
       } else {
         const error = await response.json()
         console.error('Session creation error:', error)
-        toast.error(`فشل إنشاء الحصة: ${error.error || 'Unknown error'}`)
+        toast.error(`${localeText(language, 'فشل إنشاء الحصة:', 'Could not create session:')} ${error.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error creating session:', error)
-      toast.error('خطأ في إنشاء الحصة')
+      toast.error(localeText(language, 'خطأ في إنشاء الحصة', 'Error creating session'))
     } finally {
       setSubmitting(false)
     }
@@ -221,19 +224,19 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
 
   async function handleUpdateSession() {
     if (!editingSessionId) {
-      toast.error('لم يتم اختيار حصة')
+      toast.error(localeText(language, 'لم يتم اختيار حصة', 'No session selected'))
       return
     }
     if (!newSession.title || !newSession.title.trim()) {
-      toast.error('يرجى إدخال عنوان الحصة')
+      toast.error(localeText(language, 'يرجى إدخال عنوان الحصة', 'Enter a session title'))
       return
     }
     if (!newSession.startTime) {
-      toast.error('يرجى اختيار وقت البداية')
+      toast.error(localeText(language, 'يرجى اختيار وقت البداية', 'Select a start time'))
       return
     }
     if (!newSession.endTime) {
-      toast.error('يرجى اختيار وقت النهاية')
+      toast.error(localeText(language, 'يرجى اختيار وقت النهاية', 'Select an end time'))
       return
     }
 
@@ -242,15 +245,15 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
     const endDate = new Date(newSession.endTime)
     
     if (isNaN(startDate.getTime())) {
-      toast.error('وقت بداية غير صحيح')
+      toast.error(localeText(language, 'وقت بداية غير صحيح', 'Invalid start time'))
       return
     }
     if (isNaN(endDate.getTime())) {
-      toast.error('وقت نهاية غير صحيح')
+      toast.error(localeText(language, 'وقت نهاية غير صحيح', 'Invalid end time'))
       return
     }
     if (startDate >= endDate) {
-      toast.error('يجب أن يكون وقت البداية قبل وقت النهاية')
+      toast.error(localeText(language, 'يجب أن يكون وقت البداية قبل وقت النهاية', 'The start time must be before the end time'))
       return
     }
 
@@ -280,15 +283,15 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
         setNewSession({ title: '', startTime: '', endTime: '', selectedStudents: [], externalLink: '', externalLinkType: 'ZOOM' })
         setEditingSessionId(null)
         setShowEditForm(false)
-        toast.success('تم تحديث الحصة بنجاح')
+        toast.success(localeText(language, 'تم تحديث الحصة بنجاح', 'Session updated successfully'))
       } else {
         const error = await response.json()
         console.error('Session update error:', error)
-        toast.error(`فشل تحديث الحصة: ${error.error || 'Unknown error'}`)
+        toast.error(`${localeText(language, 'فشل تحديث الحصة:', 'Could not update session:')} ${error.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error updating session:', error)
-      toast.error('خطأ في تحديث الحصة')
+      toast.error(localeText(language, 'خطأ في تحديث الحصة', 'Error updating session'))
     } finally {
       setSubmitting(false)
     }
@@ -308,15 +311,15 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
         await fetchSessions()
         setDeletingSessionId(null)
         setShowDeleteConfirm(false)
-        toast.success('تم إلغاء الحصة بنجاح')
+        toast.success(localeText(language, 'تم إلغاء الحصة بنجاح', 'Session canceled successfully'))
       } else {
         const error = await response.json()
         console.error('Cancel session error:', error)
-        toast.error(`فشل إلغاء الحصة: ${error.error || 'Unknown error'}`)
+        toast.error(`${localeText(language, 'فشل إلغاء الحصة:', 'Could not cancel session:')} ${error.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error canceling session:', error)
-      toast.error('خطأ في إلغاء الحصة')
+      toast.error(localeText(language, 'خطأ في إلغاء الحصة', 'Error canceling session'))
     } finally {
       setSubmitting(false)
     }
@@ -326,9 +329,9 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
     setSubmitting(true)
     try {
       const statusLabels = {
-        'PRESENT': 'حاضر / Present',
-        'ABSENT': 'غائب / Absent',
-        'POSTPONED': 'مؤجل / Postponed'
+        'PRESENT': localeText(language, 'حاضر', 'Present'),
+        'ABSENT': localeText(language, 'غائب', 'Absent'),
+        'POSTPONED': localeText(language, 'مؤجل', 'Postponed')
       }
       
       const response = await fetch(`/api/teacher/sessions/${sessionId}/attendance`, {
@@ -342,16 +345,16 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
         setAttendanceStatuses({ ...attendanceStatuses, [studentId]: status })
         await fetchSessions()
         if (status === 'POSTPONED') {
-          toast.success('تم تأجيل الحصة بنجاح')
+          toast.success(localeText(language, 'تم تأجيل الحصة بنجاح', 'Session postponed successfully'))
         }
       } else {
         const error = await response.json()
         console.error('Attendance error:', error)
-        toast.error(`فشل تحديث الحضور: ${error.error || 'Unknown error'}`)
+        toast.error(`${localeText(language, 'فشل تحديث الحضور:', 'Could not update attendance:')} ${error.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error setting attendance:', error)
-      toast.error('خطأ في تحديث الحضور')
+      toast.error(localeText(language, 'خطأ في تحديث الحضور', 'Error updating attendance'))
     } finally {
       setSubmitting(false)
     }
@@ -417,21 +420,21 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-[#10B981]">
-          Sessions / الحصص
+          {localeText(language, 'الحصص', 'Sessions')}
         </h2>
         <Button
           variant="primary"
           onClick={() => setShowCreateForm(true)}
         >
           <Plus className="h-4 w-4 mr-2" />
-          New Session / حصة جديدة
+          {localeText(language, 'حصة جديدة', 'New session')}
         </Button>
       </div>
 
       {activeSessions.length > 0 && (
         <div>
           <h3 className="text-xl font-semibold text-red-600 mb-4">
-            🔴 Active Sessions - Mark Attendance / الحصص الجارية - حدد الحضور
+            🔴 {localeText(language, 'الحصص الجارية - حدد الحضور', 'Active sessions - mark attendance')}
           </h3>
           <div className="space-y-4">
             {activeSessions.map((session) => (
@@ -440,7 +443,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="text-lg font-bold text-red-600">{session.title}</h3>
-                      <Badge variant="primary">In Progress / جاري</Badge>
+                      <Badge variant="primary">{localeText(language, 'جاري', 'In progress')}</Badge>
                     </div>
                     <div className="space-y-3">
                       <div className="space-y-2">
@@ -456,7 +459,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                                 className={attendanceStatuses[student.id] === 'PRESENT' ? 'bg-green-100' : ''}
                               >
                                 <CheckCircle className="h-4 w-4 mr-1" />
-                                Present / حاضر
+                                {localeText(language, 'حاضر', 'Present')}
                               </Button>
                               <Button
                                 size="sm"
@@ -466,7 +469,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                                 className={attendanceStatuses[student.id] === 'ABSENT' ? 'bg-red-100' : ''}
                               >
                                 <XCircle className="h-4 w-4 mr-1" />
-                                Absent / غائب
+                                {localeText(language, 'غائب', 'Absent')}
                               </Button>
                               <Button
                                 size="sm"
@@ -476,7 +479,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                                 className={attendanceStatuses[student.id] === 'POSTPONED' ? 'bg-yellow-100' : ''}
                               >
                                 <Clock3 className="h-4 w-4 mr-1" />
-                                Postpone / أجل
+                                {localeText(language, 'أجّل', 'Postpone')}
                               </Button>
                             </div>
                           </div>
@@ -490,7 +493,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                     onClick={() => router.push(`/session/${session.id}`)}
                   >
                     <Video className="h-4 w-4 mr-2" />
-                    Join / انضم
+                    {localeText(language, 'انضم', 'Join')}
                   </Button>
                 </div>
               </Card>
@@ -501,12 +504,12 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
 
       <div>
         <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
-          Upcoming Sessions / الحصص القادمة ({upcomingSessions.length})
+          {localeText(language, 'الحصص القادمة', 'Upcoming sessions')} ({upcomingSessions.length})
         </h3>
         {upcomingSessions.length === 0 ? (
           <Alert variant="info">
             <p>No upcoming sessions scheduled.</p>
-            <p>لا توجد حصص قادمة مجدولة.</p>
+            <p>{localeText(language, 'لا توجد حصص قادمة مجدولة.', 'No upcoming sessions are scheduled.')}</p>
           </Alert>
         ) : (
           <div className="space-y-4">
@@ -551,7 +554,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                           onClick={() => handleUpdateStatus(session.id, 'COMPLETED')}
                         >
                           <CheckCircle className="h-4 w-4 mr-2" />
-                          Complete / إنهاء
+                          {localeText(language, 'إنهاء', 'Complete')}
                         </Button>
                       )}
                       <Button 
@@ -560,7 +563,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                         onClick={() => router.push(`/session/${session.id}`)}
                       >
                       <Video className="h-4 w-4 mr-2" />
-                      Start / ابدأ
+                      {localeText(language, 'ابدأ', 'Start')}
                     </Button>
                     <Button 
                       variant="outline" 
@@ -568,7 +571,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                       onClick={() => openEditForm(session)}
                     >
                       <Edit className="h-4 w-4 mr-2" />
-                      Edit / عدّل
+                      {localeText(language, 'عدّل', 'Edit')}
                     </Button>
                     <Button 
                       variant="outline" 
@@ -579,7 +582,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                       }}
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
-                      Delete / احذف
+                      {localeText(language, 'احذف', 'Delete')}
                     </Button>
                   </div>
                 </div>
@@ -591,12 +594,12 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
 
       <div>
         <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
-          Past Sessions / الحصص السابقة ({pastSessions.length})
+          {localeText(language, 'الحصص السابقة', 'Past sessions')} ({pastSessions.length})
         </h3>
         {pastSessions.length === 0 ? (
           <Alert variant="info">
             <p>No past sessions yet.</p>
-            <p>لا توجد حصص سابقة بعد.</p>
+            <p>{localeText(language, 'لا توجد حصص سابقة بعد.', 'No past sessions yet.')}</p>
           </Alert>
         ) : (
           <div className="space-y-4">
@@ -630,30 +633,30 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
         <Modal
           isOpen={true}
           onClose={() => setShowCreateForm(false)}
-          title="Create New Session / إنشاء حصة جديدة"
+          title={localeText(language, 'إنشاء حصة جديدة', 'Create new session')}
         >
           <div className="space-y-4">
             <Input
-              label="Session Title / عنوان الحصة"
+              label={localeText(language, 'عنوان الحصة', 'Session title')}
               value={newSession.title}
               onChange={(e) => setNewSession({ ...newSession, title: e.target.value })}
               placeholder="e.g., English Conversation - Lesson 1"
             />
             <Input
-              label="Start Time / وقت البداية"
+              label={localeText(language, 'وقت البداية', 'Start time')}
               type="datetime-local"
               value={newSession.startTime}
               onChange={(e) => setNewSession({ ...newSession, startTime: e.target.value })}
             />
             <Input
-              label="End Time / وقت النهاية"
+              label={localeText(language, 'وقت النهاية', 'End time')}
               type="datetime-local"
               value={newSession.endTime}
               onChange={(e) => setNewSession({ ...newSession, endTime: e.target.value })}
             />
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Select Students / اختر الطلاب
+                {localeText(language, 'اختر الطلاب', 'Select students')}
               </label>
               <div className="border border-gray-300 rounded-lg p-3 max-h-64 overflow-y-auto">
                 {students.map((student) => (
@@ -686,11 +689,11 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
             </div>
 
             <div className="pt-4 border-t border-gray-100">
-              <h4 className="text-sm font-bold text-[#10B981] mb-3 uppercase tracking-wider">External Link / رابط خارجي</h4>
+              <h4 className="text-sm font-bold text-[#10B981] mb-3 uppercase tracking-wider">{localeText(language, 'رابط خارجي', 'External link')}</h4>
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                    <div className="col-span-1">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Platform / المنصة</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">{localeText(language, 'المنصة', 'Platform')}</label>
                     <select
                       value={newSession.externalLinkType}
                       onChange={(e) => setNewSession({ ...newSession, externalLinkType: e.target.value })}
@@ -699,15 +702,15 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                       <option value="ZOOM">Zoom</option>
                       <option value="GOOGLE_MEET">Google Meet</option>
                       <option value="TEAMS">Microsoft Teams</option>
-                      <option value="OTHER">Other / أخرى</option>
+                      <option value="OTHER">{localeText(language, 'أخرى', 'Other')}</option>
                     </select>
                   </div>
                   <div className="col-span-1 flex items-end">
-                    <p className="text-[10px] text-gray-500 leading-tight">سيتم توجيه الطلاب لهذا الرابط عند انضمامهم</p>
+                    <p className="text-[10px] text-gray-500 leading-tight">{localeText(language, 'سيتم توجيه الطلاب لهذا الرابط عند انضمامهم', 'Students will be directed to this link when they join.')}</p>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Meeting Link / رابط الاجتماع</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{localeText(language, 'رابط الاجتماع', 'Meeting link')}</label>
                   <input
                     type="url"
                     value={newSession.externalLink}
@@ -726,14 +729,14 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                 onClick={handleCreateSession}
                 disabled={submitting}
               >
-                {submitting ? 'Creating...' : 'Create / إنشاء'}
+                {submitting ? localeText(language, 'جارٍ الإنشاء…', 'Creating…') : localeText(language, 'إنشاء', 'Create')}
               </Button>
               <Button
                 variant="outline"
                 fullWidth
                 onClick={() => setShowCreateForm(false)}
               >
-                Cancel / إلغاء
+                {localeText(language, 'إلغاء', 'Cancel')}
               </Button>
             </div>
           </div>
@@ -748,33 +751,33 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
             setEditingSessionId(null)
             setNewSession({ title: '', startTime: '', endTime: '', selectedStudents: [], externalLink: '', externalLinkType: 'ZOOM' })
           }}
-          title="Edit Session / تعديل الحصة"
+          title={localeText(language, 'تعديل الحصة', 'Edit session')}
         >
           <div className="space-y-4">
             <Input
-              label="Session Title / عنوان الحصة"
+              label={localeText(language, 'عنوان الحصة', 'Session title')}
               value={newSession.title}
               onChange={(e) => setNewSession({ ...newSession, title: e.target.value })}
             />
             <Input
-              label="Start Time / وقت البداية"
+              label={localeText(language, 'وقت البداية', 'Start time')}
               type="datetime-local"
               value={newSession.startTime}
               onChange={(e) => setNewSession({ ...newSession, startTime: e.target.value })}
             />
             <Input
-              label="End Time / وقت النهاية"
+              label={localeText(language, 'وقت النهاية', 'End time')}
               type="datetime-local"
               value={newSession.endTime}
               onChange={(e) => setNewSession({ ...newSession, endTime: e.target.value })}
             />
             
             <div className="pt-4 border-t border-gray-100">
-              <h4 className="text-sm font-bold text-[#10B981] mb-3 uppercase tracking-wider">External Link / رابط خارجي</h4>
+              <h4 className="text-sm font-bold text-[#10B981] mb-3 uppercase tracking-wider">{localeText(language, 'رابط خارجي', 'External link')}</h4>
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                    <div className="col-span-1">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Platform / المنصة</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">{localeText(language, 'المنصة', 'Platform')}</label>
                     <select
                       value={newSession.externalLinkType}
                       onChange={(e) => setNewSession({ ...newSession, externalLinkType: e.target.value })}
@@ -783,12 +786,12 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                       <option value="ZOOM">Zoom</option>
                       <option value="GOOGLE_MEET">Google Meet</option>
                       <option value="TEAMS">Microsoft Teams</option>
-                      <option value="OTHER">Other / أخرى</option>
+                      <option value="OTHER">{localeText(language, 'أخرى', 'Other')}</option>
                     </select>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Meeting Link / رابط الاجتماع</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{localeText(language, 'رابط الاجتماع', 'Meeting link')}</label>
                   <input
                     type="url"
                     value={newSession.externalLink}
@@ -807,7 +810,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                 onClick={handleUpdateSession}
                 disabled={submitting}
               >
-                {submitting ? 'Updating...' : 'Update / حدّث'}
+                {submitting ? localeText(language, 'جارٍ التحديث…', 'Updating…') : localeText(language, 'حدّث', 'Update')}
               </Button>
               <Button
                 variant="outline"
@@ -818,7 +821,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                   setNewSession({ title: '', startTime: '', endTime: '', selectedStudents: [], externalLink: '', externalLinkType: 'ZOOM' })
                 }}
               >
-                Cancel / إلغاء
+                {localeText(language, 'إلغاء', 'Cancel')}
               </Button>
             </div>
           </div>
@@ -832,10 +835,10 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
             setShowDeleteConfirm(false)
             setDeletingSessionId(null)
           }}
-          title="Delete Session / حذف الحصة"
+          title={localeText(language, 'حذف الحصة', 'Delete session')}
         >
           <div className="space-y-4">
-            <p className="text-gray-700">Are you sure you want to delete this session? / هل أنت متأكد من حذف هذه الحصة؟</p>
+            <p className="text-gray-700">{localeText(language, 'هل أنت متأكد من حذف هذه الحصة؟', 'Are you sure you want to delete this session?')}</p>
             <div className="flex gap-2">
               <Button
                 variant="primary"
@@ -844,7 +847,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                 disabled={submitting}
                 className="bg-red-600 hover:bg-red-700"
               >
-                {submitting ? 'Deleting...' : 'Delete / احذف'}
+                {submitting ? localeText(language, 'جارٍ الحذف…', 'Deleting…') : localeText(language, 'احذف', 'Delete')}
               </Button>
               <Button
                 variant="outline"
@@ -854,7 +857,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                   setDeletingSessionId(null)
                 }}
               >
-                Cancel / إلغاء
+                {localeText(language, 'إلغاء', 'Cancel')}
               </Button>
             </div>
           </div>
@@ -865,7 +868,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
         <Modal
           isOpen={true}
           onClose={() => setAlertAttendanceSession(null)}
-          title="Attendance Alert - 10 Minutes Passed / تنبيه الحضور - مرت 10 دقائق"
+          title={localeText(language, 'تنبيه الحضور - مرت 10 دقائق', 'Attendance alert - 10 minutes passed')}
         >
           <div className="space-y-4">
             <p className="text-gray-700 font-semibold">
@@ -874,7 +877,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
             <p className="text-gray-600">
               10 minutes have passed since the session started. Please mark attendance for students who have not joined.
               <br />
-              مرت 10 دقائق على بدء الحصة. يرجى تحديد حالة الطلاب الذين لم ينضموا.
+              {localeText(language, 'مرت 10 دقائق على بدء الحصة. يرجى تحديد حالة الطلاب الذين لم ينضموا.', 'Ten minutes have passed since the session started. Please set the status of students who have not joined.')}
             </p>
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {alertAttendanceSession.SessionStudent.map((student) => (
@@ -920,7 +923,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
               fullWidth
               onClick={() => setAlertAttendanceSession(null)}
             >
-              Done / تم
+              {localeText(language, 'تم', 'Done')}
             </Button>
           </div>
         </Modal>

@@ -14,6 +14,8 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Modal from '@/components/ui/Modal'
 import GrammarErrorHighlighter from '@/components/GrammarErrorHighlighter'
 import { toast } from 'react-hot-toast'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeDirection, localeText } from '@/lib/locale'
 
 interface FreeWriting {
   id: string
@@ -45,6 +47,8 @@ const SUGGESTED_TOPICS = [
 
 export default function FreeWritingClient() {
   const router = useRouter()
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [writings, setWritings] = useState<FreeWriting[]>([])
   const [loading, setLoading] = useState(true)
   const [showNewWriting, setShowNewWriting] = useState(false)
@@ -107,14 +111,14 @@ export default function FreeWritingClient() {
         setTitle('')
         setContent('')
         setShowNewWriting(false)
-        toast.success('تم إرسال الكتابة بنجاح!')
+        toast.success(t('تم إرسال الكتابة بنجاح!', 'Writing submitted successfully!'))
       } else {
         const error = await response.json()
-        toast.error(error.error || 'فشل إرسال الكتابة')
+        toast.error(error.error || t('فشل إرسال الكتابة', 'Failed to submit writing'))
       }
     } catch (error) {
       console.error('Error submitting writing:', error)
-      toast.error('حدث خطأ. يرجى المحاولة مرة أخرى.')
+      toast.error(t('حدث خطأ. يرجى المحاولة مرة أخرى.', 'An error occurred. Please try again.'))
     } finally {
       setSubmitting(false)
     }
@@ -122,22 +126,22 @@ export default function FreeWritingClient() {
 
   if (!hasSubscription) {
     return (
-      <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center p-4" dir={localeDirection(language)}>
         <div className="max-w-md text-center bg-white rounded-2xl p-8 shadow-lg border-2 border-[#E5E7EB]">
           <div className="mb-4 flex justify-center">
             <div className="bg-purple-500 p-4 rounded-full">
               <FileText className="h-12 w-12 text-white" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-[#10B981] mb-3">Premium Feature</h2>
+          <h2 className="text-2xl font-bold text-[#10B981] mb-3">{t('ميزة للمشتركين', 'Premium feature')}</h2>
           <p className="text-gray-700 mb-6">
-            هذه الميزة متاحة فقط للمشتركين / This feature is only available for subscribers
+            {t('هذه الميزة متاحة للمشتركين فقط', 'This feature is available to subscribers only')}
           </p>
           <a
             href="/dashboard/student?tab=packages"
             className="block w-full bg-gradient-to-r from-[#10B981] to-[#059669] text-white py-3 rounded-xl font-bold hover:shadow-lg transition-all"
           >
-            ✨ اشترك الآن / Subscribe Now ✨
+            ✨ {t('اشترك الآن', 'Subscribe now')} ✨
           </a>
         </div>
       </div>
@@ -154,31 +158,20 @@ export default function FreeWritingClient() {
 
   if (migrationError) {
     return (
-      <div className="min-h-screen bg-[#F9FAFB]">
+      <div className="min-h-screen bg-[#F9FAFB]" dir={localeDirection(language)}>
         <div className="container mx-auto px-4 py-8 max-w-6xl">
           <Link href="/dashboard/student">
             <Button variant="outline" size="sm" className="mb-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard / العودة للوحة التحكم
+              {t('العودة للوحة التحكم', 'Back to dashboard')}
             </Button>
           </Link>
           
           <Alert variant="warning">
             <AlertTriangle className="h-6 w-6" />
             <div>
-              <p className="font-bold text-lg mb-2">Database Migration Required</p>
-              <p className="font-bold text-lg mb-4">يتطلب ترحيل قاعدة البيانات</p>
-              <p className="mb-2">
-                The Free Writing feature requires a database migration to be applied.
-              </p>
-              <p className="mb-4">
-                تتطلب ميزة الكتابة الحرة تطبيق ترحيل قاعدة البيانات.
-              </p>
-              <p className="font-semibold mb-2">
-                Please see <strong>MIGRATION_INSTRUCTIONS.md</strong> in the project root for detailed instructions.
-              </p>
               <p className="font-semibold">
-                يرجى الاطلاع على ملف <strong>MIGRATION_INSTRUCTIONS.md</strong> في جذر المشروع للحصول على تعليمات مفصلة.
+                {t('يتطلب تشغيل ميزة الكتابة الحرة تطبيق ترحيل قاعدة البيانات. يرجى مراجعة ملف تعليمات الترحيل في جذر المشروع.', 'The Free Writing feature requires a database migration. Please see the migration instructions in the project root.')}
               </p>
             </div>
           </Alert>
@@ -191,25 +184,23 @@ export default function FreeWritingClient() {
   const gradedWritings = writings.filter(w => w.grade !== null)
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB]">
+    <div className="min-h-screen bg-[#F9FAFB]" dir={localeDirection(language)}>
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Header */}
         <div className="mb-8">
           <Link href="/dashboard/student">
             <Button variant="outline" size="sm" className="mb-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard / العودة للوحة التحكم
+              {t('العودة للوحة التحكم', 'Back to dashboard')}
             </Button>
           </Link>
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold text-[#10B981] mb-2">
-                Free Writing / الكتابة الحرة
+                {t('الكتابة الحرة', 'Free writing')}
               </h1>
               <p className="text-gray-600">
-                Write freely on any topic and get feedback from your teacher
-                <br />
-                اكتب بحرية في أي موضوع واحصل على ملاحظات من معلمك
+                {t('اكتب بحرية في أي موضوع واحصل على ملاحظات من معلمك', 'Write freely on any topic and get feedback from your teacher')}
               </p>
             </div>
             <Button
@@ -219,7 +210,7 @@ export default function FreeWritingClient() {
               className="shadow-lg"
             >
               <Send className="h-5 w-5 mr-2" />
-              Write New Article / اكتب مقالة جديدة
+              {t('اكتب مقالة جديدة', 'Write a new article')}
             </Button>
           </div>
         </div>
@@ -228,7 +219,7 @@ export default function FreeWritingClient() {
         {pendingWritings.length > 0 && (
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Under Review / قيد المراجعة ({pendingWritings.length})
+              {t(`قيد المراجعة (${pendingWritings.length})`, `Under review (${pendingWritings.length})`)}
             </h2>
             <div className="space-y-4">
               {pendingWritings.map((writing) => (
@@ -240,11 +231,11 @@ export default function FreeWritingClient() {
                         <h3 className="text-lg font-bold text-[#10B981]">{writing.title}</h3>
                         <Badge variant="warning">
                           <Clock className="h-3 w-3 mr-1" />
-                          Under Review / قيد المراجعة
+                          {t('قيد المراجعة', 'Under review')}
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">
-                        Submitted: {new Date(writing.submittedAt).toLocaleString('ar-EG', {
+                        {t('تاريخ الإرسال: ', 'Submitted: ')}{new Date(writing.submittedAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US', {
                           weekday: 'short',
                           year: 'numeric',
                           month: 'short',
@@ -260,7 +251,7 @@ export default function FreeWritingClient() {
                       size="sm"
                       onClick={() => setViewingWriting(writing)}
                     >
-                      View / عرض
+                      {t('عرض', 'View')}
                     </Button>
                   </div>
                 </Card>
@@ -272,13 +263,12 @@ export default function FreeWritingClient() {
         {/* Graded Section */}
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Graded / تم التقييم ({gradedWritings.length})
+            {t(`تم التقييم (${gradedWritings.length})`, `Graded (${gradedWritings.length})`)}
           </h2>
           {gradedWritings.length === 0 ? (
             <Alert variant="info">
               <FileText className="h-5 w-5" />
-              <p>No graded writings yet. Start writing to get feedback!</p>
-              <p>لا توجد كتابات مقيمة بعد. ابدأ الكتابة للحصول على ملاحظات!</p>
+              <p>{t('لا توجد كتابات مقيمة بعد. ابدأ الكتابة للحصول على ملاحظات!', 'No graded writings yet. Start writing to get feedback!')}</p>
             </Alert>
           ) : (
             <div className="space-y-4">
@@ -291,21 +281,21 @@ export default function FreeWritingClient() {
                         <h3 className="text-lg font-bold text-gray-900">{writing.title}</h3>
                         <Badge variant="success">
                           <CheckCircle className="h-3 w-3 mr-1" />
-                          Grade: {writing.grade}/100
+                          {t('الدرجة: ', 'Grade: ')}{writing.grade}/100
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">
-                        Graded: {writing.gradedAt && new Date(writing.gradedAt).toLocaleString('ar-EG')}
+                        {t('تاريخ التقييم: ', 'Graded: ')}{writing.gradedAt && new Date(writing.gradedAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}
                       </p>
                       {writing.TeacherProfile && (
                         <p className="text-sm text-gray-600 mb-2">
-                          Teacher: {writing.TeacherProfile.User.name}
+                          {t('المعلم: ', 'Teacher: ')}{writing.TeacherProfile.User.name}
                         </p>
                       )}
                       {writing.feedback && (
                         <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mt-2">
                           <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
-                            Feedback / الملاحظات:
+                            {t('الملاحظات:', 'Feedback:')}
                           </p>
                           <p className="text-sm text-blue-800 dark:text-blue-200">{writing.feedback}</p>
                         </div>
@@ -316,7 +306,7 @@ export default function FreeWritingClient() {
                       size="sm"
                       onClick={() => setViewingWriting(writing)}
                     >
-                      View Details / عرض التفاصيل
+                      {t('عرض التفاصيل', 'View details')}
                     </Button>
                   </div>
                 </Card>
@@ -334,7 +324,7 @@ export default function FreeWritingClient() {
               setTitle('')
               setContent('')
             }}
-            title="Write New Article / اكتب مقالة جديدة"
+            title={t('اكتب مقالة جديدة', 'Write a new article')}
             size="lg"
           >
             <div className="space-y-4">
@@ -342,17 +332,16 @@ export default function FreeWritingClient() {
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
                   <Sparkles className="h-4 w-4 inline mr-1" />
-                  Suggested Topics / مواضيع مقترحة:
+                  {t('مواضيع مقترحة:', 'Suggested topics:')}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {SUGGESTED_TOPICS.map((topic, index) => (
                     <button
                       key={index}
-                      onClick={() => setTitle(topic.en)}
+                      onClick={() => setTitle(language === 'ar' ? topic.ar : topic.en)}
                       className="text-left p-2 border border-gray-300 rounded-lg hover:border-[#10B981] hover:bg-blue-50 transition-colors text-sm"
                     >
-                      <p className="font-medium text-gray-900">{topic.en}</p>
-                      <p className="text-xs text-gray-600">{topic.ar}</p>
+                        <p className="font-medium text-gray-900">{language === 'ar' ? topic.ar : topic.en}</p>
                     </button>
                   ))}
                 </div>
@@ -361,31 +350,31 @@ export default function FreeWritingClient() {
               {/* Custom Title */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Article Title / عنوان المقالة *
+                  {t('عنوان المقالة *', 'Article title *')}
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
-                  placeholder="Enter your own title... / أدخل عنوانك الخاص..."
+                  placeholder={t('أدخل عنوانك الخاص...', 'Enter your own title...')}
                 />
               </div>
 
               {/* Content */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Your Writing / كتابتك *
+                  {t('كتابتك *', 'Your writing *')}
                 </label>
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   rows={15}
-                  placeholder="Start writing here... Write at least 100 words for best feedback.\n\nابدأ الكتابة هنا... اكتب ما لا يقل عن 100 كلمة للحصول على أفضل ملاحظات."
+                  placeholder={t('ابدأ الكتابة هنا... اكتب ما لا يقل عن 100 كلمة للحصول على أفضل ملاحظات.', 'Start writing here... Write at least 100 words for the best feedback.')}
                 />
                 <p className="text-sm text-gray-500 mt-1">
-                  Word count: {content.trim().split(/\s+/).filter(Boolean).length} words
+                  {t(`عدد الكلمات: ${content.trim().split(/\s+/).filter(Boolean).length}`, `Word count: ${content.trim().split(/\s+/).filter(Boolean).length}`)}
                 </p>
               </div>
 
@@ -397,10 +386,10 @@ export default function FreeWritingClient() {
                   onClick={handleSubmit}
                   disabled={submitting || !title.trim() || !content.trim()}
                 >
-                  {submitting ? 'Submitting...' : (
+                  {submitting ? t('جارٍ الإرسال...', 'Submitting...') : (
                     <>
                       <Send className="h-4 w-4 mr-2" />
-                      Submit Writing / إرسال الكتابة
+                      {t('إرسال الكتابة', 'Submit writing')}
                     </>
                   )}
                 </Button>
@@ -413,7 +402,7 @@ export default function FreeWritingClient() {
                     setContent('')
                   }}
                 >
-                  Cancel / إلغاء
+                  {t('إلغاء', 'Cancel')}
                 </Button>
               </div>
             </div>
@@ -431,16 +420,16 @@ export default function FreeWritingClient() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant={viewingWriting.grade !== null ? 'success' : 'warning'}>
-                  {viewingWriting.grade !== null ? `Grade: ${viewingWriting.grade}/100` : 'Under Review'}
+                  {viewingWriting.grade !== null ? t(`الدرجة: ${viewingWriting.grade}/100`, `Grade: ${viewingWriting.grade}/100`) : t('قيد المراجعة', 'Under review')}
                 </Badge>
                 <p className="text-sm text-gray-600">
-                  Submitted: {new Date(viewingWriting.submittedAt).toLocaleString('ar-EG')}
+                  {t('تاريخ الإرسال: ', 'Submitted: ')}{new Date(viewingWriting.submittedAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}
                 </p>
               </div>
 
               {viewingWriting.grammarErrors && JSON.parse(viewingWriting.grammarErrors).length > 0 ? (
                 <div>
-                  <p className="font-semibold text-gray-900 mb-2">Your Writing with Corrections:</p>
+                  <p className="font-semibold text-gray-900 mb-2">{t('كتابتك مع التصحيحات:', 'Your writing with corrections:')}</p>
                   <GrammarErrorHighlighter
                     studentAnswer={viewingWriting.content}
                     errors={JSON.parse(viewingWriting.grammarErrors)}
@@ -450,7 +439,7 @@ export default function FreeWritingClient() {
                 </div>
               ) : (
                 <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                  <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Your Writing:</p>
+                  <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{t('كتابتك:', 'Your writing:')}</p>
                   <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{viewingWriting.content}</p>
                 </div>
               )}
@@ -458,14 +447,14 @@ export default function FreeWritingClient() {
               {viewingWriting.feedback && (
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                   <p className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                    Teacher Feedback / ملاحظات المعلم:
+                    {t('ملاحظات المعلم:', 'Teacher feedback:')}
                   </p>
                   <p className="text-blue-800 dark:text-blue-200">{viewingWriting.feedback}</p>
                 </div>
               )}
 
               <Button variant="outline" fullWidth onClick={() => setViewingWriting(null)}>
-                Close / إغلاق
+                {t('إغلاق', 'Close')}
               </Button>
             </div>
           </Modal>

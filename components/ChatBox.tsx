@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { Send, X, Loader2, MessageCircle } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import io, { Socket } from 'socket.io-client'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 interface Message {
   id: string
@@ -30,6 +32,8 @@ interface ChatBoxProps {
 
 export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
   const { data: session } = useSession()
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [loading, setLoading] = useState(true)
@@ -146,9 +150,9 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
 
   const getRoleBadge = (role?: string) => {
     switch (role) {
-      case 'TEACHER': return 'مدرس'
-      case 'STUDENT': return 'طالب'
-      case 'ADMIN': return 'مدير'
+      case 'TEACHER': return t('مدرس', 'Teacher')
+      case 'STUDENT': return t('طالب', 'Student')
+      case 'ADMIN': return t('مدير', 'Admin')
       default: return ''
     }
   }
@@ -195,8 +199,8 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-[#718075]">
             <MessageCircle className="w-14 h-14 mb-3 text-[#afbdaf]" />
-            <p className="font-medium">لا توجد رسائل بعد</p>
-            <p className="text-sm">ابدأ المحادثة عندما تكون جاهزاً.</p>
+            <p className="font-medium">{t('لا توجد رسائل بعد', 'No messages yet')}</p>
+            <p className="text-sm">{t('ابدأ المحادثة عندما تكون جاهزاً.', 'Start the conversation when you are ready.')}</p>
           </div>
         ) : (
           messages.map((message) => {
@@ -217,7 +221,7 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
                     {message.content}
                   </p>
                     <p className={`text-xs mt-1 ${isOwn ? 'text-[#d8e0d7]' : 'text-[#7b867d]'}`}>
-                    {new Date(message.createdAt).toLocaleTimeString('ar-EG', {
+                    {new Date(message.createdAt).toLocaleTimeString(language === 'ar' ? 'ar-EG' : 'en-US', {
                       hour: '2-digit',
                       minute: '2-digit'
                     })}
@@ -249,9 +253,9 @@ export default function ChatBox({ otherUser, onClose }: ChatBoxProps) {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="اكتب رسالتك..."
-            className="flex-1 px-4 py-3 border border-[#c9c8ba] bg-[#fdfcf7] text-[#19372d] placeholder:text-[#7b867d] rounded-full focus:outline-none focus:ring-2 focus:ring-[#174c3c]/20 focus:border-[#174c3c] text-right"
-            dir="rtl"
+            placeholder={t('اكتب رسالتك...', 'Write a message...')}
+            className="flex-1 px-4 py-3 border border-[#c9c8ba] bg-[#fdfcf7] text-[#19372d] placeholder:text-[#7b867d] rounded-full focus:outline-none focus:ring-2 focus:ring-[#174c3c]/20 focus:border-[#174c3c] text-start"
+            dir={language === 'ar' ? 'rtl' : 'ltr'}
             disabled={sending}
           />
         </div>

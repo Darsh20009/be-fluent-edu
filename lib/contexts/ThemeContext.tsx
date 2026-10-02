@@ -1,9 +1,10 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { useRouter } from 'next/navigation'
+import type { Language } from '@/lib/locale'
 
 type Theme = 'light' | 'dark'
-type Language = 'ar' | 'en'
 
 interface ThemeContextType {
   theme: Theme
@@ -17,33 +18,47 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
+export function ThemeProvider({ children, initialLanguage = 'ar' }: { children: ReactNode; initialLanguage?: Language }) {
+  const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [theme, setThemeState] = useState<Theme>('light')
-  const [language, setLanguageState] = useState<Language>('ar')
+  const [language, setLanguageState] = useState<Language>(initialLanguage)
 
   useEffect(() => {
-    setMounted(true)
-    
-    const savedTheme = (localStorage.getItem('theme') as Theme) || 'light'
-    const savedLanguage = (localStorage.getItem('language') as Language) || 'ar'
-    
-    setThemeState(savedTheme)
-    setLanguageState(savedLanguage)
-    
-    if (savedTheme !== 'light') {
+    const timer = window.setTimeout(() => {
+      const themePreference = localStorage.getItem('theme')
+      const savedTheme: Theme = themePreference === 'dark' ? 'dark' : 'light'
+      const cookieLanguage = document.cookie
+        .split('; ')
+        .find((entry) => entry.startsWith('language='))
+        ?.split('=')[1]
+      const localLanguage = localStorage.getItem('language')
+      const savedLanguage: Language = cookieLanguage === 'en' || cookieLanguage === 'ar'
+        ? cookieLanguage
+        : localLanguage === 'en' || localLanguage === 'ar'
+          ? localLanguage
+          : 'ar'
+
+      setMounted(true)
+      setThemeState(savedTheme)
+      setLanguageState(savedLanguage)
+
+      if (savedTheme !== 'light') {
+        const html = document.documentElement
+        html.classList.remove('light', 'dark')
+        html.classList.add(savedTheme)
+        html.style.colorScheme = savedTheme
+      }
+
       const html = document.documentElement
-      html.classList.remove('light', 'dark')
-      html.classList.add(savedTheme)
-      html.style.colorScheme = savedTheme
-    }
-    
-    if (savedLanguage !== 'ar') {
-      const html = document.documentElement
-      html.setAttribute('dir', 'ltr')
-      html.setAttribute('lang', 'en')
-    }
-  }, [])
+      html.setAttribute('dir', savedLanguage === 'ar' ? 'rtl' : 'ltr')
+      html.setAttribute('lang', savedLanguage)
+      document.cookie = `language=${savedLanguage}; Path=/; Max-Age=31536000; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`
+      if (savedLanguage !== initialLanguage) router.refresh()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [initialLanguage, router])
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme)
@@ -69,6 +84,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const html = document.documentElement
       html.setAttribute('dir', newLanguage === 'ar' ? 'rtl' : 'ltr')
       html.setAttribute('lang', newLanguage)
+      document.cookie = `language=${newLanguage}; Path=/; Max-Age=31536000; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`
+      router.refresh()
     }
   }
 

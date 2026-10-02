@@ -8,6 +8,8 @@ import {
   LayoutTemplate, Palette, CheckCircle, GripVertical, BarChart3
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText, localeDirection } from '@/lib/locale'
 
 /* ─── Types ─────────────────────────────────────────────── */
 interface DynamicItem { title: string; title_ar: string; desc: string; icon: string }
@@ -35,6 +37,8 @@ function ImageField({ value, onChange, onUpload, uploading, compact }: {
   value: string; onChange: (v: string) => void
   onUpload: (f: File) => void; uploading: boolean; compact?: boolean
 }) {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   return (
     <div className={`flex items-center gap-3 ${compact ? 'gap-2' : ''}`}>
       {value ? (
@@ -53,10 +57,10 @@ function ImageField({ value, onChange, onUpload, uploading, compact }: {
         <input
           type="text" value={value} onChange={e => onChange(e.target.value)}
           className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none"
-          placeholder="رابط الصورة..." />
+          placeholder={t('رابط الصورة...', 'Image URL…')} />
         <label className={`flex items-center justify-center gap-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-bold text-gray-600 cursor-pointer transition ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
           <Upload className="w-3.5 h-3.5" />
-          {uploading ? 'جاري الرفع...' : 'رفع صورة'}
+          {uploading ? t('جاري الرفع...', 'Uploading…') : t('رفع صورة', 'Upload image')}
           <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && onUpload(e.target.files[0])} disabled={uploading} />
         </label>
       </div>
@@ -70,6 +74,8 @@ function SectionCard({ id, title, icon: Icon, badge, fieldCount, expanded, onTog
   expanded: boolean; onToggle: () => void; onSave: () => void; isSaving: boolean
   children: React.ReactNode; color?: string
 }) {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const colors: Record<string, string> = {
     emerald: 'bg-emerald-100 text-emerald-600',
     blue: 'bg-blue-100 text-blue-600',
@@ -93,7 +99,7 @@ function SectionCard({ id, title, icon: Icon, badge, fieldCount, expanded, onTog
             {badge && <span className="text-xs text-gray-400 font-medium">{badge}</span>}
           </div>
           {fieldCount !== undefined && (
-            <span className="ml-2 px-2.5 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-bold">{fieldCount} عنصر</span>
+            <span className="ml-2 px-2.5 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-bold">{fieldCount} {t('عنصر', 'items')}</span>
           )}
         </div>
         {expanded ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
@@ -105,7 +111,7 @@ function SectionCard({ id, title, icon: Icon, badge, fieldCount, expanded, onTog
             <button onClick={onSave} disabled={isSaving}
               className="flex items-center gap-2 px-7 py-2.5 rounded-xl font-bold text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200 transition disabled:opacity-60">
               <Save className="w-4 h-4" />
-              {isSaving ? 'جاري الحفظ...' : 'حفظ التعديلات'}
+              {isSaving ? t('جاري الحفظ...', 'Saving…') : t('حفظ التعديلات', 'Save changes')}
             </button>
           </div>
         </div>
@@ -137,6 +143,8 @@ function TF({ label, value, onChange, type = 'text', placeholder, half }: {
 
 /* ═══════════════════════ MAIN ═══════════════════════════ */
 export default function PageEditorTab() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const PAGE = 'homepage'
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const [content, setContent] = useState<Record<string, string>>({})
@@ -212,7 +220,7 @@ export default function PageEditorTab() {
         alt: map[`hero_images__img${i+1}_alt`] || '',
       })))
 
-    } catch { toast.error('فشل تحميل المحتوى') }
+    } catch { toast.error(t('فشل تحميل المحتوى', 'Failed to load content')) }
     finally { setLoading(false) }
   }
 
@@ -242,8 +250,8 @@ export default function PageEditorTab() {
     setSaving(sectionId)
     try {
       await Promise.all(fields.map(f => postField(sectionId, f.id, getVal(sectionId, f.id))))
-      toast.success('تم الحفظ بنجاح ✓')
-    } catch { toast.error('فشل الحفظ') }
+      toast.success(t('تم الحفظ بنجاح ✓', 'Saved successfully ✓'))
+    } catch { toast.error(t('فشل الحفظ', 'Failed to save')) }
     finally { setSaving(null) }
   }
 
@@ -259,8 +267,8 @@ export default function PageEditorTab() {
         calls.push(postField('features', `feat${n}_icon`, f.icon))
       })
       await Promise.all(calls)
-      toast.success('تم حفظ المميزات ✓')
-    } catch { toast.error('فشل الحفظ') }
+      toast.success(t('تم حفظ المميزات ✓', 'Features saved ✓'))
+    } catch { toast.error(t('فشل الحفظ', 'Failed to save')) }
     finally { setSaving(null) }
   }
 
@@ -276,8 +284,8 @@ export default function PageEditorTab() {
         calls.push(postField('learning_path', `step${n}_icon`,     s.icon))
       })
       await Promise.all(calls)
-      toast.success('تم حفظ مسار التعلم ✓')
-    } catch { toast.error('فشل الحفظ') }
+      toast.success(t('تم حفظ مسار التعلم ✓', 'Learning path saved ✓'))
+    } catch { toast.error(t('فشل الحفظ', 'Failed to save')) }
     finally { setSaving(null) }
   }
 
@@ -295,8 +303,8 @@ export default function PageEditorTab() {
         calls.push(postField('packages', `pkg${n}_badge`,    p.badge))
       })
       await Promise.all(calls)
-      toast.success('تم حفظ الباقات ✓')
-    } catch { toast.error('فشل الحفظ') }
+      toast.success(t('تم حفظ الباقات ✓', 'Packages saved ✓'))
+    } catch { toast.error(t('فشل الحفظ', 'Failed to save')) }
     finally { setSaving(null) }
   }
 
@@ -310,8 +318,8 @@ export default function PageEditorTab() {
         calls.push(postField('showcase', `step${n}_desc`,  s.desc))
       })
       await Promise.all(calls)
-      toast.success('تم حفظ خطوات المسار ✓')
-    } catch { toast.error('فشل الحفظ') }
+      toast.success(t('تم حفظ خطوات المسار ✓', 'Journey steps saved ✓'))
+    } catch { toast.error(t('فشل الحفظ', 'Failed to save')) }
     finally { setSaving(null) }
   }
 
@@ -325,8 +333,8 @@ export default function PageEditorTab() {
         calls.push(postField('hero_images', `img${n}_alt`, img.alt))
       })
       await Promise.all(calls)
-      toast.success('تم حفظ صور الكاروسيل ✓')
-    } catch { toast.error('فشل الحفظ') }
+      toast.success(t('تم حفظ صور الكاروسيل ✓', 'Carousel images saved ✓'))
+    } catch { toast.error(t('فشل الحفظ', 'Failed to save')) }
     finally { setSaving(null) }
   }
 
@@ -334,8 +342,8 @@ export default function PageEditorTab() {
   async function handleStaticImageUpload(file: File, section: string, fieldId: string) {
     setUploadingField(`${section}__${fieldId}`)
     const url = await uploadImageFile(file)
-    if (url) { setVal(section, fieldId, url); toast.success('تم رفع الصورة') }
-    else toast.error('فشل رفع الصورة')
+    if (url) { setVal(section, fieldId, url); toast.success(t('تم رفع الصورة', 'Image uploaded')) }
+    else toast.error(t('فشل رفع الصورة', 'Image upload failed'))
     setUploadingField(null)
   }
 
@@ -345,8 +353,8 @@ export default function PageEditorTab() {
     if (url) {
       if (which === 'features') setFeatures(f => f.map((x, i) => i === idx ? { ...x, icon: url } : x))
       else setSteps(s => s.map((x, i) => i === idx ? { ...x, icon: url } : x))
-      toast.success('تم رفع الصورة')
-    } else toast.error('فشل رفع الصورة')
+      toast.success(t('تم رفع الصورة', 'Image uploaded'))
+    } else toast.error(t('فشل رفع الصورة', 'Image upload failed'))
     setUploadingField(null)
   }
 
@@ -355,8 +363,8 @@ export default function PageEditorTab() {
     const url = await uploadImageFile(file)
     if (url) {
       setHeroImages(imgs => imgs.map((x, i) => i === idx ? { ...x, src: url } : x))
-      toast.success('تم رفع الصورة')
-    } else toast.error('فشل رفع الصورة')
+      toast.success(t('تم رفع الصورة', 'Image uploaded'))
+    } else toast.error(t('فشل رفع الصورة', 'Image upload failed'))
     setUploadingField(null)
   }
 
@@ -379,7 +387,7 @@ export default function PageEditorTab() {
           <div className="flex gap-1">
             {idx === total - 1 && (
               <button onClick={onAdd} className="flex items-center gap-1 px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg text-xs font-bold transition">
-                <Plus className="w-3 h-3" /> إضافة
+                <Plus className="w-3 h-3" /> {t('إضافة', 'Add')}
               </button>
             )}
             {total > 1 && (
@@ -391,25 +399,25 @@ export default function PageEditorTab() {
         </div>
         <div className={`grid gap-3 ${hasTitle ? 'sm:grid-cols-2' : ''}`}>
           <div>
-            <label className="text-xs font-bold text-gray-500 block mb-1">العنوان (عربي)</label>
+            <label className="text-xs font-bold text-gray-500 block mb-1">{t('العنوان (عربي)', 'Title (Arabic)')}</label>
             <input type="text" value={item.title_ar} onChange={e => onUpdate(idx, 'title_ar', e.target.value)}
               className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none bg-white" />
           </div>
           {hasTitle && (
             <div>
-              <label className="text-xs font-bold text-gray-500 block mb-1">العنوان (إنجليزي)</label>
+              <label className="text-xs font-bold text-gray-500 block mb-1">{t('العنوان (إنجليزي)', 'Title (English)')}</label>
               <input type="text" value={item.title} onChange={e => onUpdate(idx, 'title', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none bg-white" />
             </div>
           )}
         </div>
         <div>
-          <label className="text-xs font-bold text-gray-500 block mb-1">الوصف</label>
+          <label className="text-xs font-bold text-gray-500 block mb-1">{t('الوصف', 'Description')}</label>
           <textarea value={item.desc} onChange={e => onUpdate(idx, 'desc', e.target.value)} rows={2}
             className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none resize-none bg-white" />
         </div>
         <div>
-          <label className="text-xs font-bold text-gray-500 block mb-1">الأيقونة / الصورة</label>
+          <label className="text-xs font-bold text-gray-500 block mb-1">{t('الأيقونة / الصورة', 'Icon / image')}</label>
           <ImageField value={item.icon} onChange={v => onUpdate(idx, 'icon', v)}
             onUpload={f => onImgUpload(f, idx)} uploading={uploading} compact />
         </div>
@@ -419,26 +427,26 @@ export default function PageEditorTab() {
 
   /* ─── RENDER ─────────────────────────────────────────── */
   return (
-    <div className="space-y-5" dir="rtl">
+    <div className="space-y-5" dir={localeDirection(language)}>
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
             <LayoutTemplate className="w-6 h-6 text-emerald-600" />
-            محرر الصفحات الكامل
+            {t('محرر الصفحات الكامل', 'Full page editor')}
           </h2>
-          <p className="text-sm text-gray-500 mt-0.5">تحكم في كل أقسام الصفحة الرئيسية — التغييرات تظهر فوراً على الموقع</p>
+          <p className="text-sm text-gray-500 mt-0.5">{t('تحكم في كل أقسام الصفحة الرئيسية — التغييرات تظهر فوراً على الموقع', 'Manage every homepage section — changes appear immediately on the site')}</p>
         </div>
         <div className="flex gap-2">
           <button onClick={fetchContent} disabled={loading}
             className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl transition flex items-center gap-2 text-sm font-bold text-gray-600">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            تحديث
+            {t('تحديث', 'Refresh')}
           </button>
           <a href="/" target="_blank"
             className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-sm font-bold transition border border-blue-200">
             <Eye className="w-4 h-4" />
-            معاينة الموقع
+            {t('معاينة الموقع', 'Preview site')}
           </a>
         </div>
       </div>
@@ -446,15 +454,15 @@ export default function PageEditorTab() {
       {/* Section map */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { id: 'hero', label: 'الهيرو', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-          { id: 'hero_images', label: 'صور الكاروسيل', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-          { id: 'stats', label: 'الإحصاءات', color: 'bg-amber-50 text-amber-700 border-amber-200' },
-          { id: 'features', label: 'المميزات', color: 'bg-purple-50 text-purple-700 border-purple-200' },
-          { id: 'learning_path', label: 'مسار التعلم', color: 'bg-teal-50 text-teal-700 border-teal-200' },
-          { id: 'showcase', label: 'قسم الخطوات', color: 'bg-slate-50 text-slate-700 border-slate-200' },
-          { id: 'packages', label: 'الباقات', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-          { id: 'cta', label: 'الدعوة للعمل', color: 'bg-rose-50 text-rose-700 border-rose-200' },
-          { id: 'contact', label: 'التواصل', color: 'bg-orange-50 text-orange-700 border-orange-200' },
+          { id: 'hero', label: t('الهيرو', 'Hero'), color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+          { id: 'hero_images', label: t('صور الكاروسيل', 'Carousel images'), color: 'bg-blue-50 text-blue-700 border-blue-200' },
+          { id: 'stats', label: t('الإحصاءات', 'Statistics'), color: 'bg-amber-50 text-amber-700 border-amber-200' },
+          { id: 'features', label: t('المميزات', 'Features'), color: 'bg-purple-50 text-purple-700 border-purple-200' },
+          { id: 'learning_path', label: t('مسار التعلم', 'Learning path'), color: 'bg-teal-50 text-teal-700 border-teal-200' },
+          { id: 'showcase', label: t('قسم الخطوات', 'Journey showcase'), color: 'bg-slate-50 text-slate-700 border-slate-200' },
+          { id: 'packages', label: t('الباقات', 'Packages'), color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+          { id: 'cta', label: t('الدعوة للعمل', 'Call to action'), color: 'bg-rose-50 text-rose-700 border-rose-200' },
+          { id: 'contact', label: t('التواصل', 'Contact'), color: 'bg-orange-50 text-orange-700 border-orange-200' },
         ].map(s => (
           <button key={s.id} onClick={() => toggle(s.id)}
             className={`px-3 py-2 rounded-xl text-xs font-bold border transition hover:opacity-80 ${s.color} ${expandedSection === s.id ? 'ring-2 ring-offset-1 ring-current' : ''}`}>
@@ -471,8 +479,8 @@ export default function PageEditorTab() {
         <div className="space-y-4">
 
           {/* ── SECTION 1: Hero ─────────────────────────────── */}
-          <SectionCard id="hero" title="القسم الأول — Hero الرئيسي" icon={Palette} color="emerald"
-            badge="العنوان الرئيسي والنص والصورة الخلفية"
+          <SectionCard id="hero" title={t('القسم الأول — Hero الرئيسي', 'Section 1 — Main hero')} icon={Palette} color="emerald"
+            badge={t('العنوان الرئيسي والنص والصورة الخلفية', 'Main heading, copy, and background image')}
             expanded={expandedSection === 'hero'} onToggle={() => toggle('hero')}
             onSave={() => saveStaticSection('hero', [
               { id: 'title_ar' }, { id: 'title_en' }, { id: 'subtitle_ar' }, { id: 'subtitle_en' }, { id: 'cta_text' }, { id: 'hero_bg' }
@@ -481,50 +489,50 @@ export default function PageEditorTab() {
             <div className="p-4 bg-gray-900 rounded-2xl relative overflow-hidden aspect-video flex items-center justify-center text-center">
               {getVal('hero', 'hero_bg') && <img src={getVal('hero', 'hero_bg')} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />}
               <div className="relative z-10 space-y-2">
-                <p className="text-white font-black text-lg">{getVal('hero', 'title_ar') || 'العنوان بالعربي'}</p>
+                <p className="text-white font-black text-lg">{getVal('hero', 'title_ar') || t('العنوان بالعربي', 'Arabic title')}</p>
                 <p className="text-emerald-400 font-bold text-base">{getVal('hero', 'title_en') || 'Title in English'}</p>
-                <p className="text-gray-300 text-xs max-w-xs mx-auto">{getVal('hero', 'subtitle_ar') || 'الوصف...'}</p>
+                <p className="text-gray-300 text-xs max-w-xs mx-auto">{getVal('hero', 'subtitle_ar') || t('الوصف...', 'Description…')}</p>
                 <span className="inline-block px-4 py-1 bg-emerald-500 text-white text-xs font-bold rounded-lg">
-                  {getVal('hero', 'cta_text') || 'ابدأ الآن'}
+                  {getVal('hero', 'cta_text') || t('ابدأ الآن', 'Get started')}
                 </span>
               </div>
-              <div className="absolute top-2 right-2 bg-white/10 text-white text-[9px] px-2 py-0.5 rounded-full">معاينة مباشرة</div>
+              <div className="absolute top-2 right-2 bg-white/10 text-white text-[9px] px-2 py-0.5 rounded-full">{t('معاينة مباشرة', 'Live preview')}</div>
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
-              <TF label="العنوان الرئيسي (عربي)" value={getVal('hero','title_ar')} onChange={v=>setVal('hero','title_ar',v)} placeholder="تعلم الإنجليزية" half />
-              <TF label="العنوان الرئيسي (إنجليزي)" value={getVal('hero','title_en')} onChange={v=>setVal('hero','title_en',v)} placeholder="Learn English" half />
-              <TF label="العنوان الفرعي (عربي)" value={getVal('hero','subtitle_ar')} onChange={v=>setVal('hero','subtitle_ar',v)} type="textarea" placeholder="وصف..." half />
-              <TF label="العنوان الفرعي (إنجليزي)" value={getVal('hero','subtitle_en')} onChange={v=>setVal('hero','subtitle_en',v)} type="textarea" placeholder="Description..." half />
-              <TF label="نص زر الدعوة للعمل (CTA)" value={getVal('hero','cta_text')} onChange={v=>setVal('hero','cta_text',v)} placeholder="ابدأ رحلتك الآن" half />
+              <TF label={t('العنوان الرئيسي (عربي)', 'Main title (Arabic)')} value={getVal('hero','title_ar')} onChange={v=>setVal('hero','title_ar',v)} placeholder="تعلم الإنجليزية" half />
+              <TF label={t('العنوان الرئيسي (إنجليزي)', 'Main title (English)')} value={getVal('hero','title_en')} onChange={v=>setVal('hero','title_en',v)} placeholder="Learn English" half />
+              <TF label={t('العنوان الفرعي (عربي)', 'Subtitle (Arabic)')} value={getVal('hero','subtitle_ar')} onChange={v=>setVal('hero','subtitle_ar',v)} type="textarea" placeholder={t('وصف...', 'Description…')} half />
+              <TF label={t('العنوان الفرعي (إنجليزي)', 'Subtitle (English)')} value={getVal('hero','subtitle_en')} onChange={v=>setVal('hero','subtitle_en',v)} type="textarea" placeholder="Description..." half />
+              <TF label={t('نص زر الدعوة للعمل (CTA)', 'Call-to-action button text')} value={getVal('hero','cta_text')} onChange={v=>setVal('hero','cta_text',v)} placeholder={t('ابدأ رحلتك الآن', 'Start your journey now')} half />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 block mb-1.5">صورة الخلفية</label>
+              <label className="text-xs font-bold text-gray-500 block mb-1.5">{t('صورة الخلفية', 'Background image')}</label>
               <ImageField value={getVal('hero','hero_bg')} onChange={v=>setVal('hero','hero_bg',v)}
                 onUpload={f=>handleStaticImageUpload(f,'hero','hero_bg')} uploading={uploadingField==='hero__hero_bg'} />
             </div>
           </SectionCard>
 
           {/* ── SECTION 2: Hero Carousel Images ────────────── */}
-          <SectionCard id="hero_images" title="القسم الثاني — صور الكاروسيل" icon={ImageIcon} color="blue"
-            badge="الصور المتحركة في الهيرو" fieldCount={heroImages.length}
+          <SectionCard id="hero_images" title={t('القسم الثاني — صور الكاروسيل', 'Section 2 — Hero carousel images')} icon={ImageIcon} color="blue"
+            badge={t('الصور المتحركة في الهيرو', 'Images shown in the hero carousel')} fieldCount={heroImages.length}
             expanded={expandedSection === 'hero_images'} onToggle={() => toggle('hero_images')}
             onSave={saveHeroImages} isSaving={saving === 'hero_images'}>
             <div className="p-3 bg-blue-50 rounded-xl text-sm text-blue-800 border border-blue-200 flex items-start gap-2">
               <ImageIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span>هذه الصور تظهر في الكاروسيل المتحرك بجانب العنوان الرئيسي. يمكنك تغييرها أو إضافة صور جديدة.</span>
+              <span>{t('هذه الصور تظهر في الكاروسيل المتحرك بجانب العنوان الرئيسي. يمكنك تغييرها أو إضافة صور جديدة.', 'These images appear in the animated carousel beside the main heading. You can replace them or add new images.')}</span>
             </div>
             {heroImages.map((img, idx) => (
               <div key={idx} className="bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2 text-sm font-black text-gray-700">
                     <div className="w-6 h-6 bg-blue-600 text-white rounded-lg flex items-center justify-center text-xs font-black">{idx + 1}</div>
-                    صورة {idx + 1}
+                    {t('صورة', 'Image')} {idx + 1}
                   </span>
                   <div className="flex gap-1">
                     {idx === heroImages.length - 1 && heroImages.length < 8 && (
                       <button onClick={() => setHeroImages(i => [...i, { src: '', alt: '' }])}
                         className="flex items-center gap-1 px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-xs font-bold transition">
-                        <Plus className="w-3 h-3" /> إضافة صورة
+                        <Plus className="w-3 h-3" /> {t('إضافة صورة', 'Add image')}
                       </button>
                     )}
                     {heroImages.length > 1 && (
@@ -538,18 +546,18 @@ export default function PageEditorTab() {
                 <ImageField value={img.src} onChange={v => setHeroImages(imgs => imgs.map((x,i)=>i===idx?{...x,src:v}:x))}
                   onUpload={f => handleHeroImageUpload(f, idx)} uploading={uploadingField===`hero_img_${idx}`} compact />
                 <div>
-                  <label className="text-xs font-bold text-gray-500 block mb-1">النص البديل (Alt)</label>
+                  <label className="text-xs font-bold text-gray-500 block mb-1">{t('النص البديل (Alt)', 'Alt text')}</label>
                   <input type="text" value={img.alt} onChange={e => setHeroImages(imgs => imgs.map((x,i)=>i===idx?{...x,alt:e.target.value}:x))}
                     className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none bg-white"
-                    placeholder="وصف الصورة..." />
+                    placeholder={t('وصف الصورة...', 'Describe the image…')} />
                 </div>
               </div>
             ))}
           </SectionCard>
 
           {/* ── SECTION 3: Stats ────────────────────────────── */}
-          <SectionCard id="stats" title="القسم الثالث — الإحصاءات والأرقام" icon={BarChart3 as any} color="amber"
-            badge="4 إحصاءات تظهر تحت الهيرو"
+          <SectionCard id="stats" title={t('القسم الثالث — الإحصاءات والأرقام', 'Section 3 — Statistics and figures')} icon={BarChart3 as any} color="amber"
+            badge={t('4 إحصاءات تظهر تحت الهيرو', 'Four statistics shown below the hero')}
             expanded={expandedSection === 'stats'} onToggle={() => toggle('stats')}
             onSave={() => saveStaticSection('stats', [1,2,3,4].flatMap(n=>[
               {id:`stat${n}_num`},{id:`stat${n}_label_ar`},{id:`stat${n}_label_en`}
@@ -559,31 +567,31 @@ export default function PageEditorTab() {
                 <div key={n} className="bg-gray-50 border border-gray-100 rounded-2xl p-4 space-y-3">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 bg-amber-100 text-amber-700 rounded-lg flex items-center justify-center text-sm font-black">{n}</div>
-                    <span className="text-sm font-bold text-gray-700">الإحصائية {n}</span>
+                    <span className="text-sm font-bold text-gray-700">{t('الإحصائية', 'Statistic')} {n}</span>
                     {getVal('stats',`stat${n}_num`) && (
                       <span className="text-2xl font-black text-emerald-600 mr-auto">{getVal('stats',`stat${n}_num`)}</span>
                     )}
                   </div>
-                  <TF label="الرقم / القيمة" value={getVal('stats',`stat${n}_num`)} onChange={v=>setVal('stats',`stat${n}_num`,v)} placeholder="1000+" />
-                  <TF label="الوصف (عربي)" value={getVal('stats',`stat${n}_label_ar`)} onChange={v=>setVal('stats',`stat${n}_label_ar`,v)} placeholder="طالب نشط" />
-                  <TF label="الوصف (إنجليزي)" value={getVal('stats',`stat${n}_label_en`)} onChange={v=>setVal('stats',`stat${n}_label_en`,v)} placeholder="Active Students" />
+                  <TF label={t('الرقم / القيمة', 'Number / value')} value={getVal('stats',`stat${n}_num`)} onChange={v=>setVal('stats',`stat${n}_num`,v)} placeholder="1000+" />
+                  <TF label={t('الوصف (عربي)', 'Description (Arabic)')} value={getVal('stats',`stat${n}_label_ar`)} onChange={v=>setVal('stats',`stat${n}_label_ar`,v)} placeholder={t('طالب نشط', 'Active student')} />
+                  <TF label={t('الوصف (إنجليزي)', 'Description (English)')} value={getVal('stats',`stat${n}_label_en`)} onChange={v=>setVal('stats',`stat${n}_label_en`,v)} placeholder="Active students" />
                 </div>
               ))}
             </div>
           </SectionCard>
 
           {/* ── SECTION 4: Features ─────────────────────────── */}
-          <SectionCard id="features" title="القسم الرابع — المميزات (لماذا Be Fluent؟)" icon={Star} color="purple"
-            badge="بطاقات المميزات الظاهرة في قسم المميزات وقسم لماذا نحن"
+          <SectionCard id="features" title={t('القسم الرابع — المميزات (لماذا Be Fluent؟)', 'Section 4 — Features (Why Be Fluent?)')} icon={Star} color="purple"
+            badge={t('بطاقات المميزات الظاهرة في قسم المميزات وقسم لماذا نحن', 'Feature cards shown in the features and Why Us sections')}
             fieldCount={features.length}
             expanded={expandedSection === 'features'} onToggle={() => toggle('features')}
             onSave={saveFeatures} isSaving={saving === 'features'}>
             <div className="p-3 bg-purple-50 rounded-xl text-sm text-purple-800 border border-purple-200 flex items-start gap-2">
               <Star className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span>هذه المميزات تظهر في قسمين: قسم "المميزات" العلوي وقسم "لماذا تختار Be Fluent؟" في الأسفل. الـ 3 مميزات الأولى تظهر في كلا القسمين.</span>
+              <span>{t('هذه المميزات تظهر في قسمين: قسم "المميزات" العلوي وقسم "لماذا تختار Be Fluent؟" في الأسفل. الـ 3 مميزات الأولى تظهر في كلا القسمين.', 'These features appear in two sections: the features section above and Why Choose Be Fluent below. The first three features appear in both.')}</span>
             </div>
             {features.map((feat, idx) => (
-              <DynamicCard key={idx} item={feat} idx={idx} total={features.length} label="ميزة" hasTitle
+              <DynamicCard key={idx} item={feat} idx={idx} total={features.length} label={t('ميزة', 'Feature')} hasTitle
                 onUpdate={(i, k, v) => setFeatures(f => f.map((x, j) => j === i ? { ...x, [k]: v } : x))}
                 onRemove={i => setFeatures(f => f.filter((_, j) => j !== i))}
                 onAdd={() => setFeatures(f => [...f, emptyItem()])}
@@ -593,19 +601,19 @@ export default function PageEditorTab() {
             {features.length === 0 && (
               <button onClick={() => setFeatures([emptyItem()])}
                 className="w-full py-4 border-2 border-dashed border-purple-300 rounded-2xl text-purple-600 font-bold text-sm flex items-center justify-center gap-2 hover:bg-purple-50 transition">
-                <Plus className="w-4 h-4" /> إضافة ميزة
+                <Plus className="w-4 h-4" /> {t('إضافة ميزة', 'Add feature')}
               </button>
             )}
           </SectionCard>
 
           {/* ── SECTION 5: Learning Path ─────────────────────── */}
-          <SectionCard id="learning_path" title="القسم الخامس — مسار التعلم" icon={Target} color="teal"
-            badge="خطوات الرحلة التعليمية الظاهرة بجانب الخريطة"
+          <SectionCard id="learning_path" title={t('القسم الخامس — مسار التعلم', 'Section 5 — Learning path')} icon={Target} color="teal"
+            badge={t('خطوات الرحلة التعليمية الظاهرة بجانب الخريطة', 'Learning journey steps shown beside the map')}
             fieldCount={steps.length}
             expanded={expandedSection === 'learning_path'} onToggle={() => toggle('learning_path')}
             onSave={saveSteps} isSaving={saving === 'learning_path'}>
             {steps.map((s, idx) => (
-              <DynamicCard key={idx} item={s} idx={idx} total={steps.length} label="خطوة"
+              <DynamicCard key={idx} item={s} idx={idx} total={steps.length} label={t('خطوة', 'Step')}
                 onUpdate={(i, k, v) => setSteps(st => st.map((x, j) => j === i ? { ...x, [k]: v } : x))}
                 onRemove={i => setSteps(st => st.filter((_, j) => j !== i))}
                 onAdd={() => setSteps(st => [...st, emptyItem()])}
@@ -615,32 +623,32 @@ export default function PageEditorTab() {
             {steps.length === 0 && (
               <button onClick={() => setSteps([emptyItem()])}
                 className="w-full py-4 border-2 border-dashed border-teal-300 rounded-2xl text-teal-600 font-bold text-sm flex items-center justify-center gap-2 hover:bg-teal-50 transition">
-                <Plus className="w-4 h-4" /> إضافة خطوة
+                <Plus className="w-4 h-4" /> {t('إضافة خطوة', 'Add step')}
               </button>
             )}
           </SectionCard>
 
           {/* ── SECTION 6: Showcase Steps ────────────────────── */}
-          <SectionCard id="showcase" title="القسم السادس — خطوات رحلة الإتقان" icon={Zap} color="indigo"
-            badge="القسم الداكن — خطوات التسجيل حتى الاحتراف" fieldCount={showcaseSteps.length}
+          <SectionCard id="showcase" title={t('القسم السادس — خطوات رحلة الإتقان', 'Section 6 — Mastery journey steps')} icon={Zap} color="indigo"
+            badge={t('القسم الداكن — خطوات التسجيل حتى الاحتراف', 'Dark section — from signup to proficiency')} fieldCount={showcaseSteps.length}
             expanded={expandedSection === 'showcase'} onToggle={() => toggle('showcase')}
             onSave={saveShowcaseSteps} isSaving={saving === 'showcase'}>
             <div className="p-3 bg-indigo-50 rounded-xl text-sm text-indigo-800 border border-indigo-200 flex items-start gap-2">
               <Zap className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span>هذه الخطوات تظهر في القسم الداكن الذي يشرح رحلة الطالب من التسجيل حتى الاحتراف.</span>
+              <span>{t('هذه الخطوات تظهر في القسم الداكن الذي يشرح رحلة الطالب من التسجيل حتى الاحتراف.', 'These steps appear in the dark section describing the student journey from signup to proficiency.')}</span>
             </div>
             {showcaseSteps.map((s, idx) => (
               <div key={idx} className="bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2 text-sm font-black text-gray-700">
                     <div className="w-6 h-6 bg-indigo-600 text-white rounded-lg flex items-center justify-center text-xs font-black">{idx + 1}</div>
-                    الخطوة {idx + 1}
+                    {t('الخطوة', 'Step')} {idx + 1}
                   </span>
                   <div className="flex gap-1">
                     {idx === showcaseSteps.length - 1 && (
                       <button onClick={() => setShowcaseSteps(s => [...s, emptyStep()])}
                         className="flex items-center gap-1 px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg text-xs font-bold transition">
-                        <Plus className="w-3 h-3" /> إضافة
+                        <Plus className="w-3 h-3" /> {t('إضافة', 'Add')}
                       </button>
                     )}
                     {showcaseSteps.length > 1 && (
@@ -651,15 +659,15 @@ export default function PageEditorTab() {
                     )}
                   </div>
                 </div>
-                <TF label="العنوان" value={s.title} onChange={v => setShowcaseSteps(ss => ss.map((x,i) => i===idx?{...x,title:v}:x))} placeholder={`الخطوة ${idx+1}...`} />
-                <TF label="الوصف" value={s.desc} onChange={v => setShowcaseSteps(ss => ss.map((x,i) => i===idx?{...x,desc:v}:x))} type="textarea" placeholder="وصف الخطوة..." />
+                <TF label={t('العنوان', 'Title')} value={s.title} onChange={v => setShowcaseSteps(ss => ss.map((x,i) => i===idx?{...x,title:v}:x))} placeholder={t(`الخطوة ${idx+1}...`, `Step ${idx+1}…`)} />
+                <TF label={t('الوصف', 'Description')} value={s.desc} onChange={v => setShowcaseSteps(ss => ss.map((x,i) => i===idx?{...x,desc:v}:x))} type="textarea" placeholder={t('وصف الخطوة...', 'Step description…')} />
               </div>
             ))}
           </SectionCard>
 
           {/* ── SECTION 7: Packages ──────────────────────────── */}
-          <SectionCard id="packages" title="القسم السابع — الباقات التعليمية" icon={Package} color="rose"
-            badge="الباقات المعروضة على الصفحة الرئيسية" fieldCount={packages.length}
+          <SectionCard id="packages" title={t('القسم السابع — الباقات التعليمية', 'Section 7 — Learning packages')} icon={Package} color="rose"
+            badge={t('الباقات المعروضة على الصفحة الرئيسية', 'Packages displayed on the homepage')} fieldCount={packages.length}
             expanded={expandedSection === 'packages'} onToggle={() => toggle('packages')}
             onSave={savePackages} isSaving={saving === 'packages'}>
             {packages.map((pkg, idx) => (
@@ -667,21 +675,21 @@ export default function PageEditorTab() {
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2 text-sm font-black text-gray-700">
                     <div className={`w-6 h-6 ${pkg.popular ? 'bg-emerald-600' : 'bg-rose-600'} text-white rounded-lg flex items-center justify-center text-xs font-black`}>{idx + 1}</div>
-                    الباقة {idx + 1}
-                    {pkg.popular && <span className="px-2 py-0.5 bg-emerald-200 text-emerald-800 rounded-full text-xs font-bold">الأكثر طلباً</span>}
+                    {t('الباقة', 'Package')} {idx + 1}
+                    {pkg.popular && <span className="px-2 py-0.5 bg-emerald-200 text-emerald-800 rounded-full text-xs font-bold">{t('الأكثر طلباً', 'Most popular')}</span>}
                   </span>
                   <div className="flex items-center gap-2">
                     <label className="flex items-center gap-2 text-xs font-bold text-gray-600 cursor-pointer">
                       <input type="checkbox" checked={pkg.popular}
                         onChange={e => setPackages(ps => ps.map((x, i) => i === idx ? { ...x, popular: e.target.checked } : x))}
                         className="accent-emerald-600" />
-                      الأكثر طلباً
+                      {t('الأكثر طلباً', 'Most popular')}
                     </label>
                     <div className="flex gap-1">
                       {idx === packages.length - 1 && packages.length < 6 && (
                         <button onClick={() => setPackages(p => [...p, emptyPackage()])}
                           className="flex items-center gap-1 px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-lg text-xs font-bold transition">
-                          <Plus className="w-3 h-3" /> إضافة
+                          <Plus className="w-3 h-3" /> {t('إضافة', 'Add')}
                         </button>
                       )}
                       {packages.length > 1 && (
@@ -694,52 +702,52 @@ export default function PageEditorTab() {
                   </div>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-3">
-                  <TF label="اسم الباقة" value={pkg.name} onChange={v => setPackages(ps => ps.map((x,i) => i===idx?{...x,name:v}:x))} placeholder="الباقة الشهرية" half />
-                  <TF label="السعر (بدون عملة)" value={pkg.price} onChange={v => setPackages(ps => ps.map((x,i) => i===idx?{...x,price:v}:x))} placeholder="1500" half />
-                  <TF label="عدد الحصص" value={pkg.lessons} onChange={v => setPackages(ps => ps.map((x,i) => i===idx?{...x,lessons:v}:x))} placeholder="8" half />
-                  <TF label="المدة" value={pkg.duration} onChange={v => setPackages(ps => ps.map((x,i) => i===idx?{...x,duration:v}:x))} placeholder="شهر واحد" half />
-                  <TF label="نص الشارة (اختياري)" value={pkg.badge} onChange={v => setPackages(ps => ps.map((x,i) => i===idx?{...x,badge:v}:x))} placeholder="الأكثر طلباً" half />
+                  <TF label={t('اسم الباقة', 'Package name')} value={pkg.name} onChange={v => setPackages(ps => ps.map((x,i) => i===idx?{...x,name:v}:x))} placeholder={t('الباقة الشهرية', 'Monthly package')} half />
+                  <TF label={t('السعر (بدون عملة)', 'Price (no currency)')} value={pkg.price} onChange={v => setPackages(ps => ps.map((x,i) => i===idx?{...x,price:v}:x))} placeholder="1500" half />
+                  <TF label={t('عدد الحصص', 'Number of sessions')} value={pkg.lessons} onChange={v => setPackages(ps => ps.map((x,i) => i===idx?{...x,lessons:v}:x))} placeholder="8" half />
+                  <TF label={t('المدة', 'Duration')} value={pkg.duration} onChange={v => setPackages(ps => ps.map((x,i) => i===idx?{...x,duration:v}:x))} placeholder={t('شهر واحد', 'One month')} half />
+                  <TF label={t('نص الشارة (اختياري)', 'Badge text (optional)')} value={pkg.badge} onChange={v => setPackages(ps => ps.map((x,i) => i===idx?{...x,badge:v}:x))} placeholder={t('الأكثر طلباً', 'Most popular')} half />
                 </div>
               </div>
             ))}
           </SectionCard>
 
           {/* ── SECTION 8: CTA ───────────────────────────────── */}
-          <SectionCard id="cta" title="القسم الثامن — الدعوة للعمل (CTA)" icon={Megaphone as any} color="orange"
-            badge="القسم الأخضر في نهاية الصفحة"
+          <SectionCard id="cta" title={t('القسم الثامن — الدعوة للعمل (CTA)', 'Section 8 — Call to action')} icon={Megaphone as any} color="orange"
+            badge={t('القسم الأخضر في نهاية الصفحة', 'Green section at the bottom of the page')}
             expanded={expandedSection === 'cta'} onToggle={() => toggle('cta')}
             onSave={() => saveStaticSection('cta', [{ id: 'title' }, { id: 'subtitle' }, { id: 'button_text' }])}
             isSaving={saving === 'cta'}>
             <div className="p-4 bg-gradient-to-r from-emerald-600 to-teal-500 rounded-2xl text-center">
-              <p className="text-white font-black text-xl mb-2">{getVal('cta','title') || 'جاهز لبدء رحلتك؟'}</p>
-              <p className="text-white/80 text-sm mb-3">{getVal('cta','subtitle') || 'انضم لآلاف الطلاب الذين غيروا حياتهم...'}</p>
+              <p className="text-white font-black text-xl mb-2">{getVal('cta','title') || t('جاهز لبدء رحلتك؟', 'Ready to begin your journey?')}</p>
+              <p className="text-white/80 text-sm mb-3">{getVal('cta','subtitle') || t('انضم لآلاف الطلاب الذين غيروا حياتهم...', 'Join thousands of students who transformed their lives…')}</p>
               <span className="px-6 py-2 bg-white text-emerald-700 font-bold rounded-xl text-sm">
-                {getVal('cta','button_text') || 'سجل الآن مجاناً'}
+                {getVal('cta','button_text') || t('سجل الآن مجاناً', 'Sign up for free now')}
               </span>
             </div>
-            <TF label="العنوان الرئيسي" value={getVal('cta','title')} onChange={v=>setVal('cta','title',v)} placeholder="جاهز لبدء رحلتك؟" />
-            <TF label="النص الفرعي" value={getVal('cta','subtitle')} onChange={v=>setVal('cta','subtitle',v)} type="textarea" placeholder="انضم لآلاف الطلاب..." />
-            <TF label="نص الزر" value={getVal('cta','button_text')} onChange={v=>setVal('cta','button_text',v)} placeholder="سجل الآن مجاناً" />
+            <TF label={t('العنوان الرئيسي', 'Main heading')} value={getVal('cta','title')} onChange={v=>setVal('cta','title',v)} placeholder={t('جاهز لبدء رحلتك؟', 'Ready to begin your journey?')} />
+            <TF label={t('النص الفرعي', 'Subtitle')} value={getVal('cta','subtitle')} onChange={v=>setVal('cta','subtitle',v)} type="textarea" placeholder={t('انضم لآلاف الطلاب...', 'Join thousands of students…')} />
+            <TF label={t('نص الزر', 'Button text')} value={getVal('cta','button_text')} onChange={v=>setVal('cta','button_text',v)} placeholder={t('سجل الآن مجاناً', 'Sign up for free now')} />
           </SectionCard>
 
           {/* ── SECTION 9: Contact ───────────────────────────── */}
-          <SectionCard id="contact" title="القسم التاسع — معلومات التواصل" icon={Phone as any} color="emerald"
-            badge="واتساب، إيميل، سوشيال ميديا"
+          <SectionCard id="contact" title={t('القسم التاسع — معلومات التواصل', 'Section 9 — Contact information')} icon={Phone as any} color="emerald"
+            badge={t('واتساب، إيميل، سوشيال ميديا', 'WhatsApp, email, and social media')}
             expanded={expandedSection === 'contact'} onToggle={() => toggle('contact')}
             onSave={() => saveStaticSection('contact', [
               { id: 'whatsapp' }, { id: 'email' }, { id: 'facebook' }, { id: 'instagram' }, { id: 'twitter' }, { id: 'youtube' }
             ])} isSaving={saving === 'contact'}>
             <div className="grid sm:grid-cols-2 gap-4">
-              <TF label="رقم واتساب (بدون +)" value={getVal('contact','whatsapp')} onChange={v=>setVal('contact','whatsapp',v)} placeholder="201091515594" half />
-              <TF label="البريد الإلكتروني" value={getVal('contact','email')} onChange={v=>setVal('contact','email',v)} placeholder="info@befluent-edu.online" half />
-              <TF label="رابط فيسبوك" value={getVal('contact','facebook')} onChange={v=>setVal('contact','facebook',v)} type="url" placeholder="https://facebook.com/..." half />
-              <TF label="رابط إنستغرام" value={getVal('contact','instagram')} onChange={v=>setVal('contact','instagram',v)} type="url" placeholder="https://instagram.com/..." half />
-              <TF label="رابط تويتر / X" value={getVal('contact','twitter')} onChange={v=>setVal('contact','twitter',v)} type="url" placeholder="https://x.com/..." half />
-              <TF label="رابط يوتيوب" value={getVal('contact','youtube')} onChange={v=>setVal('contact','youtube',v)} type="url" placeholder="https://youtube.com/..." half />
+              <TF label={t('رقم واتساب (بدون +)', 'WhatsApp number (without +)')} value={getVal('contact','whatsapp')} onChange={v=>setVal('contact','whatsapp',v)} placeholder="201091515594" half />
+              <TF label={t('البريد الإلكتروني', 'Email address')} value={getVal('contact','email')} onChange={v=>setVal('contact','email',v)} placeholder="info@befluent-edu.online" half />
+              <TF label={t('رابط فيسبوك', 'Facebook URL')} value={getVal('contact','facebook')} onChange={v=>setVal('contact','facebook',v)} type="url" placeholder="https://facebook.com/..." half />
+              <TF label={t('رابط إنستغرام', 'Instagram URL')} value={getVal('contact','instagram')} onChange={v=>setVal('contact','instagram',v)} type="url" placeholder="https://instagram.com/..." half />
+              <TF label={t('رابط تويتر / X', 'Twitter / X URL')} value={getVal('contact','twitter')} onChange={v=>setVal('contact','twitter',v)} type="url" placeholder="https://x.com/..." half />
+              <TF label={t('رابط يوتيوب', 'YouTube URL')} value={getVal('contact','youtube')} onChange={v=>setVal('contact','youtube',v)} type="url" placeholder="https://youtube.com/..." half />
             </div>
             <a href={`https://api.whatsapp.com/send/?phone=${getVal('contact','whatsapp')||'201091515594'}`} target="_blank"
               className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-bold hover:bg-green-200 transition">
-              <MessageCircle className="w-4 h-4" /> اختبر رابط الواتساب
+              <MessageCircle className="w-4 h-4" /> {t('اختبر رابط الواتساب', 'Test WhatsApp link')}
             </a>
           </SectionCard>
 

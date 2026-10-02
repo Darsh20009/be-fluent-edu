@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import styles from '@/app/phase4/phase4.module.css'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText, localeDirection } from '@/lib/locale'
 
 type Person = { id: string; name: string; email: string; phone?: string | null; status: string; isActive: boolean; StudentProfile?: { officialLevel?: { code: string } | null; officialStage?: { code: string } | null } | null }
 type LoadState = 'loading' | 'ready' | 'empty' | 'error' | 'database'
 
 export default function PeopleClient() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [tab, setTab] = useState<'students' | 'teachers' | 'staff'>('students')
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -52,17 +56,17 @@ export default function PeopleClient() {
     setSearch(value)
   }
 
-  return <section className={styles.card}>
+  return <section className={styles.card} dir={localeDirection(language)}>
     <div className={styles.toolbar}>
-      {(['students', 'teachers', 'staff'] as const).map((value) => <button className={styles.button} key={value} type="button" onClick={() => selectTab(value)} aria-pressed={tab === value}>{value}</button>)}
-      <input className={styles.input} value={search} onChange={(event) => updateSearch(event.target.value)} placeholder="Search people" aria-label="Search people" />
+      {(['students', 'teachers', 'staff'] as const).map((value) => <button className={styles.button} key={value} type="button" onClick={() => selectTab(value)} aria-pressed={tab === value}>{t(value === 'students' ? 'الطلاب' : value === 'teachers' ? 'المعلمون' : 'الموظفون', value[0].toUpperCase() + value.slice(1))}</button>)}
+      <input className={styles.input} value={search} onChange={(event) => updateSearch(event.target.value)} placeholder={t('ابحث عن أشخاص', 'Search people')} aria-label={t('ابحث عن أشخاص', 'Search people')} />
     </div>
-    {state === 'loading' && <p className={styles.muted} aria-live="polite" aria-busy="true">Loading people…</p>}
-    {state === 'database' && <div className={styles.blocked} role="status">People records are temporarily unavailable.</div>}
-    {state === 'error' && <div className={styles.error} role="alert">People could not be loaded. <button type="button" className={styles.button} onClick={() => { setState('loading'); setRetryKey((key) => key + 1) }}>Retry</button></div>}
-    {state === 'empty' && <div className={styles.empty}>No records match this search.</div>}
-    {state === 'ready' && <div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Name</th><th>Contact</th><th>Status</th><th>Level</th></tr></thead><tbody>
-      {items.map((person) => <tr key={person.id}><td><strong>{person.name}</strong><br /><span className={styles.muted}>{person.id}</span></td><td>{person.email}<br />{person.phone || 'No phone'}</td><td><span className={styles.badge}>{person.status}</span></td><td>{person.StudentProfile?.officialLevel?.code || 'Not assigned'}{person.StudentProfile?.officialStage?.code ? ` · ${person.StudentProfile.officialStage.code}` : ''}</td></tr>)}
+    {state === 'loading' && <p className={styles.muted} aria-live="polite" aria-busy="true">{t('جارٍ تحميل الأشخاص…', 'Loading people…')}</p>}
+    {state === 'database' && <div className={styles.blocked} role="status">{t('سجلات الأشخاص غير متاحة مؤقتًا.', 'People records are temporarily unavailable.')}</div>}
+    {state === 'error' && <div className={styles.error} role="alert">{t('تعذر تحميل الأشخاص.', 'People could not be loaded.')} <button type="button" className={styles.button} onClick={() => { setState('loading'); setRetryKey((key) => key + 1) }}>{t('إعادة المحاولة', 'Retry')}</button></div>}
+    {state === 'empty' && <div className={styles.empty}>{t('لا توجد سجلات تطابق هذا البحث.', 'No records match this search.')}</div>}
+    {state === 'ready' && <div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>{t('الاسم', 'Name')}</th><th>{t('التواصل', 'Contact')}</th><th>{t('الحالة', 'Status')}</th><th>{t('المستوى', 'Level')}</th></tr></thead><tbody>
+      {items.map((person) => <tr key={person.id}><td><strong>{person.name}</strong><br /><span className={styles.muted}>{person.id}</span></td><td>{person.email}<br />{person.phone || t('لا يوجد هاتف', 'No phone')}</td><td><span className={styles.badge}>{person.status}</span></td><td>{person.StudentProfile?.officialLevel?.code || t('غير محدد', 'Not assigned')}{person.StudentProfile?.officialStage?.code ? ` · ${person.StudentProfile.officialStage.code}` : ''}</td></tr>)}
     </tbody></table></div>}
   </section>
 }

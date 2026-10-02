@@ -11,8 +11,12 @@ import Alert from '@/components/ui/Alert'
 import AppHeader from '@/components/layout/AppHeader'
 import LanguageToggle from '@/components/LanguageToggle'
 import BrandLockup from '@/components/brand/BrandLockup'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 export default function ForgotPasswordPage() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState({
@@ -59,12 +63,12 @@ export default function ForgotPasswordPage() {
     setError('')
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match / كلمات المرور غير متطابقة')
+      setError(t('كلمات المرور غير متطابقة', 'Passwords do not match'))
       return
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters / كلمة المرور يجب أن تكون 6 أحرف على الأقل')
+      setError(t('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'Password must be at least 6 characters'))
       return
     }
 
@@ -96,13 +100,13 @@ export default function ForgotPasswordPage() {
 
 
   return (
-    <div dir="rtl" className="min-h-[100dvh] bg-[#f4f6f0] flex flex-col">
+    <div dir={language === 'ar' ? 'rtl' : 'ltr'} className="min-h-[100dvh] bg-[#f4f6f0] flex flex-col">
       <AppHeader variant="marketing">
         <Link
           href="/auth/login"
           className="border border-[#147050] px-4 py-2 text-[11px] font-bold text-[#147050] hover:bg-[#147050] hover:text-white transition-colors"
         >
-          تسجيل الدخول / Login
+          {t('تسجيل الدخول', 'Login')}
         </Link>
       </AppHeader>
 
@@ -122,9 +126,9 @@ export default function ForgotPasswordPage() {
           </div>
 
            <h1 className="mb-2 text-center text-2xl font-bold text-[#1e2b29] sm:text-3xl">
-            {step === 1 && 'نسيت كلمة المرور / Forgot Password'}
-            {step === 2 && 'تعيين كلمة مرور جديدة / Reset Password'}
-            {step === 3 && 'تم بنجاح / Success'}
+            {step === 1 && t('نسيت كلمة المرور', 'Forgot Password')}
+            {step === 2 && t('تعيين كلمة مرور جديدة', 'Reset Password')}
+            {step === 3 && t('تم بنجاح', 'Success')}
           </h1>
 
           {error && (
@@ -142,10 +146,10 @@ export default function ForgotPasswordPage() {
           {step === 1 && (
             <form onSubmit={handleVerify} className="space-y-4 sm:space-y-6 mt-6">
               <p className="text-gray-600 text-sm mb-4">
-                أدخل بريدك الإلكتروني أو رقم هاتفك للتحقق
+                {t('أدخل بريدك الإلكتروني أو رقم هاتفك للتحقق', 'Enter your email or phone number to verify your account')}
               </p>
               <Input
-                label="Email or Phone / البريد أو الهاتف"
+                label={t('البريد الإلكتروني أو الهاتف', 'Email or phone')}
                 type="text"
                 placeholder="your@email.com or +966..."
                 value={formData.emailOrPhone}
@@ -162,7 +166,7 @@ export default function ForgotPasswordPage() {
                 loading={loading}
                  className="bg-[#147050] font-semibold text-white hover:bg-[#0e5940]"
               >
-                {loading ? 'جاري التحقق...' : 'التحقق / Verify'}
+                {loading ? t('جاري التحقق...', 'Verifying...') : t('التحقق', 'Verify')}
               </Button>
             </form>
           )}
@@ -172,20 +176,17 @@ export default function ForgotPasswordPage() {
             <div className="space-y-4 mt-6">
               <Alert variant="info">
                 <p className="text-sm">
-                  تم التحقق من حسابك بنجاح
-                  <br />
-                  Account verified successfully
+                  {t('تم التحقق من حسابك بنجاح', 'Account verified successfully')}
                 </p>
               </Alert>
 
               <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <p className="text-sm font-medium text-black">اختر الإجراء:</p>
-                <p className="text-xs text-gray-600 mt-1">Choose an action:</p>
+                <p className="text-sm font-medium text-black">{t('اختر الإجراء:', 'Choose an action:')}</p>
               </div>
 
               <form onSubmit={handleResetPassword} className="space-y-4">
                 <Input
-                  label="كلمة مرور جديدة / New Password"
+                  label={t('كلمة مرور جديدة', 'New password')}
                   type="password"
                   placeholder="••••••••"
                   value={formData.password}
@@ -196,7 +197,7 @@ export default function ForgotPasswordPage() {
                 />
 
                 <Input
-                  label="تأكيد كلمة المرور / Confirm Password"
+                  label={t('تأكيد كلمة المرور', 'Confirm password')}
                   type="password"
                   placeholder="••••••••"
                   value={formData.confirmPassword}
@@ -213,7 +214,7 @@ export default function ForgotPasswordPage() {
                   loading={loading}
                  className="bg-[#147050] font-semibold text-white hover:bg-[#0e5940]"
                 >
-                  {loading ? 'جاري التحديث...' : 'تحديث كلمة المرور / Update Password'}
+                  {loading ? t('جاري التحديث...', 'Updating...') : t('تحديث كلمة المرور', 'Update password')}
                 </Button>
               </form>
             </div>
@@ -224,9 +225,9 @@ export default function ForgotPasswordPage() {
             <div className="space-y-4 mt-6 text-center">
               <div className="bg-green-50 p-6 rounded-lg border-2 border-green-200">
                 <p className="text-2xl mb-2">✓</p>
-                <p className="text-lg font-bold text-green-700 mb-2">تم بنجاح!</p>
+                <p className="text-lg font-bold text-green-700 mb-2">{t('تم بنجاح!', 'Success!')}</p>
                 <p className="text-sm text-green-600">
-                  تم تحديث كلمة المرور الخاصة بك بنجاح
+                  {t('تم تحديث كلمة المرور الخاصة بك بنجاح', 'Your password has been updated successfully')}
                 </p>
               </div>
 
@@ -236,7 +237,7 @@ export default function ForgotPasswordPage() {
                   size="lg"
                    className="bg-[#147050] font-semibold text-white hover:bg-[#0e5940]"
                 >
-                  العودة لتسجيل الدخول / Back to Login
+                  {t('العودة لتسجيل الدخول', 'Back to login')}
                 </Button>
               </Link>
             </div>

@@ -15,6 +15,8 @@ import {
   RefreshCw
 } from 'lucide-react'
 import Link from 'next/link'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 interface DailyWord {
   id: string
@@ -28,6 +30,8 @@ interface DailyWord {
 }
 
 export default function DailyWordsPage() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [words, setWords] = useState<DailyWord[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [level, setLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('beginner')
@@ -116,7 +120,7 @@ export default function DailyWordsPage() {
       <div className="min-h-screen bg-[#F5F5DC] flex items-center justify-center">
         <div className="text-center">
           <Sparkles className="h-12 w-12 text-blue-600 animate-pulse mx-auto mb-4" />
-          <p className="text-gray-600 text-lg">جاري تحميل كلمات اليوم...</p>
+          <p className="text-gray-600 text-lg">{t('جاري تحميل كلمات اليوم...', 'Loading today’s words...')}</p>
         </div>
       </div>
     )
@@ -125,7 +129,7 @@ export default function DailyWordsPage() {
   const currentWord = words[currentIndex]
 
   return (
-    <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8" dir="rtl">
+    <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8">
       <audio ref={audioRef} className="hidden" />
       
       <div className="max-w-4xl mx-auto">
@@ -135,13 +139,13 @@ export default function DailyWordsPage() {
             className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
           >
             <ChevronRight className="h-5 w-5" />
-            <span>العودة</span>
+            <span>{t('العودة', 'Back')}</span>
           </Link>
           
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-blue-600" />
             <span className="font-medium text-gray-700">
-              {new Date().toLocaleDateString('ar-EG', { 
+              {new Date().toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
                 weekday: 'long', 
                 year: 'numeric', 
                 month: 'long', 
@@ -157,10 +161,10 @@ export default function DailyWordsPage() {
           className="text-center mb-8"
         >
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            كلمات اليوم
+            {t('كلمات اليوم', 'Words of the day')}
           </h1>
           <p className="text-gray-600">
-            تعلم {words.length} كلمات جديدة كل يوم
+            {t(`تعلم ${words.length} كلمات جديدة كل يوم`, `Learn ${words.length} new words every day`)}
           </p>
         </motion.div>
 
@@ -175,7 +179,7 @@ export default function DailyWordsPage() {
                   : 'bg-white text-gray-600 hover:bg-gray-100'
               }`}
             >
-              {l === 'beginner' ? 'مبتدئ' : l === 'intermediate' ? 'متوسط' : 'متقدم'}
+              {l === 'beginner' ? t('مبتدئ', 'Beginner') : l === 'intermediate' ? t('متوسط', 'Intermediate') : t('متقدم', 'Advanced')}
             </button>
           ))}
         </div>
@@ -261,7 +265,7 @@ export default function DailyWordsPage() {
                       onClick={() => setShowMeaning(true)}
                       className="px-6 py-3 bg-gray-100 rounded-xl text-gray-600 hover:bg-gray-200 transition-colors"
                     >
-                      اضغط لإظهار المعنى
+                      {t('اضغط لإظهار المعنى', 'Tap to reveal the meaning')}
                     </motion.button>
                   )}
                 </AnimatePresence>
@@ -279,14 +283,14 @@ export default function DailyWordsPage() {
                       className="flex items-center gap-2 px-8 py-4 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors font-bold text-lg"
                     >
                       <Check className="h-6 w-6" />
-                      <span>تعلمتها!</span>
+                      <span>{t('تعلمتها!', 'Learned it!')}</span>
                     </button>
                   )}
                   
                   {currentWord.isLearned && (
                     <div className="flex items-center gap-2 px-8 py-4 bg-green-100 text-green-700 rounded-xl font-bold text-lg">
                       <Check className="h-6 w-6" />
-                      <span>تم تعلمها</span>
+                      <span>{t('تم تعلمها', 'Learned')}</span>
                     </div>
                   )}
                 </motion.div>
@@ -300,7 +304,7 @@ export default function DailyWordsPage() {
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronRight className="h-5 w-5" />
-                <span>السابق</span>
+                <span>{t('السابق', 'Previous')}</span>
               </button>
               
               <span className="text-gray-500">
@@ -312,7 +316,7 @@ export default function DailyWordsPage() {
                 disabled={currentIndex === words.length - 1}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span>التالي</span>
+                <span>{t('التالي', 'Next')}</span>
                 <ChevronLeft className="h-5 w-5" />
               </button>
             </div>
@@ -327,9 +331,9 @@ export default function DailyWordsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-bold mb-1">تقدمك اليوم</h3>
+              <h3 className="text-xl font-bold mb-1">{t('تقدمك اليوم', 'Your progress today')}</h3>
               <p className="text-white/90">
-                تعلمت {learnedToday} من {words.length} كلمات
+                {t(`تعلمت ${learnedToday} من ${words.length} كلمات`, `You learned ${learnedToday} of ${words.length} words`)}
               </p>
             </div>
             <div className="text-4xl font-bold">

@@ -9,6 +9,8 @@ import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Modal from '@/components/ui/Modal'
 import { toast } from 'react-hot-toast'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 interface WritingTest {
   id: string
@@ -31,6 +33,8 @@ interface WritingTest {
 }
 
 export default function WritingTestsPage() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [tests, setTests] = useState<WritingTest[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedTest, setSelectedTest] = useState<WritingTest | null>(null)
@@ -104,14 +108,14 @@ export default function WritingTestsPage() {
         setManuscriptFile(null)
         setManuscriptPreview(null)
         setSelectedTest(null)
-        toast.success('تم إرسال اختبار الكتابة بنجاح!')
+        toast.success(t('تم إرسال اختبار الكتابة بنجاح!', 'Writing test submitted successfully!'))
       } else {
         const error = await response.json()
-        toast.error(error.error || 'فشل إرسال الاختبار')
+        toast.error(error.error || t('فشل إرسال الاختبار', 'Failed to submit test'))
       }
     } catch (error) {
       console.error('Error submitting test:', error)
-      toast.error('حدث خطأ. يرجى المحاولة مرة أخرى.')
+      toast.error(t('حدث خطأ. يرجى المحاولة مرة أخرى.', 'An error occurred. Please try again.'))
     } finally {
       setSubmitting(false)
     }
@@ -154,15 +158,15 @@ export default function WritingTestsPage() {
               <FileText className="h-12 w-12 text-white" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-[#10B981] mb-3">Premium Feature</h2>
+          <h2 className="text-2xl font-bold text-[#10B981] mb-3">{t('ميزة للمشتركين', 'Premium feature')}</h2>
           <p className="text-gray-700 mb-6">
-            هذه الميزة متاحة فقط للمشتركين / This feature is only available for subscribers
+            {t('هذه الميزة متاحة فقط للمشتركين', 'This feature is only available to subscribers')}
           </p>
           <a
             href="/dashboard/student?tab=packages"
             className="block w-full bg-gradient-to-r from-[#10B981] to-[#059669] text-white py-3 rounded-xl font-bold hover:shadow-lg transition-all"
           >
-            ✨ اشترك الآن / Subscribe Now ✨
+            ✨ {t('اشترك الآن', 'Subscribe now')} ✨
           </a>
         </div>
       </div>
@@ -173,18 +177,17 @@ export default function WritingTestsPage() {
     <div className="container mx-auto px-4 py-8 max-w-6xl bg-[#F5F5DC] min-h-screen">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#10B981] mb-2">
-          Writing Tests / اختبارات الكتابة
+          {t('اختبارات الكتابة', 'Writing tests')}
         </h1>
-        <p className="text-gray-600">Complete your writing tests and view feedback</p>
+        <p className="text-gray-600">{t('أكمل اختبارات الكتابة واطّلع على الملاحظات', 'Complete your writing tests and view feedback')}</p>
       </div>
 
       {tests.length === 0 && !loading && (
         <Alert variant="info">
           <FileText className="h-5 w-5" />
           <div>
-            <p className="font-semibold">No Writing Tests Available / لا توجد اختبارات كتابة</p>
-            <p className="text-sm">Your teacher hasn't created any writing tests yet, or you don't have an active subscription.</p>
-            <p className="text-sm mt-1">لم يقم معلمك بإنشاء أي اختبارات كتابة بعد، أو ليس لديك اشتراك نشط.</p>
+            <p className="font-semibold">{t('لا توجد اختبارات كتابة', 'No writing tests available')}</p>
+            <p className="text-sm">{t('لم ينشئ معلمك اختبارات كتابة بعد، أو ليس لديك اشتراك نشط.', 'Your teacher has not created any writing tests yet, or you do not have an active subscription.')}</p>
           </div>
         </Alert>
       )}
@@ -192,7 +195,7 @@ export default function WritingTestsPage() {
       {pendingTests.length > 0 && (
         <div className="mb-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            Pending Tests / اختبارات معلقة
+            {t('اختبارات معلقة', 'Pending tests')}
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
             {pendingTests.map((test) => {
@@ -201,36 +204,30 @@ export default function WritingTestsPage() {
                 <Card key={test.id} variant="elevated">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900">{test.title}</h3>
-                      {test.titleAr && (
-                        <p className="text-gray-600">{test.titleAr}</p>
-                      )}
+                      <h3 className="text-lg font-bold text-gray-900">{language === 'ar' ? test.titleAr || test.title : test.title}</h3>
                     </div>
                     {isOverdue ? (
                       <Badge variant="error">
                         <AlertCircle className="h-3 w-3 mr-1" />
-                        Overdue / متأخر
+                        {t('متأخر', 'Overdue')}
                       </Badge>
                     ) : (
                       <Badge variant="warning">
                         <Clock className="h-3 w-3 mr-1" />
-                        Pending / معلق
+                        {t('معلق', 'Pending')}
                       </Badge>
                     )}
                   </div>
 
                   {test.instructions && (
                     <div className="mb-3 p-3 bg-gray-50 rounded">
-                      <p className="text-sm text-gray-700">{test.instructions}</p>
-                      {test.instructionsAr && (
-                        <p className="text-sm text-gray-700 mt-1">{test.instructionsAr}</p>
-                      )}
+                      <p className="text-sm text-gray-700">{language === 'ar' ? test.instructionsAr || test.instructions : test.instructions}</p>
                     </div>
                   )}
 
                   {test.dueDate && (
                     <p className="text-sm text-gray-600 mb-3">
-                      Due: {new Date(test.dueDate).toLocaleDateString('ar-EG')}
+                      {t('موعد التسليم: ', 'Due: ')}{new Date(test.dueDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
                     </p>
                   )}
 
@@ -240,7 +237,7 @@ export default function WritingTestsPage() {
                     onClick={() => setSelectedTest(test)}
                   >
                     <FileText className="h-4 w-4 ml-2" />
-                    Start Writing / ابدأ الكتابة
+                    {t('ابدأ الكتابة', 'Start writing')}
                   </Button>
                 </Card>
               )
@@ -252,7 +249,7 @@ export default function WritingTestsPage() {
       {submittedTests.length > 0 && (
         <div>
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            Submitted Tests / الاختبارات المرسلة
+            {t('الاختبارات المرسلة', 'Submitted tests')}
           </h2>
           <div className="space-y-4">
             {submittedTests.map((test) => {
@@ -261,28 +258,25 @@ export default function WritingTestsPage() {
                 <Card key={test.id} variant="elevated">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900">{test.title}</h3>
-                      {test.titleAr && (
-                        <p className="text-gray-600">{test.titleAr}</p>
-                      )}
+                      <h3 className="text-lg font-bold text-gray-900">{language === 'ar' ? test.titleAr || test.title : test.title}</h3>
                     </div>
                     {submission.grade !== null ? (
                       <Badge variant="success">
                         <CheckCircle className="h-3 w-3 mr-1" />
-                        Graded: {submission.grade}/100
+                        {t('الدرجة: ', 'Graded: ')}{submission.grade}/100
                       </Badge>
                     ) : (
                       <Badge variant="info">
                         <Clock className="h-3 w-3 mr-1" />
-                        Under Review / قيد المراجعة
+                        {t('قيد المراجعة', 'Under review')}
                       </Badge>
                     )}
                   </div>
 
                   <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                    <span>Submitted: {new Date(submission.submittedAt).toLocaleDateString('ar-EG')}</span>
+                    <span>{t('تاريخ الإرسال: ', 'Submitted: ')}{new Date(submission.submittedAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}</span>
                     {submission.gradedAt && (
-                      <span>• Graded: {new Date(submission.gradedAt).toLocaleDateString('ar-EG')}</span>
+                      <span>• {t('تم التصحيح: ', 'Graded: ')}{new Date(submission.gradedAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}</span>
                     )}
                   </div>
 
@@ -291,7 +285,7 @@ export default function WritingTestsPage() {
                     fullWidth
                     onClick={() => setViewingSubmission(submission)}
                   >
-                    View Submission & Feedback / عرض الإرسال والتغذية الراجعة
+                    {t('عرض الإجابة والملاحظات', 'View submission & feedback')}
                   </Button>
                 </Card>
               )
@@ -307,40 +301,37 @@ export default function WritingTestsPage() {
             setSelectedTest(null)
             setContent('')
           }}
-          title={`Write: ${selectedTest.title}`}
+          title={`${t('اكتب: ', 'Write: ')}${language === 'ar' ? selectedTest.titleAr || selectedTest.title : selectedTest.title}`}
         >
           <div className="space-y-4">
             {selectedTest.instructions && (
               <Alert variant="info">
                 <div>
-                  <p className="font-semibold mb-1">Instructions:</p>
-                  <p className="text-sm">{selectedTest.instructions}</p>
-                  {selectedTest.instructionsAr && (
-                    <p className="text-sm mt-1">{selectedTest.instructionsAr}</p>
-                  )}
+                  <p className="font-semibold mb-1">{t('التعليمات:', 'Instructions:')}</p>
+                  <p className="text-sm">{language === 'ar' ? selectedTest.instructionsAr || selectedTest.instructions : selectedTest.instructions}</p>
                 </div>
               </Alert>
             )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Your Writing / كتابتك
+                {t('كتابتك', 'Your writing')}
               </label>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 rows={12}
-                placeholder="Start writing here... ابدأ الكتابة هنا..."
+                placeholder={t('ابدأ الكتابة هنا...', 'Start writing here...')}
               />
               <p className="text-sm text-gray-500 mt-1">
-                Word count: {content.trim().split(/\s+/).filter(Boolean).length} words
+                {t('عدد الكلمات: ', 'Word count: ')}{content.trim().split(/\s+/).filter(Boolean).length}
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Handwritten Answer (Optional) / الإجابة المكتوبة بخط اليد (اختياري)
+                {t('إجابة مكتوبة بخط اليد (اختياري)', 'Handwritten answer (optional)')}
               </label>
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                 <input
@@ -357,15 +348,15 @@ export default function WritingTestsPage() {
                       {manuscriptPreview && (
                         <img
                           src={manuscriptPreview}
-                          alt="Manuscript preview"
+                           alt={t('معاينة الإجابة المكتوبة', 'Handwritten answer preview')}
                           className="mt-2 max-h-48 mx-auto rounded"
                         />
                       )}
                     </div>
                   ) : (
                     <div>
-                      <p className="text-gray-600">Upload handwritten answer</p>
-                      <p className="text-xs text-gray-500 mt-1">Images or PDF</p>
+                      <p className="text-gray-600">{t('ارفع الإجابة المكتوبة بخط اليد', 'Upload handwritten answer')}</p>
+                      <p className="text-xs text-gray-500 mt-1">{t('صور أو ملف PDF', 'Images or PDF')}</p>
                     </div>
                   )}
                 </label>
@@ -378,7 +369,7 @@ export default function WritingTestsPage() {
                   }}
                   className="mt-2 text-sm text-red-600 hover:text-red-700"
                 >
-                  ✕ Remove file
+                   ✕ {t('إزالة الملف', 'Remove file')}
                 </button>
               )}
             </div>
@@ -390,10 +381,10 @@ export default function WritingTestsPage() {
                 onClick={handleSubmit}
                 disabled={!content.trim() || submitting}
               >
-                {submitting ? 'Submitting...' : (
+                {submitting ? t('جارٍ الإرسال...', 'Submitting...') : (
                   <>
                     <Send className="h-4 w-4 ml-2" />
-                    Submit Writing / إرسال الكتابة
+                    {t('إرسال الكتابة', 'Submit writing')}
                   </>
                 )}
               </Button>
@@ -405,7 +396,7 @@ export default function WritingTestsPage() {
                   setContent('')
                 }}
               >
-                Cancel / إلغاء
+                {t('إلغاء', 'Cancel')}
               </Button>
             </div>
           </div>
@@ -416,11 +407,11 @@ export default function WritingTestsPage() {
         <Modal
           isOpen={!!viewingSubmission}
           onClose={() => setViewingSubmission(null)}
-          title="Submission Details / تفاصيل الإرسال"
+          title={t('تفاصيل الإرسال', 'Submission details')}
         >
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Your Writing:</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('كتابتك:', 'Your writing:')}</h3>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-gray-700 whitespace-pre-wrap">{viewingSubmission.content}</p>
               </div>
@@ -428,11 +419,11 @@ export default function WritingTestsPage() {
 
             {viewingSubmission.manuscriptUrl && (
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Your Handwritten Answer:</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">{t('إجابتك المكتوبة بخط اليد:', 'Your handwritten answer:')}</h3>
                 {viewingSubmission.manuscriptUrl.startsWith('data:image') ? (
                   <img
                     src={viewingSubmission.manuscriptUrl}
-                    alt="Handwritten answer"
+                    alt={t('الإجابة المكتوبة بخط اليد', 'Handwritten answer')}
                     className="max-h-96 rounded-lg border border-gray-200"
                   />
                 ) : (
@@ -442,7 +433,7 @@ export default function WritingTestsPage() {
                     rel="noopener noreferrer"
                     className="text-[#10B981] hover:underline"
                   >
-                    View Manuscript
+                    {t('عرض الإجابة المكتوبة', 'View manuscript')}
                   </a>
                 )}
               </div>
@@ -450,7 +441,7 @@ export default function WritingTestsPage() {
 
             {viewingSubmission.grade !== null && (
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Grade / الدرجة:</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">{t('الدرجة:', 'Grade:')}</h3>
                 <div className="flex items-center gap-2">
                   <div className="text-3xl font-bold text-[#10B981]">
                     {viewingSubmission.grade}/100
@@ -461,7 +452,7 @@ export default function WritingTestsPage() {
 
             {viewingSubmission.feedback && (
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Teacher Feedback / ملاحظات المعلم:</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">{t('ملاحظات المعلم:', 'Teacher feedback:')}</h3>
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <p className="text-gray-700 whitespace-pre-wrap">{viewingSubmission.feedback}</p>
                 </div>
@@ -470,12 +461,12 @@ export default function WritingTestsPage() {
 
             {viewingSubmission.grammarErrors && (
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Grammar Corrections / تصحيحات القواعد:</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">{t('تصحيحات القواعد:', 'Grammar corrections:')}</h3>
                 <div className="p-4 bg-yellow-50 rounded-lg space-y-2">
                   {JSON.parse(viewingSubmission.grammarErrors).map((error: any, idx: number) => (
                     <div key={idx} className="border-l-4 border-yellow-400 pl-3">
                       <p className="text-sm font-semibold text-gray-900">{error.text}</p>
-                      <p className="text-sm text-green-700">Correction: {error.correction}</p>
+                      <p className="text-sm text-green-700">{t('التصحيح: ', 'Correction: ')}{error.correction}</p>
                       {error.explanation && (
                         <p className="text-xs text-gray-600">{error.explanation}</p>
                       )}
@@ -490,7 +481,7 @@ export default function WritingTestsPage() {
               fullWidth
               onClick={() => setViewingSubmission(null)}
             >
-              Close / إغلاق
+              {t('إغلاق', 'Close')}
             </Button>
           </div>
         </Modal>

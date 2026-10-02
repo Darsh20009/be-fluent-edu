@@ -31,6 +31,8 @@ import Alert from '@/components/ui/Alert'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Badge from '@/components/ui/Badge'
 import { voicePrompts, type VoicePromptItem } from '@/lib/conversation-scenarios'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeDirection, localeText } from '@/lib/locale'
 
 type TabType = 'scenarios' | 'voice' | 'text'
 
@@ -95,6 +97,8 @@ interface VoiceRecording {
 
 export default function ConversationPracticePage() {
   const router = useRouter()
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [activeTab, setActiveTab] = useState<TabType>('scenarios')
   const [loading, setLoading] = useState(true)
   
@@ -186,7 +190,7 @@ export default function ConversationPracticePage() {
       }, 1000)
     } catch (error) {
       console.error('Error starting recording:', error)
-      toast.error('لا يمكن الوصول للميكروفون')
+      toast.error(t('لا يمكن الوصول للميكروفون', 'Microphone access is unavailable'))
     }
   }
 
@@ -368,18 +372,18 @@ export default function ConversationPracticePage() {
   const getLevelBadge = (level: string) => {
     switch (level) {
       case 'BEGINNER':
-        return <Badge variant="success">مبتدئ / Beginner</Badge>
+        return <Badge variant="success">{t('مبتدئ', 'Beginner')}</Badge>
       case 'INTERMEDIATE':
-        return <Badge variant="warning">متوسط / Intermediate</Badge>
+        return <Badge variant="warning">{t('متوسط', 'Intermediate')}</Badge>
       case 'ADVANCED':
-        return <Badge variant="info">متقدم / Advanced</Badge>
+        return <Badge variant="info">{t('متقدم', 'Advanced')}</Badge>
       default:
         return <Badge>{level}</Badge>
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] p-4 md:p-6">
+    <div className="min-h-screen bg-[#F9FAFB] p-4 md:p-6" dir={localeDirection(language)}>
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <button
@@ -390,11 +394,8 @@ export default function ConversationPracticePage() {
           </button>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-[#10B981]">
-              تدريب المحادثة
+              {t('تدريب المحادثة', 'Conversation practice')}
             </h1>
-            <p className="text-gray-600">
-              Conversation Practice
-            </p>
           </div>
         </div>
 
@@ -405,7 +406,7 @@ export default function ConversationPracticePage() {
             className="flex items-center gap-2"
           >
             <MessageCircle className="w-4 h-4" />
-            <span>محادثات تفاعلية</span>
+            <span>{t('محادثات تفاعلية', 'Interactive scenarios')}</span>
           </Button>
           <Button
             variant={activeTab === 'voice' ? 'primary' : 'outline'}
@@ -413,7 +414,7 @@ export default function ConversationPracticePage() {
             className="flex items-center gap-2"
           >
             <Mic className="w-4 h-4" />
-            <span>تسجيل صوتي</span>
+            <span>{t('تسجيل صوتي', 'Voice recording')}</span>
           </Button>
           <Button
             variant={activeTab === 'text' ? 'primary' : 'outline'}
@@ -421,7 +422,7 @@ export default function ConversationPracticePage() {
             className="flex items-center gap-2"
           >
             <MessageSquare className="w-4 h-4" />
-            <span>محادثة نصية</span>
+            <span>{t('محادثة نصية', 'Text conversation')}</span>
           </Button>
         </div>
 
@@ -443,23 +444,22 @@ export default function ConversationPracticePage() {
                         <div className="p-4">
                           <div className="flex justify-between items-start mb-3">
                             <div>
-                              <h3 className="font-bold text-[#10B981]">{scenario.title}</h3>
-                              <p className="text-sm text-gray-600">{scenario.titleAr}</p>
+                              <h3 className="font-bold text-[#10B981]">{language === 'ar' ? scenario.titleAr || scenario.title : scenario.title}</h3>
                             </div>
                             {scenario.progress?.completed && (
                               <CheckCircle className="w-5 h-5 text-green-500" />
                             )}
                           </div>
-                          <p className="text-sm text-gray-700 mb-3">{scenario.description}</p>
+                           <p className="text-sm text-gray-700 mb-3">{language === 'ar' ? scenario.descriptionAr || scenario.description : scenario.description}</p>
                           <div className="flex items-center justify-between">
                             {getLevelBadge(scenario.level)}
-                            <span className="text-xs text-gray-500">{scenario.categoryAr}</span>
+                             <span className="text-xs text-gray-500">{language === 'ar' ? scenario.categoryAr || scenario.category : scenario.category}</span>
                           </div>
                           {scenario.progress && (
                             <div className="mt-3 pt-3 border-t">
                               <div className="flex items-center gap-2 text-sm">
                                 <Star className="w-4 h-4 text-yellow-500" />
-                                <span>النقاط: {scenario.progress.score}</span>
+                                <span>{t('النقاط: ', 'Points: ')}{scenario.progress.score}</span>
                               </div>
                             </div>
                           )}
@@ -472,22 +472,22 @@ export default function ConversationPracticePage() {
                     <div className="p-8 text-center">
                       <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
                       <h2 className="text-2xl font-bold text-[#10B981] mb-2">
-                        أحسنت! / Well Done!
+                        {t('أحسنت!', 'Well done!')}
                       </h2>
                       <p className="text-gray-600 mb-4">
-                        لقد أكملت المحادثة بنجاح / You completed the conversation successfully
+                        {t('لقد أكملت المحادثة بنجاح', 'You completed the conversation successfully')}
                       </p>
                       <div className="text-3xl font-bold text-[#10B981] mb-6">
-                        {scenarioScore} نقطة / points
+                        {scenarioScore} {t('نقطة', 'points')}
                       </div>
                       <div className="flex justify-center gap-4">
                         <Button variant="outline" onClick={() => setSelectedScenario(null)}>
                           <ArrowRight className="w-4 h-4 ml-2" />
-                          العودة للقائمة
+                          {t('العودة للقائمة', 'Back to list')}
                         </Button>
                         <Button onClick={resetScenario}>
                           <RefreshCw className="w-4 h-4 ml-2" />
-                          إعادة المحاولة
+                          {t('إعادة المحاولة', 'Try again')}
                         </Button>
                       </div>
                     </div>
@@ -496,8 +496,7 @@ export default function ConversationPracticePage() {
                   <Card className="max-w-3xl mx-auto">
                     <div className="p-4 border-b flex justify-between items-center">
                       <div>
-                        <h2 className="font-bold text-[#10B981]">{selectedScenario.title}</h2>
-                        <p className="text-sm text-gray-600">{selectedScenario.titleAr}</p>
+                         <h2 className="font-bold text-[#10B981]">{language === 'ar' ? selectedScenario.titleAr || selectedScenario.title : selectedScenario.title}</h2>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => setSelectedScenario(null)}>
                         <XCircle className="w-5 h-5" />
@@ -507,7 +506,7 @@ export default function ConversationPracticePage() {
                       <div className="mb-4">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-sm text-gray-500">
-                            الخطوة {currentStepIndex + 1} من {selectedScenario.dialogueSteps.length}
+                            {t(`الخطوة ${currentStepIndex + 1} من ${selectedScenario.dialogueSteps.length}`, `Step ${currentStepIndex + 1} of ${selectedScenario.dialogueSteps.length}`)}
                           </span>
                           <div className="flex-1 h-2 bg-gray-200 rounded-full">
                             <div 
@@ -530,13 +529,12 @@ export default function ConversationPracticePage() {
                             return (
                               <div>
                                 <div className="bg-[#10B981] text-white p-4 rounded-lg mb-4">
-                                  <p className="text-lg">{step.message}</p>
-                                  <p className="text-sm opacity-80 mt-2">{step.messageAr}</p>
+                                   <p className="text-lg">{language === 'ar' ? step.messageAr || step.message : step.message}</p>
                                 </div>
 
                                 {step.options && (
                                   <div className="space-y-3">
-                                    <p className="font-semibold text-gray-700 mb-2">اختر الرد المناسب:</p>
+                                    <p className="font-semibold text-gray-700 mb-2">{t('اختر الرد المناسب:', 'Choose the best response:')}</p>
                                     {step.options.map(option => (
                                       <button
                                         key={option.id}
@@ -568,14 +566,12 @@ export default function ConversationPracticePage() {
                                             {showFeedback && !option.isCorrect && selectedOption === option.id && <XCircle className="w-4 h-4" />}
                                           </div>
                                           <div className="flex-1">
-                                            <p className="font-medium">{option.text}</p>
-                                            <p className="text-sm text-gray-600">{option.textAr}</p>
+                                            <p className="font-medium">{language === 'ar' ? option.textAr || option.text : option.text}</p>
                                           </div>
                                         </div>
                                         {showFeedback && selectedOption === option.id && option.feedback && (
                                           <div className={`mt-3 p-3 rounded ${option.isCorrect ? 'bg-green-100' : 'bg-red-100'}`}>
-                                            <p className="text-sm">{option.feedback}</p>
-                                            <p className="text-sm text-gray-600">{option.feedbackAr}</p>
+                                             <p className="text-sm">{language === 'ar' ? option.feedbackAr || option.feedback : option.feedback}</p>
                                           </div>
                                         )}
                                       </button>
@@ -587,8 +583,8 @@ export default function ConversationPracticePage() {
                                   <div className="mt-6 flex justify-end">
                                     <Button onClick={handleNextStep}>
                                       {currentStepIndex === selectedScenario.dialogueSteps.length - 1 
-                                        ? 'إنهاء المحادثة' 
-                                        : 'التالي'}
+                                        ? t('إنهاء المحادثة', 'Finish conversation')
+                                        : t('التالي', 'Next')}
                                       <ArrowLeft className="w-4 h-4 mr-2" />
                                     </Button>
                                   </div>
@@ -609,19 +605,19 @@ export default function ConversationPracticePage() {
                 <Card>
                   <div className="p-6">
                     <h3 className="text-xl font-bold text-[#10B981] mb-4">
-                      تسجيل الصوت / Voice Recording
+                      {t('تسجيل الصوت', 'Voice recording')}
                     </h3>
                     <p className="text-gray-600 mb-6">
-                      اختر جملة وسجل صوتك، ثم استمع لتسجيلك لتحسين نطقك
+                      {t('اختر جملة وسجل صوتك، ثم استمع لتسجيلك لتحسين نطقك', 'Choose a phrase, record your voice, and listen back to improve your pronunciation')}
                     </p>
 
                     <div className="mb-6">
-                      <h4 className="font-semibold mb-3">اختر جملة للتدريب:</h4>
+                      <h4 className="font-semibold mb-3">{t('اختر جملة للتدريب:', 'Choose a phrase to practice:')}</h4>
                       <div className="grid md:grid-cols-2 gap-3">
                         {voicePrompts.map((category, catIndex) => (
                           <div key={catIndex}>
                             <p className="text-sm font-medium text-[#10B981] mb-2">
-                              {category.category} / {category.categoryAr}
+                              {language === 'ar' ? category.categoryAr || category.category : category.category}
                             </p>
                             <div className="space-y-2">
                               {category.prompts.slice(0, 2).map((prompt, promptIndex) => (
@@ -634,8 +630,7 @@ export default function ConversationPracticePage() {
                                       : 'border-gray-200 hover:border-[#10B981]'
                                   }`}
                                 >
-                                  <p className="font-medium">{prompt.text}</p>
-                                  <p className="text-gray-600">{prompt.textAr}</p>
+                                  <p className="font-medium">{language === 'ar' ? prompt.textAr || prompt.text : prompt.text}</p>
                                 </button>
                               ))}
                             </div>
@@ -646,19 +641,15 @@ export default function ConversationPracticePage() {
 
                     {currentPrompt && (
                       <div className="bg-[#10B981] text-white p-4 rounded-lg mb-6">
-                        <p className="text-lg mb-1">{currentPrompt.text}</p>
-                        <p className="text-sm opacity-80 mb-3">{currentPrompt.textAr}</p>
+                        <p className="text-lg mb-1">{language === 'ar' ? currentPrompt.textAr || currentPrompt.text : currentPrompt.text}</p>
                         
                         {currentPrompt.pronunciationTip && (
                           <div className="mt-3 pt-3 border-t border-white/20">
                             <div className="flex items-start gap-2 mb-2">
                               <Volume2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
                               <div>
-                                <p className="text-sm font-medium mb-1">Pronunciation Tip:</p>
-                                <p className="text-sm opacity-90">{currentPrompt.pronunciationTip}</p>
-                                {currentPrompt.pronunciationTipAr && (
-                                  <p className="text-sm opacity-70 mt-1">{currentPrompt.pronunciationTipAr}</p>
-                                )}
+                                <p className="text-sm font-medium mb-1">{t('نصيحة للنطق:', 'Pronunciation tip:')}</p>
+                                <p className="text-sm opacity-90">{language === 'ar' ? currentPrompt.pronunciationTipAr || currentPrompt.pronunciationTip : currentPrompt.pronunciationTip}</p>
                               </div>
                             </div>
                             {currentPrompt.phonetics && (
@@ -673,9 +664,9 @@ export default function ConversationPracticePage() {
                                   currentPrompt.difficulty === 'medium' ? 'bg-yellow-500/30' :
                                   'bg-red-500/30'
                                 }`}>
-                                  {currentPrompt.difficulty === 'easy' ? 'سهل / Easy' :
-                                   currentPrompt.difficulty === 'medium' ? 'متوسط / Medium' :
-                                   'صعب / Hard'}
+                                  {currentPrompt.difficulty === 'easy' ? t('سهل', 'Easy') :
+                                   currentPrompt.difficulty === 'medium' ? t('متوسط', 'Medium') :
+                                   t('صعب', 'Hard')}
                                 </span>
                               </div>
                             )}
@@ -692,7 +683,7 @@ export default function ConversationPracticePage() {
                           className="flex items-center gap-2"
                         >
                           <Mic className="w-5 h-5" />
-                          بدء التسجيل
+                          {t('بدء التسجيل', 'Start recording')}
                         </Button>
                       )}
 
@@ -704,7 +695,7 @@ export default function ConversationPracticePage() {
                           </div>
                           <Button onClick={stopRecording} variant="danger">
                             <MicOff className="w-5 h-5 ml-2" />
-                            إيقاف التسجيل
+                            {t('إيقاف التسجيل', 'Stop recording')}
                           </Button>
                         </div>
                       )}
@@ -714,11 +705,11 @@ export default function ConversationPracticePage() {
                           <audio src={URL.createObjectURL(audioBlob)} controls className="max-w-xs" />
                           <Button onClick={saveRecording} className="flex items-center gap-2">
                             <Save className="w-5 h-5" />
-                            حفظ التسجيل
+                            {t('حفظ التسجيل', 'Save recording')}
                           </Button>
                           <Button variant="outline" onClick={() => setAudioBlob(null)}>
                             <RefreshCw className="w-5 h-5 ml-2" />
-                            إعادة التسجيل
+                            {t('إعادة التسجيل', 'Record again')}
                           </Button>
                         </div>
                       )}
@@ -730,7 +721,7 @@ export default function ConversationPracticePage() {
                   <Card>
                     <div className="p-6">
                       <h3 className="text-xl font-bold text-[#10B981] mb-4">
-                        تسجيلاتي / My Recordings
+                        {t('تسجيلاتي', 'My recordings')}
                       </h3>
                       <div className="space-y-3">
                         {recordings.map(recording => (
@@ -742,10 +733,9 @@ export default function ConversationPracticePage() {
                               {playingId === recording.id ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                             </button>
                             <div className="flex-1">
-                              <p className="font-medium">{recording.promptText}</p>
-                              <p className="text-sm text-gray-600">{recording.promptTextAr}</p>
+                              <p className="font-medium">{language === 'ar' ? recording.promptTextAr || recording.promptText : recording.promptText}</p>
                               <p className="text-xs text-gray-400 mt-1">
-                                {recording.duration}s • {new Date(recording.createdAt).toLocaleDateString('ar-EG')}
+                                {recording.duration}s • {new Date(recording.createdAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
                               </p>
                             </div>
                             <button
@@ -775,12 +765,11 @@ export default function ConversationPracticePage() {
                         setTextResults(null)
                       }}>
                         <div className="p-4">
-                          <h3 className="font-bold text-[#10B981] mb-1">{conv.title}</h3>
-                          <p className="text-sm text-gray-600 mb-3">{conv.titleAr}</p>
-                          <p className="text-sm text-gray-700 mb-3">{conv.description}</p>
+                          <h3 className="font-bold text-[#10B981] mb-1">{language === 'ar' ? conv.titleAr || conv.title : conv.title}</h3>
+                          <p className="text-sm text-gray-700 mb-3">{language === 'ar' ? conv.descriptionAr || conv.description : conv.description}</p>
                           <div className="flex items-center justify-between">
                             {getLevelBadge(conv.level)}
-                            <span className="text-xs text-gray-500">{conv.questions.length} أسئلة</span>
+                            <span className="text-xs text-gray-500">{t(`${conv.questions.length} أسئلة`, `${conv.questions.length} questions`)}</span>
                           </div>
                         </div>
                       </Card>
@@ -792,13 +781,13 @@ export default function ConversationPracticePage() {
                       <div className="text-center mb-6">
                         <Trophy className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
                         <h2 className="text-2xl font-bold text-[#10B981]">
-                          النتيجة / Result
+                          {t('النتيجة', 'Result')}
                         </h2>
                         <div className="text-4xl font-bold text-[#10B981] my-4">
                           {textResults.percentage}%
                         </div>
                         <p className="text-gray-600">
-                          {textResults.score} / {textResults.totalQuestions} إجابات صحيحة
+                          {t(`${textResults.score} / ${textResults.totalQuestions} إجابات صحيحة`, `${textResults.score} / ${textResults.totalQuestions} correct answers`)}
                         </p>
                       </div>
 
@@ -808,18 +797,17 @@ export default function ConversationPracticePage() {
                             <div className="flex items-start gap-2 mb-2">
                               {answer.correct ? <CheckCircle className="w-5 h-5 text-green-500" /> : <XCircle className="w-5 h-5 text-red-500" />}
                               <div>
-                                <p className="font-medium">إجابتك: {answer.text}</p>
+                                <p className="font-medium">{t('إجابتك: ', 'Your answer: ')}{answer.text}</p>
                                 {answer.matchedKeywords.length > 0 && (
                                   <p className="text-sm text-gray-600">
-                                    الكلمات المطابقة: {answer.matchedKeywords.join(', ')}
+                                    {t('الكلمات المطابقة: ', 'Matched keywords: ')}{answer.matchedKeywords.join(', ')}
                                   </p>
                                 )}
                               </div>
                             </div>
                             <div className="mt-2 p-2 bg-white rounded">
-                              <p className="text-sm font-medium text-gray-700">نموذج الإجابة:</p>
-                              <p className="text-sm">{answer.sampleAnswer}</p>
-                              <p className="text-sm text-gray-600">{answer.sampleAnswerAr}</p>
+                              <p className="text-sm font-medium text-gray-700">{t('نموذج الإجابة:', 'Sample answer:')}</p>
+                              <p className="text-sm">{language === 'ar' ? answer.sampleAnswerAr || answer.sampleAnswer : answer.sampleAnswer}</p>
                             </div>
                           </div>
                         ))}
@@ -828,7 +816,7 @@ export default function ConversationPracticePage() {
                       <div className="mt-6 flex justify-center gap-4">
                         <Button variant="outline" onClick={resetTextConversation}>
                           <ArrowRight className="w-4 h-4 ml-2" />
-                          العودة للقائمة
+                          {t('العودة للقائمة', 'Back to list')}
                         </Button>
                         <Button onClick={() => {
                           setCurrentQuestionIndex(0)
@@ -837,7 +825,7 @@ export default function ConversationPracticePage() {
                           setTextResults(null)
                         }}>
                           <RefreshCw className="w-4 h-4 ml-2" />
-                          إعادة المحاولة
+                          {t('إعادة المحاولة', 'Try again')}
                         </Button>
                       </div>
                     </div>
@@ -846,8 +834,7 @@ export default function ConversationPracticePage() {
                   <Card className="max-w-2xl mx-auto">
                     <div className="p-4 border-b flex justify-between items-center">
                       <div>
-                        <h2 className="font-bold text-[#10B981]">{selectedConversation.title}</h2>
-                        <p className="text-sm text-gray-600">{selectedConversation.titleAr}</p>
+                        <h2 className="font-bold text-[#10B981]">{language === 'ar' ? selectedConversation.titleAr || selectedConversation.title : selectedConversation.title}</h2>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => setSelectedConversation(null)}>
                         <XCircle className="w-5 h-5" />
@@ -857,7 +844,7 @@ export default function ConversationPracticePage() {
                       <div className="mb-4">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-sm text-gray-500">
-                            السؤال {currentQuestionIndex + 1} من {selectedConversation.questions.length}
+                            {t(`السؤال ${currentQuestionIndex + 1} من ${selectedConversation.questions.length}`, `Question ${currentQuestionIndex + 1} of ${selectedConversation.questions.length}`)}
                           </span>
                           <div className="flex-1 h-2 bg-gray-200 rounded-full">
                             <div 
@@ -874,7 +861,7 @@ export default function ConversationPracticePage() {
                           return (
                             <div key={index} className="space-y-2">
                               <div className="bg-[#10B981] text-white p-3 rounded-lg rounded-br-none max-w-[80%]">
-                                <p>{question?.question}</p>
+                                <p>{language === 'ar' ? question?.questionAr || question?.question : question?.question}</p>
                               </div>
                               <div className="bg-gray-100 p-3 rounded-lg rounded-bl-none max-w-[80%] mr-auto">
                                 <p>{answer.text}</p>
@@ -887,8 +874,7 @@ export default function ConversationPracticePage() {
                       {currentQuestionIndex < selectedConversation.questions.length && !textAnswers.find(a => a.questionId === selectedConversation.questions[currentQuestionIndex].id) && (
                         <div>
                           <div className="bg-[#10B981] text-white p-4 rounded-lg mb-4">
-                            <p className="text-lg">{selectedConversation.questions[currentQuestionIndex].question}</p>
-                            <p className="text-sm opacity-80 mt-2">{selectedConversation.questions[currentQuestionIndex].questionAr}</p>
+                            <p className="text-lg">{language === 'ar' ? selectedConversation.questions[currentQuestionIndex].questionAr || selectedConversation.questions[currentQuestionIndex].question : selectedConversation.questions[currentQuestionIndex].question}</p>
                           </div>
 
                           <div className="flex gap-2">
@@ -897,7 +883,7 @@ export default function ConversationPracticePage() {
                               value={currentTextAnswer}
                               onChange={(e) => setCurrentTextAnswer(e.target.value)}
                               onKeyPress={(e) => e.key === 'Enter' && handleAddTextAnswer()}
-                              placeholder="اكتب إجابتك هنا..."
+                              placeholder={t('اكتب إجابتك هنا...', 'Type your answer here...')}
                               className="flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#10B981] focus:outline-none"
                             />
                             <Button onClick={handleAddTextAnswer} disabled={!currentTextAnswer.trim()}>
@@ -910,7 +896,7 @@ export default function ConversationPracticePage() {
                       {textAnswers.length === selectedConversation.questions.length && (
                         <div className="mt-6 text-center">
                           <Button onClick={submitTextConversation} disabled={submittingText} className="px-8">
-                            {submittingText ? <LoadingSpinner size="sm" /> : 'إرسال الإجابات'}
+                            {submittingText ? <LoadingSpinner size="sm" /> : t('إرسال الإجابات', 'Submit answers')}
                           </Button>
                         </div>
                       )}

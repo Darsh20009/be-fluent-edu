@@ -14,6 +14,8 @@ import {
   ChevronRight
 } from 'lucide-react'
 import Link from 'next/link'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 interface VocabularyStats {
   totalWords: number
@@ -24,6 +26,8 @@ interface VocabularyStats {
 }
 
 export default function VocabularyPage() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [stats, setStats] = useState<VocabularyStats | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -44,28 +48,25 @@ export default function VocabularyPage() {
 
   const features = [
     {
-      title: 'الكلمات اليومية',
-      titleEn: 'Daily Words',
-      description: '5 كلمات جديدة كل يوم لتوسيع مفرداتك',
+      title: t('الكلمات اليومية', 'Daily Words'),
+      description: t('5 كلمات جديدة كل يوم لتوسيع مفرداتك', 'Learn 5 new words every day to expand your vocabulary'),
       icon: Calendar,
       href: '/dashboard/student/vocabulary/daily',
       color: 'bg-blue-500',
       gradient: 'from-blue-500 to-blue-600'
     },
     {
-      title: 'بطاقات التكرار',
-      titleEn: 'Flashcards',
-      description: 'راجع كلماتك باستخدام نظام التكرار المتباعد',
+      title: t('بطاقات التكرار', 'Flashcards'),
+      description: t('راجع كلماتك باستخدام نظام التكرار المتباعد', 'Review words with a spaced repetition system'),
       icon: Layers,
       href: '/dashboard/student/vocabulary/flashcards',
       color: 'bg-purple-500',
       gradient: 'from-purple-500 to-purple-600',
-      badge: stats?.dueForReview ? `${stats.dueForReview} للمراجعة` : undefined
+      badge: stats?.dueForReview ? `${stats.dueForReview} ${t('للمراجعة', 'to review')}` : undefined
     },
     {
-      title: 'اختبار الكلمات',
-      titleEn: 'Word Test',
-      description: 'اختبر نفسك واكتشف مستواك الحقيقي',
+      title: t('اختبار الكلمات', 'Word Test'),
+      description: t('اختبر نفسك واكتشف مستواك الحقيقي', 'Test yourself and discover your current level'),
       icon: GraduationCap,
       href: '/dashboard/student/vocabulary/test',
       color: 'bg-green-500',
@@ -82,14 +83,14 @@ export default function VocabularyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8" dir="rtl">
+    <div className="min-h-screen bg-[#F5F5DC] p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <Link
           href="/dashboard/student"
           className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors mb-4"
         >
           <ChevronRight className="w-5 h-5" />
-          <span>العودة للوحة التحكم</span>
+          <span>{t('العودة للوحة التحكم', 'Back to dashboard')}</span>
         </Link>
 
         <motion.div
@@ -98,10 +99,10 @@ export default function VocabularyPage() {
           className="mb-8"
         >
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-            نظام المفردات
+            {t('نظام المفردات', 'Vocabulary')}
           </h1>
           <p className="text-gray-600 text-lg">
-            تعلم كلمات جديدة كل يوم وحسّن مفرداتك الإنجليزية
+            {t('تعلم كلمات جديدة كل يوم وحسّن مفرداتك الإنجليزية', 'Learn new words every day and improve your English vocabulary')}
           </p>
         </motion.div>
 
@@ -119,7 +120,7 @@ export default function VocabularyPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-800">{stats.totalWords}</p>
-                  <p className="text-sm text-gray-500">إجمالي الكلمات</p>
+                  <p className="text-sm text-gray-500">{t('إجمالي الكلمات', 'Total words')}</p>
                 </div>
               </div>
             </div>
@@ -131,7 +132,7 @@ export default function VocabularyPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-800">{stats.dueForReview}</p>
-                  <p className="text-sm text-gray-500">تحتاج مراجعة</p>
+                  <p className="text-sm text-gray-500">{t('تحتاج مراجعة', 'Due for review')}</p>
                 </div>
               </div>
             </div>
@@ -143,7 +144,7 @@ export default function VocabularyPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-800">{stats.mastered}</p>
-                  <p className="text-sm text-gray-500">تم إتقانها</p>
+                  <p className="text-sm text-gray-500">{t('تم إتقانها', 'Mastered')}</p>
                 </div>
               </div>
             </div>
@@ -159,7 +160,7 @@ export default function VocabularyPage() {
                       ? Math.round((stats.totalCorrect / (stats.totalCorrect + stats.totalIncorrect)) * 100)
                       : 0}%
                   </p>
-                  <p className="text-sm text-gray-500">نسبة النجاح</p>
+                  <p className="text-sm text-gray-500">{t('نسبة النجاح', 'Accuracy')}</p>
                 </div>
               </div>
             </div>
@@ -186,7 +187,6 @@ export default function VocabularyPage() {
                         {feature.title}
                       </h3>
                       <p className="text-sm text-gray-500 mb-3">
-                        {feature.titleEn}
                       </p>
                     </div>
                     {feature.badge && (
@@ -201,7 +201,7 @@ export default function VocabularyPage() {
                   </p>
                   
                   <div className="flex items-center text-blue-600 font-medium">
-                    <span>ابدأ الآن</span>
+                    <span>{t('ابدأ الآن', 'Get started')}</span>
                     <ChevronRight className="h-4 w-4 mr-1 rotate-180" />
                   </div>
                 </div>
@@ -221,10 +221,9 @@ export default function VocabularyPage() {
               <TrendingUp className="h-8 w-8" />
             </div>
             <div>
-              <h3 className="text-xl font-bold mb-1">نصيحة اليوم</h3>
+              <h3 className="text-xl font-bold mb-1">{t('نصيحة اليوم', 'Tip of the day')}</h3>
               <p className="text-white/90">
-                حاول مراجعة الكلمات الجديدة مرتين على الأقل يومياً - مرة في الصباح ومرة في المساء. 
-                هذا يساعد على تثبيت الكلمات في الذاكرة طويلة المدى.
+                {t('حاول مراجعة الكلمات الجديدة مرتين على الأقل يومياً - مرة في الصباح ومرة في المساء. هذا يساعد على تثبيت الكلمات في الذاكرة طويلة المدى.', 'Try reviewing new words at least twice daily—once in the morning and once in the evening. This helps move them into long-term memory.')}
               </p>
             </div>
           </div>

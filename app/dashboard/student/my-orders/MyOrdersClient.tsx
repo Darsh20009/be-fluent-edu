@@ -13,6 +13,8 @@ import Button from '@/components/ui/Button'
 import Alert from '@/components/ui/Alert'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Modal from '@/components/ui/Modal'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 interface Subscription {
   id: string
@@ -47,6 +49,8 @@ interface Subscription {
 }
 
 export default function MyOrdersClient() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const router = useRouter()
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
   const [loading, setLoading] = useState(true)
@@ -77,7 +81,7 @@ export default function MyOrdersClient() {
       return (
         <Badge variant="neutral">
           <Clock className="h-3 w-3 mr-1" />
-          Expired / منتهي الصلاحية
+          {t('منتهي الصلاحية', 'Expired')}
         </Badge>
       )
     }
@@ -87,28 +91,28 @@ export default function MyOrdersClient() {
         return (
           <Badge variant="success">
             <CheckCircle className="h-3 w-3 mr-1" />
-            {subscription.startDate && new Date(subscription.startDate) <= new Date() ? 'Active / نشط' : 'Approved / مفعّل'}
+            {subscription.startDate && new Date(subscription.startDate) <= new Date() ? t('نشط', 'Active') : t('مفعّل', 'Approved')}
           </Badge>
         )
       case 'UNDER_REVIEW':
         return (
           <Badge variant="warning">
             <Clock className="h-3 w-3 mr-1" />
-            Under Review / قيد المراجعة
+            {t('قيد المراجعة', 'Under review')}
           </Badge>
         )
       case 'PENDING':
         return (
           <Badge variant="info">
             <AlertCircle className="h-3 w-3 mr-1" />
-            Pending Payment / بانتظار الدفع
+            {t('بانتظار الدفع', 'Pending payment')}
           </Badge>
         )
       case 'REJECTED':
         return (
           <Badge variant="error">
             <XCircle className="h-3 w-3 mr-1" />
-            Rejected / مرفوض
+            {t('مرفوض', 'Rejected')}
           </Badge>
         )
       default:
@@ -117,16 +121,16 @@ export default function MyOrdersClient() {
   }
 
   const getPaymentMethodDisplay = (subscription: Subscription) => {
-    if (!subscription.paymentMethod) return 'Not specified / غير محدد'
+    if (!subscription.paymentMethod) return t('غير محدد', 'Not specified')
     
     if (subscription.paymentMethod === 'BANK_TRANSFER') {
-      return 'Bank Transfer / تحويل بنكي'
+      return t('تحويل بنكي', 'Bank transfer')
     } else if (subscription.paymentMethod === 'E_WALLET') {
       const provider = subscription.eWalletProvider
       if (provider === 'INSTAPAY') return 'InstaPay'
       if (provider === 'ETISALAT_CASH') return 'Etisalat Cash'
       if (provider === 'VODAFONE_CASH') return 'Vodafone Cash'
-      return 'E-Wallet / محفظة إلكترونية'
+      return t('محفظة إلكترونية', 'E-wallet')
     }
     return subscription.paymentMethod
   }
@@ -151,16 +155,14 @@ export default function MyOrdersClient() {
           <Link href="/dashboard/student">
             <Button variant="outline" size="sm" className="mb-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard / العودة للوحة التحكم
+              {t('العودة للوحة التحكم', 'Back to dashboard')}
             </Button>
           </Link>
           <h1 className="text-3xl sm:text-4xl font-bold text-[#10B981] mb-2">
-            My Orders & Subscriptions / طلباتي واشتراكاتي
+            {t('طلباتي واشتراكاتي', 'My orders & subscriptions')}
           </h1>
           <p className="text-gray-600">
-            Track your package purchases and subscription status
-            <br />
-            تتبع مشترياتك وحالة اشتراكاتك
+            {t('تتبع مشترياتك وحالة اشتراكاتك', 'Track your package purchases and subscription status')}
           </p>
         </div>
 
@@ -169,15 +171,11 @@ export default function MyOrdersClient() {
           <Alert variant="info">
             <Package className="h-5 w-5" />
             <div>
-              <p className="font-semibold">No orders yet / لا توجد طلبات بعد</p>
-              <p className="text-sm mt-1">
-                Browse our packages and make your first purchase!
-                <br />
-                تصفح الباقات وقم بأول عملية شراء!
-              </p>
+              <p className="font-semibold">{t('لا توجد طلبات بعد', 'No orders yet')}</p>
+              <p className="text-sm mt-1">{t('تصفح الباقات وقم بأول عملية شراء!', 'Browse our packages and make your first purchase!')}</p>
               <Link href="/dashboard/student">
                 <Button variant="primary" size="sm" className="mt-3">
-                  Browse Packages / تصفح الباقات
+                  {t('تصفح الباقات', 'Browse packages')}
                 </Button>
               </Link>
             </div>
@@ -196,21 +194,21 @@ export default function MyOrdersClient() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           <h3 className="text-xl font-bold text-[#10B981]">
-                            {subscription.Package.titleAr || subscription.Package.title}
+                            {language === 'ar' ? subscription.Package.titleAr || subscription.Package.title : subscription.Package.title}
                           </h3>
                           {getStatusBadge(subscription)}
                         </div>
                         <p className="text-sm text-gray-600 mb-2">
-                          {subscription.Package.descriptionAr || subscription.Package.description}
+                          {language === 'ar' ? subscription.Package.descriptionAr || subscription.Package.description : subscription.Package.description}
                         </p>
                         <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
                           <div className="flex items-center gap-1">
                             <FileText className="h-4 w-4 text-gray-500" />
-                            <span>{subscription.Package.lessonsCount} حصة</span>
+                            <span>{subscription.Package.lessonsCount} {t('حصة', 'lessons')}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4 text-gray-500" />
-                            <span>{subscription.Package.durationDays} يوم</span>
+                            <span>{subscription.Package.durationDays} {t('يوم', 'days')}</span>
                           </div>
                         </div>
                       </div>
@@ -219,9 +217,9 @@ export default function MyOrdersClient() {
                     {/* Payment Info */}
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Order Date / تاريخ الطلب:</span>
+                        <span className="text-gray-600">{t('تاريخ الطلب:', 'Order date:')}</span>
                         <span className="font-medium">
-                          {new Date(subscription.createdAt).toLocaleDateString('ar-EG', {
+                          {new Date(subscription.createdAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric'
@@ -229,19 +227,19 @@ export default function MyOrdersClient() {
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Payment Method / طريقة الدفع:</span>
+                        <span className="text-gray-600">{t('طريقة الدفع:', 'Payment method:')}</span>
                         <span className="font-medium">{getPaymentMethodDisplay(subscription)}</span>
                       </div>
                       {subscription.paymentReference && (
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Reference / المرجع:</span>
+                          <span className="text-gray-600">{t('المرجع:', 'Reference:')}</span>
                           <span className="font-mono text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
                             {subscription.paymentReference}
                           </span>
                         </div>
                       )}
                       <div className="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700">
-                        <span className="text-gray-600">Total Amount / المبلغ الإجمالي:</span>
+                        <span className="text-gray-600">{t('المبلغ الإجمالي:', 'Total amount:')}</span>
                         <span className="text-xl font-bold text-[#10B981]">
                           {subscription.Package.price} SAR
                         </span>
@@ -253,7 +251,7 @@ export default function MyOrdersClient() {
                       <div className="mt-3 flex items-center gap-2 text-sm text-gray-700 bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
                         <User className="h-4 w-4 text-blue-600" />
                         <span>
-                          Assigned Teacher / المعلم المعين:{' '}
+                          {t('المعلم المعين:', 'Assigned teacher:')}{' '}
                           <strong>{subscription.AssignedTeacher.User.name}</strong>
                         </span>
                       </div>
@@ -265,9 +263,9 @@ export default function MyOrdersClient() {
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-gray-500" />
                           <span>
-                            <strong>Active Period / فترة النشاط:</strong>{' '}
-                            {new Date(subscription.startDate).toLocaleDateString('ar-EG')} -{' '}
-                            {new Date(subscription.endDate).toLocaleDateString('ar-EG')}
+                            <strong>{t('فترة النشاط:', 'Active period:')}</strong>{' '}
+                            {new Date(subscription.startDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')} -{' '}
+                            {new Date(subscription.endDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
                           </span>
                         </div>
                       </div>
@@ -278,7 +276,7 @@ export default function MyOrdersClient() {
                       <Alert variant="info" className="mt-3">
                         <AlertCircle className="h-4 w-4" />
                         <div>
-                          <p className="font-semibold text-sm">Admin Notes / ملاحظات الإدارة:</p>
+                          <p className="font-semibold text-sm">{t('ملاحظات الإدارة:', 'Admin notes:')}</p>
                           <p className="text-sm mt-1">{subscription.adminNotes}</p>
                         </div>
                       </Alert>
@@ -295,7 +293,7 @@ export default function MyOrdersClient() {
                         className="flex-1 lg:flex-none"
                       >
                         <Eye className="h-4 w-4 mr-2" />
-                        View Receipt / عرض الإيصال
+                        {t('عرض الإيصال', 'View receipt')}
                       </Button>
                     )}
                     {subscription.status === 'APPROVED' && (
@@ -306,7 +304,7 @@ export default function MyOrdersClient() {
                         className="flex-1 lg:flex-none"
                       >
                         <Download className="h-4 w-4 mr-2" />
-                        Invoice / الفاتورة
+                        {t('الفاتورة', 'Invoice')}
                       </Button>
                     )}
                   </div>
@@ -322,24 +320,26 @@ export default function MyOrdersClient() {
 }
 
 function InvoiceModal({ subscription, onClose }: { subscription: Subscription; onClose: () => void }) {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const handlePrint = () => {
     window.print()
   }
 
   const invoiceDate = subscription.approvedAt 
-    ? new Date(subscription.approvedAt).toLocaleDateString('ar-EG', {
+    ? new Date(subscription.approvedAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       })
-    : new Date(subscription.createdAt).toLocaleDateString('ar-EG', {
+    : new Date(subscription.createdAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       })
 
   return (
-    <Modal isOpen={true} onClose={onClose} title="Invoice / الفاتورة" size="lg">
+    <Modal isOpen={true} onClose={onClose} title={t('الفاتورة', 'Invoice')} size="lg">
       <div id="invoice-content" className="bg-white p-0">
         {/* HEADER */}
         <div className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-8 mb-8">
@@ -349,8 +349,7 @@ function InvoiceModal({ subscription, onClose }: { subscription: Subscription; o
               <p className="text-blue-100 text-sm">Fluency Comes First</p>
             </div>
             <div className="text-right">
-              <div className="text-5xl font-bold opacity-20 mb-2">INVOICE</div>
-              <div className="text-2xl font-bold text-blue-100">فاتورة</div>
+              <div className="text-5xl font-bold opacity-20 mb-2">{t('فاتورة', 'INVOICE')}</div>
             </div>
           </div>
         </div>
@@ -359,21 +358,21 @@ function InvoiceModal({ subscription, onClose }: { subscription: Subscription; o
           {/* INVOICE INFO */}
           <div className="grid grid-cols-4 gap-6 pb-6 border-b-2 border-gray-200">
             <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide font-semibold mb-1">Invoice Number</p>
+              <p className="text-gray-500 text-xs uppercase tracking-wide font-semibold mb-1">{t('رقم الفاتورة', 'Invoice number')}</p>
               <p className="text-lg font-bold text-gray-900">#{subscription.id.slice(0, 8).toUpperCase()}</p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide font-semibold mb-1">Invoice Date</p>
+              <p className="text-gray-500 text-xs uppercase tracking-wide font-semibold mb-1">{t('تاريخ الفاتورة', 'Invoice date')}</p>
               <p className="text-lg font-bold text-gray-900">{invoiceDate}</p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide font-semibold mb-1">Status</p>
-              <p className="text-lg font-bold text-green-600">PAID</p>
+              <p className="text-gray-500 text-xs uppercase tracking-wide font-semibold mb-1">{t('الحالة', 'Status')}</p>
+              <p className="text-lg font-bold text-green-600">{t('مدفوع', 'PAID')}</p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide font-semibold mb-1">Payment Method</p>
+              <p className="text-gray-500 text-xs uppercase tracking-wide font-semibold mb-1">{t('طريقة الدفع', 'Payment method')}</p>
               <p className="text-lg font-bold text-gray-900">
-                {subscription.paymentMethod === 'BANK_TRANSFER' ? 'Bank Transfer' : subscription.eWalletProvider || 'E-Wallet'}
+                {subscription.paymentMethod === 'BANK_TRANSFER' ? t('تحويل بنكي', 'Bank transfer') : subscription.eWalletProvider || t('محفظة إلكترونية', 'E-wallet')}
               </p>
             </div>
           </div>
@@ -381,18 +380,18 @@ function InvoiceModal({ subscription, onClose }: { subscription: Subscription; o
           {/* BILL TO - CUSTOMER INFO */}
           <div className="grid grid-cols-2 gap-8 pb-6">
             <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide font-semibold mb-3">Bill To</p>
+              <p className="text-gray-500 text-xs uppercase tracking-wide font-semibold mb-3">{t('إلى', 'Bill to')}</p>
               <div className="text-gray-900">
-                <p className="font-bold text-lg mb-2">Customer</p>
-                <p className="text-sm text-gray-600">Reference: {subscription.id.slice(0, 12)}</p>
+                <p className="font-bold text-lg mb-2">{t('العميل', 'Customer')}</p>
+                <p className="text-sm text-gray-600">{t('المرجع: ', 'Reference: ')}{subscription.id.slice(0, 12)}</p>
               </div>
             </div>
             <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide font-semibold mb-3">Company</p>
+              <p className="text-gray-500 text-xs uppercase tracking-wide font-semibold mb-3">{t('الشركة', 'Company')}</p>
               <div className="text-gray-900">
                 <p className="font-bold text-lg mb-1">Be Fluent</p>
-                <p className="text-sm text-gray-600">Fluency Comes First</p>
-                <p className="text-sm text-gray-600">منصة تعليم اللغة الإنجليزية</p>
+                <p className="text-sm text-gray-600">{t('طلاقتك أولاً', 'Fluency Comes First')}</p>
+                <p className="text-sm text-gray-600">{t('منصة تعليم اللغة الإنجليزية', 'English language learning platform')}</p>
               </div>
             </div>
           </div>
@@ -402,20 +401,20 @@ function InvoiceModal({ subscription, onClose }: { subscription: Subscription; o
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-100 border-y-2 border-gray-300">
-                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-900">Description / الوصف</th>
-                  <th className="px-4 py-3 text-center text-sm font-bold text-gray-900">Qty</th>
-                  <th className="px-4 py-3 text-right text-sm font-bold text-gray-900">Unit Price</th>
-                  <th className="px-4 py-3 text-right text-sm font-bold text-gray-900">Amount</th>
+                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-900">{t('الوصف', 'Description')}</th>
+                  <th className="px-4 py-3 text-center text-sm font-bold text-gray-900">{t('الكمية', 'Qty')}</th>
+                  <th className="px-4 py-3 text-right text-sm font-bold text-gray-900">{t('سعر الوحدة', 'Unit price')}</th>
+                  <th className="px-4 py-3 text-right text-sm font-bold text-gray-900">{t('المبلغ', 'Amount')}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b border-gray-200">
                   <td className="px-4 py-4">
-                    <p className="font-semibold text-gray-900">{subscription.Package.titleAr || subscription.Package.title}</p>
-                    <p className="text-sm text-gray-600 mt-1">{subscription.Package.descriptionAr || subscription.Package.description}</p>
+                    <p className="font-semibold text-gray-900">{language === 'ar' ? subscription.Package.titleAr || subscription.Package.title : subscription.Package.title}</p>
+                    <p className="text-sm text-gray-600 mt-1">{language === 'ar' ? subscription.Package.descriptionAr || subscription.Package.description : subscription.Package.description}</p>
                     <div className="text-xs text-gray-500 mt-2 space-y-1">
-                      <p>• Lessons / الحصص: {subscription.Package.lessonsCount}</p>
-                      <p>• Duration / المدة: {subscription.Package.durationDays} days</p>
+                      <p>• {t('الحصص: ', 'Lessons: ')}{subscription.Package.lessonsCount}</p>
+                      <p>• {t('المدة: ', 'Duration: ')}{subscription.Package.durationDays} {t('يوم', 'days')}</p>
                     </div>
                   </td>
                   <td className="px-4 py-4 text-center text-gray-900 font-medium">1</td>
@@ -430,15 +429,15 @@ function InvoiceModal({ subscription, onClose }: { subscription: Subscription; o
           <div className="flex justify-end pb-6 border-b-2 border-gray-200">
             <div className="w-72">
               <div className="flex justify-between mb-3 text-gray-700">
-                <span className="font-medium">Subtotal / الإجمالي:</span>
+                <span className="font-medium">{t('الإجمالي الفرعي:', 'Subtotal:')}</span>
                 <span className="font-medium">{subscription.Package.price} SAR</span>
               </div>
               <div className="flex justify-between mb-4 text-gray-700 text-sm">
-                <span className="font-medium">Tax / الضريبة:</span>
+                <span className="font-medium">{t('الضريبة:', 'Tax:')}</span>
                 <span className="font-medium">0.00 SAR</span>
               </div>
               <div className="flex justify-between bg-gradient-to-r from-[#10B981] to-[#059669] text-white p-4 rounded-lg">
-                <span className="font-bold text-lg">Total Amount / الإجمالي:</span>
+                <span className="font-bold text-lg">{t('المبلغ الإجمالي:', 'Total amount:')}</span>
                 <span className="font-bold text-2xl">{subscription.Package.price} SAR</span>
               </div>
             </div>
@@ -448,12 +447,12 @@ function InvoiceModal({ subscription, onClose }: { subscription: Subscription; o
           {subscription.startDate && subscription.endDate && (
             <div className="grid grid-cols-2 gap-6 pb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
               <div>
-                <p className="text-gray-600 text-sm font-semibold mb-1">Subscription Start / بدء الاشتراك:</p>
-                <p className="text-gray-900 font-bold">{new Date(subscription.startDate).toLocaleDateString('ar-EG')}</p>
+                <p className="text-gray-600 text-sm font-semibold mb-1">{t('بدء الاشتراك:', 'Subscription start:')}</p>
+                <p className="text-gray-900 font-bold">{new Date(subscription.startDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}</p>
               </div>
               <div>
-                <p className="text-gray-600 text-sm font-semibold mb-1">Subscription Expires / انتهاء الاشتراك:</p>
-                <p className="text-gray-900 font-bold">{new Date(subscription.endDate).toLocaleDateString('ar-EG')}</p>
+                <p className="text-gray-600 text-sm font-semibold mb-1">{t('انتهاء الاشتراك:', 'Subscription expires:')}</p>
+                <p className="text-gray-900 font-bold">{new Date(subscription.endDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}</p>
               </div>
             </div>
           )}
@@ -461,7 +460,7 @@ function InvoiceModal({ subscription, onClose }: { subscription: Subscription; o
           {/* PAYMENT REFERENCE */}
           {subscription.paymentReference && (
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-300">
-              <p className="text-gray-600 text-sm font-semibold mb-2">Payment Reference / مرجع الدفع:</p>
+              <p className="text-gray-600 text-sm font-semibold mb-2">{t('مرجع الدفع:', 'Payment reference:')}</p>
               <p className="font-mono text-gray-900 font-bold tracking-wider">{subscription.paymentReference}</p>
             </div>
           )}
@@ -469,21 +468,17 @@ function InvoiceModal({ subscription, onClose }: { subscription: Subscription; o
           {/* NOTES */}
           <div className="text-center py-6 border-t-2 border-gray-200 space-y-2">
             <p className="text-sm text-gray-700">
-              <span className="font-bold">Thank you for choosing Be Fluent!</span>
-              <br />
-              <span className="text-gray-600">شكراً لاختيارك منصة Be Fluent</span>
+              <span className="font-bold">{t('شكراً لاختيارك منصة Be Fluent', 'Thank you for choosing Be Fluent!')}</span>
             </p>
             <p className="text-xs text-gray-500 mt-3">
-              For any questions, contact: support@befluent.com
-              <br />
-              لأي استفسارات، تواصل معنا: support@befluent.com
+              {t('لأي استفسارات، تواصل معنا: support@befluent.com', 'For any questions, contact: support@befluent.com')}
             </p>
           </div>
 
           {/* FOOTER */}
           <div className="text-center text-xs text-gray-400 pt-4 border-t border-gray-200">
-            <p>© 2025 Be Fluent Platform. All rights reserved.</p>
-            <p className="mt-1">This is an electronically generated invoice. No signature required.</p>
+            <p>{t('© 2025 منصة Be Fluent. جميع الحقوق محفوظة.', '© 2025 Be Fluent Platform. All rights reserved.')}</p>
+            <p className="mt-1">{t('هذه فاتورة إلكترونية ولا تتطلب توقيعاً.', 'This is an electronically generated invoice. No signature required.')}</p>
           </div>
         </div>
       </div>
@@ -492,10 +487,10 @@ function InvoiceModal({ subscription, onClose }: { subscription: Subscription; o
       <div className="flex gap-3 mt-6 pt-6 border-t print:hidden bg-gray-50 p-4 rounded-b-lg">
         <Button variant="primary" fullWidth onClick={handlePrint}>
           <Download className="h-4 w-4 mr-2" />
-          Print / Download / طباعة / تحميل
+          {t('طباعة / تحميل', 'Print / Download')}
         </Button>
         <Button variant="outline" fullWidth onClick={onClose}>
-          Close / إغلاق
+          {t('إغلاق', 'Close')}
         </Button>
       </div>
     </Modal>

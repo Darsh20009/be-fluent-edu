@@ -7,6 +7,8 @@ import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import Alert from '@/components/ui/Alert'
 import { toast } from 'react-hot-toast'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText, localeDirection } from '@/lib/locale'
 
 interface AuditLog {
   id: string
@@ -17,6 +19,8 @@ interface AuditLog {
 }
 
 export default function SystemTab() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [logs, setLogs] = useState<AuditLog[]>([])
   const [loading, setLoading] = useState(true)
   const [cleaning, setCleaning] = useState<string | null>(null)
@@ -48,13 +52,13 @@ export default function SystemTab() {
         body: JSON.stringify({ type })
       })
       if (response.ok) {
-        toast.success('تمت العملية بنجاح')
+        toast.success(t('تمت العملية بنجاح', 'Action completed successfully'))
         if (type === 'logs') fetchLogs()
       } else {
-        toast.error('حدث خطأ أثناء العملية')
+        toast.error(t('حدث خطأ أثناء العملية', 'An error occurred during the action'))
       }
     } catch (error) {
-      toast.error('فشل الاتصال بالخادم')
+      toast.error(t('فشل الاتصال بالخادم', 'Failed to connect to the server'))
     } finally {
       setCleaning(null)
     }
@@ -69,23 +73,23 @@ export default function SystemTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={localeDirection(language)}>
       <h2 className="text-3xl font-bold text-[#10B981]">
-        System Management / إدارة النظام
+        {t('إدارة النظام', 'System management')}
       </h2>
 
       <div className="grid md:grid-cols-2 gap-6">
         <Card variant="elevated" className="border-red-100">
           <div className="flex items-center gap-3 mb-4 text-red-600">
             <AlertTriangle className="h-6 w-6" />
-            <h3 className="text-xl font-bold">Dangerous Actions / إجراءات خطيرة</h3>
+            <h3 className="text-xl font-bold">{t('إجراءات خطيرة', 'Dangerous actions')}</h3>
           </div>
           
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-100">
               <div>
-                <p className="font-bold text-red-700">مسح جميع البيانات</p>
-                <p className="text-xs text-red-600">سيتم مسح كل شيء باستثناء حسابات الأدمن</p>
+                <p className="font-bold text-red-700">{t('مسح جميع البيانات', 'Clear all data')}</p>
+                <p className="text-xs text-red-600">{t('سيتم مسح كل شيء باستثناء حسابات الأدمن', 'Everything except administrator accounts will be cleared')}</p>
               </div>
               <Button 
                 variant="outline" 
@@ -100,8 +104,8 @@ export default function SystemTab() {
 
             <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg border border-orange-100">
               <div>
-                <p className="font-bold text-orange-700">مسح السجلات (Logs)</p>
-                <p className="text-xs text-orange-600">سيتم مسح سجلات النشاط فقط</p>
+                <p className="font-bold text-orange-700">{t('مسح السجلات (Logs)', 'Clear logs')}</p>
+                <p className="text-xs text-orange-600">{t('سيتم مسح سجلات النشاط فقط', 'Only activity logs will be cleared')}</p>
               </div>
               <Button 
                 variant="outline" 
@@ -119,19 +123,19 @@ export default function SystemTab() {
         <Card variant="elevated">
           <div className="flex items-center gap-3 mb-4 text-[#10B981]">
             <Activity className="h-6 w-6" />
-            <h3 className="text-xl font-bold">System Status / حالة النظام</h3>
+            <h3 className="text-xl font-bold">{t('حالة النظام', 'System status')}</h3>
           </div>
           <div className="space-y-2 text-sm text-gray-700">
             <div className="flex justify-between py-2 border-b border-gray-100">
-              <span>Database Status</span>
-              <span className="text-green-600 font-bold">Connected</span>
+              <span>{t('حالة قاعدة البيانات', 'Database status')}</span>
+              <span className="text-green-600 font-bold">{t('متصلة', 'Connected')}</span>
             </div>
             <div className="flex justify-between py-2 border-b border-gray-100">
-              <span>Email Service</span>
+              <span>{t('خدمة البريد الإلكتروني', 'Email service')}</span>
               <span className="text-gray-600 font-bold">Qirox Studio</span>
             </div>
             <div className="flex justify-between py-2">
-              <span>Platform Version</span>
+              <span>{t('إصدار المنصة', 'Platform version')}</span>
               <span className="font-bold text-gray-900">1.0.0</span>
             </div>
           </div>
@@ -142,13 +146,13 @@ export default function SystemTab() {
         <div className="flex items-center gap-3 mb-4">
           <Activity className="h-6 w-6 text-[#10B981]" />
           <h3 className="text-xl font-bold text-[#10B981]">
-            Recent Activity Logs / سجلات النشاط الأخيرة
+            {t('سجلات النشاط الأخيرة', 'Recent activity logs')}
           </h3>
         </div>
         
         {logs.length === 0 ? (
           <Alert variant="info">
-            <p>No activity logs yet.</p>
+            <p>{t('لا توجد سجلات نشاط بعد.', 'No activity logs yet.')}</p>
           </Alert>
         ) : (
           <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
@@ -163,7 +167,7 @@ export default function SystemTab() {
                   </div>
                   <div className="flex items-center gap-2 text-xs text-gray-500">
                     <Clock className="h-3 w-3" />
-                    <span>{new Date(log.createdAt).toLocaleString('ar-EG')}</span>
+                    <span>{new Date(log.createdAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}</span>
                   </div>
                 </div>
               </div>

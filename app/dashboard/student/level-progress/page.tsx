@@ -20,6 +20,8 @@ import {
   Loader2,
   AlertCircle
 } from 'lucide-react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeDirection, localeText } from '@/lib/locale'
 
 interface LevelProgress {
   success: boolean
@@ -54,6 +56,8 @@ interface LevelProgress {
 }
 
 export default function LevelProgressPage() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [progress, setProgress] = useState<LevelProgress | null>(null)
   const [loading, setLoading] = useState(true)
   const [adjusting, setAdjusting] = useState(false)
@@ -62,7 +66,7 @@ export default function LevelProgressPage() {
   const fetchProgress = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/student/level-progress?lang=ar')
+      const res = await fetch(`/api/student/level-progress?lang=${language}`)
       const data = await res.json()
       setProgress(data)
     } catch (error) {
@@ -91,10 +95,10 @@ export default function LevelProgressPage() {
         setMessage({ type: 'success', text: data.message })
         await fetchProgress()
       } else {
-        setMessage({ type: 'error', text: data.reason || 'لا يمكن تعديل المستوى حالياً' })
+        setMessage({ type: 'error', text: data.reason || t('لا يمكن تعديل المستوى حالياً', 'Level cannot be adjusted right now') })
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'حدث خطأ أثناء تعديل المستوى' })
+      setMessage({ type: 'error', text: t('حدث خطأ أثناء تعديل المستوى', 'An error occurred while adjusting the level') })
     } finally {
       setAdjusting(false)
     }
@@ -102,10 +106,10 @@ export default function LevelProgressPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex items-center justify-center min-h-[60vh]" dir={localeDirection(language)}>
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-emerald-500 mx-auto mb-4" />
-          <p className="text-gray-500">جاري تحميل بيانات المستوى...</p>
+          <p className="text-gray-500">{t('جاري تحميل بيانات المستوى...', 'Loading level data...')}</p>
         </div>
       </div>
     )
@@ -113,18 +117,18 @@ export default function LevelProgressPage() {
 
   if (progress?.needsPlacementTest) {
     return (
-      <div className="max-w-2xl mx-auto p-6">
+      <div className="max-w-2xl mx-auto p-6" dir={localeDirection(language)}>
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 text-center">
           <AlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-amber-800 mb-4">اختبار تحديد المستوى مطلوب</h2>
+          <h2 className="text-2xl font-bold text-amber-800 mb-4">{t('اختبار تحديد المستوى مطلوب', 'Placement test required')}</h2>
           <p className="text-amber-700 mb-6">
-            لم يتم العثور على ملف الطالب. يرجى إكمال اختبار تحديد المستوى أولاً لتحديد مستواك في اللغة الإنجليزية.
+            {t('لم يتم العثور على ملف الطالب. يرجى إكمال اختبار تحديد المستوى أولاً لتحديد مستواك في اللغة الإنجليزية.', 'No student profile was found. Please complete the placement test first to determine your English level.')}
           </p>
           <a 
             href="/placement-test" 
             className="inline-flex items-center gap-2 bg-amber-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-amber-600 transition"
           >
-            ابدأ اختبار تحديد المستوى
+            {t('ابدأ اختبار تحديد المستوى', 'Start placement test')}
             <ChevronRight className="w-5 h-5 rotate-180" />
           </a>
         </div>
@@ -134,17 +138,17 @@ export default function LevelProgressPage() {
 
   if (!progress?.success) {
     return (
-      <div className="max-w-2xl mx-auto p-6">
+      <div className="max-w-2xl mx-auto p-6" dir={localeDirection(language)}>
         <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-red-800 mb-4">حدث خطأ</h2>
-          <p className="text-red-700 mb-6">تعذر تحميل بيانات المستوى. يرجى المحاولة مرة أخرى.</p>
+          <h2 className="text-2xl font-bold text-red-800 mb-4">{t('حدث خطأ', 'An error occurred')}</h2>
+          <p className="text-red-700 mb-6">{t('تعذر تحميل بيانات المستوى. يرجى المحاولة مرة أخرى.', 'Could not load level data. Please try again.')}</p>
           <button 
             onClick={fetchProgress}
             className="inline-flex items-center gap-2 bg-red-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-600 transition"
           >
             <RefreshCcw className="w-5 h-5" />
-            إعادة المحاولة
+            {t('إعادة المحاولة', 'Try again')}
           </button>
         </div>
       </div>
@@ -163,13 +167,13 @@ export default function LevelProgressPage() {
   const suggestedColors = levelColors[progress.suggestedLevel] || levelColors.A1
 
   return (
-    <div className="max-w-4xl mx-auto p-4 space-y-6" dir="rtl">
+    <div className="max-w-4xl mx-auto p-4 space-y-6" dir={localeDirection(language)}>
       <Link
         href="/dashboard/student"
         className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-medium transition-colors mb-4"
       >
         <ChevronRight className="w-5 h-5" />
-        <span>العودة للوحة التحكم</span>
+        <span>{t('العودة للوحة التحكم', 'Back to dashboard')}</span>
       </Link>
 
       {progress.progressPercentage >= 100 && (
@@ -179,8 +183,8 @@ export default function LevelProgressPage() {
           className="bg-emerald-600 text-white rounded-2xl p-6 text-center shadow-xl shadow-emerald-200"
         >
           <Award className="w-16 h-16 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">مبروك! لقد أتممت هذا المستوى</h2>
-          <p className="mb-6">يمكنك الآن استلام شهادة إتمام المستوى الخاصة بك</p>
+          <h2 className="text-2xl font-bold mb-2">{t('مبروك! لقد أتممت هذا المستوى', 'Congratulations! You completed this level')}</h2>
+          <p className="mb-6">{t('يمكنك الآن استلام شهادة إتمام المستوى الخاصة بك', 'You can now receive your level completion certificate')}</p>
           <button
             onClick={async () => {
               try {
@@ -190,19 +194,19 @@ export default function LevelProgressPage() {
                   body: JSON.stringify({ level: progress.currentLevel })
                 })
                 if (res.ok) {
-                  toast.success('تم إصدار الشهادة بنجاح! يمكنك العثور عليها في قسم "شهاداتي"')
+                  toast.success(t('تم إصدار الشهادة بنجاح! يمكنك العثور عليها في قسم "شهاداتي"', 'Certificate issued successfully! You can find it in My Certificates.'))
                   window.location.href = '/dashboard/student'
                 } else {
                   const data = await res.json()
-                  toast.error(data.error || 'فشل إصدار الشهادة')
+                  toast.error(data.error || t('فشل إصدار الشهادة', 'Failed to issue certificate'))
                 }
               } catch (e) {
-                toast.error('حدث خطأ أثناء إصدار الشهادة')
+                toast.error(t('حدث خطأ أثناء إصدار الشهادة', 'An error occurred while issuing the certificate'))
               }
             }}
             className="bg-white text-emerald-600 px-8 py-3 rounded-xl font-bold hover:bg-emerald-50 transition-colors"
           >
-            إصدار الشهادة الآن
+            {t('إصدار الشهادة الآن', 'Issue certificate now')}
           </button>
         </motion.div>
       )}
@@ -217,14 +221,14 @@ export default function LevelProgressPage() {
             <TrendingUp className="w-6 h-6 text-emerald-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">تقدم مستوى اللغة الإنجليزية</h1>
-            <p className="text-gray-500">تتبع مستواك وتقدمك في تعلم اللغة</p>
+            <h1 className="text-2xl font-bold text-gray-800">{t('تقدم مستوى اللغة الإنجليزية', 'English level progress')}</h1>
+            <p className="text-gray-500">{t('تتبع مستواك وتقدمك في تعلم اللغة', 'Track your level and language-learning progress')}</p>
           </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
           <div className="text-center">
-            <p className="text-sm text-gray-500 mb-2">المستوى الحالي</p>
+            <p className="text-sm text-gray-500 mb-2">{t('المستوى الحالي', 'Current level')}</p>
             <motion.div
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
@@ -235,7 +239,7 @@ export default function LevelProgressPage() {
             <p className="mt-3 text-lg font-semibold text-gray-700">{progress.currentLevelName}</p>
             {progress.initialLevel && progress.initialLevel !== progress.currentLevel && (
               <p className="text-sm text-gray-400 mt-1">
-                المستوى الأولي: {progress.initialLevel} ({progress.initialLevelName})
+                {t('المستوى الأولي:', 'Initial level:')} {progress.initialLevel} ({progress.initialLevelName})
               </p>
             )}
           </div>
@@ -243,7 +247,7 @@ export default function LevelProgressPage() {
           <div className="space-y-4">
             <div>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-500">التقدم في المستوى الحالي</span>
+                <span className="text-sm text-gray-500">{t('التقدم في المستوى الحالي', 'Current level progress')}</span>
                 <span className="text-sm font-semibold text-gray-700">{Math.round(progress.progressPercentage)}%</span>
               </div>
               <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
@@ -259,14 +263,14 @@ export default function LevelProgressPage() {
             <div className="bg-gray-50 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Zap className="w-5 h-5 text-amber-500" />
-                <span className="font-semibold text-gray-700">درجة الأداء</span>
+                <span className="font-semibold text-gray-700">{t('درجة الأداء', 'Performance score')}</span>
               </div>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-gray-800">{progress.performanceScore}</span>
                 <span className="text-gray-500">/ 100</span>
               </div>
               <p className="text-sm text-gray-500 mt-1">
-                بناءً على {progress.metrics.dataPoints} نشاط
+                {t(`بناءً على ${progress.metrics.dataPoints} نشاط`, `Based on ${progress.metrics.dataPoints} activities`)}
               </p>
             </div>
 
@@ -284,10 +288,10 @@ export default function LevelProgressPage() {
                   )}
                   <div>
                     <p className="font-semibold text-gray-700">
-                      {progress.levelDifference > 0 ? 'يمكنك الترقية!' : 'تعديل مستوى متاح'}
+                      {progress.levelDifference > 0 ? t('يمكنك الترقية!', 'You may be ready to advance!') : t('تعديل مستوى متاح', 'Level adjustment available')}
                     </p>
                     <p className="text-sm text-gray-500">
-                      المستوى المقترح: {progress.suggestedLevel} ({progress.suggestedLevelName})
+                      {t('المستوى المقترح:', 'Suggested level:')} {progress.suggestedLevel} ({progress.suggestedLevelName})
                     </p>
                   </div>
                 </div>
@@ -299,12 +303,12 @@ export default function LevelProgressPage() {
                   {adjusting ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      جاري التعديل...
+                      {t('جاري التعديل...', 'Adjusting...')}
                     </>
                   ) : (
                     <>
                       <RefreshCcw className="w-5 h-5" />
-                      تحديث المستوى تلقائياً
+                      {t('تحديث المستوى تلقائياً', 'Adjust level automatically')}
                     </>
                   )}
                 </button>
@@ -341,47 +345,47 @@ export default function LevelProgressPage() {
           <div className="p-3 bg-blue-100 rounded-xl">
             <Target className="w-6 h-6 text-blue-600" />
           </div>
-          <h2 className="text-xl font-bold text-gray-800">مقاييس الأداء</h2>
+            <h2 className="text-xl font-bold text-gray-800">{t('مقاييس الأداء', 'Performance metrics')}</h2>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <MetricCard
-            label="الكلمات المعروفة"
+            label={t('الكلمات المعروفة', 'Known words')}
             value={progress.metrics.wordsKnownPercentage}
             icon={<BookOpen className="w-5 h-5" />}
             color="text-emerald-500"
             bgColor="bg-emerald-50"
           />
           <MetricCard
-            label="دقة الكلمات"
+            label={t('دقة الكلمات', 'Word accuracy')}
             value={progress.metrics.wordsCorrectRate}
             icon={<CheckCircle2 className="w-5 h-5" />}
             color="text-blue-500"
             bgColor="bg-blue-50"
           />
           <MetricCard
-            label="دقة التمارين"
+            label={t('دقة التمارين', 'Exercise accuracy')}
             value={progress.metrics.exercisesCorrectRate}
             icon={<Target className="w-5 h-5" />}
             color="text-purple-500"
             bgColor="bg-purple-50"
           />
           <MetricCard
-            label="إتمام الدروس"
+            label={t('إتمام الدروس', 'Lesson completion')}
             value={progress.metrics.lessonsCompletionRate}
             icon={<Star className="w-5 h-5" />}
             color="text-amber-500"
             bgColor="bg-amber-50"
           />
           <MetricCard
-            label="متوسط الكتابة"
+            label={t('متوسط الكتابة', 'Writing average')}
             value={progress.metrics.writingAverageScore}
             icon={<Award className="w-5 h-5" />}
             color="text-rose-500"
             bgColor="bg-rose-50"
           />
           <MetricCard
-            label="الدرجة الإجمالية"
+            label={t('الدرجة الإجمالية', 'Overall score')}
             value={progress.metrics.overallScore}
             icon={<TrendingUp className="w-5 h-5" />}
             color="text-teal-500"
@@ -402,7 +406,7 @@ export default function LevelProgressPage() {
             <div className="p-3 bg-amber-100 rounded-xl">
               <Lightbulb className="w-6 h-6 text-amber-600" />
             </div>
-            <h2 className="text-xl font-bold text-gray-800">توصيات لتحسين مستواك</h2>
+            <h2 className="text-xl font-bold text-gray-800">{t('توصيات لتحسين مستواك', 'Recommendations to improve your level')}</h2>
           </div>
 
           <div className="space-y-3">
@@ -433,14 +437,14 @@ export default function LevelProgressPage() {
             <div className={`p-3 rounded-xl bg-gradient-to-br ${currentColors.gradient}`}>
               <Award className="w-6 h-6 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-gray-800">متطلبات المستوى {progress.currentLevel}</h2>
+            <h2 className="text-xl font-bold text-gray-800">{t(`متطلبات المستوى ${progress.currentLevel}`, `Level ${progress.currentLevel} requirements`)}</h2>
           </div>
 
           <div className="space-y-3">
-            <SkillRequirement label="المفردات" value={progress.skillRequirements.vocabulary} />
-            <SkillRequirement label="القواعد" value={progress.skillRequirements.grammar} />
-            <SkillRequirement label="التحدث" value={progress.skillRequirements.speaking} />
-            <SkillRequirement label="الكتابة" value={progress.skillRequirements.writing} />
+            <SkillRequirement label={t('المفردات', 'Vocabulary')} value={progress.skillRequirements.vocabulary} />
+            <SkillRequirement label={t('القواعد', 'Grammar')} value={progress.skillRequirements.grammar} />
+            <SkillRequirement label={t('التحدث', 'Speaking')} value={progress.skillRequirements.speaking} />
+            <SkillRequirement label={t('الكتابة', 'Writing')} value={progress.skillRequirements.writing} />
           </div>
         </motion.div>
       </div>

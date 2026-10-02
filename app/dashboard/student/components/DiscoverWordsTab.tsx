@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, X, Star, Sparkles, Brain, Trophy } from 'lucide-react'
 import Alert from '@/components/ui/Alert'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeDirection, localeText } from '@/lib/locale'
 
 interface Word {
   word: string
@@ -17,6 +19,8 @@ interface DiscoverWordsTabProps {
 }
 
 export default function DiscoverWordsTab({ isActive }: DiscoverWordsTabProps) {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [words, setWords] = useState<Word[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [level, setLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('beginner')
@@ -76,12 +80,12 @@ export default function DiscoverWordsTab({ isActive }: DiscoverWordsTabProps) {
 
   if (!isActive) {
     return (
-      <div>
+    <div>
         <h2 className="text-2xl sm:text-3xl font-bold text-[#10B981] mb-4">
-          Discover Words / اكتشف الكلمات الجديدة
+          {t('اكتشف الكلمات الجديدة', 'Discover new words')}
         </h2>
         <Alert variant="warning">
-          <p>قم بتفعيل حسابك للوصول لهذه الميزة / Activate your account to access this feature</p>
+          <p>{t('قم بتفعيل حسابك للوصول لهذه الميزة', 'Activate your account to access this feature')}</p>
         </Alert>
       </div>
     )
@@ -92,7 +96,7 @@ export default function DiscoverWordsTab({ isActive }: DiscoverWordsTabProps) {
       <div className="flex items-center justify-center h-64">
         <div className="text-gray-800 text-2xl flex items-center gap-3">
           <Sparkles className="animate-spin h-8 w-8 text-blue-600" />
-          <span>جاري تحميل الكلمات...</span>
+          <span>{t('جاري تحميل الكلمات...', 'Loading words...')}</span>
         </div>
       </div>
     )
@@ -101,7 +105,7 @@ export default function DiscoverWordsTab({ isActive }: DiscoverWordsTabProps) {
   const currentWord = words[currentIndex]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={localeDirection(language)}>
       {/* Header */}
       <motion.div
         initial={{ y: -50, opacity: 0 }}
@@ -113,8 +117,7 @@ export default function DiscoverWordsTab({ isActive }: DiscoverWordsTabProps) {
             <Brain className="h-8 w-8 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">اكتشف الكلمات الجديدة</h1>
-            <p className="text-gray-600">Discover New Words</p>
+            <h1 className="text-3xl font-bold text-gray-900">{t('اكتشف الكلمات الجديدة', 'Discover new words')}</h1>
           </div>
         </div>
 
@@ -122,12 +125,12 @@ export default function DiscoverWordsTab({ isActive }: DiscoverWordsTabProps) {
           <div className="bg-blue-50 border-2 border-blue-500 px-6 py-3 rounded-xl text-center">
             <Star className="h-6 w-6 mx-auto mb-1 text-blue-600" />
             <div className="text-2xl font-bold text-gray-900">{score}</div>
-            <div className="text-xs text-gray-600">النقاط</div>
+            <div className="text-xs text-gray-600">{t('النقاط', 'Points')}</div>
           </div>
           <div className="bg-blue-50 border-2 border-blue-400 px-6 py-3 rounded-xl text-center">
             <Trophy className="h-6 w-6 mx-auto mb-1 text-blue-600" />
             <div className="text-2xl font-bold text-gray-900">{streak}</div>
-            <div className="text-xs text-gray-600">التتابع</div>
+            <div className="text-xs text-gray-600">{t('التتابع', 'Streak')}</div>
           </div>
         </div>
       </motion.div>
@@ -149,9 +152,9 @@ export default function DiscoverWordsTab({ isActive }: DiscoverWordsTabProps) {
                 : 'bg-white text-gray-900 border-blue-300 hover:border-blue-600 hover:text-blue-600'
             }`}
           >
-            {lvl === 'beginner' && 'مبتدئ'}
-            {lvl === 'intermediate' && 'متوسط'}
-            {lvl === 'advanced' && 'متقدم'}
+            {lvl === 'beginner' && t('مبتدئ', 'Beginner')}
+            {lvl === 'intermediate' && t('متوسط', 'Intermediate')}
+            {lvl === 'advanced' && t('متقدم', 'Advanced')}
           </button>
         ))}
       </motion.div>
@@ -210,12 +213,9 @@ export default function DiscoverWordsTab({ isActive }: DiscoverWordsTabProps) {
                   ))}
                 </div>
 
-                {/* Arabic Meaning */}
-                <div className="mb-8">
-                  <p className="text-3xl font-bold text-gray-900 mb-2" dir="rtl">
-                    {currentWord.arabic}
-                  </p>
-                </div>
+                {language === 'ar' && <div className="mb-8">
+                  <p className="text-3xl font-bold text-gray-900 mb-2" dir="rtl">{currentWord.arabic}</p>
+                </div>}
 
                 {/* Example Toggle */}
                 <button
@@ -223,7 +223,7 @@ export default function DiscoverWordsTab({ isActive }: DiscoverWordsTabProps) {
                   className="mb-6 flex items-center gap-2 mx-auto text-blue-600 hover:text-blue-700 font-semibold"
                 >
                   <Sparkles className="h-5 w-5" />
-                  {showExample ? 'إخفاء المثال' : 'عرض المثال'}
+                  {showExample ? t('إخفاء المثال', 'Hide example') : t('عرض المثال', 'Show example')}
                 </button>
 
                 {showExample && (
@@ -245,7 +245,7 @@ export default function DiscoverWordsTab({ isActive }: DiscoverWordsTabProps) {
                     className="flex-1 max-w-xs bg-blue-500 hover:bg-blue-600 text-white px-8 py-6 rounded-2xl font-bold text-xl shadow-lg flex items-center justify-center gap-3 transition-colors"
                   >
                     <X className="h-8 w-8" />
-                    <span>لا أعرفها</span>
+                    <span>{t('لا أعرفها', "I don't know it")}</span>
                   </motion.button>
 
                   <motion.button
@@ -255,14 +255,14 @@ export default function DiscoverWordsTab({ isActive }: DiscoverWordsTabProps) {
                     className="flex-1 max-w-xs bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 rounded-2xl font-bold text-xl shadow-lg flex items-center justify-center gap-3 transition-colors"
                   >
                     <Check className="h-8 w-8" />
-                    <span>أعرفها!</span>
+                    <span>{t('أعرفها!', 'I know it!')}</span>
                   </motion.button>
                 </div>
 
                 {/* Tips */}
                 <div className="mt-8 text-sm text-gray-900 bg-blue-50 p-4 rounded-xl border border-blue-200">
-                  <p><strong>جميع الكلمات</strong> ستُضاف تلقائياً لقائمة "كلماتي" - الكلمات التي تعرفها ستُعلم كـ "معروفة"</p>
-                  <p className="mt-2">الكلمات التي لا تعرفها ستُحفظ كـ "غير معروفة" لمراجعتها لاحقاً</p>
+                  <p>{language === 'ar' ? <><strong>جميع الكلمات</strong> ستُضاف تلقائياً لقائمة "كلماتي" - الكلمات التي تعرفها ستُعلم كـ "معروفة"</> : <>All words are automatically added to "My Words"—words you know are marked as known.</>}</p>
+                  <p className="mt-2">{t('الكلمات التي لا تعرفها ستُحفظ كـ "غير معروفة" لمراجعتها لاحقاً', 'Words you do not know are saved as unknown for later review.')}</p>
                 </div>
               </motion.div>
             </motion.div>

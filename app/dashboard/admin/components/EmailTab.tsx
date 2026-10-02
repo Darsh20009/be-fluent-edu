@@ -5,6 +5,8 @@ import { Send, Mail, User, Users, CheckCircle, AlertCircle } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText, localeDirection } from '@/lib/locale'
 
 interface Recipient {
   id: string
@@ -14,6 +16,8 @@ interface Recipient {
 }
 
 export default function EmailTab() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const [recipients, setRecipients] = useState<Recipient[]>([])
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
@@ -48,7 +52,7 @@ export default function EmailTab() {
     const targetEmail = emailType === 'custom' ? customEmail : selectedRecipient
     
     if (!targetEmail || !subject || !message) {
-      setStatus({ type: 'error', message: 'يرجى ملء جميع الحقول المطلوبة' })
+      setStatus({ type: 'error', message: t('يرجى ملء جميع الحقول المطلوبة', 'Please fill in all required fields') })
       return
     }
 
@@ -69,16 +73,16 @@ export default function EmailTab() {
       const data = await response.json()
 
       if (response.ok) {
-        setStatus({ type: 'success', message: 'تم إرسال البريد الإلكتروني بنجاح!' })
+        setStatus({ type: 'success', message: t('تم إرسال البريد الإلكتروني بنجاح!', 'Email sent successfully!') })
         setCustomEmail('')
         setSelectedRecipient('')
         setSubject('')
         setMessage('')
       } else {
-        setStatus({ type: 'error', message: data.error || 'فشل في إرسال البريد الإلكتروني' })
+        setStatus({ type: 'error', message: data.error || t('فشل في إرسال البريد الإلكتروني', 'Failed to send email') })
       }
     } catch (error) {
-      setStatus({ type: 'error', message: 'حدث خطأ أثناء إرسال البريد الإلكتروني' })
+      setStatus({ type: 'error', message: t('حدث خطأ أثناء إرسال البريد الإلكتروني', 'An error occurred while sending the email') })
     } finally {
       setSending(false)
     }
@@ -93,16 +97,16 @@ export default function EmailTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={localeDirection(language)}>
       <h2 className="text-3xl font-bold text-[#10B981]">
-        Direct Email / البريد المباشر
+        {t('البريد المباشر', 'Direct email')}
       </h2>
 
       <Card variant="elevated" className="max-w-2xl">
         <form onSubmit={handleSendEmail} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
-              نوع المستلم / Recipient Type
+              {t('نوع المستلم', 'Recipient type')}
             </label>
             <div className="flex gap-4">
               <button
@@ -115,7 +119,7 @@ export default function EmailTab() {
                 }`}
               >
                 <Mail className="h-5 w-5" />
-                <span>بريد مخصص</span>
+                <span>{t('بريد مخصص', 'Custom email')}</span>
               </button>
               <button
                 type="button"
@@ -127,7 +131,7 @@ export default function EmailTab() {
                 }`}
               >
                 <Users className="h-5 w-5" />
-                <span>اختيار مستخدم</span>
+                <span>{t('اختيار مستخدم', 'Select a user')}</span>
               </button>
             </div>
           </div>
@@ -135,7 +139,7 @@ export default function EmailTab() {
           {emailType === 'custom' ? (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                البريد الإلكتروني / Email Address
+                {t('البريد الإلكتروني', 'Email address')}
               </label>
               <input
                 type="email"
@@ -149,17 +153,17 @@ export default function EmailTab() {
           ) : (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                اختر المستلم / Select Recipient
+                {t('اختر المستلم', 'Select recipient')}
               </label>
               <select
                 value={selectedRecipient}
                 onChange={(e) => setSelectedRecipient(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
               >
-                <option value="">-- اختر مستخدم --</option>
+                <option value="">{t('-- اختر مستخدم --', '-- Select a user --')}</option>
                 {recipients.map((recipient) => (
                   <option key={recipient.id} value={recipient.email}>
-                    {recipient.name} ({recipient.email}) - {recipient.role === 'STUDENT' ? 'طالب' : recipient.role === 'TEACHER' ? 'معلم' : 'مسؤول'}
+                    {recipient.name} ({recipient.email}) - {recipient.role === 'STUDENT' ? t('طالب', 'Student') : recipient.role === 'TEACHER' ? t('معلم', 'Teacher') : t('مسؤول', 'Administrator')}
                   </option>
                 ))}
               </select>
@@ -168,29 +172,29 @@ export default function EmailTab() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              الموضوع / Subject
+              {t('الموضوع', 'Subject')}
             </label>
             <input
               type="text"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              placeholder="موضوع الرسالة"
+              placeholder={t('موضوع الرسالة', 'Message subject')}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
-              dir="rtl"
+              dir={localeDirection(language)}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              الرسالة / Message
+              {t('الرسالة', 'Message')}
             </label>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="اكتب رسالتك هنا..."
+              placeholder={t('اكتب رسالتك هنا...', 'Write your message here…')}
               rows={6}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#10B981] focus:border-transparent resize-none"
-              dir="rtl"
+              dir={localeDirection(language)}
             />
           </div>
 
@@ -216,12 +220,12 @@ export default function EmailTab() {
             {sending ? (
               <div className="flex items-center gap-2">
                 <LoadingSpinner size="sm" />
-                <span>جاري الإرسال...</span>
+                <span>{t('جاري الإرسال...', 'Sending…')}</span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <Send className="h-5 w-5" />
-                <span>إرسال البريد / Send Email</span>
+                <span>{t('إرسال البريد', 'Send email')}</span>
               </div>
             )}
           </Button>

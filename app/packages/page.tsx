@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Link from "next/link";
 import { Check, Star, Users } from 'lucide-react'
 import { MarketingFrame } from '@/components/marketing/MarketingFrame'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 
 const BASIC_PACKAGES = [
   { id: '1', title: 'Basic - 1 Month', titleAr: 'شهر واحد', price: 1500, lessons: 8, duration: '1 Month' },
@@ -18,6 +20,11 @@ const GOLD_PACKAGES = [
 ]
 
 export default function PackagesPage() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
+  const durationLabel = (duration: string) => language === 'ar'
+    ? duration.startsWith('1 ') ? 'شهر واحد' : duration.startsWith('3 ') ? '3 شهور' : '6 شهور'
+    : duration
   const [tier, setTier] = useState<'BASIC' | 'GOLD'>('BASIC')
   const currentPackages = tier === 'BASIC' ? BASIC_PACKAGES : GOLD_PACKAGES
 
@@ -25,9 +32,9 @@ export default function PackagesPage() {
     <MarketingFrame>
       <main className="mx-auto max-w-[1130px] px-5 py-12 sm:py-16">
         <div className="text-center mb-12">
-          <p className="text-[10px] font-bold tracking-[.2em] text-[#147050]">PLANS & PRICING</p>
-          <h1 className="mt-3 text-3xl font-extrabold text-[#1e2b29] md:text-4xl">اختر خطتك التعليمية</h1>
-          <p className="mt-3 text-sm text-[#68756f]">استثمار واضح في لغة تستخدمها بثقة.</p>
+          <p className="text-[10px] font-bold tracking-[.2em] text-[#147050]">{t('الباقات والأسعار', 'PLANS & PRICING')}</p>
+          <h1 className="mt-3 text-3xl font-extrabold text-[#1e2b29] md:text-4xl">{t('اختر خطتك التعليمية', 'Choose your learning plan')}</h1>
+          <p className="mt-3 text-sm text-[#68756f]">{t('استثمار واضح في لغة تستخدمها بثقة.', 'A clear investment in a language you can use with confidence.')}</p>
 
           {/* Tier Toggle */}
           <div className="flex justify-center mb-12">
@@ -41,7 +48,7 @@ export default function PackagesPage() {
                 }`}
               >
                 <Users className="w-5 h-5" />
-                اشتراك Basic (جروب)
+                {t('اشتراك Basic (جماعي)', 'Basic subscription (group)')}
               </button>
               <button
                 onClick={() => setTier('GOLD')}
@@ -52,7 +59,7 @@ export default function PackagesPage() {
                 }`}
               >
                 <Star className="w-5 h-5" />
-                اشتراك Gold (برايفت)
+                {t('اشتراك Gold (خاص)', 'Gold subscription (private)')}
               </button>
             </div>
           </div>
@@ -66,25 +73,25 @@ export default function PackagesPage() {
                  tier === 'GOLD' ? 'border-[#61706b]' : 'border-[#b7d5c6]'
               }`}
             >
-               <p className="font-mono text-[10px] text-[#147050]">{pkg.duration}</p>
-               <h3 className="mt-2 text-xl font-bold text-[#1e2b29] mb-2">{pkg.titleAr}</h3>
+                <p className="font-mono text-[10px] text-[#147050]">{durationLabel(pkg.duration)}</p>
+                <h3 className="mt-2 text-xl font-bold text-[#1e2b29] mb-2">{language === 'ar' ? pkg.titleAr : pkg.title}</h3>
               <div className="mb-6">
                  <span className="text-4xl font-black text-[#147050]">{pkg.price}</span>
-                 <span className="mr-2 text-xs font-bold text-[#68756f]">جنيه</span>
+                  <span className="mr-2 text-xs font-bold text-[#68756f]">{t('جنيه', 'EGP')}</span>
               </div>
 
               <div className="space-y-4 mb-8">
                 <div className="flex items-center gap-3">
                   <Check className="w-4 h-4 text-[#147050]" />
-                  <span className="text-sm text-[#53615c]">{pkg.lessons} حصة مباشرة</span>
+                   <span className="text-sm text-[#53615c]">{t(`${pkg.lessons} حصة مباشرة`, `${pkg.lessons} live lessons`)}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Check className="w-4 h-4 text-[#147050]" />
-                  <span className="text-sm text-[#53615c]">مدة البرنامج {pkg.duration}</span>
+                   <span className="text-sm text-[#53615c]">{t(`مدة البرنامج ${durationLabel(pkg.duration)}`, `Program duration: ${durationLabel(pkg.duration)}`)}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Check className="w-4 h-4 text-[#147050]" />
-                  <span className="text-sm text-[#53615c]">{tier === 'GOLD' ? 'حصص خاصة فردية' : 'حصص تفاعلية جماعية'}</span>
+                   <span className="text-sm text-[#53615c]">{tier === 'GOLD' ? t('حصص خاصة فردية', 'Private one-to-one lessons') : t('حصص تفاعلية جماعية', 'Interactive group lessons')}</span>
                 </div>
               </div>
 
@@ -96,7 +103,7 @@ export default function PackagesPage() {
                      : 'bg-[#147050] hover:bg-[#0e5940]'
                 }`}
               >
-                ابدأ الآن
+                {t('ابدأ الآن', 'Get started')}
               </Link>
             </div>
           ))}

@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 import { Award, Star, Flame, Trophy, Medal, ArrowRight, Filter } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import GamificationHeader from '@/components/gamification/GamificationHeader'
@@ -34,6 +36,8 @@ interface Stats {
 }
 
 export default function AchievementsPage() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const router = useRouter()
   const [badges, setBadges] = useState<Badge[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
@@ -74,10 +78,10 @@ export default function AchievementsPage() {
   }
 
   const categories = [
-    { id: 'all', label: 'الكل' },
-    { id: 'STREAK', label: 'السلسلة' },
-    { id: 'LEARNING', label: 'التعلم' },
-    { id: 'ACHIEVEMENT', label: 'الإنجازات' },
+    { id: 'all', label: t('الكل', 'All') },
+    { id: 'STREAK', label: t('السلسلة', 'Streaks') },
+    { id: 'LEARNING', label: t('التعلم', 'Learning') },
+    { id: 'ACHIEVEMENT', label: t('الإنجازات', 'Achievements') },
   ]
 
   const filteredBadges = badges.filter(badge => {
@@ -103,7 +107,7 @@ export default function AchievementsPage() {
             <Award className="w-6 h-6 text-purple-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">الإنجازات والشارات</h1>
+            <h1 className="text-2xl font-bold text-gray-800">{t('الإنجازات والشارات', 'Achievements & badges')}</h1>
             <p className="text-sm text-gray-500">Achievements & Badges</p>
           </div>
         </div>
@@ -137,7 +141,7 @@ export default function AchievementsPage() {
 
             <div className="bg-white rounded-2xl p-6 shadow-lg mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800">تقدم الشارات</h2>
+                <h2 className="text-xl font-bold text-gray-800">{t('تقدم الشارات', 'Badge progress')}</h2>
                 <span className="text-lg font-bold text-purple-600">
                   {earnedCount}/{totalCount}
                 </span>
@@ -150,7 +154,7 @@ export default function AchievementsPage() {
                 />
               </div>
               <p className="text-sm text-gray-500 text-center">
-                حصلت على {earnedPercentage}% من الشارات
+                {t(`حصلت على ${earnedPercentage}% من الشارات`, `You have earned ${earnedPercentage}% of badges`)}
               </p>
             </div>
 
@@ -165,7 +169,7 @@ export default function AchievementsPage() {
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
-                    الكل
+                    {t('الكل', 'All')}
                   </button>
                   <button
                     onClick={() => setFilter('earned')}
@@ -175,7 +179,7 @@ export default function AchievementsPage() {
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
-                    المكتسبة
+                    {t('المكتسبة', 'Earned')}
                   </button>
                   <button
                     onClick={() => setFilter('locked')}
@@ -185,7 +189,7 @@ export default function AchievementsPage() {
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
-                    المقفلة
+                    {t('المقفلة', 'Locked')}
                   </button>
                 </div>
                 
@@ -227,8 +231,8 @@ export default function AchievementsPage() {
             {filteredBadges.length === 0 && (
               <div className="text-center py-12">
                 <Award className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-600">لا توجد شارات</h3>
-                <p className="text-gray-500">جرب تغيير الفلتر لرؤية شارات أخرى</p>
+                <h3 className="text-xl font-bold text-gray-600">{t('لا توجد شارات', 'No badges')}</h3>
+                <p className="text-gray-500">{t('جرّب تغيير الفلتر لرؤية شارات أخرى', 'Try changing the filter to see other badges')}</p>
               </div>
             )}
           </>

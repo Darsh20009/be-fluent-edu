@@ -1,8 +1,14 @@
+'use client'
+
 import Link from 'next/link'
 import ThemeToggle from '@/components/ThemeToggle'
+import LanguageToggle from '@/components/LanguageToggle'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 import styles from './phase4.module.css'
 
 export function Phase4Nav({ area }: { area: 'admin' | 'manager' | 'teacher' | 'student' }) {
+  const { language } = useTheme()
   const adminLinks = [
     ['/dashboard/admin/classes', 'Classes'],
     ['/dashboard/admin/feedback', 'Feedback'],
@@ -18,17 +24,20 @@ export function Phase4Nav({ area }: { area: 'admin' | 'manager' | 'teacher' | 's
   const links = area === 'admin'
     ? [...adminLinks, ['/dashboard/admin', 'Legacy overview'] as const]
     : area === 'manager'
-      ? adminLinks
+      ? adminLinks.map(([href, label], index) => [
+          href,
+          localeText(language, ['الحصص', 'ملاحظات الحصص', 'الواجبات', 'مركز التحكم', 'الأشخاص', 'المستويات', 'ذكاء التعلّم', 'المجتمع', 'التواصل'][index], label),
+        ] as const)
     : area === 'teacher'
        ? [
-           ['/dashboard/teacher/classes', 'My classes'],
+           ['/dashboard/teacher/classes', localeText(language, 'حصصي', 'My classes')],
            ['/dashboard/teacher/classes?view=QMeet', 'QMeet'],
-           ['/dashboard/teacher/feedback', 'Feedback'],
-           ['/dashboard/teacher/homework', 'Homework'],
-           ['/dashboard/teacher/students', 'My students'],
-           ['/dashboard/teacher/intelligence', 'Learning intelligence'],
-           ['/dashboard/teacher/speaking', 'Speaking'],
-           ['/dashboard/teacher', 'Legacy dashboard'],
+           ['/dashboard/teacher/feedback', localeText(language, 'ملاحظات الحصص', 'Feedback')],
+           ['/dashboard/teacher/homework', localeText(language, 'الواجبات', 'Homework')],
+           ['/dashboard/teacher/students', localeText(language, 'طلابي', 'My students')],
+           ['/dashboard/teacher/intelligence', localeText(language, 'ذكاء التعلّم', 'Learning intelligence')],
+           ['/dashboard/teacher/speaking', localeText(language, 'التحدث', 'Speaking')],
+           ['/dashboard/teacher', localeText(language, 'لوحة المعلم', 'Teacher dashboard')],
          ]
         : [
             ['/dashboard/student', 'Home'],
@@ -43,13 +52,14 @@ export function Phase4Nav({ area }: { area: 'admin' | 'manager' | 'teacher' | 's
 
   const labels = {
     admin: 'Admin navigation',
-    manager: 'Manager navigation',
-    teacher: 'Teacher navigation',
+    manager: localeText(language, 'تنقل المدير', 'Manager navigation'),
+    teacher: localeText(language, 'تنقل المعلم', 'Teacher navigation'),
     student: 'Student navigation',
   }
 
   return <nav className={styles.nav} aria-label={labels[area]}>
     {links.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}
+    {(area === 'manager' || area === 'teacher') && <LanguageToggle />}
     <ThemeToggle />
   </nav>
 }

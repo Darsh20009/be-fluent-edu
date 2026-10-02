@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
 import { Trophy, Flame, Star, Medal, Crown, ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import GamificationHeader from '@/components/gamification/GamificationHeader'
@@ -17,6 +19,8 @@ interface LeaderboardEntry {
 }
 
 export default function LeaderboardPage() {
+  const { language } = useTheme()
+  const t = (ar: string, en: string) => localeText(language, ar, en)
   const router = useRouter()
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -86,7 +90,7 @@ export default function LeaderboardPage() {
             <Trophy className="w-6 h-6 text-yellow-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">لوحة المتصدرين</h1>
+            <h1 className="text-2xl font-bold text-gray-800">{t('لوحة المتصدرين', 'Leaderboard')}</h1>
             <p className="text-sm text-gray-500">Leaderboard</p>
           </div>
         </div>
@@ -103,7 +107,7 @@ export default function LeaderboardPage() {
             }`}
           >
             <Star className="w-5 h-5" />
-            <span>نقاط الخبرة</span>
+            <span>{t('نقاط الخبرة', 'Experience points')}</span>
           </button>
           <button
             onClick={() => setType('streak')}
@@ -114,7 +118,7 @@ export default function LeaderboardPage() {
             }`}
           >
             <Flame className="w-5 h-5" />
-            <span>السلسلة</span>
+            <span>{t('السلسلة', 'Streak')}</span>
           </button>
           <button
             onClick={() => setType('level')}
@@ -125,7 +129,7 @@ export default function LeaderboardPage() {
             }`}
           >
             <Trophy className="w-5 h-5" />
-            <span>المستوى</span>
+            <span>{t('المستوى', 'Level')}</span>
           </button>
         </div>
 
@@ -135,17 +139,17 @@ export default function LeaderboardPage() {
               <div className="flex items-center gap-3">
                 <span className="text-2xl font-bold text-blue-600">#{userRank}</span>
                 <div>
-                  <p className="font-medium text-gray-800">ترتيبك الحالي</p>
+                  <p className="font-medium text-gray-800">{t('ترتيبك الحالي', 'Your current ranking')}</p>
                   <p className="text-sm text-gray-500">
                     {type === 'xp' && `${userStats.totalXP.toLocaleString()} XP`}
-                    {type === 'streak' && `${userStats.currentStreak} يوم`}
-                    {type === 'level' && `المستوى ${userStats.currentLevel}`}
+                    {type === 'streak' && t(`${userStats.currentStreak} يوم`, `${userStats.currentStreak} days`)}
+                    {type === 'level' && t(`المستوى ${userStats.currentLevel}`, `Level ${userStats.currentLevel}`)}
                   </p>
                 </div>
               </div>
               {userRank > 1 && (
                 <p className="text-sm text-gray-500">
-                  استمر للوصول إلى المركز الأول.
+                  {t('استمر للوصول إلى المركز الأول.', 'Keep going to reach the top spot.')}
                 </p>
               )}
             </div>
@@ -179,7 +183,7 @@ export default function LeaderboardPage() {
 
                 <div className="flex-1">
                   <h3 className="font-bold text-gray-800">{entry.name}</h3>
-                  <p className="text-sm text-gray-500">{entry.levelTitle} • المستوى {entry.currentLevel}</p>
+                  <p className="text-sm text-gray-500">{entry.levelTitle} • {t(`المستوى ${entry.currentLevel}`, `Level ${entry.currentLevel}`)}</p>
                 </div>
 
                 <div className="text-right">
@@ -192,13 +196,13 @@ export default function LeaderboardPage() {
                   {type === 'streak' && (
                     <div className="flex items-center gap-1 text-orange-600">
                       <Flame className="w-5 h-5" />
-                      <span className="font-bold">{entry.currentStreak} يوم</span>
+                      <span className="font-bold">{t(`${entry.currentStreak} يوم`, `${entry.currentStreak} days`)}</span>
                     </div>
                   )}
                   {type === 'level' && (
                     <div className="flex items-center gap-1 text-blue-600">
                       <Trophy className="w-5 h-5" />
-                      <span className="font-bold">المستوى {entry.currentLevel}</span>
+                      <span className="font-bold">{t(`المستوى ${entry.currentLevel}`, `Level ${entry.currentLevel}`)}</span>
                     </div>
                   )}
                 </div>
@@ -210,8 +214,8 @@ export default function LeaderboardPage() {
         {!loading && leaderboard.length === 0 && (
           <div className="text-center py-12">
             <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-600">لا يوجد متصدرين بعد</h3>
-            <p className="text-gray-500">كن أول من يتصدر القائمة!</p>
+            <h3 className="text-xl font-bold text-gray-600">{t('لا يوجد متصدرون بعد', 'No leaders yet')}</h3>
+            <p className="text-gray-500">{t('كن أول من يتصدر القائمة!', 'Be the first to top the leaderboard!')}</p>
           </div>
         )}
       </div>

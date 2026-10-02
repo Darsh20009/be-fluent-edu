@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import Link from 'next/link'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeDirection, localeText } from '@/lib/locale'
 import {
   ArrowLeft,
   BookOpen,
@@ -83,17 +85,17 @@ function makeKey(sessionId: string, studentId: string) {
   return `${sessionId}:${studentId}`
 }
 
-function formatDate(value?: string) {
+function formatDate(value: string | undefined, language: 'ar' | 'en') {
   if (!value) return ''
   const date = new Date(value)
-  return Number.isNaN(date.valueOf()) ? '' : date.toLocaleString('ar-SA', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
+  return Number.isNaN(date.valueOf()) ? '' : date.toLocaleString(language === 'ar' ? 'ar-SA' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
 }
 
-function statusText(status?: string) {
-  if (status === 'PUBLISHED') return 'منشور'
-  if (status === 'READY_TO_PUBLISH') return 'جاهز للمراجعة'
-  if (status === 'DRAFT') return 'مسودة'
-  return 'لم يبدأ'
+function statusText(status: string | undefined, language: 'ar' | 'en') {
+  if (status === 'PUBLISHED') return localeText(language, 'منشور', 'Published')
+  if (status === 'READY_TO_PUBLISH') return localeText(language, 'جاهز للمراجعة', 'Ready for review')
+  if (status === 'DRAFT') return localeText(language, 'مسودة', 'Draft')
+  return localeText(language, 'لم يبدأ', 'Not started')
 }
 
 function recordToDraft(record?: FeedbackRecord): Draft {
@@ -203,6 +205,7 @@ function Section({
   disabled: boolean
   children: ReactNode
 }) {
+  const { language } = useTheme()
   return (
     <section className="rounded-2xl border p-4 sm:p-5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -213,7 +216,7 @@ function Section({
           </div>
           <p className="mt-1 text-xs leading-5" style={{ color: 'var(--muted)' }}>{note}</p>
         </div>
-        {!disabled && <button type="button" onClick={onAdd} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 text-xs font-bold" style={{ background: 'var(--bf-green-soft)', color: 'var(--primary)' }}><Plus size={15} aria-hidden="true" />إضافة</button>}
+         {!disabled && <button type="button" onClick={onAdd} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 text-xs font-bold" style={{ background: 'var(--bf-green-soft)', color: 'var(--primary)' }}><Plus size={15} aria-hidden="true" />{localeText(language, 'إضافة', 'Add')}</button>}
       </div>
       <div className="mt-4 space-y-3">{children}</div>
     </section>
@@ -225,6 +228,7 @@ function EmptyRows({ children }: { children: ReactNode }) {
 }
 
 export default function TeacherFeedbackWorkspace() {
+  const { language } = useTheme()
   const [sessions, setSessions] = useState<Session[]>([])
   const [records, setRecords] = useState<FeedbackRecord[]>([])
   const [sessionsState, setSessionsState] = useState<RequestState>('loading')
@@ -271,11 +275,11 @@ export default function TeacherFeedbackWorkspace() {
         return {
           session,
           studentId,
-          studentName: participant.user?.name || 'طالب',
+          studentName: participant.user?.name || localeText(language, 'طالب', 'Student'),
         }
       })
       .filter((item): item is StudentSession => Boolean(item)))
-    .sort((left, right) => new Date(right.session.startTime || 0).valueOf() - new Date(left.session.startTime || 0).valueOf()), [sessions])
+    .sort((left, right) => new Date(right.session.startTime || 0).valueOf() - new Date(left.session.startTime || 0).valueOf()), [language, sessions])
 
   useEffect(() => {
     if (!sessionStudents.length) return
@@ -371,13 +375,13 @@ export default function TeacherFeedbackWorkspace() {
     const body = await response.json().catch(() => null)
     if (!response.ok) {
       const envelope = body && typeof body === 'object' ? body as { error?: { message?: string } } : undefined
-      throw new Error(envelope?.error?.message || `تعذر تحديث حالة الملاحظة (${response.status}).`)
+      throw new Error(envelope?.error?.message || localeText(language, `تعذر تحديث حالة الملاحظة (${response.status}).`, `Could not update feedback status (${response.status}).`))
     }
     return body as Partial<FeedbackRecord>
   }
 
   const saveUpsert = async () => {
-    if (!selected) throw new Error('اختر حصة وطالباً أولاً.')
+    if (!selected) throw new Error(localeText(language, 'اختر حصة وطالباً أولاً.', 'Choose a session and student first.'))
     const response = await fetch('/api/teacher/feedback', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -386,7 +390,7 @@ export default function TeacherFeedbackWorkspace() {
     const body = await response.json().catch(() => null)
     if (!response.ok) {
       const envelope = body && typeof body === 'object' ? body as { error?: { message?: string } } : undefined
-      throw new Error(envelope?.error?.message || `تعذر حفظ الملاحظة (${response.status}).`)
+      throw new Error(envelope?.error?.message || localeText(language, `تعذر حفظ الملاحظة (${response.status}).`, `Could not save feedback (${response.status}).`))
     }
     return body as FeedbackRecord
   }
@@ -408,9 +412,9 @@ export default function TeacherFeedbackWorkspace() {
       const saved = await saveUpsert()
       const local = { ...saved, status: 'DRAFT' }
       replaceRecord(local)
-      setNotice({ kind: 'success', text: 'حُفظت المسودة.' })
+      setNotice({ kind: 'success', text: localeText(language, 'حُفظت المسودة.', 'Draft saved.') })
     } catch (error) {
-      setNotice({ kind: 'error', text: error instanceof Error ? error.message : 'تعذر حفظ المسودة.' })
+      setNotice({ kind: 'error', text: error instanceof Error ? error.message : localeText(language, 'تعذر حفظ المسودة.', 'Could not save the draft.') })
     } finally {
       setBusy(false)
     }
@@ -419,7 +423,7 @@ export default function TeacherFeedbackWorkspace() {
   const prepareToPublish = async () => {
     if (!selected || published) return
     if (!isEducationalContentPresent) {
-      setNotice({ kind: 'error', text: 'أضف ملاحظة تعليمية واحدة على الأقل قبل الإرسال للمراجعة.' })
+      setNotice({ kind: 'error', text: localeText(language, 'أضف ملاحظة تعليمية واحدة على الأقل قبل الإرسال للمراجعة.', 'Add at least one learning note before submitting for review.') })
       return
     }
     setBusy(true)
@@ -430,9 +434,9 @@ export default function TeacherFeedbackWorkspace() {
       const ready = await transition(saved.id, 'READY_TO_PUBLISH')
       const next = { ...saved, ...ready, status: 'READY_TO_PUBLISH' }
       replaceRecord(next as FeedbackRecord)
-      setNotice({ kind: 'success', text: 'أُرسلت الملاحظة للمراجعة قبل النشر.' })
+      setNotice({ kind: 'success', text: localeText(language, 'أُرسلت الملاحظة للمراجعة قبل النشر.', 'Feedback submitted for review before publishing.') })
     } catch (error) {
-      setNotice({ kind: 'error', text: error instanceof Error ? error.message : 'تعذر تجهيز الملاحظة للنشر.' })
+      setNotice({ kind: 'error', text: error instanceof Error ? error.message : localeText(language, 'تعذر تجهيز الملاحظة للنشر.', 'Could not prepare feedback for publishing.') })
     } finally {
       setBusy(false)
     }
@@ -440,15 +444,15 @@ export default function TeacherFeedbackWorkspace() {
 
   const publish = async () => {
     if (!existing || existing.status !== 'READY_TO_PUBLISH') return
-    if (!window.confirm('هل تريد نشر هذه الملاحظة للطالب؟')) return
+    if (!window.confirm(localeText(language, 'هل تريد نشر هذه الملاحظة للطالب؟', 'Publish this feedback for the student?'))) return
     setBusy(true)
     setNotice(null)
     try {
       const result = await transition(existing.id, 'PUBLISHED')
       replaceRecord({ ...existing, ...result, status: 'PUBLISHED' })
-      setNotice({ kind: 'success', text: 'نُشرت الملاحظة للطالب.' })
+      setNotice({ kind: 'success', text: localeText(language, 'نُشرت الملاحظة للطالب.', 'Feedback published for the student.') })
     } catch (error) {
-      setNotice({ kind: 'error', text: error instanceof Error ? error.message : 'تعذر نشر الملاحظة.' })
+      setNotice({ kind: 'error', text: error instanceof Error ? error.message : localeText(language, 'تعذر نشر الملاحظة.', 'Could not publish feedback.') })
     } finally {
       setBusy(false)
     }
@@ -458,31 +462,31 @@ export default function TeacherFeedbackWorkspace() {
   const cardStyle = { background: 'var(--surface)', color: 'var(--foreground)', borderColor: 'var(--border)' }
 
   return (
-    <div className="space-y-5" dir="rtl">
+    <div className="space-y-5" dir={localeDirection(language)}>
       <section className="grid gap-4 xl:grid-cols-[minmax(280px,.78fr)_minmax(0,1.22fr)]">
         <aside className="overflow-hidden rounded-2xl border" style={cardStyle}>
           <div className="border-b p-4 sm:p-5" style={{ borderColor: 'var(--border)' }}>
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="font-bold">الحصص المكتملة</h2>
-                <p className="mt-1 text-xs leading-5" style={{ color: 'var(--muted)' }}>اختر طالباً لكتابة ملاحظته التعليمية.</p>
+                <h2 className="font-bold">{localeText(language, 'الحصص المكتملة', 'Completed sessions')}</h2>
+                <p className="mt-1 text-xs leading-5" style={{ color: 'var(--muted)' }}>{localeText(language, 'اختر طالباً لكتابة ملاحظته التعليمية.', 'Choose a student to write their learning feedback.')}</p>
               </div>
               <span className="rounded-full px-2.5 py-1 text-xs font-bold tabular-nums" style={{ background: 'var(--surface-muted)', color: 'var(--muted)' }}>{sessionStudents.length}</span>
             </div>
             <label className="mt-4 block">
-              <span className="sr-only">ابحث عن طالب أو حصة</span>
-              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="ابحث عن طالب أو حصة" className="min-h-11 w-full rounded-xl border px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]" style={{ background: 'var(--surface)', color: 'var(--foreground)', borderColor: 'var(--border)' }} />
+               <span className="sr-only">{localeText(language, 'ابحث عن طالب أو حصة', 'Search students or sessions')}</span>
+               <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={localeText(language, 'ابحث عن طالب أو حصة', 'Search students or sessions')} className="min-h-11 w-full rounded-xl border px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]" style={{ background: 'var(--surface)', color: 'var(--foreground)', borderColor: 'var(--border)' }} />
             </label>
           </div>
           <div className="max-h-[620px] space-y-1 overflow-y-auto p-2">
             {sessionsState === 'loading' && <div className="space-y-2 p-2" aria-busy="true">{[0, 1, 2].map((item) => <div key={item} className="h-[82px] animate-pulse rounded-xl" style={{ background: 'var(--surface-muted)' }} />)}</div>}
-            {sessionsState === 'error' && <div className="p-4 text-sm leading-6" role="alert" style={{ color: 'var(--muted)' }}>تعذر تحميل الحصص. <button type="button" onClick={() => setRetryKey((key) => key + 1)} className="font-bold underline" style={{ color: 'var(--primary)' }}>إعادة المحاولة</button></div>}
+            {sessionsState === 'error' && <div className="p-4 text-sm leading-6" role="alert" style={{ color: 'var(--muted)' }}>{localeText(language, 'تعذر تحميل الحصص.', 'Could not load sessions.')} <button type="button" onClick={() => setRetryKey((key) => key + 1)} className="font-bold underline" style={{ color: 'var(--primary)' }}>{localeText(language, 'إعادة المحاولة', 'Retry')}</button></div>}
             {sessionsState === 'ready' && filteredStudents.length === 0 && (
               <div className="p-6 text-center">
                 <span className="mx-auto grid h-10 w-10 place-items-center rounded-xl" style={{ background: 'var(--bf-green-soft)', color: 'var(--primary)' }}><CheckCircle2 size={19} aria-hidden="true" /></span>
-                <p className="mt-3 text-sm font-bold">{sessionStudents.length ? 'لا توجد نتائج مطابقة' : 'لا توجد حصة مكتملة'}</p>
-                <p className="mt-1 text-xs leading-5" style={{ color: 'var(--muted)' }}>{sessionStudents.length ? 'جرّب اسماً أو عنواناً آخر.' : 'ستظهر هنا الحصص المؤهلة بعد انتهائها.'}</p>
-                {!sessionStudents.length && <Link href="/dashboard/teacher/classes" className="mt-3 inline-flex min-h-10 items-center gap-2 text-xs font-bold" style={{ color: 'var(--primary)' }}>إدارة الحصص <ArrowLeft size={14} aria-hidden="true" /></Link>}
+                <p className="mt-3 text-sm font-bold">{sessionStudents.length ? localeText(language, 'لا توجد نتائج مطابقة', 'No matching results') : localeText(language, 'لا توجد حصة مكتملة', 'No completed sessions')}</p>
+                <p className="mt-1 text-xs leading-5" style={{ color: 'var(--muted)' }}>{sessionStudents.length ? localeText(language, 'جرّب اسماً أو عنواناً آخر.', 'Try another name or title.') : localeText(language, 'ستظهر هنا الحصص المؤهلة بعد انتهائها.', 'Eligible sessions will appear here when they end.')}</p>
+                {!sessionStudents.length && <Link href="/dashboard/teacher/classes" className="mt-3 inline-flex min-h-10 items-center gap-2 text-xs font-bold" style={{ color: 'var(--primary)' }}>{localeText(language, 'إدارة الحصص', 'Manage sessions')} <ArrowLeft size={14} aria-hidden="true" /></Link>}
               </div>
             )}
             {filteredStudents.map((item) => {
@@ -490,15 +494,15 @@ export default function TeacherFeedbackWorkspace() {
               const record = records.find((entry) => makeKey(entry.sessionId, entry.studentId) === key)
               const active = key === selectedKey
               return (
-                <button key={key} type="button" onClick={() => setSelectedKey(key)} aria-pressed={active} className="w-full rounded-xl border p-3 text-right transition-colors" style={{ background: active ? 'var(--bf-green-soft)' : 'transparent', color: 'var(--foreground)', borderColor: active ? 'var(--primary)' : 'transparent' }}>
+                <button key={key} type="button" onClick={() => setSelectedKey(key)} aria-pressed={active} className="w-full rounded-xl border p-3 text-start transition-colors" style={{ background: active ? 'var(--bf-green-soft)' : 'transparent', color: 'var(--foreground)', borderColor: active ? 'var(--primary)' : 'transparent' }}>
                   <span className="flex items-start justify-between gap-2">
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-bold">{item.studentName}</span>
-                      <span className="mt-1 block truncate text-xs" style={{ color: 'var(--muted)' }}>{item.session.title || 'حصة تعليمية'}</span>
+                       <span className="mt-1 block truncate text-xs" style={{ color: 'var(--muted)' }}>{item.session.title || localeText(language, 'حصة تعليمية', 'Class session')}</span>
                     </span>
-                    <span className="mt-0.5 shrink-0 text-[10px] font-semibold" style={{ color: record?.status === 'PUBLISHED' ? 'var(--primary)' : 'var(--muted)' }}>{statusText(record?.status)}</span>
+                     <span className="mt-0.5 shrink-0 text-[10px] font-semibold" style={{ color: record?.status === 'PUBLISHED' ? 'var(--primary)' : 'var(--muted)' }}>{statusText(record?.status, language)}</span>
                   </span>
-                  <span className="mt-2 flex items-center gap-1.5 text-[11px]" style={{ color: 'var(--muted)' }}><Clock3 size={13} aria-hidden="true" />{formatDate(item.session.startTime)}</span>
+                     <span className="mt-2 flex items-center gap-1.5 text-[11px]" style={{ color: 'var(--muted)' }}><Clock3 size={13} aria-hidden="true" />{formatDate(item.session.startTime, language)}</span>
                 </button>
               )
             })}
@@ -510,8 +514,8 @@ export default function TeacherFeedbackWorkspace() {
             <div className="grid min-h-[420px] place-items-center p-6 text-center">
               <div>
                 <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl" style={{ background: 'var(--bf-green-soft)', color: 'var(--primary)' }}><BookOpen size={22} aria-hidden="true" /></span>
-                <h2 className="mt-4 font-bold">اختر حصة من القائمة</h2>
-                <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>ستظهر تفاصيل الطالب ومحرر الملاحظات هنا.</p>
+                 <h2 className="mt-4 font-bold">{localeText(language, 'اختر حصة من القائمة', 'Choose a session from the list')}</h2>
+                 <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>{localeText(language, 'ستظهر تفاصيل الطالب ومحرر الملاحظات هنا.', 'Student details and the feedback editor will appear here.')}</p>
               </div>
             </div>
           ) : (
@@ -519,121 +523,121 @@ export default function TeacherFeedbackWorkspace() {
               <header className="border-b p-4 sm:p-6" style={{ borderColor: 'var(--border)' }}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-xs font-bold" style={{ color: 'var(--primary)' }}>ملاحظة الحصة</p>
+                     <p className="text-xs font-bold" style={{ color: 'var(--primary)' }}>{localeText(language, 'ملاحظة الحصة', 'Session feedback')}</p>
                     <h2 className="mt-1 truncate text-xl font-bold">{selected.studentName}</h2>
-                    <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>{selected.session.title || 'حصة تعليمية'}{selected.session.group?.nameAr || selected.session.group?.name ? ` · ${selected.session.group.nameAr || selected.session.group.name}` : ''}</p>
-                    <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>{formatDate(selected.session.startTime)}</p>
+                     <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>{selected.session.title || localeText(language, 'حصة تعليمية', 'Class session')}{selected.session.group?.nameAr || selected.session.group?.name ? ` · ${selected.session.group.nameAr || selected.session.group.name}` : ''}</p>
+                     <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>{formatDate(selected.session.startTime, language)}</p>
                   </div>
                   <span className="inline-flex min-h-9 items-center gap-2 rounded-full px-3 text-xs font-bold" style={{ background: existing?.status === 'PUBLISHED' ? 'var(--bf-green-soft)' : 'var(--surface-muted)', color: existing?.status === 'PUBLISHED' ? 'var(--primary)' : 'var(--muted)' }}>
                     {existing?.status === 'PUBLISHED' ? <CheckCircle2 size={15} aria-hidden="true" /> : <Circle size={13} aria-hidden="true" />}
-                    {statusText(existing?.status)}
+                     {statusText(existing?.status, language)}
                   </span>
                 </div>
               </header>
 
               <div className="space-y-4 p-4 sm:p-6">
-                {recordsState === 'error' && <p role="alert" className="rounded-xl border p-3 text-sm" style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>تعذر تحميل الملاحظات المحفوظة. لن نستبدلها بمحتوى غير مؤكد. <button type="button" className="font-bold underline" style={{ color: 'var(--primary)' }} onClick={() => setRetryKey((key) => key + 1)}>إعادة المحاولة</button></p>}
-                {recordsState === 'loading' && <p className="rounded-xl border p-3 text-sm" style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>جارٍ تحميل الملاحظات المحفوظة…</p>}
-                {published && <p className="rounded-xl border px-4 py-3 text-sm leading-6" style={{ borderColor: 'var(--border)', background: 'var(--surface-muted)', color: 'var(--muted)' }}>هذه الملاحظة منشورة ولا تسمح حالتها الحالية بالتعديل.</p>}
+                {recordsState === 'error' && <p role="alert" className="rounded-xl border p-3 text-sm" style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>{localeText(language, 'تعذر تحميل الملاحظات المحفوظة. لن نستبدلها بمحتوى غير مؤكد.', 'Saved feedback could not be loaded. It will not be replaced with unverified content.')} <button type="button" className="font-bold underline" style={{ color: 'var(--primary)' }} onClick={() => setRetryKey((key) => key + 1)}>{localeText(language, 'إعادة المحاولة', 'Retry')}</button></p>}
+                {recordsState === 'loading' && <p className="rounded-xl border p-3 text-sm" style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>{localeText(language, 'جارٍ تحميل الملاحظات المحفوظة…', 'Loading saved feedback…')}</p>}
+                {published && <p className="rounded-xl border px-4 py-3 text-sm leading-6" style={{ borderColor: 'var(--border)', background: 'var(--surface-muted)', color: 'var(--muted)' }}>{localeText(language, 'هذه الملاحظة منشورة ولا تسمح حالتها الحالية بالتعديل.', 'This feedback is published and cannot be edited in its current state.')}</p>}
                 {notice && <p role={notice.kind === 'error' ? 'alert' : 'status'} className="rounded-xl border px-4 py-3 text-sm leading-6" style={{ borderColor: 'var(--border)', background: notice.kind === 'error' ? 'var(--surface-muted)' : 'var(--bf-green-soft)', color: notice.kind === 'error' ? 'var(--muted)' : 'var(--primary)' }}>{notice.text}</p>}
                 <section className="rounded-2xl border p-4 sm:p-5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
                   <div className="mb-4 flex items-center gap-2">
                     <span className="grid h-8 w-8 place-items-center rounded-lg" style={{ background: 'var(--bf-green-soft)', color: 'var(--primary)' }}><Check size={16} aria-hidden="true" /></span>
                     <div>
-                      <h3 className="text-sm font-bold">ملخص الحصة</h3>
-                      <p className="mt-0.5 text-xs" style={{ color: 'var(--muted)' }}>ملاحظة موجزة تساعد الطالب على معرفة ما أتقنه.</p>
+                       <h3 className="text-sm font-bold">{localeText(language, 'ملخص الحصة', 'Session summary')}</h3>
+                       <p className="mt-0.5 text-xs" style={{ color: 'var(--muted)' }}>{localeText(language, 'ملاحظة موجزة تساعد الطالب على معرفة ما أتقنه.', 'A brief note to help the student understand what they have mastered.')}</p>
                     </div>
                   </div>
-                  <Field label="ملخص تعليمي" value={draft.summary} onChange={(value) => setField('summary', value)} placeholder="اكتب ملاحظة عملية ومحددة..." multiline rows={4} disabled={editorUnavailable} />
+                   <Field label={localeText(language, 'ملخص تعليمي', 'Learning summary')} value={draft.summary} onChange={(value) => setField('summary', value)} placeholder={localeText(language, 'اكتب ملاحظة عملية ومحددة...', 'Write a practical, specific note...')} multiline rows={4} disabled={editorUnavailable} />
                 </section>
 
-                <Section title="مفردات وتعبيرات" note="عبارات جديدة ومعناها ومثال على استخدامها." count={draft.expressions.length} disabled={editorUnavailable} onAdd={() => setField('expressions', [...draft.expressions, { expression: '', meaning: '', example: '', category: 'VOCABULARY' }])}>
+                <Section title={localeText(language, 'مفردات وتعبيرات', 'Vocabulary and expressions')} note={localeText(language, 'عبارات جديدة ومعناها ومثال على استخدامها.', 'New expressions, their meanings, and an example of how to use them.')} count={draft.expressions.length} disabled={editorUnavailable} onAdd={() => setField('expressions', [...draft.expressions, { expression: '', meaning: '', example: '', category: 'VOCABULARY' }])}>
                   {draft.expressions.map((item, index) => <div key={`expression-${index}`} className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--surface-muted)' }}>
-                    <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('expressions', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label="حذف التعبير" style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
+                     <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('expressions', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label={localeText(language, 'حذف التعبير', 'Delete expression')} style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <Field label="التعبير" value={item.expression} onChange={(value) => updateRow<Expression, 'expressions'>('expressions', index, 'expression', value)} disabled={editorUnavailable} />
-                      <Field label="المعنى" value={item.meaning} onChange={(value) => updateRow<Expression, 'expressions'>('expressions', index, 'meaning', value)} disabled={editorUnavailable} />
-                      <div className="sm:col-span-2"><Field label="مثال" value={item.example} onChange={(value) => updateRow<Expression, 'expressions'>('expressions', index, 'example', value)} disabled={editorUnavailable} /></div>
+                       <Field label={localeText(language, 'التعبير', 'Expression')} value={item.expression} onChange={(value) => updateRow<Expression, 'expressions'>('expressions', index, 'expression', value)} disabled={editorUnavailable} />
+                       <Field label={localeText(language, 'المعنى', 'Meaning')} value={item.meaning} onChange={(value) => updateRow<Expression, 'expressions'>('expressions', index, 'meaning', value)} disabled={editorUnavailable} />
+                       <div className="sm:col-span-2"><Field label={localeText(language, 'مثال', 'Example')} value={item.example} onChange={(value) => updateRow<Expression, 'expressions'>('expressions', index, 'example', value)} disabled={editorUnavailable} /></div>
                     </div>
                   </div>)}
-                  {!draft.expressions.length && <EmptyRows>لم تُضف مفردات بعد.</EmptyRows>}
+                   {!draft.expressions.length && <EmptyRows>{localeText(language, 'لم تُضف مفردات بعد.', 'No vocabulary has been added yet.')}</EmptyRows>}
                 </Section>
 
-                <Section title="تعابير اصطلاحية" note="تُحفظ ضمن مكتبة التعبيرات مع تصنيفها كتعابير اصطلاحية." count={draft.idioms.length} disabled={editorUnavailable} onAdd={() => setField('idioms', [...draft.idioms, { expression: '', meaning: '', example: '', category: 'IDIOM' }])}>
+                <Section title={localeText(language, 'تعابير اصطلاحية', 'Idioms')} note={localeText(language, 'تُحفظ ضمن مكتبة التعبيرات مع تصنيفها كتعابير اصطلاحية.', 'Saved in the expression library as idioms.')} count={draft.idioms.length} disabled={editorUnavailable} onAdd={() => setField('idioms', [...draft.idioms, { expression: '', meaning: '', example: '', category: 'IDIOM' }])}>
                   {draft.idioms.map((item, index) => <div key={`idiom-${index}`} className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--surface-muted)' }}>
-                    <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('idioms', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label="حذف التعبير الاصطلاحي" style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
+                       <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('idioms', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label={localeText(language, 'حذف التعبير الاصطلاحي', 'Delete idiom')} style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <Field label="التعبير" value={item.expression} onChange={(value) => updateRow<Expression, 'idioms'>('idioms', index, 'expression', value)} disabled={editorUnavailable} />
-                      <Field label="المعنى" value={item.meaning} onChange={(value) => updateRow<Expression, 'idioms'>('idioms', index, 'meaning', value)} disabled={editorUnavailable} />
-                      <div className="sm:col-span-2"><Field label="مثال" value={item.example} onChange={(value) => updateRow<Expression, 'idioms'>('idioms', index, 'example', value)} disabled={editorUnavailable} /></div>
+                       <Field label={localeText(language, 'التعبير', 'Expression')} value={item.expression} onChange={(value) => updateRow<Expression, 'idioms'>('idioms', index, 'expression', value)} disabled={editorUnavailable} />
+                       <Field label={localeText(language, 'المعنى', 'Meaning')} value={item.meaning} onChange={(value) => updateRow<Expression, 'idioms'>('idioms', index, 'meaning', value)} disabled={editorUnavailable} />
+                       <div className="sm:col-span-2"><Field label={localeText(language, 'مثال', 'Example')} value={item.example} onChange={(value) => updateRow<Expression, 'idioms'>('idioms', index, 'example', value)} disabled={editorUnavailable} /></div>
                     </div>
                   </div>)}
-                  {!draft.idioms.length && <EmptyRows>لم تُضف تعابير اصطلاحية بعد.</EmptyRows>}
+                   {!draft.idioms.length && <EmptyRows>{localeText(language, 'لم تُضف تعابير اصطلاحية بعد.', 'No idioms have been added yet.')}</EmptyRows>}
                 </Section>
 
-                <Section title="تصحيحات لغوية" note="اعرض العبارة الأصلية والتصحيح مع توضيح مختصر." count={draft.mistakes.length} disabled={editorUnavailable} onAdd={() => setField('mistakes', [...draft.mistakes, { original: '', correction: '', explanation: '' }])}>
+                <Section title={localeText(language, 'تصحيحات لغوية', 'Language corrections')} note={localeText(language, 'اعرض العبارة الأصلية والتصحيح مع توضيح مختصر.', 'Show the original phrase, its correction, and a brief explanation.')} count={draft.mistakes.length} disabled={editorUnavailable} onAdd={() => setField('mistakes', [...draft.mistakes, { original: '', correction: '', explanation: '' }])}>
                   {draft.mistakes.map((item, index) => <div key={`mistake-${index}`} className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--surface-muted)' }}>
-                    <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('mistakes', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label="حذف التصحيح" style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
+                     <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('mistakes', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label={localeText(language, 'حذف التصحيح', 'Delete correction')} style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <Field label="ما قيل" value={item.original} onChange={(value) => updateRow<Mistake, 'mistakes'>('mistakes', index, 'original', value)} disabled={editorUnavailable} />
-                      <Field label="التصحيح" value={item.correction} onChange={(value) => updateRow<Mistake, 'mistakes'>('mistakes', index, 'correction', value)} disabled={editorUnavailable} />
-                      <div className="sm:col-span-2"><Field label="التوضيح" value={item.explanation} onChange={(value) => updateRow<Mistake, 'mistakes'>('mistakes', index, 'explanation', value)} disabled={editorUnavailable} /></div>
+                       <Field label={localeText(language, 'ما قيل', 'Original phrase')} value={item.original} onChange={(value) => updateRow<Mistake, 'mistakes'>('mistakes', index, 'original', value)} disabled={editorUnavailable} />
+                       <Field label={localeText(language, 'التصحيح', 'Correction')} value={item.correction} onChange={(value) => updateRow<Mistake, 'mistakes'>('mistakes', index, 'correction', value)} disabled={editorUnavailable} />
+                       <div className="sm:col-span-2"><Field label={localeText(language, 'التوضيح', 'Explanation')} value={item.explanation} onChange={(value) => updateRow<Mistake, 'mistakes'>('mistakes', index, 'explanation', value)} disabled={editorUnavailable} /></div>
                     </div>
                   </div>)}
-                  {!draft.mistakes.length && <EmptyRows>لم تُضف تصحيحات بعد.</EmptyRows>}
+                   {!draft.mistakes.length && <EmptyRows>{localeText(language, 'لم تُضف تصحيحات بعد.', 'No corrections have been added yet.')}</EmptyRows>}
                 </Section>
 
-                <Section title="النطق" note="وجّه الطالب إلى الصوت أو النبرة أو طريقة النطق المطلوبة." count={draft.pronunciation.length} disabled={editorUnavailable} onAdd={() => setField('pronunciation', [...draft.pronunciation, { target: '', actual: '', guidance: '', phonetic: '', teacherNote: '' }])}>
+                <Section title={localeText(language, 'النطق', 'Pronunciation')} note={localeText(language, 'وجّه الطالب إلى الصوت أو النبرة أو طريقة النطق المطلوبة.', 'Guide the student on the target sound, intonation, or pronunciation.')} count={draft.pronunciation.length} disabled={editorUnavailable} onAdd={() => setField('pronunciation', [...draft.pronunciation, { target: '', actual: '', guidance: '', phonetic: '', teacherNote: '' }])}>
                   {draft.pronunciation.map((item, index) => <div key={`pronunciation-${index}`} className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--surface-muted)' }}>
-                    <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('pronunciation', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label="حذف ملاحظة النطق" style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
+                     <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('pronunciation', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label={localeText(language, 'حذف ملاحظة النطق', 'Delete pronunciation note')} style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <Field label="الصوت أو الكلمة المستهدفة" value={item.target} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'target', value)} disabled={editorUnavailable} />
-                      <Field label="ما نُطق فعلياً" value={item.actual} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'actual', value)} disabled={editorUnavailable} />
-                      <Field label="الإرشاد" value={item.guidance} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'guidance', value)} disabled={editorUnavailable} />
-                      <Field label="التهجئة الصوتية" value={item.phonetic} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'phonetic', value)} disabled={editorUnavailable} />
-                      <div className="sm:col-span-2"><Field label="ملاحظة إضافية" value={item.teacherNote} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'teacherNote', value)} disabled={editorUnavailable} /></div>
+                       <Field label={localeText(language, 'الصوت أو الكلمة المستهدفة', 'Target sound or word')} value={item.target} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'target', value)} disabled={editorUnavailable} />
+                       <Field label={localeText(language, 'ما نُطق فعلياً', 'What was actually pronounced')} value={item.actual} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'actual', value)} disabled={editorUnavailable} />
+                       <Field label={localeText(language, 'الإرشاد', 'Guidance')} value={item.guidance} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'guidance', value)} disabled={editorUnavailable} />
+                       <Field label={localeText(language, 'التهجئة الصوتية', 'Phonetic spelling')} value={item.phonetic} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'phonetic', value)} disabled={editorUnavailable} />
+                       <div className="sm:col-span-2"><Field label={localeText(language, 'ملاحظة إضافية', 'Additional note')} value={item.teacherNote} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'teacherNote', value)} disabled={editorUnavailable} /></div>
                     </div>
                   </div>)}
-                  {!draft.pronunciation.length && <EmptyRows>لم تُضف ملاحظات نطق بعد.</EmptyRows>}
+                   {!draft.pronunciation.length && <EmptyRows>{localeText(language, 'لم تُضف ملاحظات نطق بعد.', 'No pronunciation notes have been added yet.')}</EmptyRows>}
                 </Section>
 
-                <Section title="ما يمكن تحسينه" note="اقتراح تعبير بديل مع شرح يساعد على تطوير الصياغة." count={draft.ebi.length} disabled={editorUnavailable} onAdd={() => setField('ebi', [...draft.ebi, { betterExpression: '', explanation: '', priority: 'NORMAL' }])}>
+                <Section title={localeText(language, 'ما يمكن تحسينه', 'Areas to improve')} note={localeText(language, 'اقتراح تعبير بديل مع شرح يساعد على تطوير الصياغة.', 'Suggest an alternative expression and explain how it improves the phrasing.')} count={draft.ebi.length} disabled={editorUnavailable} onAdd={() => setField('ebi', [...draft.ebi, { betterExpression: '', explanation: '', priority: 'NORMAL' }])}>
                   {draft.ebi.map((item, index) => <div key={`ebi-${index}`} className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--surface-muted)' }}>
-                    <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('ebi', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label="حذف اقتراح التحسين" style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
+                     <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('ebi', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label={localeText(language, 'حذف اقتراح التحسين', 'Delete improvement suggestion')} style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <Field label="التعبير الأفضل" value={item.betterExpression} onChange={(value) => updateRow<Ebi, 'ebi'>('ebi', index, 'betterExpression', value)} disabled={editorUnavailable} />
-                      <label className="block text-xs font-semibold" style={{ color: 'var(--muted)' }}>الأولوية
+                       <Field label={localeText(language, 'التعبير الأفضل', 'Improved expression')} value={item.betterExpression} onChange={(value) => updateRow<Ebi, 'ebi'>('ebi', index, 'betterExpression', value)} disabled={editorUnavailable} />
+                       <label className="block text-xs font-semibold" style={{ color: 'var(--muted)' }}>{localeText(language, 'الأولوية', 'Priority')}
                         <select value={item.priority} onChange={(event) => setDraft((current) => ({ ...current, ebi: current.ebi.map((row, rowIndex) => rowIndex === index ? { ...row, priority: event.target.value as Ebi['priority'] } : row) }))} disabled={editorUnavailable} className="mt-1.5 min-h-11 w-full rounded-xl border px-3 text-sm" style={{ background: 'var(--surface)', color: 'var(--foreground)', borderColor: 'var(--border)' }}>
-                          <option value="LOW">عادية</option><option value="NORMAL">متوسطة</option><option value="HIGH">مهمة</option>
+                           <option value="LOW">{localeText(language, 'عادية', 'Low')}</option><option value="NORMAL">{localeText(language, 'متوسطة', 'Medium')}</option><option value="HIGH">{localeText(language, 'مهمة', 'High')}</option>
                         </select>
                       </label>
-                      <div className="sm:col-span-2"><Field label="الشرح" value={item.explanation} onChange={(value) => updateRow<Ebi, 'ebi'>('ebi', index, 'explanation', value)} disabled={editorUnavailable} /></div>
+                       <div className="sm:col-span-2"><Field label={localeText(language, 'الشرح', 'Explanation')} value={item.explanation} onChange={(value) => updateRow<Ebi, 'ebi'>('ebi', index, 'explanation', value)} disabled={editorUnavailable} /></div>
                     </div>
                   </div>)}
-                  {!draft.ebi.length && <EmptyRows>لم تُضف اقتراحات تحسين بعد.</EmptyRows>}
+                   {!draft.ebi.length && <EmptyRows>{localeText(language, 'لم تُضف اقتراحات تحسين بعد.', 'No improvement suggestions have been added yet.')}</EmptyRows>}
                 </Section>
 
                 <section className="rounded-2xl border p-4 sm:p-5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-                  <h3 className="font-bold">ملاحظة خاصة للمدرس</h3>
-                  <p className="mt-1 text-xs leading-5" style={{ color: 'var(--muted)' }}>تبقى هذه الملاحظة ضمن سجل المدرس ولا تظهر للطالب.</p>
-                  <Field label="ملاحظات داخلية" value={draft.teacherNotes} onChange={(value) => setField('teacherNotes', value)} placeholder="ملاحظات للمتابعة لاحقاً..." multiline rows={3} disabled={editorUnavailable} />
+                   <h3 className="font-bold">{localeText(language, 'ملاحظة خاصة للمدرس', 'Private teacher note')}</h3>
+                   <p className="mt-1 text-xs leading-5" style={{ color: 'var(--muted)' }}>{localeText(language, 'تبقى هذه الملاحظة ضمن سجل المدرس ولا تظهر للطالب.', 'This note stays in the teacher record and is not shown to the student.')}</p>
+                   <Field label={localeText(language, 'ملاحظات داخلية', 'Internal notes')} value={draft.teacherNotes} onChange={(value) => setField('teacherNotes', value)} placeholder={localeText(language, 'ملاحظات للمتابعة لاحقاً...', 'Notes for later follow-up...')} multiline rows={3} disabled={editorUnavailable} />
                 </section>
 
                 <div className="sticky bottom-2 z-10 rounded-2xl border p-3 shadow-sm sm:p-4" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
                   <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
                     <button type="button" onClick={() => void saveDraft()} disabled={busy || editorUnavailable} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-bold disabled:opacity-50" style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}>
-                      <Save size={16} aria-hidden="true" />{busy ? 'جارٍ الحفظ…' : 'حفظ المسودة'}
+                      <Save size={16} aria-hidden="true" />{busy ? localeText(language, 'جارٍ الحفظ…', 'Saving…') : localeText(language, 'حفظ المسودة', 'Save draft')}
                     </button>
                     <div className="flex flex-col gap-2 sm:flex-row">
                       <button type="button" onClick={() => void prepareToPublish()} disabled={busy || editorUnavailable} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold text-white disabled:opacity-50" style={{ background: 'var(--primary)' }}>
-                        <CheckCircle2 size={16} aria-hidden="true" />إرسال للمراجعة
+                        <CheckCircle2 size={16} aria-hidden="true" />{localeText(language, 'إرسال للمراجعة', 'Submit for review')}
                       </button>
                       <button type="button" onClick={() => void publish()} disabled={busy || existing?.status !== 'READY_TO_PUBLISH'} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-bold disabled:opacity-50" style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}>
-                        <Send size={15} aria-hidden="true" />نشر للطالب
+                        <Send size={15} aria-hidden="true" />{localeText(language, 'نشر للطالب', 'Publish to student')}
                       </button>
                     </div>
                   </div>
-                  {existing?.status === 'READY_TO_PUBLISH' && <p className="mt-2 text-center text-[11px]" style={{ color: 'var(--muted)' }}>الملاحظة جاهزة. راجع محتواها ثم انشرها للطالب.</p>}
+                  {existing?.status === 'READY_TO_PUBLISH' && <p className="mt-2 text-center text-[11px]" style={{ color: 'var(--muted)' }}>{localeText(language, 'الملاحظة جاهزة. راجع محتواها ثم انشرها للطالب.', 'Feedback is ready. Review it, then publish it for the student.')}</p>}
                 </div>
               </div>
             </>

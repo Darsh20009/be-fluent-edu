@@ -16,6 +16,8 @@ import {
   UserCheck,
   Users,
 } from 'lucide-react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText, localeDirection } from '@/lib/locale'
 
 type RecentSubscription = {
   id?: string | number
@@ -80,10 +82,12 @@ function itemsFrom<T>(body: unknown): T[] {
   return []
 }
 
-function formatDate(value?: string | null) {
+function formatDate(value: string | null | undefined, language: 'ar' | 'en') {
   if (!value) return '—'
   const date = new Date(value)
-  return Number.isNaN(date.valueOf()) ? '—' : date.toLocaleDateString('ar-SA', { day: 'numeric', month: 'short' })
+  return Number.isNaN(date.valueOf())
+    ? '—'
+    : date.toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', { day: 'numeric', month: 'short' })
 }
 
 function StatCard({
@@ -122,6 +126,15 @@ export default function AdminOverviewRedesign({
   onRetryStats: () => void
   onNavigate: (tab: string) => void
 }) {
+  const { language } = useTheme()
+  const t = useCallback((ar: string, en: string) => localeText(language, ar, en), [language])
+  const locale = language === 'ar' ? 'ar-SA' : 'en-US'
+  const formatNumber = (value: number) => value.toLocaleString(locale)
+  const formatCurrency = (value: number) => new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'EGP',
+    maximumFractionDigits: 0,
+  }).format(value)
   const [feedback, setFeedback] = useState<Feed<FeedbackItem[]>>({ state: 'loading' })
   const [homework, setHomework] = useState<Feed<HomeworkItem[]>>({ state: 'loading' })
   const [health, setHealth] = useState<Feed<HealthStatus>>({ state: 'loading' })
@@ -165,55 +178,55 @@ export default function AdminOverviewRedesign({
   const queue = useMemo(() => [
     ...(statsState === 'ready' && (stats?.pendingSubscriptions || 0) > 0 ? [{
       key: 'pending-subscriptions',
-      title: `${stats?.pendingSubscriptions} طلب اشتراك بانتظار المراجعة`,
-      label: 'مراجعة دفعات الاشتراك',
+      title: t(`${stats?.pendingSubscriptions} طلب اشتراك بانتظار المراجعة`, `${stats?.pendingSubscriptions} subscription requests pending review`),
+      label: t('مراجعة دفعات الاشتراك', 'Subscription payment review'),
       tab: 'subscriptions',
       icon: CreditCard,
     }] : []),
     ...(feedback.state === 'ready' ? unpubFeedback.slice(0, 5).map((item) => ({
       key: `feedback-${item.id}`,
-      title: item.summary?.trim() || 'ملاحظة تعليمية غير منشورة',
-      label: item.status === 'READY_TO_PUBLISH' ? 'جاهزة للنشر' : 'مسودة',
+      title: item.summary?.trim() || t('ملاحظة تعليمية غير منشورة', 'Unpublished learning note'),
+      label: item.status === 'READY_TO_PUBLISH' ? t('جاهزة للنشر', 'Ready to publish') : t('مسودة', 'Draft'),
       href: '/dashboard/admin/feedback',
       icon: BookOpenCheck,
     })) : []),
     ...(homework.state === 'ready' && reviewCount > 0 ? [{
       key: 'homework-review',
-      title: `${reviewCount} تسليم${reviewCount === 1 ? '' : 'ات'} بانتظار المراجعة`,
-      label: 'واجبات',
+      title: t(`${reviewCount} تسليم${reviewCount === 1 ? '' : 'ات'} بانتظار المراجعة`, `${reviewCount} submissions pending review`),
+      label: t('واجبات', 'Homework'),
       href: '/dashboard/admin/homework',
       icon: FileText,
     }] : []),
-  ], [feedback.state, homework.state, reviewCount, stats?.pendingSubscriptions, statsState, unpubFeedback])
+  ], [feedback.state, homework.state, reviewCount, stats?.pendingSubscriptions, statsState, unpubFeedback, t])
   const monthlyRevenue = Array.isArray(stats?.monthlyRevenue) ? stats.monthlyRevenue.filter((item) => Number.isFinite(item?.revenue)) : []
   const maxRevenue = Math.max(1, ...monthlyRevenue.map((item) => item.revenue))
   const healthServices = [
     {
-      label: 'التطبيق',
+      label: t('التطبيق', 'Application'),
       icon: Activity,
-      value: health.data?.application === 'healthy' ? 'يعمل' : 'غير متاح',
+      value: health.data?.application === 'healthy' ? t('يعمل', 'Healthy') : t('غير متاح', 'Unavailable'),
       ok: health.data?.application === 'healthy',
     },
     {
-      label: 'قاعدة البيانات',
+      label: t('قاعدة البيانات', 'Database'),
       icon: CheckCircle2,
       value: health.data?.database === 'healthy'
-        ? 'متصلة'
+        ? t('متصلة', 'Connected')
         : health.data?.database === 'not_configured'
-          ? 'غير مهيأة'
-          : 'غير متاحة',
+          ? t('غير مهيأة', 'Not configured')
+          : t('غير متاحة', 'Unavailable'),
       ok: health.data?.database === 'healthy',
     },
   ]
   const followUpCount = (stats?.pendingSubscriptions || 0) + unpubFeedback.length + reviewCount
 
   return (
-    <div className="space-y-5 sm:space-y-6" dir="rtl">
+    <div className="space-y-5 sm:space-y-6" dir={localeDirection(language)}>
       <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="text-xs font-bold" style={{ color: 'var(--primary)' }}>Be Fluent · الإدارة</p>
-          <h1 className="mt-1 text-2xl font-bold sm:text-3xl">نظرة عامة</h1>
-          <p className="mt-2 text-sm leading-6" style={{ color: 'var(--muted)' }}>متابعة بيانات الإدارة والمهام اليومية.</p>
+          <p className="text-xs font-bold" style={{ color: 'var(--primary)' }}>Be Fluent · {t('الإدارة', 'Administration')}</p>
+          <h1 className="mt-1 text-2xl font-bold sm:text-3xl">{t('نظرة عامة', 'Overview')}</h1>
+          <p className="mt-2 text-sm leading-6" style={{ color: 'var(--muted)' }}>{t('متابعة بيانات الإدارة والمهام اليومية.', 'Monitor administration data and daily tasks.')}</p>
         </div>
         <button
           type="button"
@@ -221,7 +234,7 @@ export default function AdminOverviewRedesign({
           className="inline-flex min-h-11 items-center gap-2 self-start rounded-lg border px-4 text-sm font-semibold transition-colors hover:bg-[var(--surface-muted)] sm:self-auto"
           style={{ borderColor: 'var(--border)', color: 'var(--primary)' }}
         >
-          الاشتراكات
+          {t('الاشتراكات', 'Subscriptions')}
           {typeof stats?.pendingSubscriptions === 'number' && stats.pendingSubscriptions > 0 && (
             <span className="min-w-6 rounded-full px-2 py-1 text-center text-xs font-bold tabular-nums" style={{ background: 'var(--bf-green-soft)', color: 'var(--primary)' }}>
               {stats.pendingSubscriptions}
@@ -232,26 +245,26 @@ export default function AdminOverviewRedesign({
 
       {statsState === 'error' && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4" role="alert" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-          <p className="text-sm" style={{ color: 'var(--muted)' }}>تعذر تحميل إحصاءات الإدارة.</p>
-          <button type="button" onClick={onRetryStats} className="min-h-10 rounded-lg px-3 text-sm font-bold text-white" style={{ background: 'var(--primary)' }}>إعادة المحاولة</button>
+          <p className="text-sm" style={{ color: 'var(--muted)' }}>{t('تعذر تحميل إحصاءات الإدارة.', 'Admin statistics could not be loaded.')}</p>
+          <button type="button" onClick={onRetryStats} className="min-h-10 rounded-lg px-3 text-sm font-bold text-white" style={{ background: 'var(--primary)' }}>{t('إعادة المحاولة', 'Retry')}</button>
         </div>
       )}
       {statsState === 'ready' && !stats && (
         <div className="rounded-xl border p-4 text-sm" role="status" style={{ background: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
-          لا تتوفر إحصاءات لعرضها حالياً.
+          {t('لا تتوفر إحصاءات لعرضها حالياً.', 'No statistics are currently available.')}
         </div>
       )}
 
-      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4" aria-label="ملخص الإدارة">
+      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4" aria-label={t('ملخص الإدارة', 'Administration summary')}>
         {statsState === 'loading' && Array.from({ length: 4 }, (_, index) => (
           <div key={index} className="h-28 animate-pulse rounded-xl border" style={{ background: 'var(--surface-muted)', borderColor: 'var(--border)' }} aria-hidden="true" />
         ))}
         {statsState === 'ready' && stats && (
           <>
-            <StatCard label="الطلاب النشطون" value={stats.activeStudents?.toLocaleString('ar-SA') ?? '—'} icon={Users} />
-            <StatCard label="المعلمون" value={stats.totalTeachers?.toLocaleString('ar-SA') ?? '—'} icon={UserCheck} />
-            <StatCard label="حصص هذا الأسبوع" value={stats.sessionsThisWeek?.toLocaleString('ar-SA') ?? '—'} icon={CalendarDays} />
-            <StatCard label="طلبات الاشتراك المعلّقة" value={stats.pendingSubscriptions?.toLocaleString('ar-SA') ?? '—'} icon={Clock3} />
+             <StatCard label={t('الطلاب النشطون', 'Active students')} value={stats.activeStudents != null ? formatNumber(stats.activeStudents) : '—'} icon={Users} />
+             <StatCard label={t('المعلمون', 'Teachers')} value={stats.totalTeachers != null ? formatNumber(stats.totalTeachers) : '—'} icon={UserCheck} />
+             <StatCard label={t('حصص هذا الأسبوع', 'Classes this week')} value={stats.sessionsThisWeek != null ? formatNumber(stats.sessionsThisWeek) : '—'} icon={CalendarDays} />
+             <StatCard label={t('طلبات الاشتراك المعلّقة', 'Pending subscription requests')} value={stats.pendingSubscriptions != null ? formatNumber(stats.pendingSubscriptions) : '—'} icon={Clock3} />
           </>
         )}
       </section>
@@ -260,10 +273,10 @@ export default function AdminOverviewRedesign({
         <div className="rounded-2xl border p-5 sm:p-6" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="font-bold">ما يحتاج متابعة</h2>
-              <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>طلبات ومهام مبنية على البيانات المسجلة.</p>
+              <h2 className="font-bold">{t('ما يحتاج متابعة', 'Needs attention')}</h2>
+              <p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>{t('طلبات ومهام مبنية على البيانات المسجلة.', 'Requests and tasks based on recorded data.')}</p>
             </div>
-            <span className="text-xs font-semibold tabular-nums" style={{ color: 'var(--muted)' }}>{followUpCount.toLocaleString('ar-SA')} عناصر</span>
+            <span className="text-xs font-semibold tabular-nums" style={{ color: 'var(--muted)' }}>{formatNumber(followUpCount)} {t('عناصر', 'items')}</span>
           </div>
           <div className="mt-4 space-y-2">
             {feedback.state === 'loading' || homework.state === 'loading' ? (
@@ -271,13 +284,13 @@ export default function AdminOverviewRedesign({
             ) : null}
             {feedback.state === 'error' || homework.state === 'error' ? (
               <div className="rounded-xl border p-4 text-sm leading-6" style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>
-                تعذر تحميل إحدى قوائم المتابعة. أعد المحاولة لقراءة بياناتها.
-                <button type="button" onClick={retry} className="me-2 font-bold underline underline-offset-4" style={{ color: 'var(--primary)' }}>إعادة المحاولة</button>
+                {t('تعذر تحميل إحدى قوائم المتابعة. أعد المحاولة لقراءة بياناتها.', 'A follow-up list could not be loaded. Retry to fetch its data.')}
+                <button type="button" onClick={retry} className="ms-2 font-bold underline underline-offset-4" style={{ color: 'var(--primary)' }}>{t('إعادة المحاولة', 'Retry')}</button>
               </div>
             ) : null}
             {feedback.state === 'ready' && homework.state === 'ready' && queue.length === 0 && (
               <div className="rounded-xl border border-dashed p-6 text-center text-sm" style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>
-                لا توجد عناصر تحتاج متابعة حالياً.
+                {t('لا توجد عناصر تحتاج متابعة حالياً.', 'There are no items needing attention.')}
               </div>
             )}
             {queue.map((item) => {
@@ -291,10 +304,10 @@ export default function AdminOverviewRedesign({
                       <span className="mt-1 block text-xs" style={{ color: 'var(--muted)' }}>{item.label}</span>
                     </span>
                   </span>
-                  <ArrowLeft size={16} className="shrink-0" style={{ color: 'var(--primary)' }} aria-hidden="true" />
+                   <ArrowLeft size={16} className={`shrink-0 ${language === 'ar' ? 'rotate-180' : ''}`} style={{ color: 'var(--primary)' }} aria-hidden="true" />
                 </>
               )
-              const className = 'flex min-h-[68px] w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-right transition-colors hover:bg-[var(--surface-muted)]'
+              const className = 'flex min-h-[68px] w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-start transition-colors hover:bg-[var(--surface-muted)]'
 
               return 'tab' in item ? (
                 <button key={item.key} type="button" onClick={() => onNavigate(item.tab)} className={className} style={{ borderColor: 'var(--border)' }}>
@@ -308,29 +321,29 @@ export default function AdminOverviewRedesign({
             })}
           </div>
           <div className="mt-5 border-t pt-4" style={{ borderColor: 'var(--border)' }}>
-            <p className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>اختصارات</p>
+            <p className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>{t('اختصارات', 'Shortcuts')}</p>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
-              <Link href="/dashboard/admin/people" className="inline-flex min-h-11 items-center justify-between rounded-xl px-4 text-sm font-semibold transition-colors hover:opacity-80" style={{ background: 'var(--surface-muted)', color: 'var(--foreground)' }}>الأشخاص <Users size={15} aria-hidden="true" /></Link>
-              <Link href="/dashboard/admin/classes" className="inline-flex min-h-11 items-center justify-between rounded-xl px-4 text-sm font-semibold transition-colors hover:opacity-80" style={{ background: 'var(--surface-muted)', color: 'var(--foreground)' }}>الحصص <CalendarDays size={15} aria-hidden="true" /></Link>
-              <button type="button" onClick={() => onNavigate('subscriptions')} className="inline-flex min-h-11 items-center justify-between rounded-xl px-4 text-sm font-semibold transition-colors hover:opacity-80" style={{ background: 'var(--surface-muted)', color: 'var(--foreground)' }}>مراجعة دفعات الاشتراك <CreditCard size={15} aria-hidden="true" /></button>
+              <Link href="/dashboard/admin/people" className="inline-flex min-h-11 items-center justify-between rounded-xl px-4 text-sm font-semibold transition-colors hover:opacity-80" style={{ background: 'var(--surface-muted)', color: 'var(--foreground)' }}>{t('الأشخاص', 'People')} <Users size={15} aria-hidden="true" /></Link>
+              <Link href="/dashboard/admin/classes" className="inline-flex min-h-11 items-center justify-between rounded-xl px-4 text-sm font-semibold transition-colors hover:opacity-80" style={{ background: 'var(--surface-muted)', color: 'var(--foreground)' }}>{t('الحصص', 'Classes')} <CalendarDays size={15} aria-hidden="true" /></Link>
+              <button type="button" onClick={() => onNavigate('subscriptions')} className="inline-flex min-h-11 items-center justify-between rounded-xl px-4 text-start text-sm font-semibold transition-colors hover:opacity-80" style={{ background: 'var(--surface-muted)', color: 'var(--foreground)' }}>{t('مراجعة دفعات الاشتراك', 'Review subscription payments')} <CreditCard size={15} aria-hidden="true" /></button>
             </div>
           </div>
         </div>
 
         <div className="rounded-2xl border p-5 sm:p-6" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-          <h2 className="flex items-center gap-2 font-bold"><Server size={18} style={{ color: 'var(--primary)' }} aria-hidden="true" />حالة الخدمات</h2>
-          <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>نتيجة فحص التطبيق وقاعدة البيانات.</p>
+          <h2 className="flex items-center gap-2 font-bold"><Server size={18} style={{ color: 'var(--primary)' }} aria-hidden="true" />{t('حالة الخدمات', 'Service health')}</h2>
+          <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>{t('نتيجة فحص التطبيق وقاعدة البيانات.', 'Application and database health check results.')}</p>
           <div className="mt-4 space-y-2">
             {health.state === 'loading' && (
-              <div className="space-y-2" aria-busy="true" aria-label="جارٍ فحص الخدمات">
+              <div className="space-y-2" aria-busy="true" aria-label={t('جارٍ فحص الخدمات', 'Checking service health')}>
                 <div className="h-12 animate-pulse rounded-lg" style={{ background: 'var(--surface-muted)' }} />
                 <div className="h-12 animate-pulse rounded-lg" style={{ background: 'var(--surface-muted)' }} />
               </div>
             )}
             {health.state === 'error' && (
               <div className="rounded-xl border p-4 text-sm leading-6" role="status" style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>
-                تعذر قراءة حالة الخدمات.
-                <button type="button" onClick={retry} className="me-2 font-bold underline underline-offset-4" style={{ color: 'var(--primary)' }}>إعادة المحاولة</button>
+                {t('تعذر قراءة حالة الخدمات.', 'Service health could not be loaded.')}
+                <button type="button" onClick={retry} className="ms-2 font-bold underline underline-offset-4" style={{ color: 'var(--primary)' }}>{t('إعادة المحاولة', 'Retry')}</button>
               </div>
             )}
             {health.state === 'ready' && healthServices.map((service) => {
@@ -347,10 +360,10 @@ export default function AdminOverviewRedesign({
       </section>
 
       <details className="rounded-xl border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset" style={{ color: 'var(--foreground)' }}>
-          تقارير وبيانات إضافية
+          <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 text-start text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset" style={{ color: 'var(--foreground)' }}>
+          {t('تقارير وبيانات إضافية', 'Additional reports and data')}
           <span className="flex items-center gap-2 text-xs font-medium" style={{ color: 'var(--muted)' }}>
-            افتح عند الحاجة
+            {t('افتح عند الحاجة', 'Expand when needed')}
             <ChevronDown size={15} aria-hidden="true" />
           </span>
         </summary>
@@ -360,15 +373,15 @@ export default function AdminOverviewRedesign({
           <div className="rounded-2xl border p-5 sm:p-6" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h2 className="font-bold">الإيرادات الشهرية</h2>
-                <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>بحسب تقرير الاشتراكات المسجل</p>
+                <h2 className="font-bold">{t('الإيرادات الشهرية', 'Monthly revenue')}</h2>
+                <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>{t('بحسب تقرير الاشتراكات المسجل', 'Based on recorded subscription reports')}</p>
               </div>
             </div>
             <div className="mt-6 flex min-h-40 items-end gap-3 overflow-x-auto border-b pb-3" style={{ borderColor: 'var(--border)' }}>
               {monthlyRevenue.map((item, index) => (
                 <div key={`${item.month}-${index}`} className="flex min-w-10 flex-1 flex-col items-center justify-end gap-2">
-                  <span className="text-[10px] font-semibold tabular-nums" style={{ color: 'var(--muted)' }}>{item.revenue.toLocaleString('ar-SA')}</span>
-                  <div role="img" aria-label={`${item.month}: ${item.revenue.toLocaleString('ar-SA')}`} className="w-full max-w-10 rounded-t" style={{ height: `${Math.max(6, (item.revenue / maxRevenue) * 108)}px`, background: 'var(--primary)' }} />
+                  <span className="text-[10px] font-semibold tabular-nums" style={{ color: 'var(--muted)' }}>{formatCurrency(item.revenue)}</span>
+                  <div role="img" aria-label={t(`إيرادات ${item.month}: ${formatCurrency(item.revenue)}`, `Revenue for ${item.month}: ${formatCurrency(item.revenue)}`)} className="w-full max-w-10 rounded-t" style={{ height: `${Math.max(6, (item.revenue / maxRevenue) * 108)}px`, background: 'var(--primary)' }} />
                   <span className="max-w-full truncate text-[11px]" style={{ color: 'var(--muted)' }}>{item.month}</span>
                 </div>
               ))}
@@ -379,26 +392,26 @@ export default function AdminOverviewRedesign({
         <div className="overflow-hidden rounded-2xl border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
           <div className="flex items-center justify-between gap-3 border-b px-5 py-4 sm:px-6" style={{ borderColor: 'var(--border)' }}>
             <div>
-              <h2 className="font-bold">أحدث الاشتراكات</h2>
-              <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>آخر الطلبات المسجلة</p>
+              <h2 className="font-bold">{t('أحدث الاشتراكات', 'Recent subscriptions')}</h2>
+              <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>{t('آخر الطلبات المسجلة', 'Latest recorded requests')}</p>
             </div>
-            <Link href="/dashboard/admin/commerce" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold" style={{ color: 'var(--primary)' }}>عرض الكل <ArrowLeft size={15} aria-hidden="true" /></Link>
+            <Link href="/dashboard/admin/commerce" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold" style={{ color: 'var(--primary)' }}>{t('عرض الكل', 'View all')} <ArrowLeft className={language === 'ar' ? 'rotate-180' : ''} size={15} aria-hidden="true" /></Link>
           </div>
-          {statsState === 'loading' ? <div className="h-24 animate-pulse" style={{ background: 'var(--surface-muted)' }} /> : recentSubscriptions.length ? (
+          {statsState === 'loading' ? <div className="h-24 animate-pulse" aria-busy="true" aria-label={t('جارٍ تحميل الاشتراكات', 'Loading subscriptions')} style={{ background: 'var(--surface-muted)' }} /> : recentSubscriptions.length ? (
             <ul className="divide-y" style={{ borderColor: 'var(--border)' }}>
               {recentSubscriptions.slice(0, 4).map((sub, index) => {
                 const status = String(sub.status || '').toUpperCase()
-                const statusLabel = status === 'APPROVED' ? 'مقبول' : status === 'PENDING' ? 'قيد المراجعة' : status === 'REJECTED' ? 'مرفوض' : (sub.status || 'غير محدد')
+                const statusLabel = status === 'APPROVED' ? t('مقبول', 'Approved') : status === 'PENDING' ? t('قيد المراجعة', 'Pending review') : status === 'REJECTED' ? t('مرفوض', 'Rejected') : (sub.status || t('غير محدد', 'Unspecified'))
                 return <li key={sub.id ?? index} className="flex items-center justify-between gap-3 px-5 py-3 sm:px-6">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-bold">{sub.User?.name || 'مستخدم'}</p>
-                    <p className="mt-1 truncate text-xs" style={{ color: 'var(--muted)' }}>{sub.Package?.title || 'باقة غير محددة'} · {formatDate(sub.createdAt)}</p>
+                    <p className="truncate text-sm font-bold">{sub.User?.name || t('مستخدم', 'User')}</p>
+                    <p className="mt-1 truncate text-xs" style={{ color: 'var(--muted)' }}>{sub.Package?.title || t('باقة غير محددة', 'Unspecified package')} · {formatDate(sub.createdAt, language)}</p>
                   </div>
                   <span className="shrink-0 rounded-full px-3 py-1 text-xs font-semibold" style={{ background: status === 'PENDING' ? 'var(--surface-muted)' : 'var(--bf-green-soft)', color: 'var(--primary)' }}>{statusLabel}</span>
                 </li>
               })}
             </ul>
-          ) : <p className="px-5 py-8 text-center text-sm" style={{ color: 'var(--muted)' }}>لا توجد اشتراكات حديثة لعرضها.</p>}
+          ) : <p className="px-5 py-8 text-center text-sm" style={{ color: 'var(--muted)' }}>{t('لا توجد اشتراكات حديثة لعرضها.', 'No recent subscriptions to show.')}</p>}
         </div>
       </section>
 
@@ -406,18 +419,18 @@ export default function AdminOverviewRedesign({
         <section className="overflow-hidden rounded-2xl border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
           <div className="flex items-center justify-between gap-3 border-b px-5 py-4 sm:px-6" style={{ borderColor: 'var(--border)' }}>
             <div>
-              <h2 className="font-bold">مستخدمون أُضيفوا مؤخراً</h2>
-              <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>بحسب أحدث البيانات المتاحة</p>
+              <h2 className="font-bold">{t('مستخدمون أُضيفوا مؤخراً', 'Recently added users')}</h2>
+              <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>{t('بحسب أحدث البيانات المتاحة', 'Based on the latest available data')}</p>
             </div>
-            <Link href="/dashboard/admin/people" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold" style={{ color: 'var(--primary)' }}>المستخدمون <ArrowLeft size={15} aria-hidden="true" /></Link>
+            <Link href="/dashboard/admin/people" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold" style={{ color: 'var(--primary)' }}>{t('المستخدمون', 'Users')} <ArrowLeft className={language === 'ar' ? 'rotate-180' : ''} size={15} aria-hidden="true" /></Link>
           </div>
           <ul className="grid divide-y sm:grid-cols-2 sm:divide-x sm:divide-y-0" style={{ borderColor: 'var(--border)' }}>
             {recentUsers.slice(0, 4).map((user, index) => (
               <li key={user.id ?? index} className="flex items-center gap-3 px-5 py-4 sm:px-6">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-xs font-bold" style={{ background: 'var(--bf-green-soft)', color: 'var(--primary)' }}>{user.name?.trim().charAt(0).toUpperCase() || '؟'}</span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-bold">{user.name || 'مستخدم'}</span>
-                  <span className="mt-1 block truncate text-xs" style={{ color: 'var(--muted)' }}>{user.role || '—'} · {formatDate(user.createdAt)}</span>
+                  <span className="block truncate text-sm font-bold">{user.name || t('مستخدم', 'User')}</span>
+                  <span className="mt-1 block truncate text-xs" style={{ color: 'var(--muted)' }}>{user.role ? (user.role === 'STUDENT' ? t('طالب', 'Student') : user.role === 'TEACHER' ? t('معلم', 'Teacher') : user.role === 'ADMIN' ? t('مدير', 'Admin') : user.role) : '—'} · {formatDate(user.createdAt, language)}</span>
                 </span>
               </li>
             ))}
@@ -427,7 +440,7 @@ export default function AdminOverviewRedesign({
         </div>
       </details>
       {stats?.totalRevenue != null && (
-        <p className="sr-only">إجمالي الإيرادات المسجلة: {Number(stats.totalRevenue).toLocaleString('ar-SA')}.</p>
+        <p className="sr-only">{t(`إجمالي الإيرادات المسجلة: ${formatCurrency(Number(stats.totalRevenue))}.`, `Total recorded revenue: ${formatCurrency(Number(stats.totalRevenue))}.`)}</p>
       )}
     </div>
   )
