@@ -21,6 +21,16 @@
   gap: 12px;
 }
 
+.providerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.accountsCard {
+  scroll-margin-top: 24px;
+}
+
 .sectionTitle {
   margin: 0;
   font-size: 1rem;
@@ -261,6 +271,16 @@
 
   .providerTopline > button,
   .sectionHeader > button {
+    width: 100%;
+  }
+
+  .providerActions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .providerActions > a,
+  .providerActions > button {
     width: 100%;
   }
 

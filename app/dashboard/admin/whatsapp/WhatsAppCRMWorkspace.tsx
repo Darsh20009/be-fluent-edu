@@ -461,17 +461,25 @@ export function WhatsAppCRMWorkspace() {
               {provider?.reason ? ` · ${provider.reason}` : ''}
             </p>
           </div>
-          <button className={pageStyles.button} type="button" onClick={refreshAll}>
-            تحديث البيانات
-          </button>
+          <div className={styles.providerActions}>
+            <a
+              className={`${pageStyles.button} ${styles.primaryButton}`}
+              href="#whatsapp-accounts"
+            >
+              الأرقام والربط
+            </a>
+            <button className={pageStyles.button} type="button" onClick={refreshAll}>
+              تحديث البيانات
+            </button>
+          </div>
         </div>
-        <p className={styles.helpText}>يظهر رمز QR داخل بطاقة الرقم بعد الضغط على «ربط واتساب»؛ هذه البطاقة تعرض حالة المزوّد فقط.</p>
+        <p className={styles.helpText}>لإضافة رقم أو بدء الربط، افتح «الأرقام والربط» أدناه. يظهر رمز QR داخل بطاقة الرقم بعد الضغط على «ربط واتساب».</p>
       </section>
 
       {notice && <div className={pageStyles.notice} role="status">{notice}</div>}
 
       <div className={pageStyles.grid}>
-        <section className={`${pageStyles.card} ${styles.accountsCard}`} aria-labelledby="accounts-heading">
+        <section id="whatsapp-accounts" className={`${pageStyles.card} ${styles.accountsCard}`} aria-labelledby="accounts-heading" tabIndex={-1}>
           <div className={styles.sectionHeader}>
             <div>
               <h2 id="accounts-heading" className={styles.sectionTitle}>الأرقام والربط</h2>
