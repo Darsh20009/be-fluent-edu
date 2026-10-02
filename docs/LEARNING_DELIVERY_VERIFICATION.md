@@ -29,7 +29,8 @@ No database replacement, schema migration, deletion of existing user records, pr
 
 - The browser test did not reach authentication or create fixtures. Infrastructure interruptions and cold development compilation prevented the learning journey from being exercised. Feedback publish/privacy, persisted approval/rejection, and signed-in ADMIN-only access still require an end-to-end run.
 - The Tips gallery is not complete. Missing captures are explicitly displayed as unavailable; screenshots must not be fabricated. Captures stored publicly must use synthetic data or redact all real personal information.
-- Live Thanarah and QMeet calls were not made. New rotated `THANARAH_API_KEY` and `QMEET_API_KEY` were absent at the readiness check.
+- The user subsequently supplied `THANARAH_API_KEY` and `QMEET_API_KEY` through Secrets. Thanarah's documented `POST https://ai.thanarah.com/api/v1/chat/completions` returned HTTP 404 for the exact one-message example with the saved key and also without credentials. This does not establish key validity or live AI readiness. Only synthetic connectivity messages were used; no student data was sent.
+- QMeet's configured base URL failed URL parsing (`ERR_INVALID_URL`) before receiving a provider response. A valid absolute service base URL is still required; no meeting was created or changed.
 - Automatic email execution remains off until the operator reviews pending work and explicitly enables it; provider configuration is not delivery verification.
 - Durable homework file/voice/video storage remains unavailable. Existing local upload URLs have not been replaced or migrated.
 - SessionFeedback currently has no persisted optional skill-rating field; optional rendering support does not imply teacher-to-student rating persistence.
