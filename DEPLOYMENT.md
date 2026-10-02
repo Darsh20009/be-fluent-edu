@@ -34,12 +34,12 @@ NODE_ENV=production
 
 3. **Build Command:**
    ```
-   npm install && npm run build
+   pnpm install --frozen-lockfile && pnpm run build
    ```
 
 4. **Start Command:**
    ```
-   npm start
+   pnpm start
    ```
 
 5. **Important Notes:**
@@ -66,3 +66,9 @@ After deployment, you can test with these accounts:
 ### NextAuth errors
 - Verify NEXTAUTH_SECRET is set and is at least 32 characters
 - Ensure NEXTAUTH_URL matches your production domain
+
+### Render build reports "Exit handler never called" and then "next: not found"
+- `next` is already declared in `package.json`; the missing command is a consequence of the failed dependency installation.
+- Set Render's Build Command to `pnpm install --frozen-lockfile && pnpm run build` and Start Command to `pnpm start`.
+- Do not use `npm install; npm run build`: the semicolon starts the build even when installation fails, hiding the original failure behind `next: not found`.
+- If the log still shows an `npm install` command, update the service's configured Build Command in Render.

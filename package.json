@@ -2,6 +2,7 @@
   "name": "befluent",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.26.1",
   "scripts": {
     "dev": "node start-server.js",
     "socket": "node server/socket.js",
