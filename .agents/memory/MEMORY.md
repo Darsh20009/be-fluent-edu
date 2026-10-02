@@ -13,3 +13,4 @@
 - [SSR locale bootstrap](ssr-locale-bootstrap.md) — read the locale cookie in the root layout so document direction and the first client render agree.
 - [Documentation screenshot privacy](documentation-screenshot-privacy.md) — use real captures with synthetic accounts or redacted data; admin-only guides do not protect public image files.
 - [Delivery completeness](delivery-completeness.md) — the user expects complete student, teacher, admin and AI flows, not page-only or partially wired delivery.
+- [Admin assistant scope](admin-assistant-scope.md) — keep the new assistant ADMIN-only across people, learning, commerce, and communications, with confirmation before writes or sends.

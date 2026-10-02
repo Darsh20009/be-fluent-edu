@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import HomeTab, { type AdminOverviewStats } from './components/AdminOverviewRedesign'
+import AdminAssistant from '@/components/admin/AdminAssistant'
 import UsersTab from './components/UsersTab'
 import SubscriptionsTab from './components/SubscriptionsTab'
 import SystemTab from './components/SystemTab'
@@ -431,6 +432,7 @@ export default function AdminDashboardClient({ user, children }: Props) {
           ) : children}
         </main>
       </div>
+      {user.role === 'ADMIN' && <AdminAssistant />}
     </div>
   )
 }

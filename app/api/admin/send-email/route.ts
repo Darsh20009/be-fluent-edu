@@ -6,6 +6,13 @@ import { sendEmail } from '@/lib/email'
 const LOGO_URL = 'https://befluent-edu.online/brand/be-fluent-mark-2026.png'
 
 function getDirectEmailTemplate(message: string) {
+  const safeMessage = message
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+
   return `
     <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; max-width: 600px; margin: auto;">
       <table role="presentation" align="center" style="border-collapse: collapse; margin: 0 auto 20px;">
@@ -17,7 +24,7 @@ function getDirectEmailTemplate(message: string) {
         </tr>
       </table>
       <div style="padding: 20px 0; line-height: 1.8; white-space: pre-wrap;">
-        ${message.replace(/\n/g, '<br>')}
+        ${safeMessage.replace(/\r\n?/g, '\n').replace(/\n/g, '<br>')}
       </div>
       <div style="margin-top: 20px; text-align: center;">
         <a href="https://befluent-edu.online" style="background-color: #10B981; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">زيارة الموقع</a>
@@ -35,9 +42,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { to, subject, message } = await request.json()
+    const body: unknown = await request.json().catch(() => null)
+    const payload = body && typeof body === 'object' ? body as {
+      to?: unknown
+      subject?: unknown
+      message?: unknown
+    } : null
+    const to = typeof payload?.to === 'string' ? payload.to.trim() : ''
+    const subject = typeof payload?.subject === 'string' ? payload.subject.trim() : ''
+    const message = typeof payload?.message === 'string' ? payload.message.trim() : ''
 
-    if (!to || !subject || !message) {
+    if (!to || !subject || !message || subject.length > 200 || message.length > 10_000) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
