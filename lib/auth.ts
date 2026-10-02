@@ -102,6 +102,10 @@ export const authOptions: NextAuthOptions = {
           return publicUser(user)
         } catch (error) {
           if (error instanceof OtpServiceError) {
+            console.warn('OTP verification rejected', {
+              code: error.code,
+              reason: error.diagnosticReason || 'unspecified',
+            })
             throw new Error('Invalid verification code')
           }
           throw error

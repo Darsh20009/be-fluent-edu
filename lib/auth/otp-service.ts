@@ -52,6 +52,13 @@ export class OtpServiceError extends Error {
       | 'ACCOUNT_UNAVAILABLE'
       | 'IDENTITY_CONFLICT',
     message = 'Unable to process verification request',
+    public readonly diagnosticReason?:
+      | 'no_active_challenge'
+      | 'expired_challenge'
+      | 'attempt_limit'
+      | 'code_mismatch'
+      | 'login_identity_unmatched'
+      | 'account_unavailable',
   ) {
     super(message)
     this.name = 'OtpServiceError'
@@ -346,7 +353,7 @@ export async function verifyOtp(input: VerifyOtpInput) {
 
   if (!challenge) {
     audit('AUTH_OTP_FAILED')
-    throw new OtpServiceError('INVALID_CODE')
+    throw new OtpServiceError('INVALID_CODE', undefined, 'no_active_challenge')
   }
 
   if (isOtpExpired(challenge.expiresAt, now)) {
@@ -355,7 +362,7 @@ export async function verifyOtp(input: VerifyOtpInput) {
       data: { invalidatedAt: now },
     })
     audit('AUTH_OTP_EXPIRED')
-    throw new OtpServiceError('EXPIRED_CODE')
+    throw new OtpServiceError('EXPIRED_CODE', undefined, 'expired_challenge')
   }
 
   if (!canAttemptOtp({
@@ -369,7 +376,7 @@ export async function verifyOtp(input: VerifyOtpInput) {
       data: { invalidatedAt: now },
     })
     audit('AUTH_OTP_FAILED')
-    throw new OtpServiceError('RATE_LIMITED')
+    throw new OtpServiceError('RATE_LIMITED', undefined, 'attempt_limit')
   }
 
   await prisma.authOtpChallenge.update({
@@ -385,7 +392,7 @@ export async function verifyOtp(input: VerifyOtpInput) {
       })
     }
     audit('AUTH_OTP_FAILED')
-    throw new OtpServiceError('INVALID_CODE')
+    throw new OtpServiceError('INVALID_CODE', undefined, 'code_mismatch')
   }
 
   const user = await findUserByIdentity(identity)
@@ -395,7 +402,7 @@ export async function verifyOtp(input: VerifyOtpInput) {
       data: { invalidatedAt: now },
     })
     audit('AUTH_OTP_FAILED')
-    throw new OtpServiceError('INVALID_CODE')
+    throw new OtpServiceError('INVALID_CODE', undefined, 'login_identity_unmatched')
   }
 
   const verifiedUser = user || await createOtpUser(identity, challenge)
@@ -405,7 +412,7 @@ export async function verifyOtp(input: VerifyOtpInput) {
       data: { invalidatedAt: now },
     })
     audit('AUTH_SESSION_REVOKED', verifiedUser.id)
-    throw new OtpServiceError('ACCOUNT_UNAVAILABLE')
+    throw new OtpServiceError('ACCOUNT_UNAVAILABLE', undefined, 'account_unavailable')
   }
 
   await prisma.authOtpChallenge.update({
