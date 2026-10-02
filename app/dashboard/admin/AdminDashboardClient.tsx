@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { signOut } from 'next-auth/react'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   Home, Users, CreditCard, Activity, LogOut, Shield, BookOpen,
   GraduationCap, ClipboardList, Mail, Tag, ChevronDown, ChevronRight, Menu, X,
   Globe, Layers, PhoneCall, MessageCircle, CalendarDays, BookOpenCheck,
-  FileText, School, UserRound
+  FileText, School, UserRound, Mic, Brain
 } from 'lucide-react'
 import Link from 'next/link'
 import HomeTab, { type AdminOverviewStats } from './components/AdminOverviewRedesign'
@@ -25,6 +25,7 @@ import ThemeToggle from '@/components/ThemeToggle'
 
 interface Props {
   user: { name: string; email: string; role: string }
+  children?: ReactNode
 }
 
 const MENU_GROUPS = [
@@ -58,6 +59,8 @@ const MENU_GROUPS = [
       { id: 'lessons', label: 'الدروس', icon: Layers },
       { id: 'placement-test', label: 'اختبار تحديد المستوى', icon: ClipboardList },
       { id: 'page-editor', label: 'محرر الصفحات', icon: Globe },
+      { id: 'speaking-route', label: 'غرف المحادثة', icon: Mic, href: '/dashboard/admin/speaking' },
+      { id: 'intelligence-route', label: 'ذكاء التعلّم', icon: Brain, href: '/dashboard/admin/intelligence' },
     ]
   },
   {
@@ -94,17 +97,30 @@ function routeMatches(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
-export default function AdminDashboardClient({ user }: Props) {
+const MANAGER_MENU = [
+  { id: 'manager-home', label: 'مساحة المدير', icon: Shield, href: '/dashboard/manager' },
+  { id: 'classes-route', label: 'الحصص', icon: CalendarDays, href: '/dashboard/admin/classes' },
+]
+
+export default function AdminDashboardClient({ user, children }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const [activeTab, setActiveTab] = useState('home')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ overview: true })
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
+    const activeGroup = MENU_GROUPS.find(group =>
+      group.items.some(item => 'href' in item && item.href && routeMatches(pathname, item.href)),
+    )
+    return { overview: true, ...(activeGroup ? { [activeGroup.id]: true } : {}) }
+  })
   const [stats, setStats] = useState<AdminOverviewStats | null>(null)
   const [statsState, setStatsState] = useState<'loading' | 'ready' | 'error'>('loading')
   const [statsRetryKey, setStatsRetryKey] = useState(0)
+  const isManager = user.role === 'MANAGER'
+  const isDashboardRoot = pathname === '/dashboard/admin'
 
   useEffect(() => {
+    if (!isDashboardRoot || isManager) return
     let cancelled = false
 
     async function loadStats() {
@@ -124,7 +140,19 @@ export default function AdminDashboardClient({ user }: Props) {
 
     void loadStats()
     return () => { cancelled = true }
-  }, [statsRetryKey])
+  }, [statsRetryKey, isDashboardRoot, isManager])
+
+  useEffect(() => {
+    const syncTabFromUrl = () => {
+      const requestedTab = new URLSearchParams(window.location.search).get('tab')
+      if (requestedTab && MENU_GROUPS.some(group => group.items.some(item => item.id === requestedTab && !('href' in item)))) {
+        setActiveTab(requestedTab)
+      }
+    }
+    syncTabFromUrl()
+    window.addEventListener('popstate', syncTabFromUrl)
+    return () => window.removeEventListener('popstate', syncTabFromUrl)
+  }, [])
 
   const retryStats = () => {
     setStatsState('loading')
@@ -134,6 +162,7 @@ export default function AdminDashboardClient({ user }: Props) {
   const navigateToTab = (tab: string) => {
     setActiveTab(tab)
     setSidebarOpen(false)
+    if (!isDashboardRoot) router.push(`/dashboard/admin?tab=${encodeURIComponent(tab)}`)
     const group = MENU_GROUPS.find(section => section.items.some(item => item.id === tab))
     if (group) {
       setExpandedGroups(current => ({ ...current, [group.id]: true }))
@@ -193,19 +222,43 @@ export default function AdminDashboardClient({ user }: Props) {
           </span>
           <span className="min-w-0">
             <span className="block truncate text-sm font-bold text-[#2d3a32]">{user.name}</span>
-            <span className="mt-1 block truncate text-xs text-[#718078]">{user.role === 'ADMIN' ? 'مدير النظام' : 'مساعد'}</span>
+            <span className="mt-1 block truncate text-xs text-[#718078]">{user.role === 'ADMIN' ? 'مدير النظام' : user.role === 'MANAGER' ? 'مدير' : 'مساعد'}</span>
           </span>
         </div>
 
-        <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4" aria-label="التنقل الرئيسي للإدارة">
-          {MENU_GROUPS.map(group => {
+        <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4" aria-label={isManager ? 'تنقل المدير' : 'التنقل الرئيسي للإدارة'}>
+          {isManager ? (
+            <section className="space-y-1">
+              <h2 className="px-3 pb-2 text-[11px] font-semibold text-[#839087]">مساحة المدير</h2>
+              {MANAGER_MENU.map(item => {
+                const Icon = item.icon
+                const selected = routeMatches(pathname, item.href)
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    aria-current={selected ? 'page' : undefined}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-right text-sm transition-colors ${
+                      selected ? 'bg-[#edf5ef] font-bold text-[#225d41]' : 'text-[#5c6961] hover:bg-[#f5f7f5] hover:text-[#225d41]'
+                    }`}
+                  >
+                    <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+                    <span className="flex-1">{item.label}</span>
+                  </Link>
+                )
+              })}
+            </section>
+          ) : MENU_GROUPS.map(group => {
             const GroupIcon = group.icon
             const expanded = expandedGroups[group.id] ?? false
             const items = (
               <div className="space-y-1">
                 {group.items.map(item => {
                   const Icon = item.icon
-                  const selected = 'href' in item && item.href ? routeMatches(pathname, item.href) : activeTab === item.id
+                  const selected = 'href' in item && item.href
+                    ? routeMatches(pathname, item.href)
+                    : isDashboardRoot && activeTab === item.id
                   const showBadge = item.id === 'subscriptions'
                   const classes = `flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-right text-sm transition-colors ${
                     selected ? 'bg-[#edf5ef] font-bold text-[#225d41]' : 'text-[#5c6961] hover:bg-[#f5f7f5] hover:text-[#225d41]'
@@ -278,10 +331,12 @@ export default function AdminDashboardClient({ user }: Props) {
         </nav>
 
         <div className="space-y-1 border-t border-[#e8ece8] p-3">
-          <Link href="/dashboard/teacher" className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-semibold text-[#5c6961] hover:bg-[#f5f7f5] hover:text-[#225d41]">
-            <GraduationCap size={18} aria-hidden="true" />
-            لوحة المعلم
-          </Link>
+          {!isManager && (
+            <Link href="/dashboard/teacher" className="flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-semibold text-[#5c6961] hover:bg-[#f5f7f5] hover:text-[#225d41]">
+              <GraduationCap size={18} aria-hidden="true" />
+              لوحة المعلم
+            </Link>
+          )}
           <button
             type="button"
             onClick={handleSignOut}
@@ -319,7 +374,7 @@ export default function AdminDashboardClient({ user }: Props) {
               <ThemeToggle />
               <span className="hidden text-left sm:block">
                 <span className="block text-xs font-bold text-[#344239]">{user.name}</span>
-                <span className="mt-1 block text-[11px] text-[#718078]">{user.role === 'ADMIN' ? 'مدير النظام' : 'مساعد'}</span>
+                <span className="mt-1 block text-[11px] text-[#718078]">{user.role === 'ADMIN' ? 'مدير النظام' : user.role === 'MANAGER' ? 'مدير' : 'مساعد'}</span>
               </span>
               <span className="grid h-10 w-10 place-items-center rounded-full bg-[#e6f0e8] text-sm font-extrabold text-[#286547]">
                 {user.name?.charAt(0).toUpperCase()}
@@ -329,17 +384,21 @@ export default function AdminDashboardClient({ user }: Props) {
         </header>
 
         <main className="mx-auto w-full max-w-[1440px] p-4 sm:p-6">
-          {activeTab === 'home' && <HomeTab stats={stats} statsState={statsState} onRetryStats={retryStats} onNavigate={navigateToTab} />}
-          {activeTab === 'leads' && <LeadsTab />}
-          {activeTab === 'users' && <UsersTab />}
-          {activeTab === 'subscriptions' && <SubscriptionsTab />}
-          {activeTab === 'coupons' && <CouponsTab />}
-          {activeTab === 'students' && <StudentsManagementTab />}
-          {activeTab === 'lessons' && <LessonsTab isActive={activeTab === 'lessons'} />}
-          {activeTab === 'placement-test' && <PlacementTestTab />}
-          {activeTab === 'page-editor' && <PageEditorTab />}
-          {activeTab === 'email' && <EmailTab />}
-          {activeTab === 'system' && <SystemTab />}
+          {isDashboardRoot ? (
+            <>
+              {activeTab === 'home' && <HomeTab stats={stats} statsState={statsState} onRetryStats={retryStats} onNavigate={navigateToTab} />}
+              {activeTab === 'leads' && <LeadsTab />}
+              {activeTab === 'users' && <UsersTab />}
+              {activeTab === 'subscriptions' && <SubscriptionsTab />}
+              {activeTab === 'coupons' && <CouponsTab />}
+              {activeTab === 'students' && <StudentsManagementTab />}
+              {activeTab === 'lessons' && <LessonsTab isActive={activeTab === 'lessons'} />}
+              {activeTab === 'placement-test' && <PlacementTestTab />}
+              {activeTab === 'page-editor' && <PageEditorTab />}
+              {activeTab === 'email' && <EmailTab />}
+              {activeTab === 'system' && <SystemTab />}
+            </>
+          ) : children}
         </main>
       </div>
     </div>

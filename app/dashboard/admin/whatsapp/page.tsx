@@ -1,21 +1,12 @@
-import { Phase4Nav } from '@/app/phase4/nav'
-import pageStyles from '@/app/phase4/phase4.module.css'
+import { requireAdminPageAccess } from '../page-access'
 import { WhatsAppCRMWorkspace } from './WhatsAppCRMWorkspace'
 
-export default function Page() {
+export default async function Page() {
+  await requireAdminPageAccess()
   return (
-    <main className={pageStyles.shell} dir="rtl">
-      <div className={pageStyles.container}>
-        <header className={pageStyles.header}>
-          <div>
-            <div className={pageStyles.eyebrow}>مساحة الإدارة</div>
-            <h1 className={pageStyles.title}>مكتب واتساب</h1>
-            <p className={pageStyles.muted}>إدارة الأرقام والربط والمحادثات من مساحة واحدة.</p>
-          </div>
-          <Phase4Nav area="admin" />
-        </header>
-        <WhatsAppCRMWorkspace />
-      </div>
-    </main>
+    <section className="space-y-4">
+      <p className="text-sm leading-6 text-[#68756e]">إدارة الأرقام والربط والمحادثات من مساحة واحدة.</p>
+      <WhatsAppCRMWorkspace />
+    </section>
   )
 }

@@ -1,2 +1,7 @@
 import { AdminSpeaking } from '@/app/dashboard/SpeakingClient'
-export default function Page(){return <AdminSpeaking/>}
+import { requireAdminPageAccess } from '../page-access'
+
+export default async function Page() {
+  await requireAdminPageAccess()
+  return <AdminSpeaking />
+}

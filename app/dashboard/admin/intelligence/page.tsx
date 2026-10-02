@@ -1,2 +1,7 @@
 import { AdminIntelligence } from '@/app/dashboard/phase9/IntelligenceClient'
-export default function Page(){return <AdminIntelligence/>}
+import { requireAdminPageAccess } from '../page-access'
+
+export default async function Page() {
+  await requireAdminPageAccess()
+  return <AdminIntelligence />
+}
