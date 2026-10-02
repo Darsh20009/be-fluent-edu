@@ -44,8 +44,8 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
   const isArabic = language === 'ar'
   const tr = (ar: string, en: string) => isArabic ? ar : en
   const passwordInputId = useId()
-  const [view, setView] = useState<ModalView>('phone')
-  const [authIntent, setAuthIntent] = useState<AuthIntent>('LOGIN')
+  const [view, setView] = useState<ModalView>(() => entryMode === 'start' ? 'register' : 'phone')
+  const [authIntent, setAuthIntent] = useState<AuthIntent>(() => entryMode === 'start' ? 'REGISTER' : 'LOGIN')
   const [countryIso, setCountryIso] = useState('EG')
   const [phoneInput, setPhoneInput] = useState('')
   const [pendingPhone, setPendingPhone] = useState('')
@@ -61,25 +61,6 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
   const [resendIn, setResendIn] = useState(0)
   const nameRef = useRef<HTMLInputElement>(null)
   const panelRef = useRef<HTMLElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    setView(entryMode === 'start' ? 'register' : 'phone')
-    setAuthIntent(entryMode === 'start' ? 'REGISTER' : 'LOGIN')
-    setCountryIso('EG')
-    setPhoneInput('')
-    setPendingPhone('')
-    setCode('')
-    setEmailOrPhone('')
-    setPassword('')
-    setShowPassword(false)
-    setConfirmPassword('')
-    setFullName('')
-    setRegistrationEmail('')
-    setError('')
-    setBusy(false)
-    setResendIn(0)
-  }, [open, entryMode])
 
   useEffect(() => {
     if (!open) return
@@ -383,6 +364,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
                   language={language}
                   onChange={setPhoneInput}
                   onCountryChange={setCountryIso}
+                  autoComplete="username"
                   placeholder={countryIso === 'EG' ? '10 1234 5678' : tr('رقمك المحلي', 'National number')}
                   disabled={busy}
                 />

@@ -46,7 +46,7 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const initialLanguage = cookieStore.get('language')?.value === 'en' ? 'en' : 'ar';
   return (
-    <html lang={initialLanguage} dir={initialLanguage === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
+    <html lang={initialLanguage} dir={initialLanguage === 'ar' ? 'rtl' : 'ltr'} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         {/* Preload critical assets immediately */}
         <link rel="icon" type="image/png" sizes="32x32" href="/brand/be-fluent-icon-2026-32.png" />

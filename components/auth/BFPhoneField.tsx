@@ -16,6 +16,7 @@ type Props = {
   language: 'ar' | 'en'
   disabled?: boolean
   placeholder?: string
+  autoComplete?: 'tel-national' | 'username'
   onChange: (value: string) => void
   onCountryChange: (iso2: string) => void
 }
@@ -27,6 +28,7 @@ export default function BFPhoneField({
   language,
   disabled = false,
   placeholder,
+  autoComplete = 'tel-national',
   onChange,
   onCountryChange,
 }: Props) {
@@ -156,9 +158,10 @@ export default function BFPhoneField({
 
       <input
         id={id}
+        name={autoComplete === 'username' ? 'username' : undefined}
         type="tel"
         inputMode="tel"
-        autoComplete="tel-national"
+        autoComplete={autoComplete}
         dir="ltr"
         style={{ unicodeBidi: 'isolate' }}
         value={value}

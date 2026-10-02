@@ -107,13 +107,14 @@ export default function BFAuthExperience() {
     return () => document.removeEventListener('click', handleSiteAuthLink, true)
   }, [pathname, router, status])
 
-  return (
+  return open ? (
     <BFAuthModal
-      open={open}
+      key={entryMode}
+      open
       entryMode={entryMode}
       returnTo={returnTo}
       registrationHref={registrationHref}
       onClose={close}
     />
-  )
+  ) : null
 }
