@@ -10,6 +10,10 @@ import {
   CheckCircle2,
   CreditCard,
   FileText,
+  PhoneCall,
+  Server,
+  Clock3,
+  UserCheck,
   Users,
 } from 'lucide-react'
 
@@ -34,6 +38,8 @@ export type AdminOverviewStats = {
   recentUsers?: RecentUser[]
   monthlyRevenue?: { month: string; revenue: number }[]
 }
+type HealthStatus = { database?: string; application?: string; checkedAt?: string }
+type StorageStatus = { configured?: boolean; status?: string; ok?: boolean }
 type FeedbackItem = { id?: string; status?: string; summary?: string | null; updatedAt?: string }
 type HomeworkItem = {
   id?: string
@@ -49,6 +55,19 @@ async function loadJson<T>(url: string): Promise<Feed<T>> {
     const response = await fetch(url, { cache: 'no-store' })
     if (!response.ok) return { state: 'error' }
     return { state: 'ready', data: await response.json() as T }
+  } catch {
+    return { state: 'error' }
+  }
+}
+
+async function loadHealth(): Promise<Feed<HealthStatus>> {
+  try {
+    const response = await fetch('/api/health', { cache: 'no-store' })
+    const body = await response.json().catch(() => null)
+    if (response.ok || (response.status === 503 && body && typeof body === 'object' && 'database' in body)) {
+      return { state: 'ready', data: body as HealthStatus }
+    }
+    return { state: 'error' }
   } catch {
     return { state: 'error' }
   }
@@ -71,33 +90,28 @@ function formatDate(value?: string | null) {
 function StatCard({
   label,
   value,
-  detail,
   icon: Icon,
   href,
 }: {
   label: string
   value: string
-  detail: string
   icon: typeof Users
   href: string
 }) {
   return (
     <Link
       href={href}
-      className="min-h-[136px] rounded-2xl border p-4 transition-colors hover:bg-[var(--surface-muted)] sm:p-5"
+      className="flex min-h-[112px] items-center gap-4 rounded-xl border p-4 transition-colors hover:bg-[var(--surface-muted)] sm:p-5"
       style={{ background: 'var(--surface)', color: 'var(--foreground)', borderColor: 'var(--border)' }}
     >
-      <div className="flex items-center justify-between gap-3">
-        <span className="grid h-10 w-10 place-items-center rounded-xl" style={{ background: 'var(--bf-green-soft)', color: 'var(--primary)' }}>
-          <Icon size={19} aria-hidden="true" />
-        </span>
-        <ArrowLeft size={15} style={{ color: 'var(--muted)' }} aria-hidden="true" />
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg" style={{ background: 'var(--bf-green-soft)', color: 'var(--primary)' }}>
+        <Icon size={20} aria-hidden="true" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] font-semibold" style={{ color: 'var(--muted)' }}>{label}</p>
+        <p className="mt-1.5 text-2xl font-bold leading-none tabular-nums">{value}</p>
       </div>
-      <p className="mt-4 text-xs font-semibold" style={{ color: 'var(--muted)' }}>{label}</p>
-      <div className="mt-1 flex items-baseline gap-2">
-        <span className="text-2xl font-bold tabular-nums">{value}</span>
-        <span className="truncate text-xs" style={{ color: 'var(--muted)' }}>{detail}</span>
-      </div>
+      <ArrowLeft size={15} className="shrink-0" style={{ color: 'var(--muted)' }} aria-hidden="true" />
     </Link>
   )
 }
