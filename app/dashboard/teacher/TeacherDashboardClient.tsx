@@ -196,6 +196,14 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
                 <FileText className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
                 <span>{localeText(language, 'ملاحظات الحصص', 'Feedback')}</span>
               </Link>
+              <Link
+                href="/dashboard/teacher/staff"
+                onClick={() => setSidebarOpen(false)}
+                className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-start text-sm text-[#5c6961] transition-colors hover:bg-[#f5f7f5] hover:text-[#225d41]"
+              >
+                <Users className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+                <span>{localeText(language, 'حسابات الموظفين', 'Employee accounts')}</span>
+              </Link>
             </nav>
           </aside>
 

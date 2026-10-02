@@ -48,6 +48,7 @@ export const PERMISSIONS = [
   'manager.manageSessions',
   'teacher.manageAssignedSessions',
   'teacher.manageAttendance',
+  'teacher.createEmployeeAccounts',
   'student.viewSessions',
   'student.viewFeedback',
   'student.viewHomework',
@@ -71,6 +72,10 @@ export const PERMISSIONS = [
 ] as const
 
 export type Permission = (typeof PERMISSIONS)[number]
+
+export function canCreateEmployeeAccounts(role: string | null | undefined): boolean {
+  return role === 'ADMIN' || role === 'TEACHER'
+}
 
 const ALL_PERMISSIONS: readonly Permission[] = PERMISSIONS
 
@@ -99,6 +104,7 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'teacher.viewAssignedGroups',
     'teacher.manageAssignedSessions',
     'teacher.manageAttendance',
+    'teacher.createEmployeeAccounts',
     'teacher.viewStudentIntelligence',
     'teacher.manageIntelligenceSuggestions',
     'teacher.editFeedback',

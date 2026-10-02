@@ -30,6 +30,7 @@ export function Phase4Nav({ area }: { area: 'admin' | 'manager' | 'teacher' | 's
         ] as const)
     : area === 'teacher'
        ? [
+            ['/dashboard/teacher', localeText(language, 'لوحة المعلم', 'Teacher dashboard')],
            ['/dashboard/teacher/classes', localeText(language, 'حصصي', 'My classes')],
            ['/dashboard/teacher/classes?view=QMeet', 'QMeet'],
            ['/dashboard/teacher/feedback', localeText(language, 'ملاحظات الحصص', 'Feedback')],
@@ -37,7 +38,6 @@ export function Phase4Nav({ area }: { area: 'admin' | 'manager' | 'teacher' | 's
            ['/dashboard/teacher/students', localeText(language, 'طلابي', 'My students')],
            ['/dashboard/teacher/intelligence', localeText(language, 'ذكاء التعلّم', 'Learning intelligence')],
            ['/dashboard/teacher/speaking', localeText(language, 'التحدث', 'Speaking')],
-           ['/dashboard/teacher', localeText(language, 'لوحة المعلم', 'Teacher dashboard')],
          ]
         : [
             ['/dashboard/student', 'Home'],
@@ -56,6 +56,8 @@ export function Phase4Nav({ area }: { area: 'admin' | 'manager' | 'teacher' | 's
     teacher: localeText(language, 'تنقل المعلم', 'Teacher navigation'),
     student: 'Student navigation',
   }
+
+  if (area === 'teacher') return null
 
   return <nav className={styles.nav} aria-label={labels[area]}>
     {links.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}

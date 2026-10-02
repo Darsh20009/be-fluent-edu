@@ -35,14 +35,15 @@ export default function UsersTab() {
   const t = (ar: string, en: string) => localeText(language, ar, en)
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'ALL' | 'STUDENT' | 'TEACHER'>('ALL')
-  const [showCreateTeacher, setShowCreateTeacher] = useState(false)
-  const [newTeacher, setNewTeacher] = useState({
+  const [filter, setFilter] = useState<'ALL' | 'STUDENT' | 'TEACHER' | 'STAFF'>('ALL')
+  const [showCreateEmployee, setShowCreateEmployee] = useState(false)
+  const [newEmployee, setNewEmployee] = useState({
     name: '',
     email: '',
     password: '',
     phone: '',
-    bio: ''
+    bio: '',
+    role: 'TEACHER' as 'TEACHER' | 'STAFF',
   })
   const [submitting, setSubmitting] = useState(false)
 
@@ -84,32 +85,37 @@ export default function UsersTab() {
     }
   }
 
-  async function handleCreateTeacher() {
-    if (!newTeacher.name || !newTeacher.email || !newTeacher.password) {
+  async function handleCreateEmployee() {
+    if (!newEmployee.name || !newEmployee.email || !newEmployee.password) {
       toast.error(t('يرجى ملء جميع الحقول المطلوبة', 'Please fill in all required fields'))
       return
     }
 
     setSubmitting(true)
     try {
-      const response = await fetch('/api/admin/users', {
+      const response = await fetch('/api/admin/people/staff', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newTeacher)
+        body: JSON.stringify(newEmployee)
       })
 
       if (response.ok) {
         await fetchUsers()
-        setNewTeacher({ name: '', email: '', password: '', phone: '', bio: '' })
-        setShowCreateTeacher(false)
-        toast.success(t('تم إنشاء حساب المدرس بنجاح!', 'Teacher account created!'))
+        setNewEmployee({ name: '', email: '', password: '', phone: '', bio: '', role: 'TEACHER' })
+        setShowCreateEmployee(false)
+        toast.success(t('تم إنشاء الحساب بنجاح', 'Account created'))
       } else {
         const data = await response.json()
-        toast.error(data.error || 'Failed to create teacher')
+        const code = data?.error?.code
+        toast.error(code === 'EMAIL_IN_USE'
+          ? t('هذا البريد مسجل بالفعل', 'This email is already in use')
+          : code === 'INVALID_EMPLOYEE'
+            ? t('تحقق من البيانات وكلمة المرور (12 حرفًا على الأقل)', 'Check the details and password (at least 12 characters)')
+            : t('تعذر إنشاء الحساب', 'Could not create account'))
       }
     } catch (error) {
-      console.error('Error creating teacher:', error)
-      toast.error('Error creating teacher')
+      console.error('Error creating employee:', error)
+      toast.error(t('تعذر إنشاء الحساب', 'Could not create account'))
     } finally {
       setSubmitting(false)
     }
@@ -125,7 +131,8 @@ export default function UsersTab() {
 
   const filteredUsers = users.filter(u => filter === 'ALL' || u.role === filter)
   const students = users.filter(u => u.role === 'STUDENT')
-  const teachers = users.filter(u => u.role === 'TEACHER' || (u.role === 'ADMIN' && u.name === 'Be Fluent'))
+  const teachers = users.filter(u => u.role === 'TEACHER')
+  const staff = users.filter(u => ['STAFF', 'ASSISTANT', 'MANAGER'].includes(u.role))
 
   return (
     <div className="space-y-6" dir={localeDirection(language)}>
@@ -135,14 +142,14 @@ export default function UsersTab() {
         </h2>
         <Button
           variant="primary"
-          onClick={() => setShowCreateTeacher(true)}
+          onClick={() => setShowCreateEmployee(true)}
         >
           <UserPlus className="h-4 w-4 mr-2" />
-          {t('إضافة مدرس', 'Add teacher')}
+          {t('إضافة موظف', 'Add employee')}
         </Button>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <Card variant="elevated">
           <div className="text-center">
             <p className="text-2xl font-bold text-[#10B981]">{users.length}</p>
@@ -159,6 +166,12 @@ export default function UsersTab() {
           <div className="text-center">
             <p className="text-2xl font-bold text-[#10B981]">{teachers.length}</p>
             <p className="text-sm text-gray-600">{t('المعلمون', 'Teachers')}</p>
+          </div>
+        </Card>
+        <Card variant="elevated">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-[#10B981]">{staff.length}</p>
+            <p className="text-sm text-gray-600">{t('الموظفون', 'Staff')}</p>
           </div>
         </Card>
       </div>
@@ -181,6 +194,12 @@ export default function UsersTab() {
           onClick={() => setFilter('TEACHER')}
         >
           {t('المعلمون', 'Teachers')} ({teachers.length})
+        </Button>
+        <Button
+          variant={filter === 'STAFF' ? 'primary' : 'outline'}
+          onClick={() => setFilter('STAFF')}
+        >
+          {t('الموظفون', 'Staff')} ({staff.length})
         </Button>
       </div>
 
@@ -247,64 +266,78 @@ export default function UsersTab() {
         )}
       </div>
 
-      {showCreateTeacher && (
+      {showCreateEmployee && (
         <Modal
           isOpen={true}
-          onClose={() => setShowCreateTeacher(false)}
-          title={t('إنشاء حساب مدرس جديد', 'Create new teacher account')}
+          onClose={() => setShowCreateEmployee(false)}
+          title={t('إنشاء حساب موظف', 'Create employee account')}
         >
           <div className="space-y-4">
+            <label className="block text-sm font-medium text-gray-900">
+              {t('نوع الحساب', 'Account type')}
+              <select
+                className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2"
+                value={newEmployee.role}
+                onChange={(event) => setNewEmployee({ ...newEmployee, role: event.target.value as 'TEACHER' | 'STAFF' })}
+              >
+                <option value="TEACHER">{t('معلم', 'Teacher')}</option>
+                <option value="STAFF">{t('موظف', 'Staff')}</option>
+              </select>
+            </label>
+            {newEmployee.role === 'STAFF' && <p className="text-sm text-gray-600">
+              {t('يحتاج حساب STAFF إلى أن يحدد ADMIN صلاحياته قبل استخدام أدوات الموظفين.', 'An ADMIN must assign permissions before a STAFF account can use staff tools.')}
+            </p>}
             <Input
               label={t('الاسم الكامل *', 'Full name *')}
-              value={newTeacher.name}
-              onChange={(e) => setNewTeacher({ ...newTeacher, name: e.target.value })}
+              value={newEmployee.name}
+              onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
               placeholder="e.g., Ahmed Hassan"
             />
             <Input
               label={t('البريد الإلكتروني *', 'Email address *')}
               type="email"
-              value={newTeacher.email}
-              onChange={(e) => setNewTeacher({ ...newTeacher, email: e.target.value })}
+              value={newEmployee.email}
+              onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
               placeholder="teacher@example.com"
             />
             <Input
-              label={t('كلمة المرور *', 'Password *')}
+              label={t('كلمة مرور أولية (12 حرفًا على الأقل) *', 'Initial password (at least 12 characters) *')}
               type="password"
-              value={newTeacher.password}
-              onChange={(e) => setNewTeacher({ ...newTeacher, password: e.target.value })}
+              value={newEmployee.password}
+              onChange={(e) => setNewEmployee({ ...newEmployee, password: e.target.value })}
               placeholder="Secure password"
             />
             <Input
               label={t('رقم الهاتف (اختياري)', 'Phone number (optional)')}
-              value={newTeacher.phone}
-              onChange={(e) => setNewTeacher({ ...newTeacher, phone: e.target.value })}
+              value={newEmployee.phone}
+              onChange={(e) => setNewEmployee({ ...newEmployee, phone: e.target.value })}
               placeholder="+966XXXXXXXXX"
             />
-            <div>
+            {newEmployee.role === 'TEACHER' && <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
                 {t('السيرة الذاتية (اختياري)', 'Bio (optional)')}
               </label>
               <textarea
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#10B981]"
-                value={newTeacher.bio}
-                onChange={(e) => setNewTeacher({ ...newTeacher, bio: e.target.value })}
+                value={newEmployee.bio}
+                onChange={(e) => setNewEmployee({ ...newEmployee, bio: e.target.value })}
                 placeholder="Teacher background and experience..."
                 rows={3}
               />
-            </div>
+            </div>}
             <div className="flex gap-2">
               <Button
                 variant="primary"
                 fullWidth
-                onClick={handleCreateTeacher}
+                onClick={handleCreateEmployee}
                 disabled={submitting}
               >
-                {submitting ? t('جارٍ الإنشاء...', 'Creating…') : t('إنشاء مدرس', 'Create teacher')}
+                {submitting ? t('جارٍ الإنشاء...', 'Creating…') : t('إنشاء الحساب', 'Create account')}
               </Button>
               <Button
                 variant="outline"
                 fullWidth
-                onClick={() => setShowCreateTeacher(false)}
+                onClick={() => setShowCreateEmployee(false)}
               >
                 {t('إلغاء', 'Cancel')}
               </Button>

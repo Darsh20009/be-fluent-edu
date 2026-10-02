@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { canAttemptOtp, canResendOtp, createOtpChallenge, isOtpExpired, OTP_POLICY, verifyOtp } from '@/lib/auth/otp'
 import { normalizePhone, phoneLookupCandidates, phoneSchema } from '@/lib/validation'
-import { hasPermission, roleHasPermission } from '@/lib/authorization'
+import { canCreateEmployeeAccounts, hasPermission, roleHasPermission } from '@/lib/authorization'
 import { isAccountUsable, resolveAccountStatus } from '@/lib/auth/status'
 
 test('normalizes supported Egyptian mobile formats canonically', () => {
@@ -52,4 +52,12 @@ test('keeps staff permissions explicit and manager separate from admin', () => {
   assert.equal(hasPermission({ userId: 'staff', role: 'STAFF', permissions: [] }, 'staff.manageSystem'), false)
   assert.equal(roleHasPermission('MANAGER', 'admin.manageSystem'), false)
   assert.equal(roleHasPermission('ADMIN', 'admin.manageSystem'), true)
+})
+
+test('only administrators and teachers can create teacher or staff accounts', () => {
+  assert.equal(canCreateEmployeeAccounts('ADMIN'), true)
+  assert.equal(canCreateEmployeeAccounts('TEACHER'), true)
+  assert.equal(canCreateEmployeeAccounts('STAFF'), false)
+  assert.equal(canCreateEmployeeAccounts('ASSISTANT'), false)
+  assert.equal(canCreateEmployeeAccounts('MANAGER'), false)
 })

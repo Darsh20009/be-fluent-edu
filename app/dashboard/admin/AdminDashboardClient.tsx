@@ -11,7 +11,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import HomeTab, { type AdminOverviewStats } from './components/AdminOverviewRedesign'
-import AdminAssistant from '@/components/admin/AdminAssistant'
 import UsersTab from './components/UsersTab'
 import SubscriptionsTab from './components/SubscriptionsTab'
 import SystemTab from './components/SystemTab'
@@ -39,6 +38,7 @@ const MENU_GROUPS = [
     icon: Home,
     items: [
       { id: 'home', label: 'لوحة التحكم', icon: Home },
+      { id: 'assistant', label: 'مساعد Be Fluent', icon: MessageCircle, href: '/dashboard/admin/assistant' },
     ]
   },
   {
@@ -124,6 +124,7 @@ export default function AdminDashboardClient({ user, children }: Props) {
     'النظام': 'System', 'السجلات وإعدادات النظام': 'System logs & settings',
     'دليل النظام': 'System guide',
     'مساحة المدير': 'Manager workspace',
+    'مساعد Be Fluent': 'Be Fluent assistant',
   } as Record<string, string>)[label] || label)
   const router = useRouter()
   const pathname = usePathname()
@@ -284,7 +285,10 @@ export default function AdminDashboardClient({ user, children }: Props) {
             const expanded = expandedGroups[group.id] ?? false
             const items = (
               <div className="space-y-1">
-                {group.items.filter(item => item.id !== 'tips-guide' || user.role === 'ADMIN').map(item => {
+                {group.items.filter(item =>
+                  (item.id !== 'tips-guide' || user.role === 'ADMIN')
+                  && (item.id !== 'assistant' || user.role === 'ADMIN'),
+                ).map(item => {
                   const Icon = item.icon
                   const selected = 'href' in item && item.href
                     ? routeMatches(pathname, item.href)
@@ -432,7 +436,6 @@ export default function AdminDashboardClient({ user, children }: Props) {
           ) : children}
         </main>
       </div>
-      {user.role === 'ADMIN' && <AdminAssistant />}
     </div>
   )
 }

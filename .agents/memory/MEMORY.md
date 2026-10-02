@@ -6,6 +6,7 @@
 - [Brand lockup](brand-lockup.md) — Use editable “Be Fluent” text beside the provided mark, with a one-shot typewriter reveal in live UI.
 - [Baileys v7 ESM interop](baileys-v7-interop.md) — load runtime APIs with native dynamic import; the CJS test loader cannot require its ESM-only Rust bridge dependency.
 - [Manager access boundaries](manager-access-boundaries.md) — keep MANAGER on a separate workspace and map only explicitly granted manager capabilities into admin API gates.
+- [إنشاء حسابات الموظفين](employee-account-creation-boundary.md) — يقتصر الإنشاء على ADMIN وTEACHER لحسابات TEACHER وSTAFF، دون منح المعلم صلاحيات.
 - [Subscription review boundary](admin-subscription-review-boundary.md) — keep actionable payment review separate from the broader commerce workspace until workflows reach parity.
 - [Effect-driven fetch state](effect-driven-fetch-state.md) — define async fetches inside effects and ignore late results; the React lint rule follows helper calls that set state.
 - [Next.js dev memory pressure](next-dev-memory-pressure.md) — distinguish cold route compilation from request latency; Turbopack child-process workers can OOM this 8 GiB dev server.
