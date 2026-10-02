@@ -8,9 +8,9 @@ import {
   BookOpenCheck,
   CalendarDays,
   CheckCircle2,
+  ChevronDown,
   CreditCard,
   FileText,
-  PhoneCall,
   Server,
   Clock3,
   UserCheck,
@@ -166,8 +166,8 @@ export default function AdminOverviewRedesign({
     ...(statsState === 'ready' && (stats?.pendingSubscriptions || 0) > 0 ? [{
       key: 'pending-subscriptions',
       title: `${stats?.pendingSubscriptions} طلب اشتراك بانتظار المراجعة`,
-      label: 'الاشتراكات',
-      href: '/dashboard/admin/commerce',
+      label: 'مراجعة دفعات الاشتراك',
+      tab: 'subscriptions',
       icon: CreditCard,
     }] : []),
     ...(feedback.state === 'ready' ? unpubFeedback.slice(0, 5).map((item) => ({
@@ -212,7 +212,7 @@ export default function AdminOverviewRedesign({
       <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <p className="text-xs font-bold" style={{ color: 'var(--primary)' }}>Be Fluent · الإدارة</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">نظرة عامة</h1>
+          <h1 className="mt-1 text-2xl font-bold sm:text-3xl">نظرة عامة</h1>
           <p className="mt-2 text-sm leading-6" style={{ color: 'var(--muted)' }}>متابعة بيانات الإدارة والمهام اليومية.</p>
         </div>
         <button
@@ -236,19 +236,22 @@ export default function AdminOverviewRedesign({
           <button type="button" onClick={onRetryStats} className="min-h-10 rounded-lg px-3 text-sm font-bold text-white" style={{ background: 'var(--primary)' }}>إعادة المحاولة</button>
         </div>
       )}
+      {statsState === 'ready' && !stats && (
+        <div className="rounded-xl border p-4 text-sm" role="status" style={{ background: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--muted)' }}>
+          لا تتوفر إحصاءات لعرضها حالياً.
+        </div>
+      )}
 
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-label="إحصاءات الإدارة">
-        {statsState === 'loading' && Array.from({ length: 6 }, (_, index) => (
+      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4" aria-label="ملخص الإدارة">
+        {statsState === 'loading' && Array.from({ length: 4 }, (_, index) => (
           <div key={index} className="h-28 animate-pulse rounded-xl border" style={{ background: 'var(--surface-muted)', borderColor: 'var(--border)' }} aria-hidden="true" />
         ))}
         {statsState === 'ready' && stats && (
           <>
-            <StatCard label="إجمالي الطلاب" value={stats.totalStudents?.toLocaleString('ar-SA') ?? '—'} icon={Users} />
-            <StatCard label="الطلاب النشطون" value={stats.activeStudents?.toLocaleString('ar-SA') ?? '—'} icon={UserCheck} />
-            <StatCard label="إجمالي الإيرادات" value={stats.totalRevenue?.toLocaleString('ar-SA') ?? '—'} icon={CreditCard} />
+            <StatCard label="الطلاب النشطون" value={stats.activeStudents?.toLocaleString('ar-SA') ?? '—'} icon={Users} />
+            <StatCard label="المعلمون" value={stats.totalTeachers?.toLocaleString('ar-SA') ?? '—'} icon={UserCheck} />
             <StatCard label="حصص هذا الأسبوع" value={stats.sessionsThisWeek?.toLocaleString('ar-SA') ?? '—'} icon={CalendarDays} />
-            <StatCard label="اشتراكات بانتظار المراجعة" value={stats.pendingSubscriptions?.toLocaleString('ar-SA') ?? '—'} icon={Clock3} />
-            <StatCard label="المعلمون" value={stats.totalTeachers?.toLocaleString('ar-SA') ?? '—'} icon={Users} />
+            <StatCard label="طلبات الاشتراك المعلّقة" value={stats.pendingSubscriptions?.toLocaleString('ar-SA') ?? '—'} icon={Clock3} />
           </>
         )}
       </section>
@@ -279,8 +282,8 @@ export default function AdminOverviewRedesign({
             )}
             {queue.map((item) => {
               const Icon = item.icon
-              return (
-                <Link key={item.key} href={item.href} className="flex min-h-[68px] items-center justify-between gap-3 rounded-xl border px-4 py-3 transition-colors hover:bg-[var(--surface-muted)]" style={{ borderColor: 'var(--border)' }}>
+              const content = (
+                <>
                   <span className="flex min-w-0 items-center gap-3">
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg" style={{ background: 'var(--bf-green-soft)', color: 'var(--primary)' }}><Icon size={17} aria-hidden="true" /></span>
                     <span className="min-w-0">
@@ -289,13 +292,28 @@ export default function AdminOverviewRedesign({
                     </span>
                   </span>
                   <ArrowLeft size={16} className="shrink-0" style={{ color: 'var(--primary)' }} aria-hidden="true" />
+                </>
+              )
+              const className = 'flex min-h-[68px] w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-right transition-colors hover:bg-[var(--surface-muted)]'
+
+              return 'tab' in item ? (
+                <button key={item.key} type="button" onClick={() => onNavigate(item.tab)} className={className} style={{ borderColor: 'var(--border)' }}>
+                  {content}
+                </button>
+              ) : (
+                <Link key={item.key} href={item.href} className={className} style={{ borderColor: 'var(--border)' }}>
+                  {content}
                 </Link>
               )
             })}
           </div>
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            <button type="button" onClick={() => onNavigate('leads')} className="inline-flex min-h-11 items-center justify-between rounded-xl px-4 text-sm font-semibold" style={{ background: 'var(--surface-muted)', color: 'var(--foreground)' }}>طلبات الحجز <PhoneCall size={15} aria-hidden="true" /></button>
-            <button type="button" onClick={() => onNavigate('system')} className="inline-flex min-h-11 items-center justify-between rounded-xl px-4 text-sm font-semibold" style={{ background: 'var(--surface-muted)', color: 'var(--foreground)' }}>النظام والسجلات <FileText size={15} aria-hidden="true" /></button>
+          <div className="mt-5 border-t pt-4" style={{ borderColor: 'var(--border)' }}>
+            <p className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>اختصارات</p>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              <Link href="/dashboard/admin/people" className="inline-flex min-h-11 items-center justify-between rounded-xl px-4 text-sm font-semibold transition-colors hover:opacity-80" style={{ background: 'var(--surface-muted)', color: 'var(--foreground)' }}>الأشخاص <Users size={15} aria-hidden="true" /></Link>
+              <Link href="/dashboard/admin/classes" className="inline-flex min-h-11 items-center justify-between rounded-xl px-4 text-sm font-semibold transition-colors hover:opacity-80" style={{ background: 'var(--surface-muted)', color: 'var(--foreground)' }}>الحصص <CalendarDays size={15} aria-hidden="true" /></Link>
+              <button type="button" onClick={() => onNavigate('subscriptions')} className="inline-flex min-h-11 items-center justify-between rounded-xl px-4 text-sm font-semibold transition-colors hover:opacity-80" style={{ background: 'var(--surface-muted)', color: 'var(--foreground)' }}>مراجعة دفعات الاشتراك <CreditCard size={15} aria-hidden="true" /></button>
+            </div>
           </div>
         </div>
 
@@ -328,6 +346,15 @@ export default function AdminOverviewRedesign({
         </div>
       </section>
 
+      <details className="rounded-xl border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset" style={{ color: 'var(--foreground)' }}>
+          تقارير وبيانات إضافية
+          <span className="flex items-center gap-2 text-xs font-medium" style={{ color: 'var(--muted)' }}>
+            افتح عند الحاجة
+            <ChevronDown size={15} aria-hidden="true" />
+          </span>
+        </summary>
+        <div className="space-y-4 border-t p-4" style={{ borderColor: 'var(--border)' }}>
       <section className="grid gap-4 xl:grid-cols-2">
         {monthlyRevenue.length > 0 && (
           <div className="rounded-2xl border p-5 sm:p-6" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
@@ -397,6 +424,8 @@ export default function AdminOverviewRedesign({
           </ul>
         </section>
       )}
+        </div>
+      </details>
       {stats?.totalRevenue != null && (
         <p className="sr-only">إجمالي الإيرادات المسجلة: {Number(stats.totalRevenue).toLocaleString('ar-SA')}.</p>
       )}

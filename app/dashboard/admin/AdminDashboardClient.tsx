@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { signOut } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   Home, Users, CreditCard, Activity, LogOut, Shield, BookOpen,
-  GraduationCap, ClipboardList, Mail, Tag, ChevronRight, Menu, X,
-  Globe, Layers, PhoneCall, MessageCircle
+  GraduationCap, ClipboardList, Mail, Tag, ChevronDown, ChevronRight, Menu, X,
+  Globe, Layers, PhoneCall, MessageCircle, CalendarDays, BookOpenCheck,
+  FileText, School, UserRound
 } from 'lucide-react'
 import Link from 'next/link'
 import HomeTab, { type AdminOverviewStats } from './components/AdminOverviewRedesign'
@@ -28,54 +29,77 @@ interface Props {
 
 const MENU_GROUPS = [
   {
+    id: 'overview',
     label: 'الرئيسية',
+    icon: Home,
     items: [
       { id: 'home', label: 'لوحة التحكم', icon: Home },
     ]
   },
   {
-    label: 'العملاء المحتملون',
+    id: 'people',
+    label: 'الأشخاص',
+    icon: Users,
     items: [
-      { id: 'leads', label: 'طلبات الحجز', icon: PhoneCall },
+      { id: 'people-route', label: 'ملفات الأشخاص', icon: UserRound, href: '/dashboard/admin/people' },
+      { id: 'users', label: 'المستخدمون', icon: Users },
+      { id: 'students', label: 'الطلاب', icon: BookOpen },
     ]
   },
   {
-    label: 'إدارة المستخدمين',
+    id: 'learning',
+    label: 'التعلّم والمتابعة',
+    icon: GraduationCap,
     items: [
-      { id: 'users', label: 'المستخدمين', icon: Users },
-      { id: 'students', label: 'الطلاب', icon: BookOpen },
-      { id: 'subscriptions', label: 'الاشتراكات', icon: CreditCard },
+      { id: 'classes-route', label: 'الحصص', icon: CalendarDays, href: '/dashboard/admin/classes' },
+      { id: 'levels-route', label: 'المستويات', icon: School, href: '/dashboard/admin/levels' },
+      { id: 'feedback-route', label: 'التغذية الراجعة', icon: BookOpenCheck, href: '/dashboard/admin/feedback' },
+      { id: 'homework-route', label: 'الواجبات', icon: FileText, href: '/dashboard/admin/homework' },
+      { id: 'lessons', label: 'الدروس', icon: Layers },
+      { id: 'placement-test', label: 'اختبار تحديد المستوى', icon: ClipboardList },
+      { id: 'page-editor', label: 'محرر الصفحات', icon: Globe },
+    ]
+  },
+  {
+    id: 'requests',
+    label: 'الطلبات والماليات',
+    icon: CreditCard,
+    items: [
+      { id: 'leads', label: 'طلبات الحجز', icon: PhoneCall },
+      { id: 'commerce-route', label: 'الباقات والمجموعات', icon: CreditCard, href: '/dashboard/admin/commerce' },
+      { id: 'subscriptions', label: 'مراجعة دفعات الاشتراك', icon: CreditCard },
       { id: 'coupons', label: 'الكوبونات', icon: Tag },
     ]
   },
   {
-    label: 'المحتوى التعليمي',
+    id: 'communication',
+    label: 'التواصل',
+    icon: MessageCircle,
     items: [
-      { id: 'lessons', label: 'الدروس', icon: Layers },
-      { id: 'placement-test', label: 'اختبار تحديد المستوى', icon: ClipboardList },
-      { id: 'page-editor', label: 'محرر الصفحات (CMS)', icon: Globe },
-    ]
-  },
-  {
-    label: 'النظام',
-    items: [
+      { id: 'whatsapp-route', label: 'WhatsApp', icon: MessageCircle, href: '/dashboard/admin/whatsapp' },
       { id: 'email', label: 'البريد المباشر', icon: Mail },
-      { id: 'system', label: 'النظام والسجلات', icon: Activity },
     ]
   },
   {
-    label: 'المساحة الجديدة',
+    id: 'system',
+    label: 'النظام',
+    icon: Activity,
     items: [
-      { id: 'new-workspace', label: 'صفحات الإدارة الجديدة', icon: Layers },
-      { id: 'whatsapp', label: 'إدارة WhatsApp CRM', icon: MessageCircle },
+      { id: 'system', label: 'السجلات وإعدادات النظام', icon: Activity },
     ]
   }
 ]
 
+function routeMatches(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`)
+}
+
 export default function AdminDashboardClient({ user }: Props) {
   const router = useRouter()
+  const pathname = usePathname()
   const [activeTab, setActiveTab] = useState('home')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ overview: true })
   const [stats, setStats] = useState<AdminOverviewStats | null>(null)
   const [statsState, setStatsState] = useState<'loading' | 'ready' | 'error'>('loading')
   const [statsRetryKey, setStatsRetryKey] = useState(0)
@@ -107,12 +131,24 @@ export default function AdminDashboardClient({ user }: Props) {
     setStatsRetryKey((key) => key + 1)
   }
 
+  const navigateToTab = (tab: string) => {
+    setActiveTab(tab)
+    setSidebarOpen(false)
+    const group = MENU_GROUPS.find(section => section.items.some(item => item.id === tab))
+    if (group) {
+      setExpandedGroups(current => ({ ...current, [group.id]: true }))
+    }
+  }
+
   const handleSignOut = async () => {
     await signOut({ redirect: false })
     router.push('/auth/login')
   }
 
-  const activeLabel = MENU_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || 'لوحة التحكم'
+  const activeRouteItem = MENU_GROUPS.flatMap(g => g.items).find(i =>
+    'href' in i && i.href ? routeMatches(pathname, i.href) : false,
+  )
+  const activeLabel = activeRouteItem?.label || MENU_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || 'لوحة التحكم'
   const pendingSubscriptions = typeof stats?.pendingSubscriptions === 'number' && Number.isFinite(stats.pendingSubscriptions)
     ? stats.pendingSubscriptions
     : null
@@ -162,47 +198,83 @@ export default function AdminDashboardClient({ user }: Props) {
         </div>
 
         <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4" aria-label="التنقل الرئيسي للإدارة">
-          {MENU_GROUPS.map(group => (
-            <section key={group.label}>
-              <h2 className="px-3 pb-2 text-[11px] font-semibold text-[#839087]">{group.label}</h2>
+          {MENU_GROUPS.map(group => {
+            const GroupIcon = group.icon
+            const expanded = expandedGroups[group.id] ?? false
+            const items = (
               <div className="space-y-1">
                 {group.items.map(item => {
                   const Icon = item.icon
-                  const selected = activeTab === item.id
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      aria-current={selected ? 'page' : undefined}
-                      onClick={() => {
-                        setSidebarOpen(false)
-                        if (item.id === 'new-workspace') {
-                          router.push('/dashboard/admin/classes')
-                          return
-                        }
-                        if (item.id === 'whatsapp') {
-                          router.push('/dashboard/admin/whatsapp')
-                          return
-                        }
-                        setActiveTab(item.id)
-                      }}
-                      className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-right text-sm transition-colors ${
-                        selected ? 'bg-[#edf5ef] font-bold text-[#225d41]' : 'text-[#5c6961] hover:bg-[#f5f7f5] hover:text-[#225d41]'
-                      }`}
-                    >
+                  const selected = 'href' in item && item.href ? routeMatches(pathname, item.href) : activeTab === item.id
+                  const showBadge = item.id === 'subscriptions'
+                  const classes = `flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-right text-sm transition-colors ${
+                    selected ? 'bg-[#edf5ef] font-bold text-[#225d41]' : 'text-[#5c6961] hover:bg-[#f5f7f5] hover:text-[#225d41]'
+                  }`
+                  const content = (
+                    <>
                       <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
                       <span className="flex-1">{item.label}</span>
-                      {item.id === 'subscriptions' && pendingSubscriptions !== null && pendingSubscriptions > 0 && (
+                      {showBadge && pendingSubscriptions !== null && pendingSubscriptions > 0 && (
                         <span className="min-w-6 rounded-full bg-[#f5f1e7] px-2 py-1 text-center text-[11px] font-bold tabular-nums text-[#80662d]">
                           {pendingSubscriptions}
                         </span>
                       )}
+                    </>
+                  )
+                  return 'href' in item && item.href ? (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      aria-current={selected ? 'page' : undefined}
+                      onClick={() => {
+                        setSidebarOpen(false)
+                        setExpandedGroups(current => ({ ...current, [group.id]: true }))
+                      }}
+                      className={classes}
+                    >
+                      {content}
+                    </Link>
+                  ) : (
+                    <button
+                      key={item.id}
+                      type="button"
+                      aria-current={selected ? 'page' : undefined}
+                      onClick={() => navigateToTab(item.id)}
+                      className={classes}
+                    >
+                      {content}
                     </button>
                   )
                 })}
               </div>
-            </section>
-          ))}
+            )
+
+            if (group.id === 'overview') {
+              return (
+                <section key={group.id}>
+                  <h2 className="px-3 pb-2 text-[11px] font-semibold text-[#839087]">{group.label}</h2>
+                  {items}
+                </section>
+              )
+            }
+
+            return (
+              <section key={group.id}>
+                <button
+                  type="button"
+                  aria-expanded={expanded}
+                  aria-controls={`admin-nav-${group.id}`}
+                  onClick={() => setExpandedGroups(current => ({ ...current, [group.id]: !expanded }))}
+                  className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-right text-sm font-semibold text-[#5c6961] hover:bg-[#f5f7f5] hover:text-[#225d41]"
+                >
+                  <GroupIcon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+                  <span className="flex-1">{group.label}</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />
+                </button>
+                <div id={`admin-nav-${group.id}`} className="mt-1 space-y-1 pr-3" hidden={!expanded}>{items}</div>
+              </section>
+            )
+          })}
         </nav>
 
         <div className="space-y-1 border-t border-[#e8ece8] p-3">
@@ -257,7 +329,7 @@ export default function AdminDashboardClient({ user }: Props) {
         </header>
 
         <main className="mx-auto w-full max-w-[1440px] p-4 sm:p-6">
-          {activeTab === 'home' && <HomeTab stats={stats} statsState={statsState} onRetryStats={retryStats} onNavigate={setActiveTab} />}
+          {activeTab === 'home' && <HomeTab stats={stats} statsState={statsState} onRetryStats={retryStats} onNavigate={navigateToTab} />}
           {activeTab === 'leads' && <LeadsTab />}
           {activeTab === 'users' && <UsersTab />}
           {activeTab === 'subscriptions' && <SubscriptionsTab />}
