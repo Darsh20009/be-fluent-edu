@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { canAttemptOtp, canResendOtp, createOtpChallenge, isOtpExpired, OTP_POLICY, verifyOtp } from '@/lib/auth/otp'
-import { normalizePhone, phoneSchema } from '@/lib/validation'
+import { normalizePhone, phoneLookupCandidates, phoneSchema } from '@/lib/validation'
 import { hasPermission, roleHasPermission } from '@/lib/authorization'
 import { isAccountUsable, resolveAccountStatus } from '@/lib/auth/status'
 
@@ -11,6 +11,15 @@ test('normalizes supported Egyptian mobile formats canonically', () => {
   assert.equal(normalizePhone('00201212345678'), '+201212345678')
   assert.equal(phoneSchema.parse('01512345678'), '+201512345678')
   assert.throws(() => phoneSchema.parse('01912345678'))
+})
+
+test('matches legacy Egyptian phone storage formats without fuzzy matching', () => {
+  assert.deepEqual(phoneLookupCandidates('+201012345678'), [
+    '+201012345678',
+    '201012345678',
+    '00201012345678',
+    '01012345678',
+  ])
 })
 
 test('hashes OTPs without retaining or accepting plaintext', () => {

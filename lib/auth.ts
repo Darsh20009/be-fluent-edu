@@ -2,7 +2,7 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
-import { normalizePhone } from './validation'
+import { phoneLookupCandidates } from './validation'
 import { normalizeRole } from './authorization'
 import { isAccountUsable, resolveAccountStatus } from './auth/status'
 import { verifyOtp, OtpServiceError } from './auth/otp-service'
@@ -46,13 +46,14 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Invalid authentication credentials')
         }
 
+        const phoneCandidates = isEmail(identity) ? [] : phoneLookupCandidates(identity)
         const user = await prisma.user.findFirst({
           where: isEmail(identity)
             ? { email: identity.toLowerCase() }
             : {
                 OR: [
-                  { normalizedPhone: normalizePhone(identity) },
-                  { phone: normalizePhone(identity) },
+                  { normalizedPhone: { in: phoneCandidates } },
+                  { phone: { in: phoneCandidates } },
                 ],
               },
         })

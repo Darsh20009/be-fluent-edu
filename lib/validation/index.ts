@@ -16,6 +16,18 @@ export function normalizePhone(value: string, defaultCountryCode = '20'): string
   return `+${defaultCountryCode}${compact}`
 }
 
+export function phoneLookupCandidates(value: string, defaultCountryCode = '20'): string[] {
+  const normalized = normalizePhone(value, defaultCountryCode)
+  const withoutPlus = normalized.slice(1)
+  const candidates = new Set([normalized, withoutPlus, `00${withoutPlus}`])
+  const countryPrefix = `+${defaultCountryCode}`
+  if (normalized.startsWith(countryPrefix)) {
+    const nationalNumber = normalized.slice(countryPrefix.length)
+    if (nationalNumber) candidates.add(`0${nationalNumber}`)
+  }
+  return [...candidates]
+}
+
 export const phoneSchema = z
   .string()
   .min(1, 'Phone number is required')
