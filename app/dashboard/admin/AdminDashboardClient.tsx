@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import {
@@ -78,21 +78,34 @@ export default function AdminDashboardClient({ user }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [stats, setStats] = useState<AdminOverviewStats | null>(null)
   const [statsState, setStatsState] = useState<'loading' | 'ready' | 'error'>('loading')
+  const [statsRetryKey, setStatsRetryKey] = useState(0)
 
-  const loadStats = useCallback(async () => {
-    setStatsState('loading')
-    try {
-      const response = await fetch('/api/admin/stats', { cache: 'no-store' })
-      if (!response.ok) throw new Error('Admin stats unavailable')
-      setStats(await response.json() as AdminOverviewStats)
-      setStatsState('ready')
-    } catch {
-      setStats(null)
-      setStatsState('error')
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadStats() {
+      try {
+        const response = await fetch('/api/admin/stats', { cache: 'no-store' })
+        if (!response.ok) throw new Error('Admin stats unavailable')
+        const nextStats = await response.json() as AdminOverviewStats
+        if (cancelled) return
+        setStats(nextStats)
+        setStatsState('ready')
+      } catch {
+        if (cancelled) return
+        setStats(null)
+        setStatsState('error')
+      }
     }
-  }, [])
 
-  useEffect(() => { void loadStats() }, [loadStats])
+    void loadStats()
+    return () => { cancelled = true }
+  }, [statsRetryKey])
+
+  const retryStats = () => {
+    setStatsState('loading')
+    setStatsRetryKey((key) => key + 1)
+  }
 
   const handleSignOut = async () => {
     await signOut({ redirect: false })
@@ -244,7 +257,7 @@ export default function AdminDashboardClient({ user }: Props) {
         </header>
 
         <main className="mx-auto w-full max-w-[1440px] p-4 sm:p-6">
-          {activeTab === 'home' && <HomeTab stats={stats} statsState={statsState} onRetryStats={loadStats} />}
+          {activeTab === 'home' && <HomeTab stats={stats} statsState={statsState} onRetryStats={retryStats} onNavigate={setActiveTab} />}
           {activeTab === 'leads' && <LeadsTab />}
           {activeTab === 'users' && <UsersTab />}
           {activeTab === 'subscriptions' && <SubscriptionsTab />}

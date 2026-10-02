@@ -127,21 +127,31 @@ export default function AdminOverviewRedesign({
   const [health, setHealth] = useState<Feed<HealthStatus>>({ state: 'loading' })
   const [retryKey, setRetryKey] = useState(0)
 
-  const load = useCallback(async () => {
+  const retry = useCallback(() => {
     setFeedback({ state: 'loading' })
     setHomework({ state: 'loading' })
     setHealth({ state: 'loading' })
-    const [feedbackFeed, homeworkFeed, healthFeed] = await Promise.all([
-      loadJson<unknown>('/api/admin/feedback'),
-      loadJson<unknown>('/api/admin/homework'),
-      loadHealth(),
-    ])
-    setFeedback(feedbackFeed.state === 'ready' ? { state: 'ready', data: itemsFrom<FeedbackItem>(feedbackFeed.data) } : { state: 'error' })
-    setHomework(homeworkFeed.state === 'ready' ? { state: 'ready', data: itemsFrom<HomeworkItem>(homeworkFeed.data) } : { state: 'error' })
-    setHealth(healthFeed)
+    setRetryKey((key) => key + 1)
   }, [])
 
-  useEffect(() => { void load() }, [load, retryKey])
+  useEffect(() => {
+    let cancelled = false
+
+    async function load() {
+      const [feedbackFeed, homeworkFeed, healthFeed] = await Promise.all([
+        loadJson<unknown>('/api/admin/feedback'),
+        loadJson<unknown>('/api/admin/homework'),
+        loadHealth(),
+      ])
+      if (cancelled) return
+      setFeedback(feedbackFeed.state === 'ready' ? { state: 'ready', data: itemsFrom<FeedbackItem>(feedbackFeed.data) } : { state: 'error' })
+      setHomework(homeworkFeed.state === 'ready' ? { state: 'ready', data: itemsFrom<HomeworkItem>(homeworkFeed.data) } : { state: 'error' })
+      setHealth(healthFeed)
+    }
+
+    void load()
+    return () => { cancelled = true }
+  }, [retryKey])
 
   const recentSubscriptions = Array.isArray(stats?.recentSubscriptions) ? stats.recentSubscriptions : []
   const recentUsers = Array.isArray(stats?.recentUsers) ? stats.recentUsers : []
@@ -228,7 +238,7 @@ export default function AdminOverviewRedesign({
       )}
 
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-label="إحصاءات الإدارة">
-        {statsState === 'loading' && Array.from({ length: 4 }, (_, index) => (
+        {statsState === 'loading' && Array.from({ length: 6 }, (_, index) => (
           <div key={index} className="h-28 animate-pulse rounded-xl border" style={{ background: 'var(--surface-muted)', borderColor: 'var(--border)' }} aria-hidden="true" />
         ))}
         {statsState === 'ready' && stats && (
@@ -259,7 +269,7 @@ export default function AdminOverviewRedesign({
             {feedback.state === 'error' || homework.state === 'error' ? (
               <div className="rounded-xl border p-4 text-sm leading-6" style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>
                 تعذر تحميل إحدى قوائم المتابعة. أعد المحاولة لقراءة بياناتها.
-                <button type="button" onClick={() => setRetryKey((key) => key + 1)} className="me-2 font-bold underline underline-offset-4" style={{ color: 'var(--primary)' }}>إعادة المحاولة</button>
+                <button type="button" onClick={retry} className="me-2 font-bold underline underline-offset-4" style={{ color: 'var(--primary)' }}>إعادة المحاولة</button>
               </div>
             ) : null}
             {feedback.state === 'ready' && homework.state === 'ready' && queue.length === 0 && (
@@ -302,7 +312,7 @@ export default function AdminOverviewRedesign({
             {health.state === 'error' && (
               <div className="rounded-xl border p-4 text-sm leading-6" role="status" style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>
                 تعذر قراءة حالة الخدمات.
-                <button type="button" onClick={() => setRetryKey((key) => key + 1)} className="me-2 font-bold underline underline-offset-4" style={{ color: 'var(--primary)' }}>إعادة المحاولة</button>
+                <button type="button" onClick={retry} className="me-2 font-bold underline underline-offset-4" style={{ color: 'var(--primary)' }}>إعادة المحاولة</button>
               </div>
             )}
             {health.state === 'ready' && healthServices.map((service) => {
