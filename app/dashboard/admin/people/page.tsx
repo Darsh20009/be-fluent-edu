@@ -12,6 +12,6 @@ export default async function PeoplePage() {
   const language = await getServerLanguage()
   return <section className="space-y-4">
     <p className="text-sm leading-6 text-[#68756e]">{localeText(language, 'النظام من الموظفين والمعلمين والطلاب.', 'Students, teachers, and staff from the live system.')}</p>
-    <PeopleClient />
+    <PeopleClient canCreateStudent={access.role === 'ADMIN'} />
   </section>
 }

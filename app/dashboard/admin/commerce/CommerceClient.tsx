@@ -30,6 +30,9 @@ export default function CommerceClient() {
   const [items, setItems] = useState<ApiItem[]>([])
   const [state, setState] = useState<'loading' | 'ready' | 'blocked' | 'error'>('loading')
   const [message, setMessage] = useState('')
+  const [lessonsPerWeek, setLessonsPerWeek] = useState('')
+  const [importingPhotoPricing, setImportingPhotoPricing] = useState(false)
+  const [photoPricingMessage, setPhotoPricingMessage] = useState('')
 
   const load = useCallback(async () => {
     setState('loading')
@@ -55,6 +58,40 @@ export default function CommerceClient() {
     }
   }, [section, t])
 
+  const importPhotoPricing = async () => {
+    const frequency = Number(lessonsPerWeek)
+    if (!Number.isInteger(frequency) || frequency < 1 || frequency > 7) {
+      setPhotoPricingMessage(t('أدخل عدد حصص أسبوعيًا من ١ إلى ٧.', 'Enter 1 to 7 lessons per week.'))
+      return
+    }
+    setImportingPhotoPricing(true)
+    setPhotoPricingMessage('')
+    try {
+      const response = await fetch('/api/admin/commerce/photo-pricing', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lessonsPerWeek: frequency }),
+      })
+      const payload = await response.json().catch(() => null)
+      if (!response.ok) {
+        const existing = Array.isArray(payload?.existing)
+          ? payload.existing.map((item: ApiItem) => String(item.title || item.id)).join(', ')
+          : ''
+        throw new Error(existing
+          ? t(`توجد باقات بالأسماء نفسها: ${existing}. لم يتم تغيير أي باقة.`, `Packages already exist with these titles: ${existing}. Nothing was changed.`)
+          : t('تعذر إنشاء باقات الأسعار. لم يتم تغيير الباقات الموجودة.', 'Could not create the pricing packages. Existing packages were not changed.'))
+      }
+      const created = Array.isArray(payload?.items) ? payload.items.length : 0
+      await load()
+      setPhotoPricingMessage(t(`تم إنشاء ${created} باقات بالجنيه المصري.`, `${created} packages were created in EGP.`))
+    } catch (error) {
+      setPhotoPricingMessage(error instanceof Error ? error.message : t('تعذر إنشاء باقات الأسعار.', 'Could not create the pricing packages.'))
+    } finally {
+      setImportingPhotoPricing(false)
+    }
+  }
+
   useEffect(() => {
     const timer = window.setTimeout(() => { void load() }, 0)
     return () => window.clearTimeout(timer)
@@ -78,6 +115,21 @@ export default function CommerceClient() {
         aria-selected={item.id === section}
       >{names[item.id]}</button>)}
     </div>
+
+    {section === 'packages' && <div className={base.card}>
+      <h2>{t('إضافة باقات الأسعار من الصور', 'Add the photo-based packages')}</h2>
+      <p className={base.muted}>{t('الأسعار لكل طالب وبالجنيه المصري. حدّد الحصص الأسبوعية؛ يُحسب الشهر على أربعة أسابيع. لن تُستبدل أي باقات موجودة.', 'Prices are per student in EGP. Set weekly lessons; each month uses four weeks. Existing packages will not be overwritten.')}</p>
+      <div className={base.toolbar}>
+        <label className="grid gap-1 text-sm">
+          {t('الحصص في الأسبوع', 'Lessons per week')}
+          <input className={base.input} type="number" min={1} max={7} step={1} inputMode="numeric" value={lessonsPerWeek} onChange={(event) => setLessonsPerWeek(event.target.value)} data-testid="input-photo-pricing-frequency" />
+        </label>
+        <button className={base.button} type="button" disabled={importingPhotoPricing} onClick={() => void importPhotoPricing()} data-testid="button-import-photo-pricing">
+          {importingPhotoPricing ? t('جارٍ الإنشاء…', 'Creating…') : t('إنشاء الباقات الست', 'Create six packages')}
+        </button>
+      </div>
+      {photoPricingMessage && <p className={base.muted} role="status" data-testid="status-photo-pricing">{photoPricingMessage}</p>}
+    </div>}
 
     {state === 'loading' && <div className={styles.status} aria-live="polite">{t('جارٍ تحميل', 'Loading')} {names[section]}…</div>}
     {state === 'blocked' && <div className={styles.blocked} role="status">

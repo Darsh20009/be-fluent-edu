@@ -19,8 +19,10 @@ const packageFields = {
   capacity: z.number().int().positive().max(100).nullable().optional(),
   durationDays: z.number().int().positive().max(3650),
   lessonsCount: z.number().int().positive().max(1000),
+  lessonsPerWeek: z.number().int().min(1).max(7).nullable().optional(),
   price: z.number().finite().nonnegative(),
   discountPrice: z.number().finite().nonnegative().nullable().optional(),
+  currency: z.enum(['EGP', 'SAR', 'USD']).nullable().optional(),
   features: z.array(z.string().trim().min(1).max(160)).max(30).default([]),
   isActive: z.boolean().default(true),
 }

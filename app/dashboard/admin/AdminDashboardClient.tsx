@@ -7,7 +7,7 @@ import {
   Home, Users, CreditCard, Activity, LogOut, Shield, BookOpen,
   GraduationCap, ClipboardList, Mail, Tag, ChevronDown, ChevronRight, Menu, X,
   Globe, Layers, PhoneCall, MessageCircle, CalendarDays, BookOpenCheck,
-  FileText, School, UserRound, Mic, Brain
+  FileText, School, UserRound, Mic, Brain, CircleDollarSign
 } from 'lucide-react'
 import Link from 'next/link'
 import HomeTab, { type AdminOverviewStats } from './components/AdminOverviewRedesign'
@@ -74,6 +74,7 @@ const MENU_GROUPS = [
     items: [
       { id: 'leads', label: 'طلبات الحجز', icon: PhoneCall },
       { id: 'commerce-route', label: 'الباقات والمجموعات', icon: CreditCard, href: '/dashboard/admin/commerce' },
+      { id: 'finance-route', label: 'المالية', icon: CircleDollarSign, href: '/dashboard/admin/finance' },
       { id: 'subscriptions', label: 'مراجعة دفعات الاشتراك', icon: CreditCard },
       { id: 'coupons', label: 'الكوبونات', icon: Tag },
     ]
@@ -125,6 +126,7 @@ export default function AdminDashboardClient({ user, children }: Props) {
     'دليل النظام': 'System guide',
     'مساحة المدير': 'Manager workspace',
     'مساعد Be Fluent': 'Be Fluent assistant',
+    'المالية': 'Finance',
   } as Record<string, string>)[label] || label)
   const router = useRouter()
   const pathname = usePathname()
@@ -287,7 +289,8 @@ export default function AdminDashboardClient({ user, children }: Props) {
               <div className="space-y-1">
                 {group.items.filter(item =>
                   (item.id !== 'tips-guide' || user.role === 'ADMIN')
-                  && (item.id !== 'assistant' || user.role === 'ADMIN'),
+                  && (item.id !== 'assistant' || user.role === 'ADMIN')
+                  && (item.id !== 'finance-route' || user.role === 'ADMIN'),
                 ).map(item => {
                   const Icon = item.icon
                   const selected = 'href' in item && item.href

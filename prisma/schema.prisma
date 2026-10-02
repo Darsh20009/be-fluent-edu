@@ -9,9 +9,9 @@ datasource db {
 
 model Assignment {
   id             String       @id @default(uuid()) @map("_id")
-  sessionId      String?      
-  teacherId      String?      // ID of the teacher who created this (optional)
-  studentId      String?      // ID of the student this is assigned to (optional)
+  sessionId      String?
+  teacherId      String? // ID of the teacher who created this (optional)
+  studentId      String? // ID of the student this is assigned to (optional)
   title          String
   description    String?
   type           String       @default("TEXT")
@@ -25,15 +25,15 @@ model Assignment {
 }
 
 model AuditLog {
-  id        String   @id @default(uuid()) @map("_id")
-  action    String
-  userId    String?  
-  details   String?
-  entityType String?
-  entityId   String?
+  id           String   @id @default(uuid()) @map("_id")
+  action       String
+  userId       String?
+  details      String?
+  entityType   String?
+  entityId     String?
   metadataJson String?
-  success    Boolean?
-  createdAt DateTime @default(now())
+  success      Boolean?
+  createdAt    DateTime @default(now())
 
   @@index([userId, createdAt])
   @@index([entityType, entityId])
@@ -41,8 +41,8 @@ model AuditLog {
 
 model Chat {
   id                         String   @id @default(uuid()) @map("_id")
-  fromUserId                 String   
-  toUserId                   String   
+  fromUserId                 String
+  toUserId                   String
   content                    String
   attachments                String?
   isSaved                    Boolean  @default(false)
@@ -52,64 +52,66 @@ model Chat {
 }
 
 model Package {
-  id            String         @id @default(uuid()) @map("_id")
-  title         String
-  titleAr       String
-  description   String?
-  descriptionAr String?
-  price         Float
-  discountPrice Float?         // السعر بعد الخصم المباشر
-  lessonsCount  Int
-  durationDays  Int
+  id               String            @id @default(uuid()) @map("_id")
+  title            String
+  titleAr          String
+  description      String?
+  descriptionAr    String?
+  price            Float
+  discountPrice    Float? // السعر بعد الخصم المباشر
+  currency         String?
+  lessonsCount     Int
+  lessonsPerWeek   Int?
+  durationDays     Int
   subscriptionType SubscriptionType?
-  levelId       String?
-  stageId       String?
-  capacity      Int?
-  featuresJson  String?
-  isActive      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @default(now()) @updatedAt
-  CartItem      CartItem[]
-  Subscription  Subscription[]
-  Enrollment    Enrollment[]
-  level         Level?         @relation("PackageLevel", fields: [levelId], references: [id])
-  stage         LevelStage?    @relation("PackageStage", fields: [stageId], references: [id])
+  levelId          String?
+  stageId          String?
+  capacity         Int?
+  featuresJson     String?
+  isActive         Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @default(now()) @updatedAt
+  CartItem         CartItem[]
+  Subscription     Subscription[]
+  Enrollment       Enrollment[]
+  level            Level?            @relation("PackageLevel", fields: [levelId], references: [id])
+  stage            LevelStage?       @relation("PackageStage", fields: [stageId], references: [id])
 
   @@index([subscriptionType, isActive])
   @@index([levelId, stageId])
 }
 
 model Session {
-  id               String           @id @default(uuid()) @map("_id")
-  teacherId        String           
+  id               String               @id @default(uuid()) @map("_id")
+  teacherId        String
   title            String
   startTime        DateTime
   endTime          DateTime
-  status           String           @default("SCHEDULED")
-  roomId           String?          @unique
+  status           String               @default("SCHEDULED")
+  roomId           String?              @unique
   recordingUrl     String?
   sessionPassword  String?
   externalLink     String?
-  externalLinkType String?          // ZOOM, GOOGLE_MEET, TEAMS, OTHER
-  whatsappNumber   String?          // Direct WhatsApp contact for this session
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @default(now()) @updatedAt
+  externalLinkType String? // ZOOM, GOOGLE_MEET, TEAMS, OTHER
+  whatsappNumber   String? // Direct WhatsApp contact for this session
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @default(now()) @updatedAt
   Assignment       Assignment[]
-  TeacherProfile   TeacherProfile   @relation(fields: [teacherId], references: [id])
+  TeacherProfile   TeacherProfile       @relation(fields: [teacherId], references: [id])
   SessionStudent   SessionStudent[]
   levelId          String?
-  level            Level?            @relation("SessionLevel", fields: [levelId], references: [id])
+  level            Level?               @relation("SessionLevel", fields: [levelId], references: [id])
   stageId          String?
-  stage            LevelStage?       @relation("SessionStage", fields: [stageId], references: [id])
+  stage            LevelStage?          @relation("SessionStage", fields: [stageId], references: [id])
   groupId          String?
-  group            LearningGroup?    @relation("GroupSessions", fields: [groupId], references: [id])
+  group            LearningGroup?       @relation("GroupSessions", fields: [groupId], references: [id])
   groupScheduleId  String?
-  groupSchedule    GroupSchedule?    @relation("ScheduledSessions", fields: [groupScheduleId], references: [id])
+  groupSchedule    GroupSchedule?       @relation("ScheduledSessions", fields: [groupScheduleId], references: [id])
   participants     SessionParticipant[]
   attendances      Attendance[]
   qmeetMeeting     QMeetMeeting?
   feedback         SessionFeedback[]
-  homework         Homework[]        @relation("SessionHomework")
+  homework         Homework[]           @relation("SessionHomework")
 
   @@index([status, startTime])
   @@index([teacherId, startTime])
@@ -118,8 +120,8 @@ model Session {
 
 model SessionStudent {
   id        String   @id @default(uuid()) @map("_id")
-  sessionId String   
-  studentId String   
+  sessionId String
+  studentId String
   attended  Boolean  @default(false)
   createdAt DateTime @default(now())
   Session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
@@ -129,8 +131,8 @@ model SessionStudent {
 }
 
 model StudentProfile {
-  id                      String   @id @default(uuid()) @map("_id")
-  userId                  String   @unique 
+  id                      String                       @id @default(uuid()) @map("_id")
+  userId                  String                       @unique
   age                     Int?
   gender                  String?
   levelInitial            String?
@@ -142,18 +144,18 @@ model StudentProfile {
   placementTestPercentage Int?
   packageId               String?
   receiptUrl              String?
-  isVerified              Boolean  @default(false)
+  isVerified              Boolean                      @default(false)
   officialLevelId         String?
   officialStageId         String?
   recommendedLevelId      String?
   recommendedStageId      String?
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @default(now()) @updatedAt
-  User                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  officialLevel           Level?   @relation("StudentOfficialLevel", fields: [officialLevelId], references: [id])
-  officialStage           LevelStage? @relation("StudentOfficialStage", fields: [officialStageId], references: [id])
-  recommendedLevel        Level?   @relation("StudentRecommendedLevel", fields: [recommendedLevelId], references: [id])
-  recommendedStage        LevelStage? @relation("StudentRecommendedStage", fields: [recommendedStageId], references: [id])
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @default(now()) @updatedAt
+  User                    User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  officialLevel           Level?                       @relation("StudentOfficialLevel", fields: [officialLevelId], references: [id])
+  officialStage           LevelStage?                  @relation("StudentOfficialStage", fields: [officialStageId], references: [id])
+  recommendedLevel        Level?                       @relation("StudentRecommendedLevel", fields: [recommendedLevelId], references: [id])
+  recommendedStage        LevelStage?                  @relation("StudentRecommendedStage", fields: [recommendedStageId], references: [id])
   learningProfile         StudentLearningProfile?
   levelRecommendations    StudentLevelRecommendation[]
 
@@ -162,35 +164,36 @@ model StudentProfile {
 }
 
 model Submission {
-  id            String     @id @default(uuid()) @map("_id")
-  assignmentId  String     
-  studentId     String     
-  textAnswer    String?
+  id             String     @id @default(uuid()) @map("_id")
+  assignmentId   String
+  studentId      String
+  textAnswer     String?
   selectedOption Int?
-  attachedFiles String?
-  grade         Float?
-  feedback      String?
-  grammarErrors String?
-  submittedAt   DateTime   @default(now())
-  updatedAt     DateTime   @default(now()) @updatedAt
-  Assignment    Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  User          User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  attachedFiles  String?
+  grade          Float?
+  feedback       String?
+  grammarErrors  String?
+  submittedAt    DateTime   @default(now())
+  updatedAt      DateTime   @default(now()) @updatedAt
+  Assignment     Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  User           User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
 model Subscription {
   id                String             @id @default(uuid()) @map("_id")
-  studentId         String             
-  packageId         String             
+  studentId         String
+  packageId         String
   subscriptionType  SubscriptionType?
   capacity          Int?
   groupId           String?
   status            SubscriptionStatus @default(PENDING)
   paid              Boolean            @default(false)
+  paidAmount        Float?
   paymentMethod     PaymentMethod?
   eWalletProvider   EWalletProvider?
   paymentReference  String?
   receiptUrl        String?
-  assignedTeacherId String?            
+  assignedTeacherId String?
   approvedAt        DateTime?
   rejectedAt        DateTime?
   adminNotes        String?
@@ -214,21 +217,23 @@ model Subscription {
 }
 
 model TeacherProfile {
-  id                    String         @id @default(uuid()) @map("_id")
-  userId                String         @unique 
-  bio                   String?
-  subjects              String?
-  createdAt             DateTime       @default(now())
-  updatedAt             DateTime       @default(now()) @updatedAt
-  FreeWriting           FreeWriting[]  @relation("FreeWritingGrader")
-  Session               Session[]
-  AssignedSubscriptions Subscription[] @relation("AssignedSubscriptions")
-  User                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  WritingTest           WritingTest[]
-  learningGroups        LearningGroup[]
-  groupSchedules        GroupSchedule[]
-  enrollments           Enrollment[] @relation("EnrollmentTeacher")
-  moderatedSpeakingRooms SpeakingRoom[] @relation("SpeakingRoomModerator")
+  id                     String          @id @default(uuid()) @map("_id")
+  userId                 String          @unique
+  bio                    String?
+  subjects               String?
+  lessonCostPerLesson    Float?
+  lessonCostCurrency     String?
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @default(now()) @updatedAt
+  FreeWriting            FreeWriting[]   @relation("FreeWritingGrader")
+  Session                Session[]
+  AssignedSubscriptions  Subscription[]  @relation("AssignedSubscriptions")
+  User                   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  WritingTest            WritingTest[]
+  learningGroups         LearningGroup[]
+  groupSchedules         GroupSchedule[]
+  enrollments            Enrollment[]    @relation("EnrollmentTeacher")
+  moderatedSpeakingRooms SpeakingRoom[]  @relation("SpeakingRoomModerator")
 }
 
 model Certificate {
@@ -246,103 +251,105 @@ model Certificate {
 }
 
 model User {
-  id                         String                    @id @default(uuid()) @map("_id")
-  email                      String                    @unique
-  name                       String
-  phone                      String?
-  passwordHash               String
-  role                       String                    @default("STUDENT")
-  profilePhoto               String?
-  isActive                   Boolean                   @default(false)
-  passwordSetupRequired      Boolean                   @default(false)
-  createdAt                  DateTime                  @default(now())
-  updatedAt                  DateTime                  @default(now()) @updatedAt
-  Cart                       Cart?
-  Chat_Chat_fromUserIdToUser Chat[]                    @relation("Chat_fromUserIdToUser")
-  Chat_Chat_toUserIdToUser   Chat[]                    @relation("Chat_toUserIdToUser")
-  FreeWriting                FreeWriting[]             @relation("FreeWritingStudent")
-  SessionStudent             SessionStudent[]
-  StudentProfile             StudentProfile?
-  Submission                 Submission[]
-  Subscription               Subscription[]
-  TeacherProfile             TeacherProfile?
-  Word                       Word[]
-  WritingTestSubmission      WritingTestSubmission[]
-  LessonProgress             LessonProgress[]
-  ExerciseAttempt            ExerciseAttempt[]
-  ConversationProgress       ConversationProgress[]
-  VoiceRecording             VoiceRecording[]
-  TextConversationAttempt    TextConversationAttempt[]
-  Gamification               UserGamification?
-  certificates               Certificate[]             @relation("UserCertificates")
-  PlacementTestAttempt       PlacementTestAttempt[]
-  TestAttempt                TestAttempt[]
-  normalizedPhone            String?
-  status                     String                    @default("PENDING")
-  phoneVerifiedAt            DateTime?
-  lastSeenAt                 DateTime?
-  staffPermissions           StaffPermission[]
-  learningProfile            StudentLearningProfile?
-  learningProgress           LearningProgress[]
-  enrollments                Enrollment[]              @relation("EnrollmentStudent")
-  groupMemberships           GroupMember[]
-  sessionParticipants        SessionParticipant[]
-  attendances                Attendance[]
-  studentFeedback            SessionFeedback[]         @relation("FeedbackStudent")
-  teacherFeedback            SessionFeedback[]         @relation("FeedbackTeacher")
-  createdHomework            Homework[]                @relation("HomeworkCreator")
-  assignedHomework           Homework[]                @relation("HomeworkStudent")
-  homeworkSubmissions        HomeworkSubmission[]
-  homeworkReviews            HomeworkReview[]          @relation("HomeworkReviewer")
-  speakingRoomMemberships    SpeakingRoomMember[]
-  speakingRoomMessages       SpeakingRoomMessage[]
-  speakingRoomReports        SpeakingRoomReport[]      @relation("SpeakingRoomReportReporter")
-  speakingRoomTargetReports   SpeakingRoomReport[]      @relation("SpeakingRoomReportTarget")
-  resolvedSpeakingRoomReports SpeakingRoomReport[]     @relation("SpeakingRoomReportResolver")
-  speakingRoomContent         SpeakingRoomContent[]     @relation("SpeakingRoomContentCreator")
-  notifications              Notification[]
-  whatsappAccounts           WhatsAppAccount[]          @relation("WhatsAppAccountOwner")
-  whatsappContacts           WhatsAppContact[]          @relation("WhatsAppContactUser")
-  whatsappConversations      WhatsAppConversation[]     @relation("WhatsAppConversationStudent")
-  assignedWhatsAppConversations WhatsAppConversation[]  @relation("WhatsAppConversationStaff")
-  aiRecommendations          AIRecommendation[]
-  aiInteractions             AIInteraction[]
-  learningSignals            LearningSignal[]
-  dailyLearningSessions      DailyLearningSession[]
+  id                                      String                          @id @default(uuid()) @map("_id")
+  email                                   String                          @unique
+  name                                    String
+  phone                                   String?
+  passwordHash                            String
+  role                                    String                          @default("STUDENT")
+  profilePhoto                            String?
+  isActive                                Boolean                         @default(false)
+  passwordSetupRequired                   Boolean                         @default(false)
+  createdAt                               DateTime                        @default(now())
+  updatedAt                               DateTime                        @default(now()) @updatedAt
+  Cart                                    Cart?
+  Chat_Chat_fromUserIdToUser              Chat[]                          @relation("Chat_fromUserIdToUser")
+  Chat_Chat_toUserIdToUser                Chat[]                          @relation("Chat_toUserIdToUser")
+  FreeWriting                             FreeWriting[]                   @relation("FreeWritingStudent")
+  SessionStudent                          SessionStudent[]
+  StudentProfile                          StudentProfile?
+  Submission                              Submission[]
+  Subscription                            Subscription[]
+  TeacherProfile                          TeacherProfile?
+  Word                                    Word[]
+  WritingTestSubmission                   WritingTestSubmission[]
+  LessonProgress                          LessonProgress[]
+  ExerciseAttempt                         ExerciseAttempt[]
+  ConversationProgress                    ConversationProgress[]
+  VoiceRecording                          VoiceRecording[]
+  TextConversationAttempt                 TextConversationAttempt[]
+  Gamification                            UserGamification?
+  certificates                            Certificate[]                   @relation("UserCertificates")
+  PlacementTestAttempt                    PlacementTestAttempt[]
+  TestAttempt                             TestAttempt[]
+  normalizedPhone                         String?
+  status                                  String                          @default("PENDING")
+  phoneVerifiedAt                         DateTime?
+  lastSeenAt                              DateTime?
+  staffPermissions                        StaffPermission[]
+  learningProfile                         StudentLearningProfile?
+  learningProgress                        LearningProgress[]
+  enrollments                             Enrollment[]                    @relation("EnrollmentStudent")
+  groupMemberships                        GroupMember[]
+  sessionParticipants                     SessionParticipant[]
+  attendances                             Attendance[]
+  studentFeedback                         SessionFeedback[]               @relation("FeedbackStudent")
+  teacherFeedback                         SessionFeedback[]               @relation("FeedbackTeacher")
+  createdHomework                         Homework[]                      @relation("HomeworkCreator")
+  assignedHomework                        Homework[]                      @relation("HomeworkStudent")
+  homeworkSubmissions                     HomeworkSubmission[]
+  homeworkReviews                         HomeworkReview[]                @relation("HomeworkReviewer")
+  speakingRoomMemberships                 SpeakingRoomMember[]
+  speakingRoomMessages                    SpeakingRoomMessage[]
+  speakingRoomReports                     SpeakingRoomReport[]            @relation("SpeakingRoomReportReporter")
+  speakingRoomTargetReports               SpeakingRoomReport[]            @relation("SpeakingRoomReportTarget")
+  resolvedSpeakingRoomReports             SpeakingRoomReport[]            @relation("SpeakingRoomReportResolver")
+  speakingRoomContent                     SpeakingRoomContent[]           @relation("SpeakingRoomContentCreator")
+  notifications                           Notification[]
+  pushSubscriptions                       PushSubscription[]
+  whatsappNotificationsOptIn              Boolean                         @default(false)
+  whatsappAccounts                        WhatsAppAccount[]               @relation("WhatsAppAccountOwner")
+  whatsappContacts                        WhatsAppContact[]               @relation("WhatsAppContactUser")
+  whatsappConversations                   WhatsAppConversation[]          @relation("WhatsAppConversationStudent")
+  assignedWhatsAppConversations           WhatsAppConversation[]          @relation("WhatsAppConversationStaff")
+  aiRecommendations                       AIRecommendation[]
+  aiInteractions                          AIInteraction[]
+  learningSignals                         LearningSignal[]
+  dailyLearningSessions                   DailyLearningSession[]
   teacherIntelligenceSuggestionsAsTeacher TeacherIntelligenceSuggestion[] @relation("IntelligenceSuggestionTeacher")
   teacherIntelligenceSuggestionsAsStudent TeacherIntelligenceSuggestion[] @relation("IntelligenceSuggestionStudent")
-  teacherIntelligenceSuggestionsApproved TeacherIntelligenceSuggestion[] @relation("IntelligenceSuggestionApprover")
-  otpChallenges              AuthOtpChallenge[]
-  authRateLimits             AuthRateLimit[]          @relation("AuthRateLimitUser")
-  levelRecommendations       StudentLevelRecommendation[] @relation("LevelRecommendationTeacher")
-  receivedLevelRecommendations StudentLevelRecommendation[] @relation("LevelRecommendationStudent")
+  teacherIntelligenceSuggestionsApproved  TeacherIntelligenceSuggestion[] @relation("IntelligenceSuggestionApprover")
+  otpChallenges                           AuthOtpChallenge[]
+  authRateLimits                          AuthRateLimit[]                 @relation("AuthRateLimitUser")
+  levelRecommendations                    StudentLevelRecommendation[]    @relation("LevelRecommendationTeacher")
+  receivedLevelRecommendations            StudentLevelRecommendation[]    @relation("LevelRecommendationStudent")
 
   @@index([normalizedPhone])
   @@index([role, status])
 }
 
 model AuthOtpChallenge {
-  id                String   @id @default(uuid()) @map("_id")
-  normalizedPhone   String?
-  email             String?
-  name              String?
-  intent            String   @default("LOGIN")
-  channel           String
-  codeHash          String
-  expiresAt         DateTime
-  attempts          Int      @default(0)
-  maxAttempts       Int      @default(5)
-  resendCount       Int      @default(0)
-  requestedAt       DateTime @default(now())
-  lastSentAt        DateTime @default(now())
-  consumedAt        DateTime?
-  invalidatedAt     DateTime?
-  requestIpHash     String?
-  userAgentHash     String?
-  userId            String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @default(now()) @updatedAt
-  user              User?    @relation(fields: [userId], references: [id])
+  id              String    @id @default(uuid()) @map("_id")
+  normalizedPhone String?
+  email           String?
+  name            String?
+  intent          String    @default("LOGIN")
+  channel         String
+  codeHash        String
+  expiresAt       DateTime
+  attempts        Int       @default(0)
+  maxAttempts     Int       @default(5)
+  resendCount     Int       @default(0)
+  requestedAt     DateTime  @default(now())
+  lastSentAt      DateTime  @default(now())
+  consumedAt      DateTime?
+  invalidatedAt   DateTime?
+  requestIpHash   String?
+  userAgentHash   String?
+  userId          String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
+  user            User?     @relation(fields: [userId], references: [id])
 
   @@index([normalizedPhone, intent, createdAt])
   @@index([email, intent, createdAt])
@@ -350,16 +357,16 @@ model AuthOtpChallenge {
 }
 
 model AuthRateLimit {
-  id               String   @id @default(uuid()) @map("_id")
-  key              String
-  kind             String
-  windowStartedAt  DateTime
-  count            Int      @default(0)
-  blockedUntil     DateTime?
-  userId           String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @default(now()) @updatedAt
-  user             User?    @relation("AuthRateLimitUser", fields: [userId], references: [id])
+  id              String    @id @default(uuid()) @map("_id")
+  key             String
+  kind            String
+  windowStartedAt DateTime
+  count           Int       @default(0)
+  blockedUntil    DateTime?
+  userId          String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
+  user            User?     @relation("AuthRateLimitUser", fields: [userId], references: [id])
 
   @@unique([key, kind])
   @@index([blockedUntil])
@@ -367,45 +374,45 @@ model AuthRateLimit {
 }
 
 model Word {
-  id               String   @id @default(uuid()) @map("_id")
-  studentId        String   
+  id               String    @id @default(uuid()) @map("_id")
+  studentId        String
   englishWord      String
   arabicMeaning    String
   exampleSentence  String?
   pronunciationUrl String?
   imageUrl         String?
-  known            Boolean  @default(false)
-  reviewCount      Int      @default(0)
-  correctCount     Int      @default(0)
-  incorrectCount   Int      @default(0)
+  known            Boolean   @default(false)
+  reviewCount      Int       @default(0)
+  correctCount     Int       @default(0)
+  incorrectCount   Int       @default(0)
   lastReviewedAt   DateTime?
   nextReviewAt     DateTime?
-  easeFactor       Float    @default(2.5)
-  interval         Int      @default(1)
+  easeFactor       Float     @default(2.5)
+  interval         Int       @default(1)
   category         String?
-  level            String   @default("BEGINNER")
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @default(now()) @updatedAt
-  User             User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  level            String    @default("BEGINNER")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @default(now()) @updatedAt
+  User             User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
 model DailyWord {
-  id              String   @id @default(uuid()) @map("_id")
-  englishWord     String
-  arabicMeaning   String
-  exampleSentence String?
+  id               String   @id @default(uuid()) @map("_id")
+  englishWord      String
+  arabicMeaning    String
+  exampleSentence  String?
   pronunciationUrl String?
-  imageUrl        String?
-  category        String?
-  level           String   @default("BEGINNER")
-  dateShown       DateTime
-  order           Int      @default(0)
-  createdAt       DateTime @default(now())
+  imageUrl         String?
+  category         String?
+  level            String   @default("BEGINNER")
+  dateShown        DateTime
+  order            Int      @default(0)
+  createdAt        DateTime @default(now())
 }
 
 model Cart {
   id        String     @id @default(uuid()) @map("_id")
-  studentId String     @unique 
+  studentId String     @unique
   createdAt DateTime   @default(now())
   updatedAt DateTime   @default(now()) @updatedAt
   User      User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -414,8 +421,8 @@ model Cart {
 
 model CartItem {
   id        String   @id @default(uuid()) @map("_id")
-  cartId    String   
-  packageId String   
+  cartId    String
+  packageId String
   createdAt DateTime @default(now())
   Cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
   Package   Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
@@ -425,7 +432,7 @@ model CartItem {
 
 model WritingTest {
   id                    String                  @id @default(uuid()) @map("_id")
-  teacherId             String                  
+  teacherId             String
   title                 String
   titleAr               String?
   instructions          String?
@@ -439,8 +446,8 @@ model WritingTest {
 
 model WritingTestSubmission {
   id            String      @id @default(uuid()) @map("_id")
-  testId        String      
-  studentId     String      
+  testId        String
+  studentId     String
   content       String
   manuscriptUrl String?
   grade         Float?
@@ -454,20 +461,20 @@ model WritingTestSubmission {
 }
 
 model Coupon {
-  id          String    @id @default(uuid()) @map("_id")
-  code        String    @unique
-  discount    String
-  expiryDate  DateTime?
+  id                  String    @id @default(uuid()) @map("_id")
+  code                String    @unique
+  discount            String
+  expiryDate          DateTime?
   isActive            Boolean   @default(true)
   applicablePackageId String    @default("ALL")
   useCount            Int       @default(0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now()) @updatedAt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @default(now()) @updatedAt
 }
 
 model FreeWriting {
   id             String          @id @default(uuid()) @map("_id")
-  studentId      String          
+  studentId      String
   title          String
   content        String
   grade          Float?
@@ -475,25 +482,25 @@ model FreeWriting {
   grammarErrors  String?
   submittedAt    DateTime        @default(now())
   gradedAt       DateTime?
-  teacherId      String?         
+  teacherId      String?
   updatedAt      DateTime        @default(now()) @updatedAt
   User           User            @relation("FreeWritingStudent", fields: [studentId], references: [id], onDelete: Cascade)
   TeacherProfile TeacherProfile? @relation("FreeWritingGrader", fields: [teacherId], references: [id])
 }
 
 model SiteSettings {
-  id              String   @id @default(uuid()) @map("_id")
-  whatsappNumber  String?
-  supportNumber   String?
-  supportEmail    String?
-  facebookUrl     String?
-  instagramUrl    String?
-  heroTitle       String?
-  heroTitleAr     String?
-  heroSubtitle    String?
-  heroSubtitleAr  String?
-  learningPath    String?  // JSON string for learning path steps
-  updatedAt       DateTime @default(now()) @updatedAt
+  id             String   @id @default(uuid()) @map("_id")
+  whatsappNumber String?
+  supportNumber  String?
+  supportEmail   String?
+  facebookUrl    String?
+  instagramUrl   String?
+  heroTitle      String?
+  heroTitleAr    String?
+  heroSubtitle   String?
+  heroSubtitleAr String?
+  learningPath   String? // JSON string for learning path steps
+  updatedAt      DateTime @default(now()) @updatedAt
 }
 
 model Test {
@@ -504,7 +511,7 @@ model Test {
   descriptionAr String?
   level         String         @default("BEGINNER")
   category      String?
-  duration      Int?           // Duration in minutes
+  duration      Int? // Duration in minutes
   passingScore  Int            @default(50)
   isPublished   Boolean        @default(false)
   createdAt     DateTime       @default(now())
@@ -514,33 +521,33 @@ model Test {
 }
 
 model TestQuestion {
-  id            String   @id @default(uuid()) @map("_id")
+  id            String  @id @default(uuid()) @map("_id")
   testId        String?
-  type          String   @default("MULTIPLE_CHOICE")
-  testType      String   @default("PLACEMENT") // PLACEMENT, A1_FINAL, etc.
+  type          String  @default("MULTIPLE_CHOICE")
+  testType      String  @default("PLACEMENT") // PLACEMENT, A1_FINAL, etc.
   question      String
   questionAr    String?
-  options       String?  // JSON array
+  options       String? // JSON array
   correctAnswer String
   explanation   String?
-  level         String   @default("A1")
-  category      String   @default("Grammar")
-  points        Int      @default(1)
-  order         Int      @default(0)
-  test          Test?    @relation(fields: [testId], references: [id], onDelete: Cascade)
+  level         String  @default("A1")
+  category      String  @default("Grammar")
+  points        Int     @default(1)
+  order         Int     @default(0)
+  test          Test?   @relation(fields: [testId], references: [id], onDelete: Cascade)
 }
 
 model TestAttempt {
-  id          String   @id @default(uuid()) @map("_id")
+  id          String    @id @default(uuid()) @map("_id")
   testId      String
   studentId   String
-  score       Int      @default(0)
-  totalPoints Int      @default(0)
-  status      String   @default("COMPLETED") // COMPLETED, IN_PROGRESS
-  startedAt   DateTime @default(now())
+  score       Int       @default(0)
+  totalPoints Int       @default(0)
+  status      String    @default("COMPLETED") // COMPLETED, IN_PROGRESS
+  startedAt   DateTime  @default(now())
   completedAt DateTime?
-  test        Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  test        Test      @relation(fields: [testId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
 enum SubscriptionStatus {
@@ -562,74 +569,74 @@ enum EWalletProvider {
 
 // نظام الدروس
 model Lesson {
-  id             String           @id @default(uuid()) @map("_id")
-  title          String
-  titleAr        String
-  description    String?
-  descriptionAr  String?
-  order          Int              @default(0)
-  level          String           @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
-  category       String?          // Grammar, Vocabulary, Conversation, etc.
-  categoryAr     String?
-  videoUrl       String?          // رابط الفيديو
-  videoDuration  Int?             // مدة الفيديو بالثواني
-  articleContent String?          // محتوى المقال بتنسيق HTML/Markdown
-  articleContentAr String?        // محتوى المقال بالعربي
-  thumbnailUrl   String?          // صورة مصغرة للدرس
-  isPublished    Boolean          @default(false)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @default(now()) @updatedAt
-  exercises      Exercise[]
-  LessonProgress LessonProgress[]
+  id               String           @id @default(uuid()) @map("_id")
+  title            String
+  titleAr          String
+  description      String?
+  descriptionAr    String?
+  order            Int              @default(0)
+  level            String           @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
+  category         String? // Grammar, Vocabulary, Conversation, etc.
+  categoryAr       String?
+  videoUrl         String? // رابط الفيديو
+  videoDuration    Int? // مدة الفيديو بالثواني
+  articleContent   String? // محتوى المقال بتنسيق HTML/Markdown
+  articleContentAr String? // محتوى المقال بالعربي
+  thumbnailUrl     String? // صورة مصغرة للدرس
+  isPublished      Boolean          @default(false)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now()) @updatedAt
+  exercises        Exercise[]
+  LessonProgress   LessonProgress[]
 }
 
 model Exercise {
-  id              String           @id @default(uuid()) @map("_id")
-  lessonId        String           
+  id              String            @id @default(uuid()) @map("_id")
+  lessonId        String
   type            ExerciseType
-  order           Int              @default(0)
-  question        String           // السؤال
-  questionAr      String?          // السؤال بالعربي
-  options         String?          // الخيارات (JSON array للاختيار من متعدد)
-  correctAnswer   String           // الإجابة الصحيحة
-  explanation     String?          // شرح الإجابة
-  explanationAr   String?          // شرح الإجابة بالعربي
-  sentence        String?          // الجملة للقراءة
-  sentenceAr      String?          // ترجمة الجملة
-  audioUrl        String?          // رابط الصوت للنطق
-  imageUrl        String?          // صورة توضيحية
-  dragItems       String?          // عناصر السحب والإفلات (JSON)
-  dropZones       String?          // مناطق الإفلات (JSON)
-  blanks          String?          // الفراغات لملء الفراغ (JSON)
-  points          Int              @default(10)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @default(now()) @updatedAt
-  Lesson          Lesson           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  order           Int               @default(0)
+  question        String // السؤال
+  questionAr      String? // السؤال بالعربي
+  options         String? // الخيارات (JSON array للاختيار من متعدد)
+  correctAnswer   String // الإجابة الصحيحة
+  explanation     String? // شرح الإجابة
+  explanationAr   String? // شرح الإجابة بالعربي
+  sentence        String? // الجملة للقراءة
+  sentenceAr      String? // ترجمة الجملة
+  audioUrl        String? // رابط الصوت للنطق
+  imageUrl        String? // صورة توضيحية
+  dragItems       String? // عناصر السحب والإفلات (JSON)
+  dropZones       String? // مناطق الإفلات (JSON)
+  blanks          String? // الفراغات لملء الفراغ (JSON)
+  points          Int               @default(10)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+  Lesson          Lesson            @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   ExerciseAttempt ExerciseAttempt[]
 }
 
 model LessonProgress {
-  id             String   @id @default(uuid()) @map("_id")
-  studentId      String   
-  lessonId       String   
-  completed      Boolean  @default(false)
-  videoWatched   Boolean  @default(false)
-  articleRead    Boolean  @default(false)
-  exercisesScore Float?   // نسبة النجاح في التمارين
+  id             String    @id @default(uuid()) @map("_id")
+  studentId      String
+  lessonId       String
+  completed      Boolean   @default(false)
+  videoWatched   Boolean   @default(false)
+  articleRead    Boolean   @default(false)
+  exercisesScore Float? // نسبة النجاح في التمارين
   completedAt    DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now()) @updatedAt
-  User           User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  Lesson         Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt
+  User           User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  Lesson         Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, lessonId])
 }
 
 model ExerciseAttempt {
   id          String   @id @default(uuid()) @map("_id")
-  studentId   String   
-  exerciseId  String   
-  answer      String   // إجابة الطالب
+  studentId   String
+  exerciseId  String
+  answer      String // إجابة الطالب
   isCorrect   Boolean
   points      Int      @default(0)
   attemptedAt DateTime @default(now())
@@ -638,63 +645,63 @@ model ExerciseAttempt {
 }
 
 enum ExerciseType {
-  MULTIPLE_CHOICE    // اختيار من متعدد
-  FILL_BLANK         // ملء الفراغ
-  DRAG_DROP          // سحب وإفلات
-  SENTENCE_READING   // قراءة جمل مع ترجمة
-  TRUE_FALSE         // صح أو خطأ
+  MULTIPLE_CHOICE // اختيار من متعدد
+  FILL_BLANK // ملء الفراغ
+  DRAG_DROP // سحب وإفلات
+  SENTENCE_READING // قراءة جمل مع ترجمة
+  TRUE_FALSE // صح أو خطأ
 }
 
 // نظام الاستماع - Listening System
 model ListeningContent {
-  id                String              @id @default(uuid()) @map("_id")
-  title             String              // عنوان المحتوى
-  titleAr           String              // العنوان بالعربي
-  description       String?             // وصف المحتوى
-  descriptionAr     String?             // الوصف بالعربي
-  mediaType         ListeningMediaType  // نوع الوسائط (AUDIO/VIDEO)
-  mediaUrl          String              // رابط الملف (MP3/MP4)
-  thumbnailUrl      String?             // صورة مصغرة
-  duration          Int?                // مدة المحتوى بالثواني
-  level             String              @default("BEGINNER") // مستوى الصعوبة
-  category          String?             // التصنيف (محادثة، أخبار، قصص، الخ)
-  categoryAr        String?             // التصنيف بالعربي
-  transcript        String?             // نص المحتوى للمتابعة
-  transcriptAr      String?             // النص بالعربي
-  order             Int                 @default(0)
-  isPublished       Boolean             @default(true)
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @default(now()) @updatedAt
-  exercises         ListeningExercise[]
-  progress          ListeningProgress[]
+  id            String              @id @default(uuid()) @map("_id")
+  title         String // عنوان المحتوى
+  titleAr       String // العنوان بالعربي
+  description   String? // وصف المحتوى
+  descriptionAr String? // الوصف بالعربي
+  mediaType     ListeningMediaType // نوع الوسائط (AUDIO/VIDEO)
+  mediaUrl      String // رابط الملف (MP3/MP4)
+  thumbnailUrl  String? // صورة مصغرة
+  duration      Int? // مدة المحتوى بالثواني
+  level         String              @default("BEGINNER") // مستوى الصعوبة
+  category      String? // التصنيف (محادثة، أخبار، قصص، الخ)
+  categoryAr    String? // التصنيف بالعربي
+  transcript    String? // نص المحتوى للمتابعة
+  transcriptAr  String? // النص بالعربي
+  order         Int                 @default(0)
+  isPublished   Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @default(now()) @updatedAt
+  exercises     ListeningExercise[]
+  progress      ListeningProgress[]
 }
 
 model ListeningExercise {
-  id                String                   @id @default(uuid()) @map("_id")
-  contentId         String                   
-  type              ListeningExerciseType
-  order             Int                      @default(0)
-  question          String                   // السؤال
-  questionAr        String?                  // السؤال بالعربي
-  options           String?                  // الخيارات (JSON array)
-  correctAnswer     String                   // الإجابة الصحيحة
-  explanation       String?                  // شرح الإجابة
-  explanationAr     String?                  // شرح الإجابة بالعربي
-  points            Int                      @default(10)
-  timestamp         Int?                     // وقت ظهور السؤال بالثواني (اختياري)
-  createdAt         DateTime                 @default(now())
-  updatedAt         DateTime                 @default(now()) @updatedAt
-  ListeningContent  ListeningContent         @relation(fields: [contentId], references: [id], onDelete: Cascade)
-  attempts          ListeningExerciseAttempt[]
+  id               String                     @id @default(uuid()) @map("_id")
+  contentId        String
+  type             ListeningExerciseType
+  order            Int                        @default(0)
+  question         String // السؤال
+  questionAr       String? // السؤال بالعربي
+  options          String? // الخيارات (JSON array)
+  correctAnswer    String // الإجابة الصحيحة
+  explanation      String? // شرح الإجابة
+  explanationAr    String? // شرح الإجابة بالعربي
+  points           Int                        @default(10)
+  timestamp        Int? // وقت ظهور السؤال بالثواني (اختياري)
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @default(now()) @updatedAt
+  ListeningContent ListeningContent           @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  attempts         ListeningExerciseAttempt[]
 }
 
 model ListeningProgress {
   id               String           @id @default(uuid()) @map("_id")
-  contentId        String           
-  visitorId        String?          // معرف الزائر (للمستخدمين غير المسجلين)
+  contentId        String
+  visitorId        String? // معرف الزائر (للمستخدمين غير المسجلين)
   completed        Boolean          @default(false)
   listenedDuration Int              @default(0) // المدة التي استمع إليها بالثواني
-  exercisesScore   Float?           // نسبة النجاح في التمارين
+  exercisesScore   Float? // نسبة النجاح في التمارين
   completedAt      DateTime?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @default(now()) @updatedAt
@@ -705,9 +712,9 @@ model ListeningProgress {
 
 model ListeningExerciseAttempt {
   id          String            @id @default(uuid()) @map("_id")
-  exerciseId  String            
-  visitorId   String?           // معرف الزائر
-  answer      String            // إجابة المستخدم
+  exerciseId  String
+  visitorId   String? // معرف الزائر
+  answer      String // إجابة المستخدم
   isCorrect   Boolean
   points      Int               @default(0)
   attemptedAt DateTime          @default(now())
@@ -715,65 +722,65 @@ model ListeningExerciseAttempt {
 }
 
 enum ListeningMediaType {
-  AUDIO  // MP3
-  VIDEO  // MP4
+  AUDIO // MP3
+  VIDEO // MP4
 }
 
 enum ListeningExerciseType {
-  MULTIPLE_CHOICE    // اختيار من متعدد
-  TRUE_FALSE         // صح أو خطأ
-  FILL_BLANK         // ملء الفراغ
-  WORD_ORDER         // ترتيب الكلمات
+  MULTIPLE_CHOICE // اختيار من متعدد
+  TRUE_FALSE // صح أو خطأ
+  FILL_BLANK // ملء الفراغ
+  WORD_ORDER // ترتيب الكلمات
 }
 
 // نظام المحادثة التدريبية - Conversation Practice System
 model ConversationScenario {
-  id              String                    @id @default(uuid()) @map("_id")
-  title           String                    // عنوان السيناريو
-  titleAr         String                    // العنوان بالعربي
-  description     String?                   // وصف السيناريو
-  descriptionAr   String?                   // الوصف بالعربي
-  category        String                    // التصنيف (مطعم، مطار، تسوق، الخ)
-  categoryAr      String                    // التصنيف بالعربي
-  level           String                    @default("BEGINNER") // مستوى الصعوبة
-  imageUrl        String?                   // صورة توضيحية للموقف
-  dialogueSteps   String                    // خطوات الحوار (JSON array)
-  isPublished     Boolean                   @default(true)
-  order           Int                       @default(0)
-  createdAt       DateTime                  @default(now())
-  updatedAt       DateTime                  @default(now()) @updatedAt
-  progress        ConversationProgress[]
+  id            String                 @id @default(uuid()) @map("_id")
+  title         String // عنوان السيناريو
+  titleAr       String // العنوان بالعربي
+  description   String? // وصف السيناريو
+  descriptionAr String? // الوصف بالعربي
+  category      String // التصنيف (مطعم، مطار، تسوق، الخ)
+  categoryAr    String // التصنيف بالعربي
+  level         String                 @default("BEGINNER") // مستوى الصعوبة
+  imageUrl      String? // صورة توضيحية للموقف
+  dialogueSteps String // خطوات الحوار (JSON array)
+  isPublished   Boolean                @default(true)
+  order         Int                    @default(0)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @default(now()) @updatedAt
+  progress      ConversationProgress[]
 }
 
 model ConversationProgress {
-  id              String               @id @default(uuid()) @map("_id")
-  studentId       String               
-  scenarioId      String               
-  completed       Boolean              @default(false)
-  currentStep     Int                  @default(0)
-  score           Int                  @default(0)
-  completedAt     DateTime?
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @default(now()) @updatedAt
-  User            User                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  Scenario        ConversationScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  id          String               @id @default(uuid()) @map("_id")
+  studentId   String
+  scenarioId  String
+  completed   Boolean              @default(false)
+  currentStep Int                  @default(0)
+  score       Int                  @default(0)
+  completedAt DateTime?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @default(now()) @updatedAt
+  User        User                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  Scenario    ConversationScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, scenarioId])
 }
 
 // نظام تسجيل الصوت - Voice Recording System
 model VoiceRecording {
-  id              String   @id @default(uuid()) @map("_id")
-  studentId       String   
-  title           String                    // عنوان التسجيل
-  audioData       String                    // Base64 encoded audio data
-  duration        Int?                      // مدة التسجيل بالثواني
-  promptText      String?                   // النص المطلوب قراءته
-  promptTextAr    String?                   // النص بالعربي
-  category        String?                   // التصنيف
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @default(now()) @updatedAt
-  User            User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  id           String   @id @default(uuid()) @map("_id")
+  studentId    String
+  title        String // عنوان التسجيل
+  audioData    String // Base64 encoded audio data
+  duration     Int? // مدة التسجيل بالثواني
+  promptText   String? // النص المطلوب قراءته
+  promptTextAr String? // النص بالعربي
+  category     String? // التصنيف
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+  User         User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
 // نظام اختبار تحديد المستوى - Placement Test System
@@ -782,10 +789,10 @@ model PlacementQuestion {
   question      String
   questionAr    String?
   questionType  String   @default("MCQ") // MCQ, WRITTEN, VIDEO_RECORDING, IMAGE
-  options       String?  // JSON string array - for MCQ only
-  correctAnswer String?  // for MCQ only
-  mediaUrl      String?  // URL for image/video questions
-  explanation   String?  // explanation for the correct answer
+  options       String? // JSON string array - for MCQ only
+  correctAnswer String? // for MCQ only
+  mediaUrl      String? // URL for image/video questions
+  explanation   String? // explanation for the correct answer
   points        Int      @default(1)
   order         Int      @default(0)
   level         String   @default("A1")
@@ -796,13 +803,13 @@ model PlacementQuestion {
 }
 
 model TestSettings {
-  id              String   @id @default(uuid()) @map("_id")
-  testType        String   @unique
-  questionsCount  Int      @default(10)
-  timeLimitMins   Int      @default(30)
-  passScore       Int      @default(60)
-  shuffleQuestions Boolean @default(true)
-  updatedAt       DateTime @default(now()) @updatedAt
+  id               String   @id @default(uuid()) @map("_id")
+  testType         String   @unique
+  questionsCount   Int      @default(10)
+  timeLimitMins    Int      @default(30)
+  passScore        Int      @default(60)
+  shuffleQuestions Boolean  @default(true)
+  updatedAt        DateTime @default(now()) @updatedAt
 }
 
 model PageContent {
@@ -818,44 +825,44 @@ model PageContent {
 }
 
 model PlacementTestAttempt {
-  id          String   @id @default(uuid()) @map("_id")
+  id          String    @id @default(uuid()) @map("_id")
   studentId   String
-  testType    String   @default("PLACEMENT")
-  score       Int      @default(0)
-  percentage  Float    @default(0)
-  levelResult String?  // المستوى الذي تم تحديده
-  details     String?  // تفاصيل الإجابات (JSON)
-  startedAt   DateTime @default(now())
+  testType    String    @default("PLACEMENT")
+  score       Int       @default(0)
+  percentage  Float     @default(0)
+  levelResult String? // المستوى الذي تم تحديده
+  details     String? // تفاصيل الإجابات (JSON)
+  startedAt   DateTime  @default(now())
   completedAt DateTime?
-  User        User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  User        User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
 // نظام المحادثة النصية - Text Conversation System
 model TextConversation {
-  id              String                     @id @default(uuid()) @map("_id")
-  title           String                     // عنوان المحادثة
-  titleAr         String                     // العنوان بالعربي
-  description     String?                    // وصف المحادثة
-  descriptionAr   String?                    // الوصف بالعربي
-  level           String                     @default("BEGINNER")
-  questions       String                     // الأسئلة (JSON array)
-  isPublished     Boolean                    @default(true)
-  order           Int                        @default(0)
-  createdAt       DateTime                   @default(now())
-  updatedAt       DateTime                   @default(now()) @updatedAt
-  attempts        TextConversationAttempt[]
+  id            String                    @id @default(uuid()) @map("_id")
+  title         String // عنوان المحادثة
+  titleAr       String // العنوان بالعربي
+  description   String? // وصف المحادثة
+  descriptionAr String? // الوصف بالعربي
+  level         String                    @default("BEGINNER")
+  questions     String // الأسئلة (JSON array)
+  isPublished   Boolean                   @default(true)
+  order         Int                       @default(0)
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @default(now()) @updatedAt
+  attempts      TextConversationAttempt[]
 }
 
 model TextConversationAttempt {
-  id              String           @id @default(uuid()) @map("_id")
-  studentId       String           
-  conversationId  String           
-  answers         String           // إجابات الطالب (JSON array)
-  score           Int              @default(0)
-  totalQuestions  Int              @default(0)
-  completedAt     DateTime         @default(now())
-  User            User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  Conversation    TextConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  id             String           @id @default(uuid()) @map("_id")
+  studentId      String
+  conversationId String
+  answers        String // إجابات الطالب (JSON array)
+  score          Int              @default(0)
+  totalQuestions Int              @default(0)
+  completedAt    DateTime         @default(now())
+  User           User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  Conversation   TextConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }
 
 // =============================================
@@ -864,73 +871,73 @@ model TextConversationAttempt {
 
 // إحصائيات اللاعب - Player Stats
 model UserGamification {
-  id              String          @id @default(uuid()) @map("_id")
-  userId          String          @unique 
-  totalXP         Int             @default(0)         // إجمالي نقاط الخبرة
-  currentLevel    Int             @default(1)         // المستوى الحالي
-  currentLevelXP  Int             @default(0)         // XP في المستوى الحالي
-  xpToNextLevel   Int             @default(100)       // XP المطلوب للمستوى التالي
-  totalPoints     Int             @default(0)         // إجمالي النقاط
-  currentStreak   Int             @default(0)         // سلسلة الأيام الحالية
-  longestStreak   Int             @default(0)         // أطول سلسلة أيام
-  lastActiveDate  DateTime?                           // آخر يوم نشاط
-  wordsLearned    Int             @default(0)         // عدد الكلمات المتعلمة
-  lessonsCompleted Int            @default(0)         // عدد الدروس المكتملة
-  exercisesCompleted Int          @default(0)         // عدد التمارين المكتملة
-  writingsSubmitted Int           @default(0)         // عدد الكتابات المقدمة
-  perfectScores   Int             @default(0)         // عدد الدرجات الكاملة
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @default(now()) @updatedAt
-  User            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userBadges      UserBadge[]
-  dailyActivities DailyActivity[]
+  id                 String          @id @default(uuid()) @map("_id")
+  userId             String          @unique
+  totalXP            Int             @default(0) // إجمالي نقاط الخبرة
+  currentLevel       Int             @default(1) // المستوى الحالي
+  currentLevelXP     Int             @default(0) // XP في المستوى الحالي
+  xpToNextLevel      Int             @default(100) // XP المطلوب للمستوى التالي
+  totalPoints        Int             @default(0) // إجمالي النقاط
+  currentStreak      Int             @default(0) // سلسلة الأيام الحالية
+  longestStreak      Int             @default(0) // أطول سلسلة أيام
+  lastActiveDate     DateTime? // آخر يوم نشاط
+  wordsLearned       Int             @default(0) // عدد الكلمات المتعلمة
+  lessonsCompleted   Int             @default(0) // عدد الدروس المكتملة
+  exercisesCompleted Int             @default(0) // عدد التمارين المكتملة
+  writingsSubmitted  Int             @default(0) // عدد الكتابات المقدمة
+  perfectScores      Int             @default(0) // عدد الدرجات الكاملة
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @default(now()) @updatedAt
+  User               User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userBadges         UserBadge[]
+  dailyActivities    DailyActivity[]
 }
 
 // تعريف الشارات - Badge Definitions
 model Badge {
-  id              String      @id @default(uuid()) @map("_id")
-  name            String      // اسم الشارة بالإنجليزية
-  nameAr          String      // اسم الشارة بالعربية
-  description     String      // وصف الشارة بالإنجليزية
-  descriptionAr   String      // وصف الشارة بالعربية
-  icon            String      // أيقونة الشارة (emoji أو رابط صورة)
-  category        BadgeCategory // تصنيف الشارة
-  requirement     String      // متطلبات الحصول على الشارة (JSON)
-  xpReward        Int         @default(0)  // مكافأة XP عند الحصول على الشارة
-  pointsReward    Int         @default(0)  // مكافأة النقاط
-  rarity          BadgeRarity @default(COMMON) // ندرة الشارة
-  isActive        Boolean     @default(true)
-  order           Int         @default(0)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @default(now()) @updatedAt
-  userBadges      UserBadge[]
+  id            String        @id @default(uuid()) @map("_id")
+  name          String // اسم الشارة بالإنجليزية
+  nameAr        String // اسم الشارة بالعربية
+  description   String // وصف الشارة بالإنجليزية
+  descriptionAr String // وصف الشارة بالعربية
+  icon          String // أيقونة الشارة (emoji أو رابط صورة)
+  category      BadgeCategory // تصنيف الشارة
+  requirement   String // متطلبات الحصول على الشارة (JSON)
+  xpReward      Int           @default(0) // مكافأة XP عند الحصول على الشارة
+  pointsReward  Int           @default(0) // مكافأة النقاط
+  rarity        BadgeRarity   @default(COMMON) // ندرة الشارة
+  isActive      Boolean       @default(true)
+  order         Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @default(now()) @updatedAt
+  userBadges    UserBadge[]
 }
 
 // شارات المستخدم - User Badges
 model UserBadge {
-  id              String           @id @default(uuid()) @map("_id")
-  gamificationId  String           
-  badgeId         String           
-  earnedAt        DateTime         @default(now())
+  id               String           @id @default(uuid()) @map("_id")
+  gamificationId   String
+  badgeId          String
+  earnedAt         DateTime         @default(now())
   UserGamification UserGamification @relation(fields: [gamificationId], references: [id], onDelete: Cascade)
-  Badge           Badge            @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  Badge            Badge            @relation(fields: [badgeId], references: [id], onDelete: Cascade)
 
   @@unique([gamificationId, badgeId])
 }
 
 // النشاط اليومي - Daily Activity (للـ Streak)
 model DailyActivity {
-  id              String           @id @default(uuid()) @map("_id")
-  gamificationId  String           
-  date            DateTime         // تاريخ اليوم
-  xpEarned        Int              @default(0)  // XP المكتسب في هذا اليوم
-  pointsEarned    Int              @default(0)  // النقاط المكتسبة
-  activitiesCount Int              @default(0)  // عدد الأنشطة المنجزة
-  wordsLearned    Int              @default(0)  // الكلمات المتعلمة
-  lessonsCompleted Int             @default(0)  // الدروس المكتملة
-  exercisesDone   Int              @default(0)  // التمارين المنجزة
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @default(now()) @updatedAt
+  id               String           @id @default(uuid()) @map("_id")
+  gamificationId   String
+  date             DateTime // تاريخ اليوم
+  xpEarned         Int              @default(0) // XP المكتسب في هذا اليوم
+  pointsEarned     Int              @default(0) // النقاط المكتسبة
+  activitiesCount  Int              @default(0) // عدد الأنشطة المنجزة
+  wordsLearned     Int              @default(0) // الكلمات المتعلمة
+  lessonsCompleted Int              @default(0) // الدروس المكتملة
+  exercisesDone    Int              @default(0) // التمارين المنجزة
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now()) @updatedAt
   UserGamification UserGamification @relation(fields: [gamificationId], references: [id], onDelete: Cascade)
 
   @@unique([gamificationId, date])
@@ -938,28 +945,28 @@ model DailyActivity {
 
 // تصنيفات الشارات
 enum BadgeCategory {
-  STREAK       // شارات السلسلة اليومية
-  LEARNING     // شارات التعلم
-  ACHIEVEMENT  // شارات الإنجاز
-  SOCIAL       // شارات اجتماعية
-  SPECIAL      // شارات خاصة
+  STREAK // شارات السلسلة اليومية
+  LEARNING // شارات التعلم
+  ACHIEVEMENT // شارات الإنجاز
+  SOCIAL // شارات اجتماعية
+  SPECIAL // شارات خاصة
 }
 
 // ندرة الشارات
 enum BadgeRarity {
-  COMMON       // شائعة
-  UNCOMMON     // غير شائعة
-  RARE         // نادرة
-  EPIC         // ملحمية
-  LEGENDARY    // أسطورية
+  COMMON // شائعة
+  UNCOMMON // غير شائعة
+  RARE // نادرة
+  EPIC // ملحمية
+  LEGENDARY // أسطورية
 }
 
 model LiveSession {
-  id        String   @id @default(uuid()) @map("_id")
+  id        String    @id @default(uuid()) @map("_id")
   sessionId String
   teacherId String
-  status    String   @default("LIVE")
-  startedAt DateTime @default(now())
+  status    String    @default("LIVE")
+  startedAt DateTime  @default(now())
   endedAt   DateTime?
 }
 
@@ -974,7 +981,6 @@ model LiveParticipant {
 
   @@unique([liveId, userId])
 }
-
 
 model TrialBooking {
   id        String   @id @default(uuid()) @map("_id")
@@ -1007,100 +1013,100 @@ model StaffPermission {
 }
 
 model Level {
-  id                          String                    @id @default(uuid()) @map("_id")
-  code                        String                    @unique
+  id                          String                       @id @default(uuid()) @map("_id")
+  code                        String                       @unique
   name                        String
   nameAr                      String?
   description                 String?
   descriptionAr               String?
-  order                       Int                       @default(0)
-  isActive                    Boolean                   @default(true)
-  createdAt                   DateTime                  @default(now())
-  updatedAt                   DateTime                  @default(now()) @updatedAt
-  stages                      LevelStage[]              @relation("LevelStages")
-  resources                   Resource[]                @relation("ResourceLevel")
-  officialStudents            StudentProfile[]          @relation("StudentOfficialLevel")
-  recommendedStudents         StudentProfile[]          @relation("StudentRecommendedLevel")
-  officialLearningProfiles    StudentLearningProfile[]  @relation("LearningProfileOfficialLevel")
-  recommendedLearningProfiles StudentLearningProfile[]  @relation("LearningProfileRecommendedLevel")
-  groups                      LearningGroup[]           @relation("LearningGroupLevel")
-  packages                    Package[]                 @relation("PackageLevel")
-  sessions                    Session[]                 @relation("SessionLevel")
-  learningProgress            LearningProgress[]        @relation("LearningProgressLevel")
-  speakingRooms               SpeakingRoom[]            @relation("SpeakingRoomLevel")
-  aiRecommendations            AIRecommendation[]        @relation("AIRecommendationLevel")
-  levelRecommendations         StudentLevelRecommendation[] @relation("RecommendationLevel")
+  order                       Int                          @default(0)
+  isActive                    Boolean                      @default(true)
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @default(now()) @updatedAt
+  stages                      LevelStage[]                 @relation("LevelStages")
+  resources                   Resource[]                   @relation("ResourceLevel")
+  officialStudents            StudentProfile[]             @relation("StudentOfficialLevel")
+  recommendedStudents         StudentProfile[]             @relation("StudentRecommendedLevel")
+  officialLearningProfiles    StudentLearningProfile[]     @relation("LearningProfileOfficialLevel")
+  recommendedLearningProfiles StudentLearningProfile[]     @relation("LearningProfileRecommendedLevel")
+  groups                      LearningGroup[]              @relation("LearningGroupLevel")
+  packages                    Package[]                    @relation("PackageLevel")
+  sessions                    Session[]                    @relation("SessionLevel")
+  learningProgress            LearningProgress[]           @relation("LearningProgressLevel")
+  speakingRooms               SpeakingRoom[]               @relation("SpeakingRoomLevel")
+  aiRecommendations           AIRecommendation[]           @relation("AIRecommendationLevel")
+  levelRecommendations        StudentLevelRecommendation[] @relation("RecommendationLevel")
 
   @@index([isActive, order])
 }
 
 model LevelStage {
-  id                          String                    @id @default(uuid()) @map("_id")
+  id                          String                       @id @default(uuid()) @map("_id")
   levelId                     String
   code                        String
   name                        String
   nameAr                      String?
-  order                       Int                       @default(0)
-  isActive                    Boolean                   @default(true)
-  createdAt                   DateTime                  @default(now())
-  updatedAt                   DateTime                  @default(now()) @updatedAt
-  level                       Level                     @relation("LevelStages", fields: [levelId], references: [id], onDelete: Cascade)
-  resources                   Resource[]                @relation("ResourceStage")
-  officialStudents            StudentProfile[]          @relation("StudentOfficialStage")
-  recommendedStudents         StudentProfile[]          @relation("StudentRecommendedStage")
-  officialLearningProfiles    StudentLearningProfile[]  @relation("LearningProfileOfficialStage")
-  recommendedLearningProfiles StudentLearningProfile[]  @relation("LearningProfileRecommendedStage")
-  groups                      LearningGroup[]           @relation("LearningGroupStage")
-  packages                    Package[]                 @relation("PackageStage")
-  sessions                    Session[]                 @relation("SessionStage")
-  learningProgress            LearningProgress[]        @relation("LearningProgressStage")
-  speakingRooms               SpeakingRoom[]            @relation("SpeakingRoomStage")
-  aiRecommendations            AIRecommendation[]        @relation("AIRecommendationStage")
-  levelRecommendations         StudentLevelRecommendation[] @relation("RecommendationStage")
+  order                       Int                          @default(0)
+  isActive                    Boolean                      @default(true)
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @default(now()) @updatedAt
+  level                       Level                        @relation("LevelStages", fields: [levelId], references: [id], onDelete: Cascade)
+  resources                   Resource[]                   @relation("ResourceStage")
+  officialStudents            StudentProfile[]             @relation("StudentOfficialStage")
+  recommendedStudents         StudentProfile[]             @relation("StudentRecommendedStage")
+  officialLearningProfiles    StudentLearningProfile[]     @relation("LearningProfileOfficialStage")
+  recommendedLearningProfiles StudentLearningProfile[]     @relation("LearningProfileRecommendedStage")
+  groups                      LearningGroup[]              @relation("LearningGroupStage")
+  packages                    Package[]                    @relation("PackageStage")
+  sessions                    Session[]                    @relation("SessionStage")
+  learningProgress            LearningProgress[]           @relation("LearningProgressStage")
+  speakingRooms               SpeakingRoom[]               @relation("SpeakingRoomStage")
+  aiRecommendations           AIRecommendation[]           @relation("AIRecommendationStage")
+  levelRecommendations        StudentLevelRecommendation[] @relation("RecommendationStage")
 
   @@unique([levelId, code])
   @@index([levelId, isActive, order])
 }
 
 model Skill {
-  id               String             @id @default(uuid()) @map("_id")
-  code             String             @unique
-  name             String
-  nameAr           String?
-  description      String?
-  descriptionAr    String?
-  isActive         Boolean            @default(true)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @default(now()) @updatedAt
-  resources        Resource[]         @relation("ResourceSkill")
-  learningProgress LearningProgress[] @relation("LearningProgressSkill")
-  learningSignals  LearningSignal[]
+  id                String             @id @default(uuid()) @map("_id")
+  code              String             @unique
+  name              String
+  nameAr            String?
+  description       String?
+  descriptionAr     String?
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @default(now()) @updatedAt
+  resources         Resource[]         @relation("ResourceSkill")
+  learningProgress  LearningProgress[] @relation("LearningProgressSkill")
+  learningSignals   LearningSignal[]
   aiRecommendations AIRecommendation[]
 }
 
 model Resource {
-  id            String             @id @default(uuid()) @map("_id")
-  resourceType  String
-  title         String
-  titleAr       String?
-  description   String?
-  descriptionAr String?
-  contentRef    String?
-  legacyModel   String?
-  legacyId      String?
-  levelId       String?
-  stageId       String?
-  skillId       String?
-  order         Int                @default(0)
-  isPublished   Boolean            @default(false)
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @default(now()) @updatedAt
-  level         Level?             @relation("ResourceLevel", fields: [levelId], references: [id])
-  stage         LevelStage?        @relation("ResourceStage", fields: [stageId], references: [id])
-  skill         Skill?             @relation("ResourceSkill", fields: [skillId], references: [id])
-  progress      LearningProgress[] @relation("ResourceProgress")
+  id                String             @id @default(uuid()) @map("_id")
+  resourceType      String
+  title             String
+  titleAr           String?
+  description       String?
+  descriptionAr     String?
+  contentRef        String?
+  legacyModel       String?
+  legacyId          String?
+  levelId           String?
+  stageId           String?
+  skillId           String?
+  order             Int                @default(0)
+  isPublished       Boolean            @default(false)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @default(now()) @updatedAt
+  level             Level?             @relation("ResourceLevel", fields: [levelId], references: [id])
+  stage             LevelStage?        @relation("ResourceStage", fields: [stageId], references: [id])
+  skill             Skill?             @relation("ResourceSkill", fields: [skillId], references: [id])
+  progress          LearningProgress[] @relation("ResourceProgress")
   aiRecommendations AIRecommendation[]
-  learningSignals LearningSignal[]
+  learningSignals   LearningSignal[]
 
   @@index([resourceType, isPublished])
   @@index([levelId, stageId, order])
@@ -1168,42 +1174,42 @@ model StudentLearningProfile {
 }
 
 model StudentLevelRecommendation {
-  id                String      @id @default(uuid()) @map("_id")
-  teacherId         String
-  studentId         String
-  studentProfileId  String
+  id                 String         @id @default(uuid()) @map("_id")
+  teacherId          String
+  studentId          String
+  studentProfileId   String
   recommendedLevelId String
   recommendedStageId String?
-  reason            String?
-  createdAt         DateTime    @default(now())
-  teacher           User        @relation("LevelRecommendationTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
-  student           User        @relation("LevelRecommendationStudent", fields: [studentId], references: [id], onDelete: Cascade)
-  studentProfile    StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
-  recommendedLevel  Level       @relation("RecommendationLevel", fields: [recommendedLevelId], references: [id])
-  recommendedStage  LevelStage? @relation("RecommendationStage", fields: [recommendedStageId], references: [id])
+  reason             String?
+  createdAt          DateTime       @default(now())
+  teacher            User           @relation("LevelRecommendationTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  student            User           @relation("LevelRecommendationStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  studentProfile     StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  recommendedLevel   Level          @relation("RecommendationLevel", fields: [recommendedLevelId], references: [id])
+  recommendedStage   LevelStage?    @relation("RecommendationStage", fields: [recommendedStageId], references: [id])
 
   @@index([studentId, createdAt])
   @@index([teacherId, createdAt])
 }
 
 model Enrollment {
-  id               String         @id @default(uuid()) @map("_id")
+  id               String           @id @default(uuid()) @map("_id")
   studentId        String
   subscriptionId   String?
   packageId        String?
   groupId          String?
   teacherProfileId String?
   subscriptionType SubscriptionType
-  status           String         @default("PENDING")
+  status           String           @default("PENDING")
   startsAt         DateTime?
   endsAt           DateTime?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @default(now()) @updatedAt
-  student          User           @relation("EnrollmentStudent", fields: [studentId], references: [id], onDelete: Cascade)
-  subscription     Subscription?  @relation(fields: [subscriptionId], references: [id])
-  package          Package?       @relation(fields: [packageId], references: [id])
-  group            LearningGroup? @relation("EnrollmentGroup", fields: [groupId], references: [id])
-  teacher          TeacherProfile? @relation("EnrollmentTeacher", fields: [teacherProfileId], references: [id])
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now()) @updatedAt
+  student          User             @relation("EnrollmentStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  subscription     Subscription?    @relation(fields: [subscriptionId], references: [id])
+  package          Package?         @relation(fields: [packageId], references: [id])
+  group            LearningGroup?   @relation("EnrollmentGroup", fields: [groupId], references: [id])
+  teacher          TeacherProfile?  @relation("EnrollmentTeacher", fields: [teacherProfileId], references: [id])
 
   @@index([studentId, status])
   @@index([groupId, status])
@@ -1211,7 +1217,7 @@ model Enrollment {
 }
 
 model LearningGroup {
-  id               String          @id @default(uuid()) @map("_id")
+  id               String           @id @default(uuid()) @map("_id")
   name             String
   nameAr           String?
   levelId          String?
@@ -1220,18 +1226,18 @@ model LearningGroup {
   teacherProfileId String?
   capacity         Int?
   timezone         String?
-  status           String          @default("DRAFT")
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @default(now()) @updatedAt
-  level            Level?          @relation("LearningGroupLevel", fields: [levelId], references: [id])
-  stage            LevelStage?     @relation("LearningGroupStage", fields: [stageId], references: [id])
-  teacher          TeacherProfile? @relation(fields: [teacherProfileId], references: [id])
-  members          GroupMember[]   @relation("GroupMembers")
+  status           String           @default("DRAFT")
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now()) @updatedAt
+  level            Level?           @relation("LearningGroupLevel", fields: [levelId], references: [id])
+  stage            LevelStage?      @relation("LearningGroupStage", fields: [stageId], references: [id])
+  teacher          TeacherProfile?  @relation(fields: [teacherProfileId], references: [id])
+  members          GroupMember[]    @relation("GroupMembers")
   schedules        GroupSchedule[]
-  enrollments      Enrollment[]    @relation("EnrollmentGroup")
-  subscriptions    Subscription[]  @relation("SubscriptionGroup")
-  sessions         Session[]       @relation("GroupSessions")
-  homework         Homework[]      @relation("GroupHomework")
+  enrollments      Enrollment[]     @relation("EnrollmentGroup")
+  subscriptions    Subscription[]   @relation("SubscriptionGroup")
+  sessions         Session[]        @relation("GroupSessions")
+  homework         Homework[]       @relation("GroupHomework")
 
   @@index([levelId, stageId, status])
   @@index([teacherProfileId, status])
@@ -1273,16 +1279,16 @@ model GroupSchedule {
 }
 
 model SessionParticipant {
-  id        String   @id @default(uuid()) @map("_id")
+  id        String    @id @default(uuid()) @map("_id")
   sessionId String
   userId    String
-  role      String   @default("STUDENT")
-  status    String   @default("SCHEDULED")
+  role      String    @default("STUDENT")
+  status    String    @default("SCHEDULED")
   joinedAt  DateTime?
   leftAt    DateTime?
-  createdAt DateTime @default(now())
-  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  session   Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([sessionId, userId])
   @@index([sessionId, status])
@@ -1290,18 +1296,18 @@ model SessionParticipant {
 }
 
 model Attendance {
-  id              String   @id @default(uuid()) @map("_id")
+  id              String    @id @default(uuid()) @map("_id")
   sessionId       String
   userId          String
-  status          String   @default("PENDING")
+  status          String    @default("PENDING")
   joinedAt        DateTime?
   leftAt          DateTime?
   durationSeconds Int?
   note            String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @default(now()) @updatedAt
-  session         Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
+  session         Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([sessionId, userId])
   @@index([userId, status])
@@ -1324,27 +1330,27 @@ model QMeetMeeting {
 }
 
 model SessionFeedback {
-  id             String                  @id @default(uuid()) @map("_id")
-  sessionId      String
-  studentId      String
-  teacherId      String
-  summary        String?
-  teacherNotes   String?
-  status         String                  @default("DRAFT")
-  publishedAt    DateTime?
-  publishedById  String?
-  publicationVersion Int                     @default(0)
-  editAfterPublishAllowed Boolean             @default(false)
-  createdAt      DateTime                @default(now())
-  updatedAt      DateTime                @default(now()) @updatedAt
-  session        Session                 @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  student        User                    @relation("FeedbackStudent", fields: [studentId], references: [id], onDelete: Cascade)
-  teacher        User                    @relation("FeedbackTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
-  expressions    FeedbackExpression[]
-  mistakes       FeedbackMistake[]
-  pronunciation  FeedbackPronunciation[]
-  ebi            FeedbackEBI[]
-  revisions      FeedbackRevision[]
+  id                      String                  @id @default(uuid()) @map("_id")
+  sessionId               String
+  studentId               String
+  teacherId               String
+  summary                 String?
+  teacherNotes            String?
+  status                  String                  @default("DRAFT")
+  publishedAt             DateTime?
+  publishedById           String?
+  publicationVersion      Int                     @default(0)
+  editAfterPublishAllowed Boolean                 @default(false)
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @default(now()) @updatedAt
+  session                 Session                 @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student                 User                    @relation("FeedbackStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  teacher                 User                    @relation("FeedbackTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  expressions             FeedbackExpression[]
+  mistakes                FeedbackMistake[]
+  pronunciation           FeedbackPronunciation[]
+  ebi                     FeedbackEBI[]
+  revisions               FeedbackRevision[]
 
   @@unique([sessionId, studentId])
   @@index([studentId, status])
@@ -1388,16 +1394,16 @@ model FeedbackMistake {
 }
 
 model FeedbackPronunciation {
-  id         String          @id @default(uuid()) @map("_id")
-  feedbackId String
-  target     String
-  actual     String?
-  guidance   String?
-  phonetic   String?
+  id          String          @id @default(uuid()) @map("_id")
+  feedbackId  String
+  target      String
+  actual      String?
+  guidance    String?
+  phonetic    String?
   teacherNote String?
-  audioRef   String?
-  createdAt  DateTime        @default(now())
-  feedback   SessionFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  audioRef    String?
+  createdAt   DateTime        @default(now())
+  feedback    SessionFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
 }
 
 model FeedbackEBI {
@@ -1469,36 +1475,36 @@ model Homework {
 }
 
 model HomeworkItem {
-  id          String              @id @default(uuid()) @map("_id")
+  id          String               @id @default(uuid()) @map("_id")
   homeworkId  String
   itemType    String
   prompt      String?
   contentRef  String?
-  isRequired  Boolean             @default(true)
-  order       Int                 @default(0)
-  createdAt   DateTime            @default(now())
-  homework    Homework            @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  isRequired  Boolean              @default(true)
+  order       Int                  @default(0)
+  createdAt   DateTime             @default(now())
+  homework    Homework             @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
   submissions HomeworkSubmission[] @relation("HomeworkItemSubmissions")
 
   @@index([homeworkId, order])
 }
 
 model HomeworkSubmission {
-  id          String        @id @default(uuid()) @map("_id")
+  id          String           @id @default(uuid()) @map("_id")
   homeworkId  String
-  itemId     String?
-  studentId  String
-  attempt    Int           @default(1)
+  itemId      String?
+  studentId   String
+  attempt     Int              @default(1)
   contentType String
   contentText String?
-  contentRef String?
-  status     String        @default("SUBMITTED")
-  submittedAt DateTime      @default(now())
-  updatedAt   DateTime      @default(now()) @updatedAt
-  homework   Homework      @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
-  item       HomeworkItem? @relation("HomeworkItemSubmissions", fields: [itemId], references: [id])
-  student    User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  reviews    HomeworkReview[]
+  contentRef  String?
+  status      String           @default("SUBMITTED")
+  submittedAt DateTime         @default(now())
+  updatedAt   DateTime         @default(now()) @updatedAt
+  homework    Homework         @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  item        HomeworkItem?    @relation("HomeworkItemSubmissions", fields: [itemId], references: [id])
+  student     User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  reviews     HomeworkReview[]
 
   @@unique([homeworkId, itemId, studentId, attempt])
   @@index([homeworkId, studentId, status])
@@ -1524,59 +1530,59 @@ model HomeworkReview {
 }
 
 model SpeakingRoom {
-  id          String               @id @default(uuid()) @map("_id")
-  name        String?
-  description String?
-  levelId     String?
-  stageId     String?
-  topic       String
-  prompt      String?
-  vocabularyJson String?
-  status      String               @default("OPEN")
-  maxMembers  Int?
-  createdById String?
+  id                        String                @id @default(uuid()) @map("_id")
+  name                      String?
+  description               String?
+  levelId                   String?
+  stageId                   String?
+  topic                     String
+  prompt                    String?
+  vocabularyJson            String?
+  status                    String                @default("OPEN")
+  maxMembers                Int?
+  createdById               String?
   moderatorTeacherProfileId String?
-  activeMemberCount Int       @default(0)
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @default(now()) @updatedAt
-  level       Level?               @relation("SpeakingRoomLevel", fields: [levelId], references: [id])
-  stage       LevelStage?          @relation("SpeakingRoomStage", fields: [stageId], references: [id])
-  moderatorTeacherProfile TeacherProfile? @relation("SpeakingRoomModerator", fields: [moderatorTeacherProfileId], references: [id])
-  members     SpeakingRoomMember[]
-  messages    SpeakingRoomMessage[]
-  reports     SpeakingRoomReport[]
-  content     SpeakingRoomContent[]
+  activeMemberCount         Int                   @default(0)
+  createdAt                 DateTime              @default(now())
+  updatedAt                 DateTime              @default(now()) @updatedAt
+  level                     Level?                @relation("SpeakingRoomLevel", fields: [levelId], references: [id])
+  stage                     LevelStage?           @relation("SpeakingRoomStage", fields: [stageId], references: [id])
+  moderatorTeacherProfile   TeacherProfile?       @relation("SpeakingRoomModerator", fields: [moderatorTeacherProfileId], references: [id])
+  members                   SpeakingRoomMember[]
+  messages                  SpeakingRoomMessage[]
+  reports                   SpeakingRoomReport[]
+  content                   SpeakingRoomContent[]
 
   @@index([levelId, stageId, status])
 }
 
 model SpeakingRoomMember {
-  id        String        @id @default(uuid()) @map("_id")
-  roomId    String
-  userId    String
-  role      String        @default("MEMBER")
-  status    String        @default("ACTIVE")
-  muted     Boolean       @default(false)
-  joinedAt  DateTime      @default(now())
-  leftAt    DateTime?
-  room      SpeakingRoom  @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id       String       @id @default(uuid()) @map("_id")
+  roomId   String
+  userId   String
+  role     String       @default("MEMBER")
+  status   String       @default("ACTIVE")
+  muted    Boolean      @default(false)
+  joinedAt DateTime     @default(now())
+  leftAt   DateTime?
+  room     SpeakingRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([roomId, userId])
   @@index([userId, status])
 }
 
 model SpeakingRoomMessage {
-  id          String       @id @default(uuid()) @map("_id")
+  id          String               @id @default(uuid()) @map("_id")
   roomId      String
   senderId    String
-  messageType String       @default("TEXT")
+  messageType String               @default("TEXT")
   text        String?
   voiceRef    String?
-  status      String       @default("VISIBLE")
-  createdAt   DateTime     @default(now())
-  room        SpeakingRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  sender      User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  status      String               @default("VISIBLE")
+  createdAt   DateTime             @default(now())
+  room        SpeakingRoom         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender      User                 @relation(fields: [senderId], references: [id], onDelete: Cascade)
   reports     SpeakingRoomReport[]
 
   @@index([roomId, createdAt])
@@ -1584,85 +1590,134 @@ model SpeakingRoomMessage {
 }
 
 model SpeakingRoomReport {
-  id             String              @id @default(uuid()) @map("_id")
+  id             String               @id @default(uuid()) @map("_id")
   roomId         String
   reporterId     String
   targetUserId   String?
   messageId      String?
   reason         String
-  status         String              @default("OPEN")
+  status         String               @default("OPEN")
   resolutionNote String?
   resolvedById   String?
-  createdAt      DateTime            @default(now())
+  createdAt      DateTime             @default(now())
   resolvedAt     DateTime?
-  room           SpeakingRoom        @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  reporter       User                @relation("SpeakingRoomReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
-  targetUser     User?               @relation("SpeakingRoomReportTarget", fields: [targetUserId], references: [id])
+  room           SpeakingRoom         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  reporter       User                 @relation("SpeakingRoomReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetUser     User?                @relation("SpeakingRoomReportTarget", fields: [targetUserId], references: [id])
   message        SpeakingRoomMessage? @relation(fields: [messageId], references: [id])
-  resolvedBy     User?               @relation("SpeakingRoomReportResolver", fields: [resolvedById], references: [id])
+  resolvedBy     User?                @relation("SpeakingRoomReportResolver", fields: [resolvedById], references: [id])
 
   @@index([roomId, status, createdAt])
   @@index([reporterId, createdAt])
 }
 
 model SpeakingRoomContent {
-  id          String       @id @default(uuid()) @map("_id")
+  id          String        @id @default(uuid()) @map("_id")
   roomId      String?
   contentType String
   text        String
-  status      String       @default("ACTIVE")
+  status      String        @default("ACTIVE")
   createdById String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @default(now()) @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now()) @updatedAt
   room        SpeakingRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  createdBy   User         @relation("SpeakingRoomContentCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  createdBy   User          @relation("SpeakingRoomContentCreator", fields: [createdById], references: [id], onDelete: Cascade)
 
   @@index([roomId, contentType, status])
 }
 
 model Notification {
-  id             String   @id @default(uuid()) @map("_id")
+  id             String    @id @default(uuid()) @map("_id")
   userId         String
   eventType      String
   channel        String
   title          String?
   body           String?
   payloadJson    String?
-  deliveryStatus String   @default("PENDING")
+  deliveryStatus String    @default("PENDING")
   idempotencyKey String?
-  dedupeKey      String   @unique @default(uuid())
+  dedupeKey      String    @unique @default(uuid())
   sentAt         DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now()) @updatedAt
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readAt         DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, deliveryStatus, createdAt])
   @@index([eventType, channel])
   @@index([idempotencyKey])
 }
 
+model PushSubscription {
+  id        String   @id @default(uuid()) @map("_id")
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model FinanceIncome {
+  id             String   @id @default(uuid()) @map("_id")
+  monthKey       String
+  amount         Float
+  currency       String   @default("EGP")
+  receivedAt     DateTime @default(now())
+  method         String?
+  studentId      String?
+  subscriptionId String?
+  note           String?
+  createdById    String
+  referenceKey   String   @unique @default(uuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
+  @@index([monthKey, receivedAt])
+  @@index([studentId, monthKey])
+  @@index([subscriptionId])
+}
+
+model FinanceExpense {
+  id          String   @id @default(uuid()) @map("_id")
+  monthKey    String
+  category    String
+  description String
+  amount      Float
+  currency    String   @default("EGP")
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  @@index([monthKey, category])
+}
+
 model WhatsAppAccount {
-  id              String                @id @default(uuid()) @map("_id")
-  userId          String?
-  provider        String
-  isOtpSender     Boolean               @default(false)
-  phoneNumber     String
-  normalizedPhone String?
-  status          String                @default("DISCONNECTED")
-  authPersistenceStatus String           @default("PERSISTENCE_UNAVAILABLE")
-  reconnectAttempts Int                 @default(0)
-  lastError       String?
-  workerLockToken String?
-  workerLockedAt  DateTime?
-  lastMessageSentAt DateTime?
-  metadataJson    String?
-  lastConnectedAt DateTime?
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @default(now()) @updatedAt
-  owner           User?                 @relation("WhatsAppAccountOwner", fields: [userId], references: [id])
-  contacts        WhatsAppContact[]
-  conversations   WhatsAppConversation[]
-  queues          WhatsAppQueue[]
+  id                    String                 @id @default(uuid()) @map("_id")
+  userId                String?
+  provider              String
+  isOtpSender           Boolean                @default(false)
+  phoneNumber           String
+  normalizedPhone       String?
+  status                String                 @default("DISCONNECTED")
+  authPersistenceStatus String                 @default("PERSISTENCE_UNAVAILABLE")
+  reconnectAttempts     Int                    @default(0)
+  lastError             String?
+  workerLockToken       String?
+  workerLockedAt        DateTime?
+  lastMessageSentAt     DateTime?
+  metadataJson          String?
+  lastConnectedAt       DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @default(now()) @updatedAt
+  owner                 User?                  @relation("WhatsAppAccountOwner", fields: [userId], references: [id])
+  contacts              WhatsAppContact[]
+  conversations         WhatsAppConversation[]
+  queues                WhatsAppQueue[]
 
   @@index([normalizedPhone])
   @@index([provider, status])
@@ -1670,43 +1725,43 @@ model WhatsAppAccount {
 }
 
 model WhatsAppContact {
-  id              String                @id @default(uuid()) @map("_id")
-  accountId       String
-  userId          String?
-  phoneNumber     String
-  normalizedPhone String?
-  displayName     String?
-  status          String                @default("ACTIVE")
-  isGroup         Boolean               @default(false)
+  id                String                 @id @default(uuid()) @map("_id")
+  accountId         String
+  userId            String?
+  phoneNumber       String
+  normalizedPhone   String?
+  displayName       String?
+  status            String                 @default("ACTIVE")
+  isGroup           Boolean                @default(false)
   lastInteractionAt DateTime?
-  metadataJson    String?
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @default(now()) @updatedAt
-  account         WhatsAppAccount       @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  user            User?                 @relation("WhatsAppContactUser", fields: [userId], references: [id])
-  conversations   WhatsAppConversation[]
+  metadataJson      String?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @default(now()) @updatedAt
+  account           WhatsAppAccount        @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  user              User?                  @relation("WhatsAppContactUser", fields: [userId], references: [id])
+  conversations     WhatsAppConversation[]
 
   @@unique([accountId, normalizedPhone])
   @@index([userId, status])
 }
 
 model WhatsAppConversation {
-  id             String               @id @default(uuid()) @map("_id")
-  accountId      String
-  contactId      String
-  studentId      String?
+  id              String            @id @default(uuid()) @map("_id")
+  accountId       String
+  contactId       String
+  studentId       String?
   assignedStaffId String?
-  status         String               @default("OPEN")
-  unreadCount    Int                  @default(0)
-  lastMessageAt  DateTime?
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @default(now()) @updatedAt
-  account        WhatsAppAccount      @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  contact        WhatsAppContact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  student        User?                @relation("WhatsAppConversationStudent", fields: [studentId], references: [id])
-  assignedStaff  User?                @relation("WhatsAppConversationStaff", fields: [assignedStaffId], references: [id])
-  messages       WhatsAppMessage[]
-  queues         WhatsAppQueue[]
+  status          String            @default("OPEN")
+  unreadCount     Int               @default(0)
+  lastMessageAt   DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+  account         WhatsAppAccount   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  contact         WhatsAppContact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  student         User?             @relation("WhatsAppConversationStudent", fields: [studentId], references: [id])
+  assignedStaff   User?             @relation("WhatsAppConversationStaff", fields: [assignedStaffId], references: [id])
+  messages        WhatsAppMessage[]
+  queues          WhatsAppQueue[]
 
   @@index([accountId, status, lastMessageAt])
   @@index([contactId, status])
@@ -1761,31 +1816,31 @@ model WhatsAppQueue {
 }
 
 model AIRecommendation {
-  id          String      @id @default(uuid()) @map("_id")
-  studentId   String
-  levelId     String?
-  stageId     String?
-  type        String
-  title       String?
-  reason      String?
-  priority    Int         @default(50)
-  skillId     String?
-  resourceId  String?
-  dedupeKey   String
-  evidenceCycleKey String   @default("LEGACY")
-  dedupeCycle Int          @default(1)
+  id                   String                     @id @default(uuid()) @map("_id")
+  studentId            String
+  levelId              String?
+  stageId              String?
+  type                 String
+  title                String?
+  reason               String?
+  priority             Int                        @default(50)
+  skillId              String?
+  resourceId           String?
+  dedupeKey            String
+  evidenceCycleKey     String                     @default("LEGACY")
+  dedupeCycle          Int                        @default(1)
   sourceSignalKeysJson String?
-  payloadJson String?
-  status      String      @default("PENDING")
-  expiresAt   DateTime?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @default(now()) @updatedAt
-  student     User        @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  level       Level?      @relation("AIRecommendationLevel", fields: [levelId], references: [id])
-  stage       LevelStage? @relation("AIRecommendationStage", fields: [stageId], references: [id])
-  skill       Skill?      @relation(fields: [skillId], references: [id])
-  resource    Resource?   @relation(fields: [resourceId], references: [id])
-  dailySteps  DailyLearningSessionStep[]
+  payloadJson          String?
+  status               String                     @default("PENDING")
+  expiresAt            DateTime?
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @default(now()) @updatedAt
+  student              User                       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  level                Level?                     @relation("AIRecommendationLevel", fields: [levelId], references: [id])
+  stage                LevelStage?                @relation("AIRecommendationStage", fields: [stageId], references: [id])
+  skill                Skill?                     @relation(fields: [skillId], references: [id])
+  resource             Resource?                  @relation(fields: [resourceId], references: [id])
+  dailySteps           DailyLearningSessionStep[]
 
   @@unique([studentId, dedupeKey, dedupeCycle])
   @@index([studentId, dedupeKey, evidenceCycleKey])
@@ -1795,27 +1850,27 @@ model AIRecommendation {
 }
 
 model LearningSignal {
-  id             String   @id @default(uuid()) @map("_id")
-  studentId      String
-  type           String
-  source         String
+  id               String    @id @default(uuid()) @map("_id")
+  studentId        String
+  type             String
+  source           String
   sourceEntityType String?
-  sourceEntityId String?
-  sourceItemKey  String?
-  dedupeKey      String
-  skillId        String?
-  levelId        String?
-  stageId        String?
-  topicKey       String?
-  strength       Float    @default(1)
-  occurredAt     DateTime
-  expiresAt      DateTime?
-  evidenceJson   String?
-  createdAt      DateTime @default(now())
-  student        User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  skill          Skill?   @relation(fields: [skillId], references: [id])
-  resource       Resource? @relation(fields: [resourceId], references: [id])
-  resourceId     String?
+  sourceEntityId   String?
+  sourceItemKey    String?
+  dedupeKey        String
+  skillId          String?
+  levelId          String?
+  stageId          String?
+  topicKey         String?
+  strength         Float     @default(1)
+  occurredAt       DateTime
+  expiresAt        DateTime?
+  evidenceJson     String?
+  createdAt        DateTime  @default(now())
+  student          User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  skill            Skill?    @relation(fields: [skillId], references: [id])
+  resource         Resource? @relation(fields: [resourceId], references: [id])
+  resourceId       String?
 
   @@unique([studentId, dedupeKey])
   @@index([studentId, type, occurredAt])
@@ -1824,22 +1879,22 @@ model LearningSignal {
 }
 
 model DailyLearningSession {
-  id                String                    @id @default(uuid()) @map("_id")
-  studentId         String
-  dailyKey          String
-  status            String                    @default("NOT_STARTED")
-  planSnapshotJson  String
-  totalMinutes      Int
-  currentStepIndex  Int                       @default(0)
-  progressJson      String?
-  startedAt         DateTime?
-  pausedAt          DateTime?
-  completedAt       DateTime?
-  abandonedAt       DateTime?
-  createdAt         DateTime                  @default(now())
-  updatedAt         DateTime                  @default(now()) @updatedAt
-  student           User                      @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  steps             DailyLearningSessionStep[]
+  id               String                     @id @default(uuid()) @map("_id")
+  studentId        String
+  dailyKey         String
+  status           String                     @default("NOT_STARTED")
+  planSnapshotJson String
+  totalMinutes     Int
+  currentStepIndex Int                        @default(0)
+  progressJson     String?
+  startedAt        DateTime?
+  pausedAt         DateTime?
+  completedAt      DateTime?
+  abandonedAt      DateTime?
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @default(now()) @updatedAt
+  student          User                       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  steps            DailyLearningSessionStep[]
 
   @@unique([studentId, dailyKey])
   @@index([studentId, status, dailyKey])
@@ -1866,21 +1921,21 @@ model DailyLearningSessionStep {
 }
 
 model TeacherIntelligenceSuggestion {
-  id           String   @id @default(uuid()) @map("_id")
+  id           String    @id @default(uuid()) @map("_id")
   teacherId    String
   studentId    String
   type         String
   draftJson    String
   reason       String
-  status       String   @default("DRAFT")
+  status       String    @default("DRAFT")
   approvedById String?
   approvedAt   DateTime?
   expiresAt    DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now()) @updatedAt
-  teacher      User     @relation("IntelligenceSuggestionTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
-  student      User     @relation("IntelligenceSuggestionStudent", fields: [studentId], references: [id], onDelete: Cascade)
-  approvedBy   User?    @relation("IntelligenceSuggestionApprover", fields: [approvedById], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+  teacher      User      @relation("IntelligenceSuggestionTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  student      User      @relation("IntelligenceSuggestionStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  approvedBy   User?     @relation("IntelligenceSuggestionApprover", fields: [approvedById], references: [id])
 
   @@index([studentId, status, createdAt])
   @@index([teacherId, status, createdAt])
