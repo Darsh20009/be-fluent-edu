@@ -17,6 +17,7 @@ import {
   type OtpDeliveryChannel,
   type OtpDeliveryProvider,
 } from './providers'
+import { WhatsAppOtpDeliveryError } from '@/lib/whatsapp/otp-delivery'
 import { isAccountUsable } from './status'
 
 export type OtpIntent = 'LOGIN' | 'REGISTER'
@@ -58,7 +59,13 @@ export class OtpServiceError extends Error {
       | 'attempt_limit'
       | 'code_mismatch'
       | 'login_identity_unmatched'
-      | 'account_unavailable',
+      | 'account_unavailable'
+      | 'whatsapp_provider_unavailable'
+      | 'whatsapp_sender_not_configured'
+      | 'whatsapp_multiple_senders'
+      | 'whatsapp_session_in_use'
+      | 'whatsapp_send_failed'
+      | 'delivery_failed',
   ) {
     super(message)
     this.name = 'OtpServiceError'
@@ -249,12 +256,27 @@ export async function requestOtp(input: RequestOtpInput) {
       expiresInSeconds: OTP_POLICY.expiresInSeconds,
     })
     audit('AUTH_OTP_SENT')
-  } catch {
+  } catch (error) {
     await prisma.authOtpChallenge.update({
       where: { id: created.id },
       data: { invalidatedAt: new Date() },
     })
-    throw new OtpServiceError('DELIVERY_UNAVAILABLE')
+    const whatsappDeliveryReasons = {
+          PROVIDER_UNAVAILABLE: 'whatsapp_provider_unavailable',
+          SENDER_NOT_CONFIGURED: 'whatsapp_sender_not_configured',
+          MULTIPLE_SENDERS: 'whatsapp_multiple_senders',
+          SESSION_IN_USE: 'whatsapp_session_in_use',
+          SEND_FAILED: 'whatsapp_send_failed',
+    } as const
+    const deliveryReason: NonNullable<OtpServiceError['diagnosticReason']> =
+      error instanceof WhatsAppOtpDeliveryError
+        ? whatsappDeliveryReasons[error.reason]
+        : 'delivery_failed'
+    console.warn('OTP delivery failed', {
+      channel: input.channel,
+      reason: deliveryReason,
+    })
+    throw new OtpServiceError('DELIVERY_UNAVAILABLE', undefined, deliveryReason)
   }
 
   return {

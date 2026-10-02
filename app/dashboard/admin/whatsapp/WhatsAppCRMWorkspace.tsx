@@ -535,6 +535,23 @@ export function WhatsAppCRMWorkspace() {
             <div className={pageStyles.empty}>{t('لا توجد أرقام بعد. أضف رقمًا لبدء ربط واتساب وإدارة المحادثات.', 'No numbers yet. Add a number to connect WhatsApp and manage conversations.')}</div>
           )}
 
+          {accounts.length > 0 && !accounts.some((account) => account.isOtpSender) && (
+            <div className={pageStyles.notice} role="status">
+              {t(
+                'ربط واتساب وحده لا يفعّل رموز الدخول. اختر «استخدام لرموز التحقق» على رقم متصل.',
+                'Connecting WhatsApp alone does not enable login codes. Select “Use for verification codes” on a connected number.',
+              )}
+            </div>
+          )}
+          {accounts.some((account) => account.isOtpSender && account.status !== 'CONNECTED') && (
+            <div className={pageStyles.error} role="alert">
+              {t(
+                'مرسل رموز التحقق المحدد غير متصل. أعد ربط الرقم أو اختر رقماً متصلاً آخر.',
+                'The selected verification-code sender is disconnected. Reconnect it or select another connected number.',
+              )}
+            </div>
+          )}
+
           {accounts.length > 0 && (
             <div className={styles.accountList}>
               {accounts.map((account) => {

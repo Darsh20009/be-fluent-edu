@@ -11,6 +11,7 @@
 - [Effect-driven fetch state](effect-driven-fetch-state.md) — define async fetches inside effects and ignore late results; the React lint rule follows helper calls that set state.
 - [Next.js dev memory pressure](next-dev-memory-pressure.md) — distinguish cold route compilation from request latency; Turbopack child-process workers can OOM this 8 GiB dev server.
 - [Persistent login sessions](persistent-login-sessions.md) — keep active Be Fluent sessions across home navigation and return users directly to their role dashboard.
+- [OTP password recovery boundary](otp-password-recovery-boundary.md) — after OTP login, update only the authenticated user's password; never trust a client-supplied user ID.
 - [SSR locale bootstrap](ssr-locale-bootstrap.md) — read the locale cookie in the root layout so document direction and the first client render agree.
 - [Documentation screenshot privacy](documentation-screenshot-privacy.md) — use real captures with synthetic accounts or redacted data; admin-only guides do not protect public image files.
 - [Delivery completeness](delivery-completeness.md) — the user expects complete student, teacher, admin and AI flows, not page-only or partially wired delivery.

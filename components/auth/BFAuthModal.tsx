@@ -19,7 +19,9 @@ type Props = {
   entryMode: EntryMode
   returnTo: string
   registrationHref: string
+  embedded?: boolean
   onClose: () => void
+  onComplete?: (destination: string) => void
 }
 
 function friendlyOtpError(code: string, isArabic: boolean) {
@@ -27,6 +29,16 @@ function friendlyOtpError(code: string, isArabic: boolean) {
     return isArabic
       ? 'طلبت رموزاً عدة خلال وقت قصير. انتظر قليلاً ثم حاول مجدداً.'
       : 'Too many code requests in a short time. Please wait and try again.'
+  }
+  if (code === 'OTP_SENDER_NOT_CONFIGURED') {
+    return isArabic
+      ? 'رقم واتساب المرتبط لم يُحدّد مرسلاً لرموز التحقق. يلزم من المسؤول اختيار رقم متصل من إدارة واتساب.'
+      : 'No WhatsApp verification sender is selected. An admin must select a connected number in WhatsApp management.'
+  }
+  if (code === 'OTP_SENDER_CONFIGURATION_INVALID') {
+    return isArabic
+      ? 'إعداد مرسل رموز واتساب غير صحيح. يلزم من المسؤول مراجعة الأرقام المحددة في إدارة واتساب.'
+      : 'WhatsApp verification sender settings are invalid. An admin must review the selected numbers in WhatsApp management.'
   }
   if (code === 'DELIVERY_UNAVAILABLE') {
     return isArabic
@@ -38,13 +50,13 @@ function friendlyOtpError(code: string, isArabic: boolean) {
     : 'We could not send a code right now. Try again or use your password.'
 }
 
-export default function BFAuthModal({ open, entryMode, returnTo, registrationHref, onClose }: Props) {
+export default function BFAuthModal({ open, entryMode, returnTo, registrationHref, embedded = false, onClose, onComplete }: Props) {
   const router = useRouter()
   const { language } = useTheme()
   const isArabic = language === 'ar'
   const tr = (ar: string, en: string) => isArabic ? ar : en
   const passwordInputId = useId()
-  const [view, setView] = useState<ModalView>(() => entryMode === 'start' ? 'register' : 'password')
+  const [view, setView] = useState<ModalView>(() => entryMode === 'start' ? 'register' : 'phone')
   const [authIntent, setAuthIntent] = useState<AuthIntent>(() => entryMode === 'start' ? 'REGISTER' : 'LOGIN')
   const [countryIso, setCountryIso] = useState('EG')
   const [phoneInput, setPhoneInput] = useState('')
@@ -125,6 +137,25 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
     return '/onboarding'
   }
 
+  const finishSignIn = () => {
+    if (embedded) {
+      onClose()
+      try {
+        window.top?.postMessage({ type: 'LOGIN_SUCCESS' }, '*')
+      } catch {
+        window.parent.postMessage({ type: 'LOGIN_SUCCESS' }, '*')
+      }
+      return
+    }
+    if (onComplete) {
+      onComplete(returnTo)
+      return
+    }
+    onClose()
+    router.push(returnTo)
+    router.refresh()
+  }
+
   const saveRegistrationPassword = async () => {
     setError('')
     try {
@@ -139,9 +170,20 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
         setError(tr('تم التحقق من الهاتف، لكن تعذر حفظ كلمة المرور. حاول مرة أخرى.', 'Your phone is verified, but we could not save the password. Try again.'))
         return
       }
-      onClose()
-      router.push(onboardingDestination())
-      router.refresh()
+      if (embedded) {
+        onClose()
+        try {
+          window.top?.postMessage({ type: 'LOGIN_SUCCESS' }, '*')
+        } catch {
+          window.parent.postMessage({ type: 'LOGIN_SUCCESS' }, '*')
+        }
+      } else if (onComplete) {
+        onComplete(onboardingDestination())
+      } else {
+        onClose()
+        router.push(onboardingDestination())
+        router.refresh()
+      }
     } catch {
       setError(tr('تم التحقق من الهاتف، لكن تعذر الاتصال لحفظ كلمة المرور.', 'Your phone is verified, but we could not reach the service to save the password.'))
     }
@@ -253,9 +295,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
         await saveRegistrationPassword()
         return
       }
-      onClose()
-      router.push(returnTo)
-      router.refresh()
+      finishSignIn()
     } catch {
       setError(tr('تعذر تسجيل الدخول الآن. حاول مرة أخرى.', 'We could not sign you in. Please try again.'))
     } finally {
@@ -282,9 +322,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
         setError(tr('تعذر تسجيل الدخول بهذه البيانات.', 'We could not sign you in with those details.'))
         return
       }
-      onClose()
-      router.push(returnTo)
-      router.refresh()
+      finishSignIn()
     } catch {
       setError(tr('تعذر تسجيل الدخول الآن. حاول مرة أخرى.', 'We could not sign you in. Please try again.'))
     } finally {
@@ -510,7 +548,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
             {view === 'password' && (
               <form className="mt-6 space-y-4" onSubmit={signInWithPassword}>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-semibold text-[#34443a]">{tr('البريد الإلكتروني أو الهاتف', 'Email or phone')}</span>
+                  <span className="mb-2 block text-sm font-semibold text-[#34443a]">{tr('رقم الهاتف أو البريد الإلكتروني', 'Phone number or email')}</span>
                   <input
                     type="text"
                     autoComplete="username"
@@ -518,6 +556,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
                     style={{ unicodeBidi: 'isolate' }}
                     value={emailOrPhone}
                     onChange={(event) => setEmailOrPhone(event.target.value)}
+                    placeholder="+966 5X XXX XXXX"
                     className="min-h-12 w-full border border-[#dce4dc] px-3 text-sm outline-none focus:border-[#24714f] focus:ring-2 focus:ring-[#24714f]/15"
                     disabled={busy}
                     required

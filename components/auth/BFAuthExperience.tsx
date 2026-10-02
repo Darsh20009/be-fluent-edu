@@ -42,7 +42,7 @@ export default function BFAuthExperience() {
   }, [])
 
   useEffect(() => {
-    const isDirectAuthEntry = pathname === '/auth/login' || pathname === '/auth/register'
+    const isDirectAuthEntry = pathname === '/auth/register'
     if (isDirectAuthEntry) {
       if (status === 'loading') return
       if (status === 'authenticated') {

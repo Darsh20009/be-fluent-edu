@@ -57,8 +57,25 @@ export async function POST(request: NextRequest) {
           : error.code === 'DELIVERY_UNAVAILABLE'
             ? 503
             : 400
+      const senderConfigurationReasons = [
+        'whatsapp_sender_not_configured',
+        'whatsapp_multiple_senders',
+      ]
+      const responseCode = error.diagnosticReason === 'whatsapp_sender_not_configured'
+        ? 'OTP_SENDER_NOT_CONFIGURED'
+        : error.diagnosticReason === 'whatsapp_multiple_senders'
+          ? 'OTP_SENDER_CONFIGURATION_INVALID'
+          : error.code
       return NextResponse.json(
-        { ok: false, error: { code: error.code, message: error.message } },
+        {
+          ok: false,
+          error: {
+            code: responseCode,
+            message: senderConfigurationReasons.includes(error.diagnosticReason || '')
+              ? 'WhatsApp verification sender configuration requires administrator attention.'
+              : error.message,
+          },
+        },
         { status },
       )
     }
