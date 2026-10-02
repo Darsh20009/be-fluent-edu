@@ -50,6 +50,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
   const [showAttendanceModal, setShowAttendanceModal] = useState(false)
   const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [sessionPassword, setSessionPassword] = useState('')
+  const [sessionMeetingUrl, setSessionMeetingUrl] = useState('')
   const [sessionTitle, setSessionTitle] = useState('')
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null)
   const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null)
@@ -174,6 +175,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
 
     setSubmitting(true)
     try {
+      const useQMeet = newSession.externalLinkType === 'QMEET'
       // Convert local time directly to UTC (datetime-local input is parsed as local time)
       const utcStartTime = startDate.toISOString()
       const utcEndTime = endDate.toISOString()
@@ -188,17 +190,39 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
           startTime: utcStartTime,
           endTime: utcEndTime,
           studentIds: newSession.selectedStudents,
-          externalLink: newSession.externalLink.trim() || undefined,
-          externalLinkType: newSession.externalLink ? newSession.externalLinkType : undefined
+          externalLink: useQMeet ? undefined : newSession.externalLink.trim() || undefined,
+          externalLinkType: !useQMeet && newSession.externalLink ? newSession.externalLinkType : undefined
         })
       })
 
       if (response.ok) {
         const createdSession = await response.json()
         console.log('✅ Session created successfully:', createdSession.id)
+        let meetingUrl = ''
+        let qmeetError = ''
+        if (useQMeet) {
+          try {
+            const qmeetResponse = await fetch(`/api/teacher/classes/sessions/${encodeURIComponent(createdSession.id)}/qmeet`, {
+              method: 'POST'
+            })
+            const qmeetBody = await qmeetResponse.json().catch(() => ({}))
+            if (!qmeetResponse.ok) {
+              qmeetError = typeof qmeetBody?.error?.message === 'string'
+                ? qmeetBody.error.message
+                : localeText(language, 'تعذر إنشاء اجتماع QMeet.', 'Could not create the QMeet meeting.')
+            } else {
+              const meeting = qmeetBody.meeting
+              meetingUrl = typeof meeting?.hostUrl === 'string' ? meeting.hostUrl : typeof meeting?.joinUrl === 'string' ? meeting.joinUrl : ''
+              if (!meetingUrl) qmeetError = localeText(language, 'لم يُرجع QMeet رابطًا للاجتماع.', 'QMeet did not return a meeting link.')
+            }
+          } catch {
+            qmeetError = localeText(language, 'تعذر الاتصال بخدمة QMeet.', 'Could not reach QMeet.')
+          }
+        }
         await fetchSessions()
         setSessionTitle(newSession.title)
         setSessionPassword(createdSession.sessionPassword || '')
+        setSessionMeetingUrl(meetingUrl)
         setShowPasswordModal(true)
         setNewSession({ 
           title: '', 
@@ -209,6 +233,9 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
           externalLinkType: 'ZOOM'
         })
         setShowCreateForm(false)
+        if (qmeetError) {
+          toast.error(`${localeText(language, 'حُفظت الحصة لكن تعذر إنشاء اجتماع QMeet:', 'The class was saved, but QMeet could not be created:')} ${qmeetError}`)
+        }
       } else {
         const error = await response.json()
         console.error('Session creation error:', error)
@@ -700,16 +727,19 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
                     >
                       <option value="ZOOM">Zoom</option>
+                       <option value="QMEET">QMeet</option>
                       <option value="GOOGLE_MEET">Google Meet</option>
                       <option value="TEAMS">Microsoft Teams</option>
                       <option value="OTHER">{localeText(language, 'أخرى', 'Other')}</option>
                     </select>
                   </div>
                   <div className="col-span-1 flex items-end">
-                    <p className="text-[10px] text-gray-500 leading-tight">{localeText(language, 'سيتم توجيه الطلاب لهذا الرابط عند انضمامهم', 'Students will be directed to this link when they join.')}</p>
+                     <p className="text-[10px] text-gray-500 leading-tight">{newSession.externalLinkType === 'QMEET'
+                       ? localeText(language, 'سيُنشأ رابط QMeet تلقائيًا عند حفظ الحصة', 'A QMeet link will be created automatically when the class is saved.')
+                       : localeText(language, 'سيتم توجيه الطلاب لهذا الرابط عند انضمامهم', 'Students will be directed to this link when they join.')}</p>
                   </div>
                 </div>
-                <div>
+                {newSession.externalLinkType !== 'QMEET' && <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">{localeText(language, 'رابط الاجتماع', 'Meeting link')}</label>
                   <input
                     type="url"
@@ -718,7 +748,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
                     placeholder="https://zoom.us/j/..."
                   />
-                </div>
+                </div>}
               </div>
             </div>
 
@@ -933,6 +963,7 @@ export default function SessionsTab({ teacherProfileId }: { teacherProfileId: st
         isOpen={showPasswordModal}
         sessionTitle={sessionTitle}
         password={sessionPassword}
+        meetingUrl={sessionMeetingUrl || undefined}
         onClose={() => setShowPasswordModal(false)}
       />
     </div>

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import base from '@/app/phase4/phase4.module.css'
 import { useTheme } from '@/lib/contexts/ThemeContext'
 import { localeText } from '@/lib/locale'
+import AdminQMeetQuickStart from '@/app/dashboard/admin/classes/AdminQMeetQuickStart'
 
 type Role = 'admin' | 'teacher' | 'student'
 type Session = Record<string, unknown> & {
@@ -62,6 +63,9 @@ export default function ClassesClient({ role }: { role: Role }) {
   const [state, setState] = useState<LoadState>('loading')
   const [message, setMessage] = useState('')
   const [joinMessage, setJoinMessage] = useState('')
+  const [qmeetActionId, setQmeetActionId] = useState('')
+  const [qmeetActionMessage, setQmeetActionMessage] = useState('')
+  const [qmeetActionLink, setQmeetActionLink] = useState('')
   const [loadedAt, setLoadedAt] = useState(0)
 
   const load = useCallback(async () => {
@@ -125,6 +129,39 @@ export default function ClassesClient({ role }: { role: Role }) {
     } catch { setJoinMessage(tr('الانضمام غير متاح مؤقتاً. حاول مرة أخرى.', 'Joining is temporarily unavailable. Please try again.')) }
   }
 
+  async function createQMeetLink(id: string) {
+    setQmeetActionId(id)
+    setQmeetActionMessage('')
+    setQmeetActionLink('')
+    try {
+      const endpoint = role === 'admin'
+        ? `/api/admin/classes/sessions/${encodeURIComponent(id)}/qmeet`
+        : `/api/teacher/classes/sessions/${encodeURIComponent(id)}/qmeet`
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}',
+      })
+      const body = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        const error = body?.error
+        setQmeetActionMessage(typeof error?.message === 'string'
+          ? error.message
+          : tr('تعذر إنشاء رابط QMeet.', 'Could not create a QMeet link.'))
+        return
+      }
+      const meeting = body.meeting
+      const link = typeof meeting?.hostUrl === 'string' ? meeting.hostUrl : meeting?.joinUrl
+      if (typeof link === 'string') setQmeetActionLink(link)
+      await load()
+      setQmeetActionMessage(tr('تم إنشاء رابط QMeet.', 'QMeet link created.'))
+    } catch {
+      setQmeetActionMessage(tr('تعذر الاتصال بخدمة QMeet. حاول مرة أخرى.', 'Could not reach QMeet. Please try again.'))
+    } finally {
+      setQmeetActionId('')
+    }
+  }
+
   const statusLabel = (status: unknown) => {
     const value = String(status || 'Scheduled')
     const labels: Record<string, string> = { SCHEDULED: 'مجدولة', CREATED: 'تم الإنشاء', CANCELLED: 'ملغاة', FAILED: 'فشل' }
@@ -135,7 +172,12 @@ export default function ClassesClient({ role }: { role: Role }) {
     <div className={base.sectionNav} role="tablist" aria-label={tr('عرض الفصول', 'Class views')}>
       {config.tabs.map((item) => <button data-testid={`tab-${item.toLowerCase().replaceAll(' ', '-')}`} key={item} role="tab" aria-selected={tab === item} onClick={() => setTab(item)}>{tr(tabTranslations[item] || item, item)}</button>)}
     </div>
+    {role === 'admin' && <AdminQMeetQuickStart onCreated={() => void load()} />}
     {role === 'admin' && <QMeetStatus />}
+    {qmeetActionMessage && (role === 'admin' || role === 'teacher') && <div className={base.notice} role="status" data-testid="qmeet-action-status">
+      {qmeetActionMessage}
+      {qmeetActionLink && <> · <a href={qmeetActionLink} target="_blank" rel="noopener noreferrer">{tr('فتح اجتماع QMeet', 'Open QMeet')}</a></>}
+    </div>}
     {state === 'loading' && <div className={base.grid} aria-live="polite" data-testid="state-loading">{[1, 2, 3].map((item) => <div className={base.skeleton} key={item} />)}</div>}
     {state === 'database' && <div className={`${base.notice} ${base.blocked}`} role="status" data-testid="state-database-unavailable"><strong>{tr('قاعدة البيانات غير متاحة', 'Database unavailable')}</strong><p>{message || tr('بيانات الفصول غير متاحة. ستظل عناصر التحكم متوقفة ولن تُحفظ تغييرات.', 'Class records are unavailable. Controls remain disabled; changes will not be saved.')}</p></div>}
     {state === 'provider' && <div className={base.notice} role="status" data-testid="state-provider-unavailable"><strong>{tr('خدمة الاجتماعات المباشرة QMeet غير متاحة حالياً.', 'The QMeet live meeting service is currently unavailable.')}</strong><p>{tr('تحقق من جاهزية QMeet أو تواصل مع فريق Be Fluent.', 'Check QMeet readiness or contact Be Fluent.')}</p><button className={base.button} data-testid="button-retry-provider" onClick={() => void load()}>{tr('إعادة المحاولة', 'Retry')}</button></div>}
@@ -147,7 +189,14 @@ export default function ClassesClient({ role }: { role: Role }) {
         <h2 data-testid={`class-title-${item.id}`}>{String(item.title || (isArabic ? item.group?.nameAr || item.group?.name : item.group?.name || item.group?.nameAr) || tr('حصة بدون عنوان', 'Untitled class'))}</h2>
         <p className={base.muted}>{formatDate(item.startTime, language)}{item.endTime ? ` · ${formatDate(item.endTime, language)}` : ''}</p>
         <p>{item.group ? `${tr('المجموعة', 'Group')} · ${isArabic ? item.group.nameAr || item.group.name || tr('مجموعة معينة', 'Assigned group') : item.group.name || item.group.nameAr || tr('مجموعة معينة', 'Assigned group')}` : tr('جلسة صفية', 'Class session')}{Array.isArray(item.participants) ? ` · ${item.participants.length} ${tr('مشاركاً', 'participants')}` : ''}</p>
-        {role === 'admin' && <p className={base.muted}>{Array.isArray(item.attendances) ? `${item.attendances.length} ${tr('سجل حضور', 'attendance records')}` : tr('الحضور غير مسجل', 'Attendance not reported')}{item.qmeetMeeting ? ` · ${tr('مرتبط بـ QMeet', 'QMeet linked')}` : ` · ${tr('غير مرتبط بـ QMeet', 'QMeet not linked')}`}</p>}
+        {role === 'admin' && <p className={base.muted}>{Array.isArray(item.attendances) ? `${item.attendances.length} ${tr('سجل حضور', 'attendance records')}` : tr('الحضور غير مسجل', 'Attendance not reported')}{item.qmeetMeeting ? ` · ${tr('حالة QMeet', 'QMeet status')}: ${statusLabel(item.qmeetMeeting.status)}` : ` · ${tr('غير مرتبط بـ QMeet', 'QMeet not linked')}`}</p>}
+        {(role === 'admin' || role === 'teacher') && <div className={base.actions}>
+          {item.qmeetMeeting?.status === 'CREATED' && (typeof item.qmeetMeeting.hostUrl === 'string' || typeof item.qmeetMeeting.joinUrl === 'string')
+            ? <a className={base.button} href={typeof item.qmeetMeeting.hostUrl === 'string' ? item.qmeetMeeting.hostUrl : String(item.qmeetMeeting.joinUrl)} target="_blank" rel="noopener noreferrer">{tr('فتح اجتماع QMeet', 'Open QMeet')}</a>
+            : <button className={base.button} disabled={Boolean(qmeetActionId) || dbBlocked} data-testid={`button-create-qmeet-${item.id}`} onClick={() => void createQMeetLink(item.id)}>
+              {qmeetActionId === item.id ? tr('جارٍ إنشاء الرابط…', 'Creating link…') : tr('إنشاء رابط QMeet', 'Create QMeet link')}
+            </button>}
+        </div>}
         {role === 'student' && <div className={base.actions}><button className={base.button} disabled={dbBlocked} data-testid={`button-join-class-${item.id}`} onClick={() => void join(item.id)}>{tr('الانضمام إلى الحصة', 'Join class')}</button></div>}
       </article>)}
     </div>}

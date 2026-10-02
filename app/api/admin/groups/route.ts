@@ -17,7 +17,15 @@ export async function GET(request: NextRequest) {
       stage: true,
       teacher: { include: { User: true } },
       schedules: true,
-      members: { where: { status: 'ACTIVE' }, include: { user: true } },
+      members: {
+        where: {
+          status: 'ACTIVE',
+          role: 'STUDENT',
+          user: { role: 'STUDENT', isActive: true },
+        },
+        include: { user: true },
+      },
+      enrollments: { where: { status: 'ACTIVE' }, select: { studentId: true } },
     },
     orderBy: { createdAt: 'desc' },
   })

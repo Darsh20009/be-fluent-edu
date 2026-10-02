@@ -7,6 +7,7 @@ interface SessionPasswordDisplayModalProps {
   isOpen: boolean
   sessionTitle: string
   password: string
+  meetingUrl?: string
   onClose: () => void
 }
 
@@ -14,6 +15,7 @@ export default function SessionPasswordDisplayModal({
   isOpen,
   sessionTitle,
   password,
+  meetingUrl,
   onClose
 }: SessionPasswordDisplayModalProps) {
   const [copied, setCopied] = useState(false)
@@ -57,6 +59,17 @@ export default function SessionPasswordDisplayModal({
             </button>
           </div>
         </div>
+
+        {meetingUrl && (
+          <a
+            href={meetingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mb-5 block w-full rounded-lg border border-emerald-700 px-4 py-3 text-center font-semibold text-emerald-300 hover:bg-neutral-800"
+          >
+            Open QMeet / فتح اجتماع QMeet
+          </a>
+        )}
 
         <p className="text-xs text-neutral-500 text-center mb-6">
           Share this password with your students at the time of the session for them to join.
