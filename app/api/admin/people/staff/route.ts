@@ -59,12 +59,12 @@ export async function POST(request: NextRequest) {
 
   const input = parsed.data
   const email = input.email.toLowerCase()
-  const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } })
-  if (existing) {
-    return NextResponse.json({ ok: false, error: { code: 'EMAIL_IN_USE' } }, { status: 409 })
-  }
-
   try {
+    const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } })
+    if (existing) {
+      return NextResponse.json({ ok: false, error: { code: 'EMAIL_IN_USE' } }, { status: 409 })
+    }
+
     const passwordHash = await bcrypt.hash(input.password, 12)
     const employee = await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({

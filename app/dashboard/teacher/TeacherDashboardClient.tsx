@@ -29,6 +29,16 @@ interface TeacherDashboardClientProps {
   }
 }
 
+async function ensureTeacherProfile() {
+  const response = await fetch('/api/teacher/setup', { method: 'POST' })
+  if (!response.ok) throw new Error('TEACHER_PROFILE_SETUP_FAILED')
+  const data: unknown = await response.json()
+  if (!data || typeof data !== 'object' || !('teacherProfileId' in data) || typeof data.teacherProfileId !== 'string' || !data.teacherProfileId) {
+    throw new Error('TEACHER_PROFILE_SETUP_FAILED')
+  }
+  return data.teacherProfileId
+}
+
 export default function TeacherDashboardClient({ user: initialUser }: TeacherDashboardClientProps) {
   const { language } = useTheme()
   const router = useRouter()
@@ -42,19 +52,8 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
     setLoading(true)
     setSetupFailed(false)
     try {
-      const response = await fetch('/api/teacher/setup', {
-        method: 'POST'
-      })
-      if (response.ok) {
-        const data = await response.json()
-        if (typeof data?.teacherProfileId === 'string' && data.teacherProfileId) {
-          setUser(current => ({ ...current, teacherProfileId: data.teacherProfileId }))
-        } else {
-          setSetupFailed(true)
-        }
-      } else {
-        setSetupFailed(true)
-      }
+      const teacherProfileId = await ensureTeacherProfile()
+      setUser(current => ({ ...current, teacherProfileId }))
     } catch {
       setSetupFailed(true)
     } finally {
@@ -63,10 +62,21 @@ export default function TeacherDashboardClient({ user: initialUser }: TeacherDas
   }, [])
 
   useEffect(() => {
-    if (!user.teacherProfileId) {
-      void setupTeacherProfile()
+    if (user.teacherProfileId) return
+    let active = true
+    const createProfile = async () => {
+      try {
+        const teacherProfileId = await ensureTeacherProfile()
+        if (active) setUser(current => ({ ...current, teacherProfileId }))
+      } catch {
+        if (active) setSetupFailed(true)
+      } finally {
+        if (active) setLoading(false)
+      }
     }
-  }, [user.teacherProfileId, setupTeacherProfile])
+    void createProfile()
+    return () => { active = false }
+  }, [user.teacherProfileId])
 
   const handleSignOut = async () => {
     await signOut({ redirect: false })

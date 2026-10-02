@@ -423,7 +423,7 @@ export default function AdminDashboardClient({ user, children }: Props) {
             <>
               {activeTab === 'home' && <HomeTab stats={stats} statsState={statsState} onRetryStats={retryStats} onNavigate={navigateToTab} />}
               {activeTab === 'leads' && <LeadsTab />}
-              {activeTab === 'users' && <UsersTab />}
+              {activeTab === 'users' && <UsersTab canCreateEmployees={user.role === 'ADMIN'} />}
               {activeTab === 'subscriptions' && <SubscriptionsTab />}
               {activeTab === 'coupons' && <CouponsTab />}
               {activeTab === 'students' && <StudentsManagementTab />}

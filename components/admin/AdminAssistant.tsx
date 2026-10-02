@@ -229,11 +229,10 @@ export default function AdminAssistant() {
         ? current.slice(0, -1)
         : current)
       setDraft(content)
-      setError(requestError instanceof Error
-        ? language === 'ar' && requestError.message.includes('assistant')
-          ? t('تعذر إكمال الطلب الآن. احتفظت برسالتك، ويمكنك المحاولة مجدداً.', 'The assistant is unavailable. Please try again.')
-          : requestError.message
-        : t('تعذر الاتصال بالمساعد. حاول مرة أخرى.', 'The assistant is unavailable. Please try again.'))
+      const detail = requestError instanceof Error ? requestError.message : ''
+      setError(language === 'ar' && /^[\x00-\x7F]*$/.test(detail)
+        ? t('تعذر إكمال الطلب الآن. احتفظت برسالتك، ويمكنك المحاولة مجدداً.', 'The assistant is unavailable. Please try again.')
+        : detail || t('تعذر الاتصال بالمساعد. حاول مرة أخرى.', 'The assistant is unavailable. Please try again.'))
     } finally {
       setBusy(false)
     }
@@ -268,9 +267,10 @@ export default function AdminAssistant() {
         content: t('تم تنفيذ الإجراء بنجاح.', 'The action completed successfully.'),
       }])
     } catch (requestError) {
-      setError(requestError instanceof Error
-        ? requestError.message
-        : t('تعذر تنفيذ الإجراء. حاول مرة أخرى.', 'The action could not be completed. Please try again.'))
+      const detail = requestError instanceof Error ? requestError.message : ''
+      setError(language === 'ar' && /^[\x00-\x7F]*$/.test(detail)
+        ? t('تعذر تنفيذ الإجراء. راجع البيانات وحاول مجدداً.', 'The action could not be completed. Review the details and try again.')
+        : detail || t('تعذر تنفيذ الإجراء. حاول مرة أخرى.', 'The action could not be completed. Please try again.'))
     } finally {
       setBusy(false)
     }

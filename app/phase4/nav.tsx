@@ -61,7 +61,7 @@ export function Phase4Nav({ area }: { area: 'admin' | 'manager' | 'teacher' | 's
 
   return <nav className={styles.nav} aria-label={labels[area]}>
     {links.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}
-    {(area === 'manager' || area === 'teacher') && <LanguageToggle />}
+    {area === 'manager' && <LanguageToggle />}
     <ThemeToggle />
   </nav>
 }

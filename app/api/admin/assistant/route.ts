@@ -457,7 +457,7 @@ export async function POST(request: Request) {
   try {
     const openai = new OpenAI({ apiKey })
     const knowledgeEntry = await prisma.adminAssistantKnowledgeBase.findUnique({
-      where: { key: 'global' },
+      where: { id: 'admin-assistant' },
       select: { content: true },
     })
     const referenceContent = knowledgeEntry?.content.trim()

@@ -1912,7 +1912,6 @@ enum SubscriptionType {
 
 model AdminAssistantKnowledgeBase {
   id          String   @id @default(uuid()) @map("_id")
-  key         String   @unique
   content     String   @default("")
   updatedById String?
   createdAt   DateTime @default(now())

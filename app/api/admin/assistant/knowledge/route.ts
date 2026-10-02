@@ -8,15 +8,18 @@ const knowledgeSchema = z.object({
   content: z.string().max(20000),
 })
 
-const GLOBAL_KNOWLEDGE_KEY = 'global'
+const GLOBAL_KNOWLEDGE_ID = 'admin-assistant'
 
 export async function GET() {
   const access = await requirePermission('admin.manageSystem')
   if (isNextResponse(access)) return access
+  if (access.role !== 'ADMIN') {
+    return NextResponse.json({ ok: false, error: { code: 'FORBIDDEN' } }, { status: 403 })
+  }
 
   try {
     const entry = await prisma.adminAssistantKnowledgeBase.findUnique({
-      where: { key: GLOBAL_KNOWLEDGE_KEY },
+      where: { id: GLOBAL_KNOWLEDGE_ID },
       select: { content: true, updatedAt: true },
     })
     return NextResponse.json({ content: entry?.content || '', updatedAt: entry?.updatedAt || null })
@@ -29,6 +32,9 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   const access = await requirePermission('admin.manageSystem')
   if (isNextResponse(access)) return access
+  if (access.role !== 'ADMIN') {
+    return NextResponse.json({ ok: false, error: { code: 'FORBIDDEN' } }, { status: 403 })
+  }
 
   const input = await request.json().catch(() => null)
   const parsed = knowledgeSchema.safeParse(input)
@@ -38,9 +44,9 @@ export async function PUT(request: NextRequest) {
 
   try {
     const entry = await prisma.adminAssistantKnowledgeBase.upsert({
-      where: { key: GLOBAL_KNOWLEDGE_KEY },
+      where: { id: GLOBAL_KNOWLEDGE_ID },
       create: {
-        key: GLOBAL_KNOWLEDGE_KEY,
+        id: GLOBAL_KNOWLEDGE_ID,
         content: parsed.data.content,
         updatedById: access.userId,
       },
@@ -51,9 +57,9 @@ export async function PUT(request: NextRequest) {
       select: { content: true, updatedAt: true },
     })
     await recordAuditEvent({
-      action: 'Admin assistant knowledge updated',
+      action: 'AI_CONFIGURATION_CHANGE',
       userId: access.userId,
-      details: { contentLength: entry.content.length },
+      details: { feature: 'ADMIN_ASSISTANT_KNOWLEDGE', contentLength: entry.content.length },
     }).catch((error) => console.error('Assistant knowledge audit event failed:', error))
     return NextResponse.json({ ok: true, content: entry.content, updatedAt: entry.updatedAt })
   } catch (error) {

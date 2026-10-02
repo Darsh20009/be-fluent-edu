@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Users, UserPlus, CheckCircle, XCircle, Shield } from 'lucide-react'
+import { UserPlus, CheckCircle, XCircle, Shield } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
@@ -30,7 +30,7 @@ interface User {
   }[]
 }
 
-export default function UsersTab() {
+export default function UsersTab({ canCreateEmployees }: { canCreateEmployees: boolean }) {
   const { language } = useTheme()
   const t = (ar: string, en: string) => localeText(language, ar, en)
   const [users, setUsers] = useState<User[]>([])
@@ -65,7 +65,7 @@ export default function UsersTab() {
     }
   }
 
-  async function toggleUserStatus(userId: string, currentStatus: boolean) {
+  async function toggleUserStatus(userId: string) {
     try {
       const response = await fetch(`/api/admin/users/${userId}/toggle`, {
         method: 'PATCH',
@@ -140,13 +140,15 @@ export default function UsersTab() {
         <h2 className="text-3xl font-bold text-[#10B981]">
           {t('المستخدمون', 'Users')}
         </h2>
-        <Button
-          variant="primary"
-          onClick={() => setShowCreateEmployee(true)}
-        >
-          <UserPlus className="h-4 w-4 mr-2" />
-          {t('إضافة موظف', 'Add employee')}
-        </Button>
+        {canCreateEmployees && (
+          <Button
+            variant="primary"
+            onClick={() => setShowCreateEmployee(true)}
+          >
+            <UserPlus className="h-4 w-4 mr-2" />
+            {t('إضافة موظف', 'Add employee')}
+          </Button>
+        )}
       </div>
 
       <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -255,7 +257,7 @@ export default function UsersTab() {
                   <Button
                     variant={user.isActive ? 'outline' : 'primary'}
                     size="sm"
-                    onClick={() => toggleUserStatus(user.id, user.isActive)}
+                    onClick={() => toggleUserStatus(user.id)}
                   >
                     {user.isActive ? t('تعطيل', 'Deactivate') : t('تفعيل', 'Activate')}
                   </Button>
@@ -266,7 +268,7 @@ export default function UsersTab() {
         )}
       </div>
 
-      {showCreateEmployee && (
+      {canCreateEmployees && showCreateEmployee && (
         <Modal
           isOpen={true}
           onClose={() => setShowCreateEmployee(false)}
