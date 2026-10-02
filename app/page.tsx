@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -44,9 +45,14 @@ const packageEndpoint = '/api/packages';
 
 export default function HomePage() {
   const { language, theme, toggleTheme, toggleLanguage } = useTheme();
+  const { status: authStatus } = useSession();
   const isArabic = language === 'ar';
   const isDark = theme === 'dark';
   const tr = (arabic: string, english: string) => isArabic ? arabic : english;
+  const accountHref = authStatus === 'authenticated' ? '/dashboard' : '/auth/login';
+  const accountLabel = authStatus === 'authenticated'
+    ? tr('لوحة التحكم', 'Dashboard')
+    : tr('دخول', 'Log in');
   const [menuOpen, setMenuOpen] = useState(false);
   const [level, setLevel] = useState('B1');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -159,8 +165,8 @@ export default function HomePage() {
             <button type="button" onClick={toggleLanguage} className="flex min-h-11 min-w-11 items-center justify-center rounded px-3 text-[12px] font-semibold text-[#54635b] transition-colors hover:bg-[#f1f5ef] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#28694b]" aria-label={tr('عرض الموقع بالإنجليزية', 'View website in Arabic')}>
               {isArabic ? 'EN' : 'العربية'}
             </button>
-            <Link href="/auth/login" className="inline-flex min-h-11 items-center rounded border border-[#d9e0d9] px-4 text-[12px] font-bold text-[#33463b] transition-colors hover:border-[#28694b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#28694b]">
-              {tr('دخول', 'Log in')}
+            <Link href={accountHref} className="inline-flex min-h-11 items-center rounded border border-[#d9e0d9] px-4 text-[12px] font-bold text-[#33463b] transition-colors hover:border-[#28694b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#28694b]">
+              {accountLabel}
             </Link>
             <Link href="/auth/register" className="inline-flex min-h-11 items-center gap-2 rounded bg-[#28694b] px-4 text-[12px] font-bold text-white transition-colors hover:bg-[#1d543b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#28694b]">
               {tr('ابدأ التعلم', 'Start learning')}<ArrowIcon size={14} aria-hidden="true" />
@@ -187,7 +193,7 @@ export default function HomePage() {
               <Link href="/packages" onClick={closeMenu} className="rounded px-3 py-3 text-sm font-semibold hover:bg-[#f1f5ef]">{tr('الباقات', 'Packages')}</Link>
               <Link href="/contact" onClick={closeMenu} className="rounded px-3 py-3 text-sm font-semibold hover:bg-[#f1f5ef]">{tr('تواصل معنا', 'Contact')}</Link>
               <div className="mt-2 grid grid-cols-2 gap-2 border-t border-[#e7ebe5] pt-4">
-                <Link href="/auth/login" onClick={closeMenu} className="rounded border border-[#d9e0d9] px-3 py-3 text-center text-xs font-bold">{tr('دخول', 'Log in')}</Link>
+                <Link href={accountHref} onClick={closeMenu} className="rounded border border-[#d9e0d9] px-3 py-3 text-center text-xs font-bold">{accountLabel}</Link>
                 <Link href="/auth/register" onClick={closeMenu} className="rounded bg-[#28694b] px-3 py-3 text-center text-xs font-bold text-white">{tr('ابدأ التعلم', 'Start learning')}</Link>
               </div>
             </div>
@@ -507,7 +513,7 @@ export default function HomePage() {
             <Link href="/learning-path" className="hover:text-[#28694b]">{tr('مسار التعلم', 'Learning path')}</Link>
             <Link href="/packages" className="hover:text-[#28694b]">{tr('الباقات', 'Packages')}</Link>
             <Link href="/contact" className="hover:text-[#28694b]">{tr('تواصل معنا', 'Contact')}</Link>
-            <Link href="/auth/login" className="hover:text-[#28694b]">{tr('دخول', 'Log in')}</Link>
+            <Link href={accountHref} className="hover:text-[#28694b]">{accountLabel}</Link>
           </nav>
           <p className="text-[11px] text-[#89958c]">© Be Fluent</p>
         </div>

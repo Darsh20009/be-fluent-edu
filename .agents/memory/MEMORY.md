@@ -9,3 +9,4 @@
 - [Subscription review boundary](admin-subscription-review-boundary.md) — keep actionable payment review separate from the broader commerce workspace until workflows reach parity.
 - [Effect-driven fetch state](effect-driven-fetch-state.md) — define async fetches inside effects and ignore late results; the React lint rule follows helper calls that set state.
 - [Next.js dev memory pressure](next-dev-memory-pressure.md) — distinguish cold route compilation from request latency; Turbopack child-process workers can OOM this 8 GiB dev server.
+- [Persistent login sessions](persistent-login-sessions.md) — keep active Be Fluent sessions across home navigation and return users directly to their role dashboard.
