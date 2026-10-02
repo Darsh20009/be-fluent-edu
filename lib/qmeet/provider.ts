@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { QMeetClient, type CreateMeetingInput } from './index'
+import { isValidQMeetBaseUrl, QMeetClient, type CreateMeetingInput } from './index'
 
 const httpsUrlSchema = z.string().url().refine((value) => new URL(value).protocol === 'https:', {
   message: 'QMeet URLs must use HTTPS',
@@ -28,7 +28,7 @@ export class QMeetClientProvider implements QMeetProvider {
   constructor(private readonly client = new QMeetClient()) {}
 
   isConfigured() {
-    return Boolean(process.env.QMEET_API_KEY && process.env.QMEET_API_BASE_URL)
+    return Boolean(process.env.QMEET_API_KEY && isValidQMeetBaseUrl(process.env.QMEET_API_BASE_URL || ''))
   }
 
   async createMeeting(input: CreateMeetingInput) {

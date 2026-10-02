@@ -15,7 +15,7 @@ ZEGO_APP_ID = "1050328575"
 SMTP2GO_FROM_EMAIL = "noreply@befluent-edu.online"
 SMTP2GO_FROM_NAME = "Be Fluent Academy"
 WHATSAPP_PROVIDER = "baileys"
-QMEET_API_BASE_URL = "qmeet_416a8055034415913815f96c18db2bddd567c69e"
+QMEET_API_BASE_URL = "https://qiroxstudio.online"
 
 [userenv.development]
 PHASE5_DATABASE_ENABLED = "true"

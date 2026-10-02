@@ -18,7 +18,7 @@ No database replacement, schema migration, deletion of existing user records, pr
 
 ## Verified
 
-- Repository TypeScript check passed.
+- Repository TypeScript check passed before the follow-up QMeet contract adjustment. The QMeet adjustment was checked with focused transport/regression tests and targeted ESLint rather than another memory-intensive concurrent repository check.
 - Targeted ESLint checks passed for the new report, Tips, AI proposal UI/backend, and shared components checked in this delivery. This does not claim the entire legacy repository is lint-clean.
 - Focused tests: 81 passed; two existing MongoDB integration placeholders remained skipped.
 - Diff whitespace check passed.
@@ -30,7 +30,10 @@ No database replacement, schema migration, deletion of existing user records, pr
 - The browser test did not reach authentication or create fixtures. Infrastructure interruptions and cold development compilation prevented the learning journey from being exercised. Feedback publish/privacy, persisted approval/rejection, and signed-in ADMIN-only access still require an end-to-end run.
 - The Tips gallery is not complete. Missing captures are explicitly displayed as unavailable; screenshots must not be fabricated. Captures stored publicly must use synthetic data or redact all real personal information.
 - The user subsequently supplied `THANARAH_API_KEY` and `QMEET_API_KEY` through Secrets. Thanarah's documented `POST https://ai.thanarah.com/api/v1/chat/completions` returned HTTP 404 for the exact one-message example with the saved key and also without credentials. This does not establish key validity or live AI readiness. Only synthetic connectivity messages were used; no student data was sent.
-- QMeet's configured base URL failed URL parsing (`ERR_INVALID_URL`) before receiving a provider response. A valid absolute service base URL is still required; no meeting was created or changed.
+- QMeet's initial configured base URL failed URL parsing (`ERR_INVALID_URL`). The user subsequently supplied `https://qiroxstudio.online`; the base URL has been corrected. An unauthenticated GET to `/api/qmeet/v1/meetings` returned HTTP 401, confirming that the route is reachable, not that authentication or meeting creation succeeds.
+- QMeet requests now use the documented `scheduledAt` and `durationMinutes` creation fields; existing session start/end times are adapted at the provider boundary. The API-key header is retained on every request. HTTPS configuration checks, bounded requests, redirect protection, and sanitized failures were added. Focused transport/Phase 6 tests passed 14 checks with one existing MongoDB placeholder skipped; targeted ESLint passed.
+- A QMeet credential was exposed in chat; revocation and replacement through Secrets were requested. The exposed value was not copied into code or documentation or used for live requests.
+- After the user confirmed saving the requested QMeet credential through Secrets, authenticated `GET /api/qmeet/v1/meetings` succeeded and returned an array. No meeting records or credential values were logged. This verifies authenticated read access, not creation, joining, or deletion. No meeting was created or changed.
 - Automatic email execution remains off until the operator reviews pending work and explicitly enables it; provider configuration is not delivery verification.
 - Durable homework file/voice/video storage remains unavailable. Existing local upload URLs have not been replaced or migrated.
 - SessionFeedback currently has no persisted optional skill-rating field; optional rendering support does not imply teacher-to-student rating persistence.
