@@ -465,7 +465,7 @@ export function WhatsAppCRMWorkspace() {
             تحديث البيانات
           </button>
         </div>
-        <p className={styles.helpText}>لا تعرض هذه الحالة رموز QR أو بيانات الجلسة.</p>
+        <p className={styles.helpText}>يظهر رمز QR داخل بطاقة الرقم بعد الضغط على «ربط واتساب»؛ هذه البطاقة تعرض حالة المزوّد فقط.</p>
       </section>
 
       {notice && <div className={pageStyles.notice} role="status">{notice}</div>}
