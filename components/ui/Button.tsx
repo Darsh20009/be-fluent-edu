@@ -8,13 +8,13 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-[#10B981] text-white hover:bg-[#003A6B] focus-visible:ring-[#10B981] shadow-sm',
-        secondary: 'bg-[#F9FAFB] text-black hover:bg-[#F3F4F6] focus-visible:ring-neutral-500 border border-[#E5E7EB]',
-        accent: 'bg-accent text-neutral-900 hover:bg-accent-600 focus-visible:ring-accent-500 shadow-sm',
-        outline: 'border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-white focus-visible:ring-primary-500',
-        ghost: 'bg-transparent hover:bg-neutral-100 text-neutral-900 dark:hover:bg-neutral-800 dark:text-neutral-100',
-        danger: 'bg-error text-white hover:bg-error-600 focus-visible:ring-error-500 shadow-sm',
-        success: 'bg-success text-white hover:bg-success-600 focus-visible:ring-success-500 shadow-sm',
+        primary: 'bg-primary text-primary-foreground hover:bg-primary-strong focus-visible:ring-primary',
+        secondary: 'bg-surface-muted text-foreground hover:bg-surface focus-visible:ring-primary border border-border',
+        accent: 'bg-accent text-accent-foreground hover:opacity-90 focus-visible:ring-accent',
+        outline: 'border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground focus-visible:ring-primary',
+        ghost: 'bg-transparent hover:bg-surface-muted text-foreground focus-visible:ring-primary',
+        danger: 'bg-red-700 text-white hover:bg-red-800 focus-visible:ring-red-700',
+        success: 'bg-primary text-primary-foreground hover:bg-primary-strong focus-visible:ring-primary',
       },
       size: {
         sm: 'h-9 px-3 text-sm',

@@ -1,0 +1,7 @@
+# Email outbox automatic delivery
+
+Email outbox delivery is supervised by the custom Node server, but is **off by default in every environment**. To activate it, an operator must explicitly set `EMAIL_OUTBOX_AUTORUN=true` in the server environment and restart the server. The existing `PHASE5_DATABASE_ENABLED=true` database gate must also be enabled, and the configured Qirox email provider must report ready (`QIROX_EMAIL_API_KEY` outside production or `QIROX_EMAIL_API_KEY_PRODUCTION` in production).
+
+Before opting in, review the pending EMAIL notifications in the database/outbox, including their age and whether each message should still be delivered. Enabling the runner will automatically consume eligible pending and recoverable stale-processing entries; it does not distinguish old development records from newly queued records. In particular, do not enable this against a shared or real-user database until the pending queue has been reviewed and intentional delivery is approved. This opt-in exists to prevent an accidental server startup in development from sending previously queued real-user messages.
+
+The runner checks database and provider readiness before loading or invoking the worker, processes a bounded batch per tick, prevents overlapping drains, backs off after runtime errors, and stops during server shutdown. Logs intentionally contain only sanitized error categories. Delivery status continues to follow the existing outbox worker semantics; this runner does not interpret provider acceptance as delivery.

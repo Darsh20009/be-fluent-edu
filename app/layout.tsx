@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
-import { Geist, Geist_Mono } from "next/font/google";
+import { DM_Sans, Noto_Kufi_Arabic, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/contexts/ThemeContext";
@@ -11,9 +11,16 @@ import BFAuthExperience from "@/components/auth/BFAuthExperience";
 import { Toaster } from "react-hot-toast";
 import { defaultMetadata, organizationJsonLd, courseJsonLd, faqJsonLd, websiteJsonLd } from "@/lib/seo";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const latinFont = DM_Sans({
+  variable: "--font-bf-latin",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const arabicFont = Noto_Kufi_Arabic({
+  variable: "--font-bf-arabic",
+  subsets: ["arabic"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -53,7 +60,7 @@ export default async function RootLayout({
         <meta name="msapplication-TileColor" content="#24714f" />
         <meta name="msapplication-TileImage" content="/brand/be-fluent-icon-2026-144.png" />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
+      <body className={`${latinFont.variable} ${arabicFont.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
         <Script
           id="organization-jsonld"
           type="application/ld+json"

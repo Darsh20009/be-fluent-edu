@@ -1,0 +1,40 @@
+# Learning delivery verification
+
+Date: 2026-10-02
+
+This is an implementation and verification record, not a statement that the full Be Fluent specification is complete or ready for production.
+
+## Implemented
+
+- Bilingual ADMIN-only Tips guide for 65 public, student, teacher, and administration route/tab entries. Entries explain purpose, instructions, permissions, dependencies, and connected workflows. Server-side readiness exposes booleans only; provider configuration is not presented as proof of connectivity.
+- Branded student session reports for vocabulary, supported idiom/slang/chunk categories, wrong/right corrections, all public pronunciation fields, EBI, session metadata, and single-report printing. Top-level private teacher notes remain excluded from the student API and report.
+- Teacher form category controls and clearer correct-pronunciation labels, without changing the existing feedback lifecycle or database schema.
+- Thanarah-backed generation with bounded anonymized context and strict output validation. Generated drafts persist for teacher review and reload only within the teacher's active learner assignment.
+- Teacher/admin approval of generated AI drafts atomically materializes a student-visible recommendation; rejection creates none. The existing recommendation uniqueness constraint protects repeated approval of the same draft. Separate generation requests can create separate pending drafts; generation itself is not advertised as idempotent.
+- Supervised email outbox consumption with bounded batches, non-overlap, backoff, and shutdown cleanup. It remains explicitly opt-in; implementation did not send queued messages to real users.
+- Shared fonts, palette-based buttons, and bilingual loading boundaries.
+
+No database replacement, schema migration, deletion of existing user records, production configuration change, or live message send was performed.
+
+## Verified
+
+- Repository TypeScript check passed.
+- Targeted ESLint checks passed for the new report, Tips, AI proposal UI/backend, and shared components checked in this delivery. This does not claim the entire legacy repository is lint-clean.
+- Focused tests: 81 passed; two existing MongoDB integration placeholders remained skipped.
+- Diff whitespace check passed.
+- Real mobile homepage screenshot rendered successfully. It is saved as `public/tips/screens/public-home.png`.
+- MongoDB health returned healthy during direct checks.
+
+## Not verified or incomplete
+
+- The browser test did not reach authentication or create fixtures. Infrastructure interruptions and cold development compilation prevented the learning journey from being exercised. Feedback publish/privacy, persisted approval/rejection, and signed-in ADMIN-only access still require an end-to-end run.
+- The Tips gallery is not complete. Missing captures are explicitly displayed as unavailable; screenshots must not be fabricated. Captures stored publicly must use synthetic data or redact all real personal information.
+- Live Thanarah and QMeet calls were not made. New rotated `THANARAH_API_KEY` and `QMEET_API_KEY` were absent at the readiness check.
+- Automatic email execution remains off until the operator reviews pending work and explicitly enables it; provider configuration is not delivery verification.
+- Durable homework file/voice/video storage remains unavailable. Existing local upload URLs have not been replaced or migrated.
+- SessionFeedback currently has no persisted optional skill-rating field; optional rendering support does not imply teacher-to-student rating persistence.
+- This delivery does not implement a new independent administration reporting center or claim all remaining specification modules are finished.
+
+## Development runtime caution
+
+The shared development container repeatedly approached its memory limit during cold compilation and parallel TypeScript checks. A Webpack trial did not establish stable improvement; the original custom Next.js development pipeline has been retained. Full-project static checks should run once with the web server paused, before browser testing. A public root screenshot is not evidence that all authenticated routes work.

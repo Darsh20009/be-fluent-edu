@@ -9,7 +9,7 @@
   min-height: 100dvh;
   color: var(--bf-ink);
   background: var(--bf-paper);
-  font-family: var(--font-geist-sans, "Tahoma"), sans-serif;
+  font-family: var(--bf-font-sans);
 }
 
 .foundation :global(.bg-white) {

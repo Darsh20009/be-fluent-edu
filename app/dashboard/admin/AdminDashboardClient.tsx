@@ -92,6 +92,7 @@ const MENU_GROUPS = [
     icon: Activity,
     items: [
       { id: 'system', label: 'السجلات وإعدادات النظام', icon: Activity },
+      { id: 'tips-guide', label: 'دليل النظام', icon: BookOpenCheck, href: '/dashboard/admin/tips' },
     ]
   }
 ]
@@ -120,6 +121,7 @@ export default function AdminDashboardClient({ user, children }: Props) {
     'الباقات والمجموعات': 'Packages & groups', 'مراجعة دفعات الاشتراك': 'Subscription payments',
     'الكوبونات': 'Coupons', 'التواصل': 'Communication', 'البريد المباشر': 'Direct email',
     'النظام': 'System', 'السجلات وإعدادات النظام': 'System logs & settings',
+    'دليل النظام': 'System guide',
     'مساحة المدير': 'Manager workspace',
   } as Record<string, string>)[label] || label)
   const router = useRouter()
@@ -281,7 +283,7 @@ export default function AdminDashboardClient({ user, children }: Props) {
             const expanded = expandedGroups[group.id] ?? false
             const items = (
               <div className="space-y-1">
-                {group.items.map(item => {
+                {group.items.filter(item => item.id !== 'tips-guide' || user.role === 'ADMIN').map(item => {
                   const Icon = item.icon
                   const selected = 'href' in item && item.href
                     ? routeMatches(pathname, item.href)

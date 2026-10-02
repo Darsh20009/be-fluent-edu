@@ -7,6 +7,7 @@ const { getToken } = require('next-auth/jwt');
 const { PrismaClient } = require('@prisma/client');
 const { transitionSpeakingRoomMember } = require('./lib/phase8-speaking-membership.js');
 const { startWhatsAppWorkerRunner } = require('./server/whatsapp-worker-runner.cjs');
+const { startEmailWorkerRunner } = require('./server/email-worker-runner.cjs');
 const { persistSpeakingActivitySignal } = require('./lib/phase9/speaking-socket.cjs');
 
 const dev = process.env.NODE_ENV !== 'production';
@@ -206,6 +207,7 @@ app.prepare().then(() => {
   });
 
   let whatsappWorkerStop = null;
+  let emailWorkerStop = null;
   let shuttingDown = false;
 
   const withShutdownTimeout = (promise, timeoutMs) => Promise.race([
@@ -219,6 +221,9 @@ app.prepare().then(() => {
     console.log(`🛑 Shutting down on ${signal}...`);
     if (whatsappWorkerStop) {
       await withShutdownTimeout(whatsappWorkerStop(), 5000);
+    }
+    if (emailWorkerStop) {
+      await withShutdownTimeout(emailWorkerStop(), 5000);
     }
     try {
       require('tsx/cjs');
@@ -247,5 +252,6 @@ app.prepare().then(() => {
     console.log(`> Ready on http://0.0.0.0:${port}`);
     console.log('> Socket.IO server running on path: /api/socket/io');
     whatsappWorkerStop = startWhatsAppWorkerRunner();
+    emailWorkerStop = startEmailWorkerRunner();
   });
 });

@@ -22,7 +22,7 @@ export function Phase4Nav({ area }: { area: 'admin' | 'manager' | 'teacher' | 's
   ] as const
 
   const links = area === 'admin'
-    ? [...adminLinks, ['/dashboard/admin', 'Legacy overview'] as const]
+    ? [[ '/dashboard/admin/tips', localeText(language, 'دليل النظام', 'System guide') ] as const, ...adminLinks, ['/dashboard/admin', 'Legacy overview'] as const]
     : area === 'manager'
       ? adminLinks.map(([href, label], index) => [
           href,

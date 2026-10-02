@@ -1,6 +1,6 @@
 'use client'
 /* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type React from 'react'
 import styles from './intelligence.module.css'
 import { BFButton } from '@/components/bf'
@@ -22,7 +22,7 @@ const translations: Record<string, string> = {
   'B Fluent EDU / learning intelligence': 'B Fluent EDU / ذكاء التعلّم', 'Learning views': 'عروض التعلّم',
   'Your learning, today': 'تعلّمك اليوم', 'A short plan shaped by what happened in your classes.': 'خطة قصيرة مستندة إلى ما حدث في حصصك.',
   'NOT_STARTED': 'لم يبدأ', 'IN_PROGRESS': 'قيد التقدم', 'PAUSED': 'متوقف مؤقتاً', 'COMPLETED': 'مكتمل',
-  'ABANDONED': 'منتهي', 'PENDING': 'قيد الانتظار', 'SKIPPED': 'تم التخطي', 'READY': 'جاهز',
+  'ABANDONED': 'منتهي', 'PENDING': 'قيد الانتظار', 'PENDING_REVIEW': 'قيد المراجعة', 'APPROVED': 'موافق عليه', 'REJECTED': 'مرفوض', 'SKIPPED': 'تم التخطي', 'READY': 'جاهز',
   'NOT_READY': 'غير جاهز', 'NO_RECOMMENDATIONS': 'لا توجد توصيات',
   'Daily plan': 'الخطة اليومية', 'minutes': 'دقيقة', 'Starting a recommendation step accepts it; only completed steps are marked complete.': 'يؤدي بدء خطوة موصى بها إلى قبولها؛ ولا تُعلّم الخطوات كمكتملة إلا بعد إتمامها.',
   'A plan will appear when current recommendations have suitable learning resources.': 'ستظهر الخطة عند توفر موارد تعليمية مناسبة للتوصيات الحالية.',
@@ -49,7 +49,34 @@ const translations: Record<string, string> = {
   'Learning intelligence': 'ذكاء التعلّم', 'A clear operational view of evidence, recommendations, and controls.': 'عرض تشغيلي واضح للأدلة والتوصيات وعناصر التحكم.',
   'Overview': 'نظرة عامة', 'Settings': 'الإعدادات',
   'pending recommendations': 'توصية قيد الانتظار', 'teacher drafts': 'مسودة للمعلم',
-  'Service status': 'حالة الخدمة', 'Provider unavailable. Teacher approval only changes a draft to APPROVED; it does not create student records.': 'الموفر غير متاح. موافقة المعلم تغيّر حالة المسودة إلى «معتمد» فقط، ولا تنشئ سجلات للطلاب.',
+  'Service status': 'حالة الخدمة', 'AI proposal approval creates a student recommendation; rejection does not.': 'تؤدي الموافقة على مقترح الذكاء الاصطناعي إلى إنشاء توصية للطالب، بينما لا يؤدي الرفض إلى ذلك.',
+  'Generate provider proposals': 'أنشئ مقترحات من الموفّر', 'Generating proposals…': 'جارٍ إنشاء المقترحات…',
+  'Provider proposals': 'مقترحات الموفّر', 'AI-generated for teacher review': 'أنشأها الذكاء الاصطناعي لمراجعة المعلم',
+  'These proposals are saved for teacher review only. They are not student recommendations until approved.': 'تُحفظ هذه المقترحات لمراجعة المعلم فقط، ولا تصبح توصيات للطالب حتى الموافقة عليها.',
+  'Each generation creates a separate set of review drafts.': 'ينشئ كل توليد مجموعة منفصلة من مسودات المراجعة.',
+  'No proposals were returned. Try again when more learning evidence is available.': 'لم يتم إرجاع مقترحات. حاول مجدداً عند توفر أدلة تعلّم إضافية.',
+  'The AI provider is unavailable right now. Your student records are unchanged.': 'موفّر الذكاء الاصطناعي غير متاح حالياً. لم تتغير سجلات الطالب.',
+  'The provider response could not be safely reviewed. Retry generation.': 'تعذّرت مراجعة استجابة الموفّر بأمان. أعد إنشاء المقترحات.',
+  'The provider could not generate proposals. Retry in a moment.': 'تعذّر على الموفّر إنشاء المقترحات. حاول مجدداً بعد قليل.',
+  'Proposal generation failed. Check your assignment and try again.': 'تعذّر إنشاء المقترحات. تحقق من تعيين الطالب ثم حاول مجدداً.',
+  'Approve proposal': 'الموافقة على المقترح', 'Reject proposal': 'رفض المقترح',
+  'Confirm rejection': 'تأكيد الرفض', 'Keep proposal': 'الاحتفاظ بالمقترح', 'Reviewing…': 'جارٍ المراجعة…',
+  'Recommendation created': 'تم إنشاء التوصية', 'Proposal review could not be completed. Refresh the student and check its review status.': 'تعذّرت مراجعة المقترح. حدّث بيانات الطالب وتحقق من حالة المراجعة.',
+  'Saved to teacher review': 'محفوظ لمراجعة المعلم',
+  'Current student recommendations': 'توصيات الطالب الحالية', 'Student recommendation records': 'سجلات توصيات الطالب',
+  'No current student recommendations.': 'لا توجد توصيات حالية للطالب.',
+  'No pending provider drafts. Generate proposals to create a new review batch.': 'لا توجد مسودات معلّقة من الموفّر. أنشئ المقترحات لبدء مجموعة مراجعة جديدة.',
+  'Could not load pending review drafts.': 'تعذّر تحميل مسودات المراجعة المعلّقة.',
+  'Provider proposal review': 'مراجعة مقترحات الموفّر',
+  'Approve': 'موافقة', 'Reject': 'رفض', 'Reviewed by admin': 'تمت المراجعة بواسطة الإدارة',
+  'Approved and added to student recommendations.': 'تمت الموافقة وإضافة المقترح إلى توصيات الطالب.',
+  'Rejected. No student recommendation was created.': 'تم الرفض. لم يتم إنشاء توصية للطالب.',
+  'Admin review action failed. Refresh and check the pending queue.': 'تعذّر تنفيذ إجراء المراجعة. حدّث الصفحة وتحقق من قائمة الانتظار.',
+  'Invalid proposal draft; it cannot be approved.': 'مسودة المقترح غير صالحة ولا يمكن الموافقة عليها.',
+  'Teacher': 'المعلم', 'Student': 'الطالب', 'Created': 'تاريخ الإنشاء',
+  'Manual teacher suggestions are not handled in this AI proposal queue.': 'لا تُدار اقتراحات المعلم اليدوية ضمن قائمة مقترحات الذكاء الاصطناعي هذه.',
+  'Approving a manual teacher draft only marks it APPROVED; it does not create a student recommendation.': 'الموافقة على مسودة المعلم اليدوية تغيّر حالتها إلى «موافق عليها» فقط، ولا تنشئ توصية للطالب.',
+  'Loading review drafts…': 'جارٍ تحميل مسودات المراجعة…',
 }
 function t(language: 'ar' | 'en', value: string) {
   return localeText(language, translations[value] || value, value)
@@ -370,20 +397,220 @@ function Profile({ profile }: { profile: any }) {
 
 const draftFields: Record<string, string[]> = { FEEDBACK_EXPRESSION: ['expression', 'meaning', 'example', 'category'], MISTAKE: ['original', 'correction', 'explanation'], EBI: ['betterExpression', 'explanation', 'priority'] }
 function safeDraft(draft: any) { return Object.fromEntries((draftFields[draft.type] || []).map((key) => [key, String(draft[key] || '').trim()]).filter((entry) => entry[1])) }
+type ProviderProposal = {
+  id: string
+  status: string
+  proposal: { type: string; title: string; reason: string; skillCode: string | null; resourceId: string | null; levelId: string | null; stageId: string | null }
+  reason: string
+  materialized?: boolean
+  recommendationId?: string
+}
+type ProviderFailure = 'unavailable' | 'invalid' | 'provider' | 'request'
 export function TeacherIntelligence() {
   const { language } = useTheme()
-  const [id, setId] = useState(''); const [student, setStudent] = useState<any>(null); const [state, setState] = useState<Load>('ready'); const [drafts, setDrafts] = useState<any[]>([]); const [draft, setDraft] = useState<any>({ type: 'FEEDBACK_EXPRESSION', reason: '' })
-  const lookup = async () => { setStudent(null); setState('loading'); try { setStudent(await api(`/api/teacher/intelligence/students/${encodeURIComponent(id)}`)); setState('ready') } catch (error) { setState((error as Error).message === 'DATABASE_UNAVAILABLE' ? 'database' : 'error') } }
+  const [id, setId] = useState('')
+  const [student, setStudent] = useState<any>(null)
+  const [state, setState] = useState<Load>('ready')
+  const [drafts, setDrafts] = useState<any[]>([])
+  const [draft, setDraft] = useState<any>({ type: 'FEEDBACK_EXPRESSION', reason: '' })
+  const [proposals, setProposals] = useState<ProviderProposal[]>([])
+  const [proposalState, setProposalState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
+  const [proposalQueueState, setProposalQueueState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
+  const [proposalFailure, setProposalFailure] = useState<ProviderFailure | null>(null)
+  const [reviewingId, setReviewingId] = useState<string | null>(null)
+  const [confirmRejectId, setConfirmRejectId] = useState<string | null>(null)
+  const [reviewError, setReviewError] = useState('')
+  const loadPendingProposals = useCallback(async (studentId: string) => {
+    setProposalQueueState('loading')
+    try {
+      const result = await api(`/api/teacher/intelligence/students/${encodeURIComponent(studentId)}/proposals`)
+      if (result?.ok !== true || !Array.isArray(result?.items)) throw new Error('INVALID_PROPOSAL_QUEUE')
+      setProposals(result.items)
+      setProposalState(result.items.length ? 'ready' : 'idle')
+      setProposalQueueState('ready')
+    } catch {
+      setProposalQueueState('error')
+    }
+  }, [])
+  const lookup = useCallback(async (studentId = id) => {
+    const requestedId = studentId.trim()
+    if (!requestedId) return
+    setId(requestedId)
+    try { window.sessionStorage.setItem('bf.teacher.intelligence.studentId', requestedId) } catch { /* Storage is optional. */ }
+    setStudent(null)
+    setProposals([])
+    setProposalState('idle')
+    setProposalQueueState('idle')
+    setProposalFailure(null)
+    setState('loading')
+    try {
+      const learner = await api(`/api/teacher/intelligence/students/${encodeURIComponent(requestedId)}`)
+      setStudent(learner)
+      setState('ready')
+      void loadPendingProposals(requestedId)
+    } catch (error) {
+      setState((error as Error).message === 'DATABASE_UNAVAILABLE' ? 'database' : 'error')
+    }
+  }, [id, loadPendingProposals])
+  const restoredLearner = useRef(false)
+  useEffect(() => {
+    if (restoredLearner.current) return
+    restoredLearner.current = true
+    try {
+      const savedId = window.sessionStorage.getItem('bf.teacher.intelligence.studentId')
+      if (savedId) void lookup(savedId)
+    } catch { /* Storage is optional; a teacher can enter an ID manually. */ }
+  }, [lookup])
+  const generateProposals = async () => {
+    if (!student || proposalState === 'loading') return
+    setProposalState('loading')
+    setProposalFailure(null)
+    setReviewError('')
+    try {
+      const result = await api(`/api/teacher/intelligence/students/${encodeURIComponent(id.trim())}/proposals`, { method: 'POST' })
+      if (result?.mode !== 'PROVIDER' || result?.persisted !== true || !Array.isArray(result?.items)) {
+        setProposalFailure('invalid')
+        setProposalState('error')
+        return
+      }
+      setProposals((current) => [...current, ...result.items])
+      setProposalState('ready')
+      setProposalQueueState('ready')
+    } catch (error) {
+      const code = (error as Error).message
+      setProposalFailure(code === 'AI_PROVIDER_UNAVAILABLE' ? 'unavailable'
+        : code === 'AI_INVALID_RESPONSE' ? 'invalid'
+          : code === 'AI_PROVIDER_ERROR' ? 'provider' : 'request')
+      setProposalState('error')
+    }
+  }
   const create = async () => { try { const response = await api('/api/teacher/intelligence/suggestions', { method: 'POST', body: JSON.stringify({ studentId: id, type: draft.type, reason: draft.reason, draft: safeDraft(draft) }) }); const item = response?.item ?? response; setDrafts((current) => [...current, item]) } catch (error) { setState((error as Error).message === 'DATABASE_UNAVAILABLE' ? 'database' : 'error') } }
-  const approve = async (item: any) => { try { const response = await api(`/api/teacher/intelligence/suggestions/${item.id}/approve`, { method: 'POST', body: JSON.stringify({ approved: true }) }); const result = response?.item ?? response; setDrafts((current) => current.map((draftItem) => draftItem.id === item.id ? { ...draftItem, ...result, status: result.status } : draftItem)); await lookup() } catch (error) { setState((error as Error).message === 'DATABASE_UNAVAILABLE' ? 'database' : 'error') } }
+  const approve = async (item: any) => { try { const response = await api(`/api/teacher/intelligence/suggestions/${item.id}/approve`, { method: 'POST', body: JSON.stringify({ approved: true }) }); const result = response?.item ?? response; setDrafts((current) => current.map((draftItem) => draftItem.id === item.id ? { ...draftItem, ...result, status: result.status } : draftItem)); setStudent(await api(`/api/teacher/intelligence/students/${encodeURIComponent(id.trim())}`)) } catch (error) { setState((error as Error).message === 'DATABASE_UNAVAILABLE' ? 'database' : 'error') } }
+  const proposalFailureCopy: Record<ProviderFailure, string> = {
+    unavailable: 'The AI provider is unavailable right now. Your student records are unchanged.',
+    invalid: 'The provider response could not be safely reviewed. Retry generation.',
+    provider: 'The provider could not generate proposals. Retry in a moment.',
+    request: 'Proposal generation failed. Check your assignment and try again.',
+  }
+  const approveProviderProposal = async (item: ProviderProposal) => {
+    if (reviewingId) return
+    setReviewingId(item.id)
+    setReviewError('')
+    try {
+      const result = await api(`/api/teacher/intelligence/suggestions/${encodeURIComponent(item.id)}/approve`, {
+        method: 'POST',
+        body: JSON.stringify({ approved: true }),
+      })
+      if (result?.kind !== 'APPROVED' || result?.materialized !== true || !result?.recommendationId) {
+        throw new Error('REVIEW_NOT_MATERIALIZED')
+      }
+      setProposals((current) => current.map((proposal) => proposal.id === item.id
+        ? { ...proposal, status: result.status, materialized: true, recommendationId: result.recommendationId }
+        : proposal))
+      const refreshedStudent = await api(`/api/teacher/intelligence/students/${encodeURIComponent(id.trim())}`)
+      setStudent(refreshedStudent)
+    } catch {
+      setReviewError(t(language, 'Proposal review could not be completed. Refresh the student and check its review status.'))
+    } finally {
+      setReviewingId(null)
+      setConfirmRejectId(null)
+    }
+  }
+  const rejectProviderProposal = async (item: ProviderProposal) => {
+    if (reviewingId) return
+    setReviewingId(item.id)
+    setReviewError('')
+    try {
+      const result = await api(`/api/teacher/intelligence/suggestions/${encodeURIComponent(item.id)}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({ rejected: true }),
+      })
+      if (result?.kind !== 'REJECTED') throw new Error('REVIEW_NOT_REJECTED')
+      setProposals((current) => current.map((proposal) => proposal.id === item.id
+        ? { ...proposal, status: result.status }
+        : proposal))
+    } catch {
+      setReviewError(t(language, 'Proposal review could not be completed. Refresh the student and check its review status.'))
+    } finally {
+      setReviewingId(null)
+      setConfirmRejectId(null)
+    }
+  }
   const draftTypeLabels: Record<string, string> = { FEEDBACK_EXPRESSION: 'تعبير للملاحظات', MISTAKE: 'خطأ', EBI: 'تعبير أفضل' }
   const fieldLabels: Record<string, string> = { expression: 'التعبير', meaning: 'المعنى', example: 'مثال', category: 'الفئة', original: 'الأصل', correction: 'التصحيح', explanation: 'الشرح', betterExpression: 'تعبير أفضل', priority: 'الأولوية' }
   return <Shell title="Student intelligence" subtitle="Review class evidence and decide what is worth sharing." tabs={['Assigned student']} tab="Assigned student" setTab={() => {}}>
-    <div className={styles.card}><input value={id} onChange={(event) => setId(event.target.value)} placeholder={t(language, 'Assigned student ID')} /><button className={`${styles.button} ${styles.primary}`} disabled={!id} onClick={lookup}>{t(language, 'Look up student')}</button></div>
-    <State state={state} retry={lookup}/>
+    <div className={styles.card}>
+      <label className={styles.field}><span>{t(language, 'Assigned student ID')}</span><input data-testid="teacher-student-id" value={id} onChange={(event) => {
+        const nextId = event.target.value
+        setId(nextId)
+        setStudent(null)
+        setProposals([])
+        setProposalState('idle')
+        setProposalQueueState('idle')
+        setState('ready')
+        try { window.sessionStorage.removeItem('bf.teacher.intelligence.studentId') } catch { /* Storage is optional. */ }
+      }} placeholder={t(language, 'Assigned student ID')} onKeyDown={(event) => { if (event.key === 'Enter') void lookup() }}/></label>
+      <button data-testid="teacher-student-lookup" className={`${styles.button} ${styles.primary}`} disabled={!id.trim() || state === 'loading'} onClick={() => void lookup()}>{t(language, 'Look up student')}</button>
+    </div>
+    <State state={state} retry={() => void lookup()}/>
     {state === 'ready' && student && <div className={styles.grid}>
       <section className={styles.card}><h2>{student.student?.name || id}</h2><p className={styles.muted}>{t(language, 'Evidence from this assigned student only.')}</p>{(student.signals || []).slice(0, 8).map((signal: any) => <div className={styles.item} key={signal.id}>{signal.evidence?.expression || signal.evidence?.original || signal.topicKey || signal.type}</div>)}</section>
-      <section className={styles.card}><h2>{t(language, 'Suggestion draft')}</h2><select value={draft.type} onChange={(event) => setDraft({ type: event.target.value, reason: '' })}>{Object.keys(draftFields).map((type) => <option key={type} value={type}>{language === 'ar' ? draftTypeLabels[type] : type}</option>)}</select><textarea placeholder={t(language, 'Reason')} value={draft.reason} onChange={(event) => setDraft({ ...draft, reason: event.target.value })}/>{draftFields[draft.type].map((field) => <input key={field} placeholder={language === 'ar' ? fieldLabels[field] || field : field} value={draft[field] || ''} onChange={(event) => setDraft({ ...draft, [field]: event.target.value })}/>)}<button className={`${styles.button} ${styles.primary}`} onClick={create}>{t(language, 'Save draft')}</button>{drafts.map((item) => <div className={styles.item} key={item.id}><span className={styles.tag}>{statusText(language, item.status)}</span>{item.status === 'DRAFT' && <button className={styles.button} onClick={() => approve(item)}>{t(language, 'Approve explicitly')}</button>}</div>)}</section>
+      <section className={`${styles.card} ${styles.wide}`} data-testid="provider-proposal-panel">
+        <div className={styles.proposalHeading}>
+          <div><div className={styles.kicker}>{t(language, 'AI-generated for teacher review')}</div><h2>{t(language, 'Provider proposals')}</h2></div>
+          <button data-testid="generate-provider-proposals" className={`${styles.button} ${styles.primary}`} disabled={proposalState === 'loading'} onClick={() => void generateProposals()}>
+            {proposalState === 'loading' ? t(language, 'Generating proposals…') : t(language, 'Generate provider proposals')}
+          </button>
+        </div>
+        <div className={`${styles.notice} ${styles.reviewNotice}`} role="note">
+          <strong>{t(language, 'These proposals are saved for teacher review only. They are not student recommendations until approved.')}</strong>
+          <p>{t(language, 'Each generation creates a separate set of review drafts.')}</p>
+        </div>
+        {proposalState === 'loading' && <div className={styles.proposalSkeleton} aria-label={t(language, 'Generating proposals…')} data-testid="proposal-loading">{[0, 1].map((item) => <div className={styles.skeleton} key={item}/>)}</div>}
+        {proposalQueueState === 'loading' && <div className={styles.proposalSkeleton} aria-label={t(language, 'Loading review drafts…')} data-testid="proposal-queue-loading"><div className={styles.skeleton}/></div>}
+        {proposalQueueState === 'error' && <div className={styles.error} role="alert" data-testid="proposal-queue-error">
+          {t(language, 'Could not load pending review drafts.')}
+          <button className={styles.button} onClick={() => void loadPendingProposals(id.trim())}>{t(language, 'Retry')}</button>
+        </div>}
+        {proposalQueueState === 'ready' && proposalState === 'idle' && proposals.length === 0 && <div className={styles.empty} data-testid="proposal-queue-empty">{t(language, 'No pending provider drafts. Generate proposals to create a new review batch.')}</div>}
+        {proposalState === 'error' && proposalFailure && <div className={styles.error} role="alert" data-testid={`proposal-error-${proposalFailure}`}>
+          {t(language, proposalFailureCopy[proposalFailure])}
+          <button className={styles.button} onClick={() => void generateProposals()}>{t(language, 'Retry')}</button>
+        </div>}
+        {proposalState === 'ready' && proposals.length === 0 && <div className={styles.empty} data-testid="proposal-empty">{t(language, 'No proposals were returned. Try again when more learning evidence is available.')}</div>}
+        {proposals.length > 0 && <div className={styles.proposalReview} data-testid="provider-proposals">
+          {reviewError && <div className={styles.error} role="alert" data-testid="proposal-review-error">{reviewError}</div>}
+          {proposals.map((item) => <article className={styles.proposal} key={item.id} data-testid="provider-proposal">
+            <div className={styles.row}>
+              <div><span className={styles.tag}>{item.proposal.type}</span><span className={`${styles.tag} ${styles.reviewStatusTag}`}>{statusText(language, item.status)}</span></div>
+              {item.materialized && <span className={styles.materializedTag}>{t(language, 'Recommendation created')}</span>}
+            </div>
+            <h3>{item.proposal.title}</h3>
+            <p className={styles.muted}>{item.proposal.reason || item.reason}</p>
+            <dl className={styles.proposalMeta}>
+              {item.proposal.skillCode && <div><dt>{t(language, 'Skill')}</dt><dd>{item.proposal.skillCode}</dd></div>}
+              {item.proposal.resourceId && <div><dt>{t(language, 'Resource')}</dt><dd>{item.proposal.resourceId}</dd></div>}
+              {item.proposal.levelId && <div><dt>{t(language, 'Level')}</dt><dd>{student.officialLevel?.code || item.proposal.levelId}</dd></div>}
+              {item.proposal.stageId && <div><dt>{t(language, 'Stage')}</dt><dd>{student.officialStage?.code || item.proposal.stageId}</dd></div>}
+            </dl>
+            {item.status === 'PENDING_REVIEW' && <div className={styles.actions}>
+              <button className={`${styles.button} ${styles.primary}`} disabled={Boolean(reviewingId)} onClick={() => void approveProviderProposal(item)} data-testid={`approve-provider-proposal-${item.id}`}>
+                {reviewingId === item.id ? t(language, 'Reviewing…') : t(language, 'Approve proposal')}
+              </button>
+              {confirmRejectId === item.id
+                ? <><span className={styles.muted}>{t(language, 'Confirm rejection')}?</span><button className={styles.button} disabled={Boolean(reviewingId)} onClick={() => void rejectProviderProposal(item)}>{t(language, 'Confirm rejection')}</button><button className={styles.button} disabled={Boolean(reviewingId)} onClick={() => setConfirmRejectId(null)}>{t(language, 'Keep proposal')}</button></>
+                : <button className={styles.button} disabled={Boolean(reviewingId)} onClick={() => setConfirmRejectId(item.id)} data-testid={`reject-provider-proposal-${item.id}`}>{t(language, 'Reject proposal')}</button>}
+            </div>}
+          </article>)}
+        </div>}
+      </section>
+      {Array.isArray(student.recommendations) && <section className={`${styles.card} ${styles.wide}`} data-testid="existing-student-recommendations">
+        <div className={styles.row}><h2>{t(language, 'Current student recommendations')}</h2><span className={styles.tag}>{t(language, 'Student recommendation records')}</span></div>
+        {student.recommendations.length
+          ? student.recommendations.map((item: any) => <article className={styles.item} key={item.id}><div className={styles.row}><b>{item.title || item.type}</b><span className={styles.tag}>{statusText(language, item.status)}</span></div><p className={styles.muted}>{item.reason}</p></article>)
+          : <div className={styles.empty}>{t(language, 'No current student recommendations.')}</div>}
+      </section>}
+      <section className={styles.card}><h2>{t(language, 'Suggestion draft')}</h2><p className={styles.muted}>{t(language, 'Approving a manual teacher draft only marks it APPROVED; it does not create a student recommendation.')}</p><select value={draft.type} onChange={(event) => setDraft({ type: event.target.value, reason: '' })}>{Object.keys(draftFields).map((type) => <option key={type} value={type}>{language === 'ar' ? draftTypeLabels[type] : type}</option>)}</select><textarea placeholder={t(language, 'Reason')} value={draft.reason} onChange={(event) => setDraft({ ...draft, reason: event.target.value })}/>{draftFields[draft.type].map((field) => <input key={field} placeholder={language === 'ar' ? fieldLabels[field] || field : field} value={draft[field] || ''} onChange={(event) => setDraft({ ...draft, [field]: event.target.value })}/>)}<button className={`${styles.button} ${styles.primary}`} onClick={create}>{t(language, 'Save draft')}</button>{drafts.map((item) => <div className={styles.item} key={item.id}><span className={styles.tag}>{statusText(language, item.status)}</span>{item.status === 'DRAFT' && <button className={styles.button} onClick={() => approve(item)}>{t(language, 'Approve explicitly')}</button>}</div>)}</section>
     </div>}
   </Shell>
 }
@@ -391,11 +618,72 @@ export function AdminIntelligence() {
   const { language } = useTheme()
   const [state, setState] = useState<Load>('loading')
   const [data, setData] = useState<any>({})
+  const [reviewingId, setReviewingId] = useState<string | null>(null)
+  const [confirmRejectId, setConfirmRejectId] = useState<string | null>(null)
+  const [reviewError, setReviewError] = useState('')
   const load = async () => {
+    setState('loading')
     try {
-      const [overview, recommendations, settings] = await Promise.all([api('/api/admin/intelligence/overview'), api('/api/admin/intelligence/recommendations'), api('/api/admin/intelligence/settings')])
-      setData({ overview, recommendations: recommendations.items || [], settings }); setState('ready')
+      const [overview, recommendations, settings, suggestions] = await Promise.all([
+        api('/api/admin/intelligence/overview'),
+        api('/api/admin/intelligence/recommendations'),
+        api('/api/admin/intelligence/settings'),
+        api('/api/admin/intelligence/suggestions?limit=50'),
+      ])
+      setData({ overview, recommendations: recommendations.items || [], settings, suggestions: suggestions.items || [] })
+      setState('ready')
     } catch (error) { setState((error as Error).message === 'DATABASE_UNAVAILABLE' ? 'database' : 'error') }
+  }
+  const reviewSuggestion = async (item: any, decision: 'APPROVE' | 'REJECT') => {
+    if (reviewingId) return
+    setReviewingId(item.id)
+    setReviewError('')
+    try {
+      const result = await api('/api/admin/intelligence/suggestions', {
+        method: 'POST',
+        body: JSON.stringify({ suggestionId: item.id, decision }),
+      })
+      if (decision === 'APPROVE') {
+        if (result?.kind !== 'APPROVED' || result?.materialized !== true || !result?.recommendationId) {
+          throw new Error('APPROVAL_NOT_MATERIALIZED')
+        }
+        setData((current: any) => ({
+          ...current,
+          overview: {
+            ...current.overview,
+            pendingRecommendations: (current.overview?.pendingRecommendations || 0) + 1,
+          },
+          suggestions: current.suggestions.map((suggestion: any) => suggestion.id === item.id
+            ? { ...suggestion, status: 'APPROVED', materialized: true, recommendationId: result.recommendationId }
+            : suggestion),
+          recommendations: [{
+            id: result.recommendationId,
+            studentId: item.studentId,
+            student: item.student || null,
+            type: item.proposal?.type,
+            title: item.proposal?.title,
+            reason: item.proposal?.reason || item.reason,
+            status: 'PENDING',
+          }, ...current.recommendations],
+        }))
+      } else {
+        if (result?.kind !== 'REJECTED') throw new Error('REJECTION_NOT_RECORDED')
+        setData((current: any) => ({
+          ...current,
+          suggestions: current.suggestions.map((suggestion: any) => suggestion.id === item.id
+            ? { ...suggestion, status: 'REJECTED', materialized: false }
+            : suggestion),
+        }))
+      }
+    } catch (error) {
+      const code = (error as Error).message
+      setReviewError(code === 'INVALID_DRAFT'
+        ? t(language, 'Invalid proposal draft; it cannot be approved.')
+        : t(language, 'Admin review action failed. Refresh and check the pending queue.'))
+    } finally {
+      setReviewingId(null)
+      setConfirmRejectId(null)
+    }
   }
   useEffect(() => { void load() }, [])
   return <Shell title="Learning intelligence" subtitle="A clear operational view of evidence, recommendations, and controls." tabs={['Overview', 'Recommendations', 'Settings']} tab="Overview" setTab={() => {}}>
@@ -403,7 +691,39 @@ export function AdminIntelligence() {
     {state === 'ready' && <div className={styles.grid}>
       <section className={styles.card}><h2>{t(language, 'Overview')}</h2><p className={styles.muted}>{data.overview?.pendingRecommendations} {t(language, 'pending recommendations')} · {data.overview?.teacherSuggestions} {t(language, 'teacher drafts')}</p></section>
       <section className={styles.card}><h2>{t(language, 'Recommendations')}</h2>{data.recommendations.map((item: any) => <div className={styles.item} key={item.id}>{item.student?.name || item.studentId} · {item.title || item.type} · {statusText(language, item.status)}</div>)}</section>
-      <section className={styles.card}><h2>{t(language, 'Service status')}</h2><p className={styles.muted}>{data.settings?.mode}</p><div className={styles.notice}>{t(language, 'Provider unavailable. Teacher approval only changes a draft to APPROVED; it does not create student records.')}</div></section>
+      <section className={`${styles.card} ${styles.wide}`} data-testid="admin-ai-proposal-queue">
+        <div className={styles.row}><div><div className={styles.kicker}>{t(language, 'Reviewed by admin')}</div><h2>{t(language, 'Provider proposal review')}</h2></div><span className={styles.tag}>{data.suggestions.filter((item: any) => item.status === 'PENDING_REVIEW').length}</span></div>
+        <p className={styles.muted}>{t(language, 'AI proposal approval creates a student recommendation; rejection does not.')}</p>
+        <p className={styles.muted}>{t(language, 'Manual teacher suggestions are not handled in this AI proposal queue.')}</p>
+        {reviewError && <div className={styles.error} role="alert" data-testid="admin-proposal-review-error">{reviewError}</div>}
+        {data.suggestions.length === 0
+          ? <div className={styles.empty} data-testid="admin-proposal-queue-empty">{t(language, 'No pending provider drafts. Generate proposals to create a new review batch.')}</div>
+          : <div className={styles.adminReviewList}>{data.suggestions.map((item: any) => <article className={styles.adminProposal} key={item.id} data-testid="admin-ai-proposal">
+            <div className={styles.row}>
+              <div><span className={styles.tag}>{item.proposal?.type || 'AI_RECOMMENDATION'}</span><span className={styles.tag}>{statusText(language, item.status)}</span></div>
+              {item.materialized && <span className={styles.materializedTag}>{t(language, 'Recommendation created')}</span>}
+            </div>
+            <h3>{item.proposal?.title || t(language, 'Invalid proposal draft; it cannot be approved.')}</h3>
+            {item.proposal?.reason && <p className={styles.muted}>{item.proposal.reason}</p>}
+            {item.invalidDraft && <p className={styles.error}>{t(language, 'Invalid proposal draft; it cannot be approved.')}</p>}
+            <dl className={styles.proposalMeta}>
+              <div><dt>{t(language, 'Student')}</dt><dd>{item.student?.name || item.studentId}</dd></div>
+              <div><dt>{t(language, 'Teacher')}</dt><dd>{item.teacherId}</dd></div>
+              {item.createdAt && <div><dt>{t(language, 'Created')}</dt><dd>{new Date(item.createdAt).toLocaleDateString(language === 'ar' ? 'ar' : 'en')}</dd></div>}
+            </dl>
+            {item.status === 'APPROVED' && <p className={styles.reviewOutcome} role="status">{t(language, 'Approved and added to student recommendations.')}</p>}
+            {item.status === 'REJECTED' && <p className={styles.reviewOutcome} role="status">{t(language, 'Rejected. No student recommendation was created.')}</p>}
+            {item.status === 'PENDING_REVIEW' && <div className={styles.actions}>
+              <button className={`${styles.button} ${styles.primary}`} disabled={Boolean(reviewingId) || item.invalidDraft} onClick={() => void reviewSuggestion(item, 'APPROVE')} data-testid={`admin-approve-proposal-${item.id}`}>
+                {reviewingId === item.id ? t(language, 'Reviewing…') : t(language, 'Approve')}
+              </button>
+              {confirmRejectId === item.id
+                ? <><span className={styles.muted}>{t(language, 'Confirm rejection')}?</span><button className={styles.button} disabled={Boolean(reviewingId)} onClick={() => void reviewSuggestion(item, 'REJECT')}>{t(language, 'Confirm rejection')}</button><button className={styles.button} disabled={Boolean(reviewingId)} onClick={() => setConfirmRejectId(null)}>{t(language, 'Keep proposal')}</button></>
+                : <button className={styles.button} disabled={Boolean(reviewingId)} onClick={() => setConfirmRejectId(item.id)} data-testid={`admin-reject-proposal-${item.id}`}>{t(language, 'Reject')}</button>}
+            </div>}
+          </article>)}</div>}
+      </section>
+      <section className={styles.card}><h2>{t(language, 'Service status')}</h2><p className={styles.muted}>{data.settings?.mode}</p><div className={styles.notice}>{t(language, 'AI proposal approval creates a student recommendation; rejection does not.')}</div></section>
     </div>}
   </Shell>
 }

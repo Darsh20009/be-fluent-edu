@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTheme } from '@/lib/contexts/ThemeContext'
 import { localeDirection, localeText } from '@/lib/locale'
 import base from '@/app/phase4/phase4.module.css'
+import FeedbackReport from '@/components/feedback/FeedbackReport'
 
 type Role = 'admin' | 'teacher' | 'student'
 type Kind = 'feedback' | 'homework'
@@ -21,11 +22,13 @@ type Item = Record<string, unknown> & {
   submissions?: Array<{ reviews?: unknown[] }>
   summary?: string
   publishedAt?: string
-  session?: { title?: string; startTime?: string }
-  expressions?: Array<{ expression?: string; meaning?: string | null; category?: string | null }>
+  session?: { title?: string; startTime?: string; endTime?: string }
+  expressions?: Array<{ expression?: string; meaning?: string | null; example?: string | null; category?: string | null }>
   mistakes?: Array<{ original?: string; correction?: string; explanation?: string | null }>
-  pronunciation?: Array<{ target?: string; guidance?: string | null; phonetic?: string | null }>
-  ebi?: Array<{ betterExpression?: string; explanation?: string | null }>
+  pronunciation?: Array<{ target?: string; actual?: string | null; guidance?: string | null; phonetic?: string | null; teacherNote?: string | null }>
+  ebi?: Array<{ betterExpression?: string; explanation?: string | null; priority?: string | null }>
+  studentName?: string | null
+  skillRatings?: Array<{ skill?: string | null; name?: string | null; rating?: string | number | null; score?: string | number | null }>
 }
 type ApiEnvelope = { error?: { code?: string; message?: string }; code?: string; items?: Item[]; configured?: boolean; status?: string }
 
@@ -155,6 +158,18 @@ export default function LearningClient({ role, kind }: { role: Role; kind: Kind 
     {state === 'database' && <div className={`${base.notice} ${base.blocked}`} data-testid="state-database-unavailable"><strong>{localeText(language, 'قاعدة البيانات غير متاحة', 'Database unavailable')}</strong><p>{message || localeText(language, 'يتعذر تحميل السجلات. عناصر التحكم غير متاحة ولن يتم حفظ أي شيء.', 'Records cannot be loaded. Controls remain unavailable and nothing will be persisted.')}</p></div>}
     {state === 'error' && <div className={base.error} role="alert" data-testid="state-error">{message || localeText(language, 'تعذّر الوصول إلى خدمة التعلّم. يُرجى المحاولة مجدداً.', 'This learning service could not be reached. Please try again.')}<button className={base.button} data-testid="button-retry" onClick={() => void load()}>{localeText(language, 'إعادة المحاولة', 'Retry')}</button></div>}
     {(state === 'empty' || (state === 'ready' && visible.length === 0)) && <div className={base.empty} data-testid="state-empty"><strong>{localeText(language, 'لا يوجد محتوى هنا بعد', 'Nothing here yet')}</strong><br />{localeText(language, 'ستظهر السجلات هنا عند توفرها.', 'When records are available, they will appear in this view.')}</div>}
-    {state === 'ready' && visible.length > 0 && <div className={base.grid} data-testid="learning-list">{visible.map((item, index) => <article className={base.card} key={String(item.id || index)} data-testid={`learning-card-${item.id || index}`}><div className={base.eyebrow}>{detail(item, language) || localeText(language, kind === 'feedback' ? 'سجل ملاحظات' : 'واجب', kind === 'feedback' ? 'Feedback record' : 'Assignment')}</div><h2>{label(item, language)}</h2><p className={base.muted}>{localized(item, 'summary', language) || localized(item, 'description', language) || localized(item, 'feedback', language) || localized(item, 'notes', language) || localeText(language, 'تتوفر التفاصيل عند فتح هذا السجل.', 'Details are available when this record is opened.')}</p>{kind === 'feedback' && role === 'student' && <div data-testid={`feedback-content-${item.id || index}`}>{item.expressions?.map((entry, entryIndex) => <p key={`expression-${entryIndex}`}><strong>{entry.expression}</strong>{entry.meaning ? ` — ${entry.meaning}` : ''}</p>)}{item.mistakes?.map((entry, entryIndex) => <p key={`mistake-${entryIndex}`}><strong>{entry.original}</strong>{entry.correction ? ` → ${entry.correction}` : ''}</p>)}{item.pronunciation?.map((entry, entryIndex) => <p key={`pronunciation-${entryIndex}`}><strong>{entry.target}</strong>{entry.guidance ? ` — ${entry.guidance}` : ''}{entry.phonetic ? ` (${entry.phonetic})` : ''}</p>)}{item.ebi?.map((entry, entryIndex) => <p key={`ebi-${entryIndex}`}><strong>EBI:</strong> {entry.betterExpression}{entry.explanation ? ` — ${entry.explanation}` : ''}</p>)}</div>}</article>)}</div>}
+    {state === 'ready' && visible.length > 0 && <div className={base.grid} data-testid="learning-list">{visible.map((item, index) => {
+      const itemId = String(item.id || index)
+      if (kind === 'feedback' && role === 'student') {
+        return <div className={base.card} key={itemId} data-testid={`learning-card-${itemId}`}>
+          <FeedbackReport item={item} language={language} reportId={`student-${itemId}`} />
+        </div>
+      }
+      return <article className={base.card} key={itemId} data-testid={`learning-card-${itemId}`}>
+        <div className={base.eyebrow}>{detail(item, language) || localeText(language, kind === 'feedback' ? 'سجل ملاحظات' : 'واجب', kind === 'feedback' ? 'Feedback record' : 'Assignment')}</div>
+        <h2>{label(item, language)}</h2>
+        <p className={base.muted}>{localized(item, 'summary', language) || localized(item, 'description', language) || localized(item, 'feedback', language) || localized(item, 'notes', language) || localeText(language, 'تتوفر التفاصيل عند فتح هذا السجل.', 'Details are available when you open this record.')}</p>
+      </article>
+    })}</div>}
   </section>
 }

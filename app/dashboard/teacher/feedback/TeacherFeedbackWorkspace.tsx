@@ -554,8 +554,16 @@ export default function TeacherFeedbackWorkspace() {
                 <Section title={localeText(language, 'مفردات وتعبيرات', 'Vocabulary and expressions')} note={localeText(language, 'عبارات جديدة ومعناها ومثال على استخدامها.', 'New expressions, their meanings, and an example of how to use them.')} count={draft.expressions.length} disabled={editorUnavailable} onAdd={() => setField('expressions', [...draft.expressions, { expression: '', meaning: '', example: '', category: 'VOCABULARY' }])}>
                   {draft.expressions.map((item, index) => <div key={`expression-${index}`} className="rounded-xl border p-3" style={{ borderColor: 'var(--border)', background: 'var(--surface-muted)' }}>
                      <div className="mb-2 flex justify-end"><button type="button" disabled={editorUnavailable} onClick={() => deleteRow('expressions', index)} className="grid h-9 w-9 place-items-center rounded-lg" aria-label={localeText(language, 'حذف التعبير', 'Delete expression')} style={{ color: 'var(--muted)' }}><Trash2 size={15} aria-hidden="true" /></button></div>
-                    <div className="grid gap-3 sm:grid-cols-2">
+                     <div className="grid gap-3 sm:grid-cols-2">
                        <Field label={localeText(language, 'التعبير', 'Expression')} value={item.expression} onChange={(value) => updateRow<Expression, 'expressions'>('expressions', index, 'expression', value)} disabled={editorUnavailable} />
+                        <label className="block text-xs font-semibold" style={{ color: 'var(--muted)' }}>{localeText(language, 'نوع التعبير', 'Expression type')}
+                          <select aria-label={localeText(language, 'نوع التعبير', 'Expression type')} value={item.category || 'VOCABULARY'} onChange={(event) => updateRow<Expression, 'expressions'>('expressions', index, 'category', event.target.value)} disabled={editorUnavailable} className="mt-1.5 min-h-11 w-full rounded-xl border px-3 text-sm" style={{ background: 'var(--surface)', color: 'var(--foreground)', borderColor: 'var(--border)' }}>
+                            <option value="VOCABULARY">{localeText(language, 'مفردات', 'Vocabulary')}</option>
+                            <option value="IDIOM">{localeText(language, 'تعبير اصطلاحي', 'Idiom')}</option>
+                            <option value="SLANG">{localeText(language, 'تعبير دارج', 'Slang')}</option>
+                            <option value="CHUNK">{localeText(language, 'تركيب جاهز', 'Useful chunk')}</option>
+                          </select>
+                        </label>
                        <Field label={localeText(language, 'المعنى', 'Meaning')} value={item.meaning} onChange={(value) => updateRow<Expression, 'expressions'>('expressions', index, 'meaning', value)} disabled={editorUnavailable} />
                        <div className="sm:col-span-2"><Field label={localeText(language, 'مثال', 'Example')} value={item.example} onChange={(value) => updateRow<Expression, 'expressions'>('expressions', index, 'example', value)} disabled={editorUnavailable} /></div>
                     </div>
@@ -593,9 +601,9 @@ export default function TeacherFeedbackWorkspace() {
                     <div className="grid gap-3 sm:grid-cols-2">
                        <Field label={localeText(language, 'الصوت أو الكلمة المستهدفة', 'Target sound or word')} value={item.target} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'target', value)} disabled={editorUnavailable} />
                        <Field label={localeText(language, 'ما نُطق فعلياً', 'What was actually pronounced')} value={item.actual} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'actual', value)} disabled={editorUnavailable} />
-                       <Field label={localeText(language, 'الإرشاد', 'Guidance')} value={item.guidance} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'guidance', value)} disabled={editorUnavailable} />
-                       <Field label={localeText(language, 'التهجئة الصوتية', 'Phonetic spelling')} value={item.phonetic} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'phonetic', value)} disabled={editorUnavailable} />
-                       <div className="sm:col-span-2"><Field label={localeText(language, 'ملاحظة إضافية', 'Additional note')} value={item.teacherNote} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'teacherNote', value)} disabled={editorUnavailable} /></div>
+                        <Field label={localeText(language, 'طريقة النطق الصحيحة', 'Correct pronunciation guidance')} value={item.guidance} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'guidance', value)} placeholder={localeText(language, 'اشرح موضع اللسان أو الصوت أو النبرة المطلوبة...', 'Describe the target sound, mouth position, or intonation...')} disabled={editorUnavailable} />
+                        <Field label={localeText(language, 'التهجئة الصوتية (اختياري)', 'Phonetic spelling (optional)')} value={item.phonetic} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'phonetic', value)} placeholder={localeText(language, 'مثال: /θ/ أو /ð/', 'Example: /θ/ or /ð/')} disabled={editorUnavailable} />
+                        <div className="sm:col-span-2"><Field label={localeText(language, 'ملاحظة نطق للطالب', 'Pronunciation note for the student')} value={item.teacherNote} onChange={(value) => updateRow<Pronunciation, 'pronunciation'>('pronunciation', index, 'teacherNote', value)} disabled={editorUnavailable} /></div>
                     </div>
                   </div>)}
                    {!draft.pronunciation.length && <EmptyRows>{localeText(language, 'لم تُضف ملاحظات نطق بعد.', 'No pronunciation notes have been added yet.')}</EmptyRows>}

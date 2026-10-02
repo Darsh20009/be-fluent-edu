@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -8,10 +7,10 @@
   --surface-muted: #f4f6f3;
   --foreground: #202a25;
   --muted: #65716a;
-  --primary: #24714f;
-  --primary-strong: #1d5f42;
+  --primary: #147755;
+  --primary-strong: #105e43;
   --primary-foreground: #ffffff;
-  --accent: #24714f;
+  --accent: #342b52;
   --accent-foreground: #ffffff;
   --border: #e2e8e2;
   --radius: .5rem;
@@ -25,6 +24,8 @@
   --bf-green-soft: #e8f4ed;
   --bf-purple: #342b52;
   --bf-purple-soft: #f0edf6;
+  --font-geist-sans: var(--font-bf-latin);
+  --bf-font-sans: var(--font-bf-latin), var(--font-bf-arabic), Arial, sans-serif;
 }
 
 html.dark {
@@ -37,8 +38,8 @@ html.dark {
   --primary: #68ad86;
   --primary-strong: #8bc9a2;
   --primary-foreground: #102018;
-  --accent: #68ad86;
-  --accent-foreground: #102018;
+  --accent: #c4b7e3;
+  --accent-foreground: #201a30;
   --border: #344239;
   --bf-canvas: #111915;
   --bf-paper: #19231d;
@@ -64,7 +65,7 @@ html.dark {
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-border: var(--border);
-  --font-sans: "Noto Kufi Arabic", "DM Sans", sans-serif;
+  --font-sans: var(--bf-font-sans);
 }
 
 * { box-sizing: border-box; }
@@ -76,7 +77,7 @@ body {
   overflow-x: clip;
   background: var(--background);
   color: var(--foreground);
-  font-family: "Noto Kufi Arabic", "DM Sans", sans-serif;
+  font-family: var(--bf-font-sans);
   text-rendering: optimizeLegibility;
 }
 html.dark body {
@@ -84,6 +85,10 @@ html.dark body {
   color: var(--foreground);
 }
 button, a { -webkit-tap-highlight-color: transparent; }
+button, input, select, textarea { font-family: inherit; }
+html[lang="ar"] :where(h1, h2, h3, h4, h5, h6, p, a, button, label, input, textarea, select) {
+  letter-spacing: normal;
+}
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
