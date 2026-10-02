@@ -44,7 +44,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
   const isArabic = language === 'ar'
   const tr = (ar: string, en: string) => isArabic ? ar : en
   const passwordInputId = useId()
-  const [view, setView] = useState<ModalView>(() => entryMode === 'start' ? 'register' : 'phone')
+  const [view, setView] = useState<ModalView>(() => entryMode === 'start' ? 'register' : 'password')
   const [authIntent, setAuthIntent] = useState<AuthIntent>(() => entryMode === 'start' ? 'REGISTER' : 'LOGIN')
   const [countryIso, setCountryIso] = useState('EG')
   const [phoneInput, setPhoneInput] = useState('')
@@ -390,7 +390,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
                     maxLength={120}
                     value={fullName}
                     onChange={(event) => setFullName(event.target.value)}
-                    className="min-h-12 w-full border border-[#dce4dc] px-3 text-sm outline-none focus:border-[#24714f] focus:ring-2 focus:ring-[#24714f]/15"
+                    className="min-h-12 w-full border border-[#dce4dc] px-3 text-base outline-none focus:border-[#24714f] focus:ring-2 focus:ring-[#24714f]/15"
                     disabled={busy}
                     required
                   />
@@ -533,7 +533,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
                       autoComplete="current-password"
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
-                      className="min-h-12 w-full border border-[#dce4dc] ps-10 pe-10 text-sm outline-none focus:border-[#24714f] focus:ring-2 focus:ring-[#24714f]/15"
+                      className="min-h-12 w-full border border-[#dce4dc] ps-10 pe-10 text-base outline-none focus:border-[#24714f] focus:ring-2 focus:ring-[#24714f]/15"
                       disabled={busy}
                       required
                     />
