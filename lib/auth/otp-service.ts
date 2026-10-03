@@ -19,7 +19,10 @@ import {
 } from './providers'
 import { WhatsAppOtpDeliveryError } from '@/lib/whatsapp/otp-delivery'
 import { isAccountUsable } from './status'
-import { buildOtpChallengeWhere } from './otp-error-policy'
+import {
+  buildOtpChallengeActiveStateWhere,
+  buildOtpChallengeWhere,
+} from './otp-error-policy'
 
 export type OtpIntent = 'LOGIN' | 'REGISTER'
 
@@ -172,11 +175,10 @@ async function invalidatePreviousChallenges(
   await prisma.authOtpChallenge.updateMany({
     where: {
       intent,
-      consumedAt: null,
-      invalidatedAt: null,
       id: { not: keepChallengeId },
       createdAt: { lt: createdBefore },
       OR: identityFilters,
+      ...buildOtpChallengeActiveStateWhere(),
     },
     data: { invalidatedAt: new Date() },
   })
@@ -208,11 +210,10 @@ export async function requestOtp(input: RequestOtpInput) {
   const previous = await prisma.authOtpChallenge.findFirst({
     where: {
       intent: input.intent,
-      consumedAt: null,
-      invalidatedAt: null,
       ...(identity.normalizedPhone
         ? { normalizedPhone: identity.normalizedPhone }
         : { email: identity.email }),
+      ...buildOtpChallengeActiveStateWhere(),
     },
     orderBy: { createdAt: 'desc' },
   })

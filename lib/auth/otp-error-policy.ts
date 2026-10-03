@@ -3,6 +3,15 @@ type OtpFailure = {
   diagnosticReason?: string
 }
 
+export function buildOtpChallengeActiveStateWhere() {
+  return {
+    AND: [
+      { OR: [{ consumedAt: null }, { consumedAt: { isSet: false } }] },
+      { OR: [{ invalidatedAt: null }, { invalidatedAt: { isSet: false } }] },
+    ],
+  }
+}
+
 export function buildOtpChallengeWhere(
   identity: { normalizedPhone?: string; email?: string },
   intent: 'LOGIN' | 'REGISTER',
@@ -11,8 +20,7 @@ export function buildOtpChallengeWhere(
   return {
     ...(challengeId ? { id: challengeId } : {}),
     intent,
-    consumedAt: null,
-    invalidatedAt: null,
+    ...buildOtpChallengeActiveStateWhere(),
     ...(identity.normalizedPhone
       ? { normalizedPhone: identity.normalizedPhone }
       : { email: identity.email }),

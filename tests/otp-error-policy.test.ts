@@ -7,6 +7,12 @@ import {
 } from '../lib/auth/otp-error-policy'
 
 test('OTP verification is constrained to the request id, identity, and intent', () => {
+  const activeStateWhere = {
+    AND: [
+      { OR: [{ consumedAt: null }, { consumedAt: { isSet: false } }] },
+      { OR: [{ invalidatedAt: null }, { invalidatedAt: { isSet: false } }] },
+    ],
+  }
   assert.deepEqual(
     buildOtpChallengeWhere(
       { normalizedPhone: '+966512345678' },
@@ -16,8 +22,7 @@ test('OTP verification is constrained to the request id, identity, and intent', 
     {
       id: 'request-123',
       intent: 'LOGIN',
-      consumedAt: null,
-      invalidatedAt: null,
+      ...activeStateWhere,
       normalizedPhone: '+966512345678',
     },
   )
@@ -25,8 +30,7 @@ test('OTP verification is constrained to the request id, identity, and intent', 
     buildOtpChallengeWhere({ email: 'learner@example.com' }, 'REGISTER'),
     {
       intent: 'REGISTER',
-      consumedAt: null,
-      invalidatedAt: null,
+      ...activeStateWhere,
       email: 'learner@example.com',
     },
   )
