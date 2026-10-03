@@ -114,12 +114,60 @@ export const groupScheduleSchema = z.object({
 
 export const matchingSchema = z.object({
   studentId: z.string().trim().min(1),
+  subscriptionId: z.string().trim().min(1).optional(),
   subscriptionType: subscriptionTypeSchema,
   levelId: z.string().trim().min(1).nullable().optional(),
   stageId: z.string().trim().min(1).nullable().optional(),
   preferredDays: z.array(z.number().int().min(0).max(6)).max(7).default([]),
   preferredStartMinute: z.number().int().min(0).max(1439).nullable().optional(),
+  proposeGroupId: z.string().trim().min(1).optional(),
+  availabilityTimezone: z.string().trim().min(1).max(100).optional(),
+  availabilitySlots: z.array(z.object({
+    dayOfWeek: z.number().int().min(0).max(6),
+    startMinute: z.number().int().min(0).max(1439),
+    durationMinutes: z.number().int().min(30).max(240),
+  }).strict()).max(49).optional(),
+}).superRefine((value, context) => {
+  if (value.proposeGroupId && !value.subscriptionId) {
+    context.addIssue({ code: 'custom', path: ['subscriptionId'], message: 'A subscription is required to propose a group' })
+  }
+  if (value.availabilitySlots?.some((slot) => slot.startMinute + slot.durationMinutes > 1440)) {
+    context.addIssue({ code: 'custom', path: ['availabilitySlots'], message: 'Availability slots must end before midnight' })
+  }
 })
+
+export const groupProposalDecisionSchema = z.object({
+  enrollmentId: z.string().trim().min(1),
+  decision: z.enum(['ACCEPT', 'DECLINE']),
+})
+
+export type GroupProposalAction = 'ACCEPT' | 'DECLINE' | 'APPROVE'
+
+export function groupProposalTransition(currentStatus: string, action: GroupProposalAction) {
+  const transitions: Record<string, Partial<Record<GroupProposalAction, string>>> = {
+    PROPOSED: { ACCEPT: 'STUDENT_ACCEPTED', DECLINE: 'STUDENT_DECLINED' },
+    STUDENT_ACCEPTED: { APPROVE: 'ACTIVE' },
+  }
+  return transitions[currentStatus]?.[action] || null
+}
+
+export type AvailabilityWindow = { dayOfWeek: number; startMinute: number; durationMinutes: number }
+export type AvailabilityPattern = { timezone: string; slots: AvailabilityWindow[] }
+
+export function sharedAvailabilitySlots(left: AvailabilityPattern, right: AvailabilityPattern) {
+  if (!left.timezone || left.timezone !== right.timezone) return []
+  const slots: AvailabilityWindow[] = []
+  for (const a of left.slots) {
+    for (const b of right.slots) {
+      if (a.dayOfWeek !== b.dayOfWeek) continue
+      const startMinute = Math.max(a.startMinute, b.startMinute)
+      const endMinute = Math.min(a.startMinute + a.durationMinutes, b.startMinute + b.durationMinutes)
+      if (endMinute > startMinute) slots.push({ dayOfWeek: a.dayOfWeek, startMinute, durationMinutes: endMinute - startMinute })
+    }
+  }
+  const unique = new Map(slots.map((slot) => [`${slot.dayOfWeek}:${slot.startMinute}:${slot.durationMinutes}`, slot]))
+  return [...unique.values()].sort((a, b) => a.dayOfWeek - b.dayOfWeek || a.startMinute - b.startMinute)
+}
 
 export type MatchingRequest = z.infer<typeof matchingSchema>
 
@@ -132,7 +180,7 @@ export interface MatchingGroup {
   capacity: number | null
   activeMemberCount: number
   status: string
-  schedules: Array<{ dayOfWeek: number; startMinute: number; status: string }>
+  schedules: Array<{ dayOfWeek: number; startMinute: number; durationMinutes?: number; timezone?: string; status: string }>
 }
 
 export function scoreMatchingGroup(group: MatchingGroup, request: MatchingRequest) {
@@ -144,6 +192,15 @@ export function scoreMatchingGroup(group: MatchingGroup, request: MatchingReques
   if (!group.teacherProfileId) return null
 
   const activeSchedules = group.schedules.filter((schedule) => schedule.status === 'ACTIVE')
+  const comparableSchedules = request.availabilitySlots?.length
+    ? activeSchedules.filter((schedule) => schedule.timezone === request.availabilityTimezone)
+    : []
+  const availabilityMatch = comparableSchedules.some((schedule) => request.availabilitySlots!.some((slot) =>
+    slot.dayOfWeek === schedule.dayOfWeek
+    && slot.startMinute < schedule.startMinute + (schedule.durationMinutes || 60)
+    && schedule.startMinute < slot.startMinute + slot.durationMinutes,
+  ))
+  if (comparableSchedules.length > 0 && !availabilityMatch) return null
   const dayMatches = request.preferredDays.length === 0
     ? activeSchedules.length
     : activeSchedules.filter((schedule) => request.preferredDays.includes(schedule.dayOfWeek)).length
@@ -155,8 +212,9 @@ export function scoreMatchingGroup(group: MatchingGroup, request: MatchingReques
 
   return {
     groupId: group.id,
-    score: 100 + dayMatches * 10 - Math.min(timeDistance, 600) / 60,
+    score: 100 + dayMatches * 10 + (availabilityMatch ? 25 : 0) - Math.min(timeDistance, 600) / 60,
     remainingCapacity: group.capacity == null ? null : group.capacity - group.activeMemberCount,
+    availabilityMatch,
   }
 }
 

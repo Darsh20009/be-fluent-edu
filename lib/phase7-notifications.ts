@@ -3,7 +3,7 @@ import { deterministicNotificationKey } from '@/lib/phase7'
 import type { Prisma } from '@prisma/client'
 
 export async function queuePhase7Notifications(input: {
-  event: 'feedback.published' | 'homework.assigned' | 'homework.reviewed'
+  event: 'feedback.published' | 'homework.assigned' | 'homework.reviewed' | 'group.proposal' | 'group.assigned'
   entityId: string
   recipientUserId: string
   title: string

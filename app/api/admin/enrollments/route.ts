@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     prisma.user.findUnique({ where: { id: body.studentId }, include: { StudentProfile: true } }),
     prisma.subscription.findUnique({ where: { id: body.subscriptionId }, include: { Package: true } }),
     prisma.enrollment.findFirst({
-      where: { studentId: body.studentId, status: { in: ['PENDING', 'ACTIVE'] } },
+      where: { studentId: body.studentId, status: { in: ['PENDING', 'ACTIVE', 'PROPOSED', 'STUDENT_ACCEPTED'] } },
     }),
   ])
 

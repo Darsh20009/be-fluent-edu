@@ -7,6 +7,8 @@ import {
   packageCreateSchema,
   phase5DatabaseGuard,
   rankMatchingGroups,
+  groupProposalTransition,
+  sharedAvailabilitySlots,
   subscriptionStatusSchema,
 } from '@/lib/phase5'
 import { roleHasPermission } from '@/lib/authorization'
@@ -74,6 +76,40 @@ test('matching ranks closer compatible schedules first', () => {
     { ...base, id: 'closer', schedules: [{ dayOfWeek: 2, startMinute: 610, status: 'ACTIVE' }] },
   ]
   assert.deepEqual(rankMatchingGroups(groups, request).map((item) => item.groupId), ['closer', 'later'])
+})
+
+test('matching uses saved availability only for schedules in the same timezone', () => {
+  const request = matchingSchema.parse({
+    studentId: 'student-1',
+    subscriptionType: 'GROUP',
+    availabilityTimezone: 'Asia/Riyadh',
+    availabilitySlots: [{ dayOfWeek: 2, startMinute: 600, durationMinutes: 90 }],
+  })
+  const base = { levelId: null, stageId: null, subscriptionType: 'GROUP' as const, teacherProfileId: 'teacher', capacity: 5, activeMemberCount: 1, status: 'ACTIVE' }
+  const groups = [
+    { ...base, id: 'overlap', schedules: [{ dayOfWeek: 2, startMinute: 660, durationMinutes: 60, timezone: 'Asia/Riyadh', status: 'ACTIVE' }] },
+    { ...base, id: 'no-overlap', schedules: [{ dayOfWeek: 2, startMinute: 720, durationMinutes: 60, timezone: 'Asia/Riyadh', status: 'ACTIVE' }] },
+    { ...base, id: 'other-zone', schedules: [{ dayOfWeek: 2, startMinute: 720, durationMinutes: 60, timezone: 'Europe/London', status: 'ACTIVE' }] },
+  ]
+  const matches = rankMatchingGroups(groups, request)
+  assert.deepEqual(matches.map((item) => item.groupId), ['overlap', 'other-zone'])
+  assert.equal(matches[0].availabilityMatch, true)
+  assert.equal(matches[1].availabilityMatch, false)
+})
+
+test('Duo availability overlap requires a shared timezone and actual time intersection', () => {
+  const left = { timezone: 'Asia/Riyadh', slots: [{ dayOfWeek: 1, startMinute: 600, durationMinutes: 90 }] }
+  const right = { timezone: 'Asia/Riyadh', slots: [{ dayOfWeek: 1, startMinute: 660, durationMinutes: 60 }] }
+  assert.deepEqual(sharedAvailabilitySlots(left, right), [{ dayOfWeek: 1, startMinute: 660, durationMinutes: 30 }])
+  assert.deepEqual(sharedAvailabilitySlots(left, { ...right, timezone: 'Europe/London' }), [])
+})
+
+test('group suggestion requires student acceptance before administrator approval', () => {
+  assert.equal(groupProposalTransition('PROPOSED', 'ACCEPT'), 'STUDENT_ACCEPTED')
+  assert.equal(groupProposalTransition('PROPOSED', 'DECLINE'), 'STUDENT_DECLINED')
+  assert.equal(groupProposalTransition('PROPOSED', 'APPROVE'), null)
+  assert.equal(groupProposalTransition('STUDENT_ACCEPTED', 'APPROVE'), 'ACTIVE')
+  assert.equal(groupProposalTransition('STUDENT_DECLINED', 'APPROVE'), null)
 })
 
 test('phase 5 RBAC grants explicit operational capabilities', () => {

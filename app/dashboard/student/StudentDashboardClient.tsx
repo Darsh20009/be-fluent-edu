@@ -8,6 +8,7 @@ import { Award, BookOpen, Calendar, ChevronLeft, CreditCard, FileText, Home, Lay
 import Button from '@/components/ui/Button'
 import BrandLockup from '@/components/brand/BrandLockup'
 import ThemeToggle from '@/components/ThemeToggle'
+import NotificationCenter from '@/components/NotificationCenter'
 import HomeTab from './components/RedesignedHomeTab'
 import CertificatesTab from './components/CertificatesTab'
 import SessionsTab from './components/SessionsTab'
@@ -65,6 +66,7 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
   const primary: MenuItem[] = [
     { id: 'home', label: localeText(language, 'الرئيسية', 'Home'), icon: Home },
     { id: 'classes', label: localeText(language, 'حصصي', 'My classes'), icon: Calendar, href: '/dashboard/student/classes' },
+    { id: 'group-proposal', label: localeText(language, 'اقتراح المجموعة', 'Group suggestion'), icon: Calendar, href: '/dashboard/student/group-proposal' },
     { id: 'learning', label: localeText(language, 'التعلّم', 'Learning'), icon: BookOpen, href: '/dashboard/student/learning' },
     { id: 'homework', label: localeText(language, 'الواجبات', 'Homework'), icon: FileText, href: '/dashboard/student/homework' },
     { id: 'feedback', label: localeText(language, 'ملاحظات المدرس', 'Teacher feedback'), icon: MessageSquare, href: '/dashboard/student/feedback' },
@@ -99,7 +101,7 @@ export default function StudentDashboardClient({ user }: StudentDashboardClientP
     <header className={styles.topbar}><div className={styles.topbarInner}>
       <div className={styles.headerTools}><button type="button" aria-label={localeText(language, 'فتح القائمة', 'Open menu')} aria-expanded={sidebarOpen} aria-controls="student-navigation-panel" onClick={() => setSidebarOpen(true)} className={styles.mobileOnly}><Menu size={21} aria-hidden="true" /></button><Link href="/" className={styles.brand} aria-label="Be Fluent home"><BrandLockup size="xs" /></Link></div>
       <nav className={styles.desktopNav} aria-label={localeText(language, 'التنقل السريع', 'Quick navigation')}><Link href="/dashboard/student/classes">{localeText(language, 'حصصي', 'My classes')}</Link><Link href="/dashboard/student/learning">{localeText(language, 'التعلّم', 'Learning')}</Link><Link href="/dashboard/student/feedback">{localeText(language, 'الملاحظات', 'Feedback')}</Link></nav>
-      <div className={styles.headerTools}><ThemeToggle /><span className={styles.status}>{user.isActive ? localeText(language, 'حساب نشط', 'Active account') : localeText(language, 'قيد التفعيل', 'Activation pending')}</span><Link href="/dashboard/student/cart" aria-label={localeText(language, 'السلة', 'Cart')} className="relative grid min-h-11 min-w-11 place-items-center rounded-lg text-[#496257] hover:bg-[#f2f7f2]"><ShoppingCart size={19} aria-hidden="true" />{cartItemsCount > 0 && <span className="absolute -top-1 -left-1 min-w-4 h-4 px-1 bg-[#247456] text-white text-[11px] grid place-items-center rounded-full">{cartItemsCount}</span>}</Link><Button variant="outline" size="sm" onClick={handleSignOut} className="!min-h-11 !border-[#d7e1d8] !rounded-lg !text-[#315f49]"><LogOut size={15} className="ml-1" />{localeText(language, 'خروج', 'Sign out')}</Button></div>
+      <div className={styles.headerTools}><NotificationCenter /><ThemeToggle /><span className={styles.status}>{user.isActive ? localeText(language, 'حساب نشط', 'Active account') : localeText(language, 'قيد التفعيل', 'Activation pending')}</span><Link href="/dashboard/student/cart" aria-label={localeText(language, 'السلة', 'Cart')} className="relative grid min-h-11 min-w-11 place-items-center rounded-lg text-[#496257] hover:bg-[#f2f7f2]"><ShoppingCart size={19} aria-hidden="true" />{cartItemsCount > 0 && <span className="absolute -top-1 -left-1 min-w-4 h-4 px-1 bg-[#247456] text-white text-[11px] grid place-items-center rounded-full">{cartItemsCount}</span>}</Link><Button variant="outline" size="sm" onClick={handleSignOut} className="!min-h-11 !border-[#d7e1d8] !rounded-lg !text-[#315f49]"><LogOut size={15} className="ml-1" />{localeText(language, 'خروج', 'Sign out')}</Button></div>
     </div></header>
     {sidebarOpen && <button type="button" aria-label={localeText(language, 'إغلاق القائمة', 'Close menu')} className={styles.mobileOverlay} onClick={() => setSidebarOpen(false)} />}
     <div className={styles.page}><div className={styles.shell}>

@@ -16,11 +16,47 @@ const sections = [
 
 type Section = (typeof sections)[number]['id']
 type ApiItem = Record<string, unknown> & { id: string }
+type MatchCandidate = {
+  groupId: string
+  score: number
+  remainingCapacity: number | null
+  availabilityMatch: boolean
+  name: string
+  nameAr: string | null
+  teacherName: string | null
+  schedules: Array<{ dayOfWeek: number; startMinute: number; durationMinutes: number; timezone: string }>
+}
+type DuoPartnerCandidate = {
+  subscriptionId: string
+  studentId: string
+  studentName: string
+  sharedMinutes: number
+  sharedSlots: Array<{ dayOfWeek: number; startMinute: number; durationMinutes: number }>
+}
+type MatchState = { loading: boolean; candidates: MatchCandidate[]; partners: DuoPartnerCandidate[]; message: string }
 
 function displayName(item: ApiItem, section: Section) {
   if (section === 'packages') return String(item.title || item.titleAr || item.id)
   if (section === 'groups' || section === 'schedules') return String(item.name || item.nameAr || item.id)
+  if (section === 'subscriptions') {
+    const student = item.User as ApiItem | undefined
+    return String(student?.name || item.studentId || item.id)
+  }
+  if (section === 'enrollments') {
+    const student = item.student as ApiItem | undefined
+    return String(student?.name || item.studentId || item.id)
+  }
   return String(item.id)
+}
+
+function getSubscriptionType(item: ApiItem) {
+  const pkg = item.Package as ApiItem | undefined
+  const type = String(item.subscriptionType || pkg?.subscriptionType || '')
+  return ['GROUP', 'DUO', 'PRIVATE', 'SMALL_GROUP'].includes(type) ? type : null
+}
+
+function timeLabel(minute: number) {
+  return `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`
 }
 
 export default function CommerceClient() {
@@ -33,6 +69,8 @@ export default function CommerceClient() {
   const [lessonsPerWeek, setLessonsPerWeek] = useState('')
   const [importingPhotoPricing, setImportingPhotoPricing] = useState(false)
   const [photoPricingMessage, setPhotoPricingMessage] = useState('')
+  const [matchStates, setMatchStates] = useState<Record<string, MatchState>>({})
+  const [approvingEnrollmentId, setApprovingEnrollmentId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setState('loading')
@@ -92,6 +130,83 @@ export default function CommerceClient() {
     }
   }
 
+  const findMatches = async (item: ApiItem) => {
+    const subscriptionType = getSubscriptionType(item)
+    const studentId = String(item.studentId || '')
+    if (!subscriptionType || !studentId) {
+      setMatchStates((current) => ({ ...current, [item.id]: { loading: false, candidates: [], partners: [], message: t('بيانات الاشتراك أو الطالب غير مكتملة.', 'Subscription or student details are missing.') } }))
+      return
+    }
+    setMatchStates((current) => ({ ...current, [item.id]: { loading: true, candidates: [], partners: [], message: '' } }))
+    try {
+      const response = await fetch('/api/admin/groups/matching', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId, subscriptionId: item.id, subscriptionType }),
+      })
+      const payload = await response.json().catch(() => null)
+      if (!response.ok) {
+        const unavailable = response.status === 503
+        throw new Error(unavailable
+          ? t('المطابقة غير متاحة حتى تفعيل بيانات المرحلة الخامسة.', 'Matching is unavailable until Phase 5 data is enabled.')
+          : t('تعذر العثور على المجموعات المناسبة.', 'Could not find compatible groups.'))
+      }
+      setMatchStates((current) => ({
+        ...current,
+        [item.id]: {
+          loading: false,
+          candidates: Array.isArray(payload?.candidates) ? payload.candidates : [],
+          partners: Array.isArray(payload?.duoPartnerCandidates) ? payload.duoPartnerCandidates : [],
+          message: '',
+        },
+      }))
+    } catch (error) {
+      setMatchStates((current) => ({ ...current, [item.id]: { loading: false, candidates: [], partners: [], message: error instanceof Error ? error.message : t('تعذر إكمال المطابقة.', 'Matching failed.') } }))
+    }
+  }
+
+  const proposeGroup = async (item: ApiItem, groupId: string) => {
+    const subscriptionType = getSubscriptionType(item)
+    const studentId = String(item.studentId || '')
+    if (!subscriptionType || !studentId) return
+    setMatchStates((current) => ({ ...current, [item.id]: { ...(current[item.id] || { candidates: [], partners: [] }), loading: true, message: '' } }))
+    try {
+      const response = await fetch('/api/admin/groups/matching', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId, subscriptionId: item.id, subscriptionType, proposeGroupId: groupId }),
+      })
+      const payload = await response.json().catch(() => null)
+      if (!response.ok) throw new Error(t('تعذر إرسال الاقتراح. تحقق من حالة الاشتراك وسعة المجموعة.', 'Could not send the suggestion. Check the subscription status and group capacity.'))
+      setMatchStates((current) => ({ ...current, [item.id]: { ...(current[item.id] || { candidates: [], partners: [] }), loading: false, message: t('أُرسل الاقتراح للطالب. لن يُفعّل التعيين قبل موافقته واعتماد الإدارة.', 'The suggestion was sent. Assignment will not activate until the student accepts and an administrator approves.') } }))
+      await load()
+      return payload?.proposedEnrollment
+    } catch (error) {
+      setMatchStates((current) => ({ ...current, [item.id]: { ...(current[item.id] || { candidates: [], partners: [] }), loading: false, message: error instanceof Error ? error.message : t('تعذر إرسال الاقتراح.', 'Could not send the suggestion.') } }))
+    }
+  }
+
+  const approveProposal = async (enrollmentId: string) => {
+    setApprovingEnrollmentId(enrollmentId)
+    setMessage('')
+    try {
+      const response = await fetch(`/api/admin/enrollments/${encodeURIComponent(enrollmentId)}/approve-proposal`, { method: 'POST' })
+      const payload = await response.json().catch(() => null)
+      if (!response.ok) {
+        const code = String(payload?.error?.code || '')
+        throw new Error(code === 'GROUP_FULL'
+          ? t('امتلأت المجموعة قبل الاعتماد؛ ابحث عن خيار آخر.', 'The group filled before approval. Find another match.')
+          : t('تعذر اعتماد التعيين. تأكد من موافقة الطالب وصلاحية الاشتراك.', 'Could not confirm assignment. Check student acceptance and subscription status.'))
+      }
+      setMessage(t('تم اعتماد التعيين وإضافة الطالب إلى المجموعة.', 'The assignment was approved and the student was added to the group.'))
+      await load()
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : t('تعذر اعتماد التعيين.', 'Could not confirm the assignment.'))
+    } finally {
+      setApprovingEnrollmentId(null)
+    }
+  }
+
   useEffect(() => {
     const timer = window.setTimeout(() => { void load() }, 0)
     return () => window.clearTimeout(timer)
@@ -104,6 +219,9 @@ export default function CommerceClient() {
     groups: t('المجموعات', 'Groups'),
     schedules: t('الجداول', 'Schedules'),
   }
+  const dayNames = language === 'ar'
+    ? ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
+    : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
   return <section dir={localeDirection(language)}>
     <div className={styles.tabs} role="tablist" aria-label={t('العمليات التجارية', 'Commercial operations')}>
@@ -138,12 +256,46 @@ export default function CommerceClient() {
        <p className={base.muted}>{t('تظل المرحلة الخامسة محظورة القراءة والكتابة حتى استعادة الاتصال وتفعيلها صراحةً.', 'Phase 5 remains read/write blocked until connectivity is restored and explicitly enabled.')}</p>
     </div>}
     {state === 'error' && <div className={base.error} role="alert">{message} <button className={base.button} onClick={() => void load()}>{t('إعادة المحاولة', 'Retry')}</button></div>}
+    {message && section === 'enrollments' && <p role="status" className={base.muted}>{message}</p>}
     {state === 'ready' && items.length === 0 && <div className={base.empty}>{t('لم يتم العثور على', 'No')} {names[section]}.</div>}
     {state === 'ready' && items.length > 0 && <div className={base.grid}>
       {items.map((item) => <article className={base.card} key={item.id}>
         <h2>{displayName(item, section)}</h2>
-         <p className={base.muted}>{String(item.status || item.subscriptionType || t('مهيأ', 'Configured'))}</p>
+        <p className={base.muted}>{String(item.status || item.subscriptionType || t('مهيأ', 'Configured'))}</p>
          {section === 'schedules' && Array.isArray(item.schedules) && <p>{item.schedules.length} {t('مواعيد', 'schedule entries')}</p>}
+        {section === 'subscriptions' && item.status === 'APPROVED' && !item.groupId && <div className="mt-4">
+          <button type="button" className={base.button} disabled={matchStates[item.id]?.loading} onClick={() => void findMatches(item)} data-testid={`button-match-${item.id}`}>
+            {matchStates[item.id]?.loading ? t('جارٍ البحث…', 'Finding matches…') : t('ابحث عن مجموعة', 'Find a group')}
+          </button>
+          {matchStates[item.id]?.message && <p role="status" className={`${base.muted} mt-2`}>{matchStates[item.id].message}</p>}
+          {matchStates[item.id]?.candidates.map((candidate) => <div key={candidate.groupId} className="mt-3 rounded-lg border border-[#dce5dd] p-3">
+            <h3 className="font-semibold text-[#26332e]">{language === 'ar' ? candidate.nameAr || candidate.name : candidate.name}</h3>
+            <p className="mt-1 text-xs text-[#68756e]">{candidate.teacherName ? `${t('المعلم', 'Teacher')}: ${candidate.teacherName}` : ''}{candidate.remainingCapacity != null ? ` · ${t('الأماكن المتبقية', 'Seats left')}: ${candidate.remainingCapacity}` : ''}</p>
+            {candidate.schedules.slice(0, 3).map((schedule, index) => <p key={`${schedule.dayOfWeek}-${schedule.startMinute}-${index}`} className="mt-1 text-xs text-[#68756e]">
+              {schedule.dayOfWeek} · {timeLabel(schedule.startMinute)} · {schedule.timezone}
+            </p>)}
+            {candidate.availabilityMatch && <p className="mt-1 text-xs font-semibold text-[#286547]">{t('يتوافق مع أوقات الطالب المحفوظة', 'Matches the student’s saved availability')}</p>}
+            <button type="button" className={`${base.button} mt-3`} disabled={matchStates[item.id]?.loading} onClick={() => void proposeGroup(item, candidate.groupId)}>
+              {t('إرسال اقتراح للطالب', 'Send suggestion to student')}
+            </button>
+          </div>)}
+          {getSubscriptionType(item) === 'DUO' && matchStates[item.id]?.partners.length > 0 && <div className="mt-4 rounded-lg bg-[#f5f8f5] p-3">
+            <h3 className="font-semibold text-[#26332e]">{t('طلاب متوافقون محتملون لباقة الثنائي', 'Potential Duo plan partners')}</h3>
+            <p className="mt-1 text-xs text-[#68756e]">{t('هذه مطابقة مبدئية للتوفر والمستوى، وليست تعيينًا أو موافقة من الطالب الآخر.', 'This is a preliminary availability and level match, not an assignment or the other student’s acceptance.')}</p>
+            <ul className="mt-3 grid gap-2">
+              {matchStates[item.id].partners.map((partner) => <li key={partner.subscriptionId} className="rounded-lg border border-[#dce5dd] bg-white p-3">
+                <p className="font-semibold text-[#26332e]">{partner.studentName}</p>
+                <p className="mt-1 text-xs text-[#68756e]">{t('وقت مشترك', 'Shared availability')}: {partner.sharedMinutes} {t('دقيقة أسبوعيًا', 'minutes per week')}</p>
+                {partner.sharedSlots.slice(0, 4).map((slot, index) => <p key={`${slot.dayOfWeek}-${slot.startMinute}-${index}`} className="mt-1 text-xs text-[#68756e]">
+                  {dayNames[slot.dayOfWeek]} · {timeLabel(slot.startMinute)}–{timeLabel(slot.startMinute + slot.durationMinutes)}
+                </p>)}
+              </li>)}
+            </ul>
+          </div>}
+        </div>}
+        {section === 'enrollments' && item.status === 'STUDENT_ACCEPTED' && <button type="button" className={`${base.button} mt-4`} disabled={approvingEnrollmentId === item.id} onClick={() => void approveProposal(item.id)} data-testid={`button-approve-proposal-${item.id}`}>
+          {approvingEnrollmentId === item.id ? t('جارٍ الاعتماد…', 'Approving…') : t('اعتماد التعيين', 'Approve assignment')}
+        </button>}
       </article>)}
     </div>}
   </section>

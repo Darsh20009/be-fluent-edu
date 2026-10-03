@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import LanguageToggle from '@/components/LanguageToggle'
 import ThemeToggle from '@/components/ThemeToggle'
+import NotificationCenter from '@/components/NotificationCenter'
 import { useTheme } from '@/lib/contexts/ThemeContext'
 import { localeDirection, localeText } from '@/lib/locale'
 
@@ -164,6 +165,7 @@ export default function TeacherWorkspaceShell({ user, children }: TeacherWorkspa
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
+              <NotificationCenter />
               <LanguageToggle />
               <ThemeToggle />
             </div>

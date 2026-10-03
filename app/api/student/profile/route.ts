@@ -27,7 +27,11 @@ export async function GET() {
 export async function PATCH(request: NextRequest) {
   const access = await studentId()
   if (isNextResponse(access)) return access
-  const body = studentProfilePatchSchema.parse(await request.json())
+  const parsed = studentProfilePatchSchema.safeParse(await request.json().catch(() => null))
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: { code: 'VALIDATION_ERROR', details: parsed.error.flatten() } }, { status: 400 })
+  }
+  const body = parsed.data
   if (body.goal !== undefined) {
     const blocked = phase9DatabaseGuard()
     if (blocked) return blocked
@@ -37,6 +41,17 @@ export async function PATCH(request: NextRequest) {
   if (body.phone !== undefined) userData.phone = body.phone ? normalizePhone(body.phone) : null
   const profileData: Record<string, unknown> = {}
   for (const key of ['age', 'gender', 'nationality', 'goal'] as const) if (body[key] !== undefined) profileData[key] = body[key]
+  if (body.availabilityMonth !== undefined) profileData.availabilityMonth = body.availabilityMonth
+  if (body.availabilitySlots !== undefined) {
+    profileData.availabilityJson = body.availabilitySlots.length
+      ? JSON.stringify({
+          timezone: body.availabilityTimezone || 'Asia/Riyadh',
+          slots: body.availabilitySlots,
+        })
+      : null
+  } else if (body.availabilityMonth === null) {
+    profileData.availabilityJson = null
+  }
   if (body.goal !== undefined) {
     const updated = await prisma.$transaction(async (tx) => {
       const user = Object.keys(userData).length
