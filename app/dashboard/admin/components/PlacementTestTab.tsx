@@ -32,6 +32,8 @@ interface Question {
   order: number
 }
 
+type ApiQuestion = Omit<Question, 'options'> & { options?: string | string[] | null }
+
 interface TestResult {
   id: string
   userId: string
@@ -40,7 +42,7 @@ interface TestResult {
   score: number
   level: string
   completedAt: string
-  answers?: any[]
+  answers?: unknown[]
 }
 
 const LEVELS: Level[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
@@ -81,6 +83,13 @@ const emptyQuestion = (): Partial<Question> => ({
 export default function PlacementTestTab() {
   const { language } = useTheme()
   const t = (ar: string, en: string) => localeText(language, ar, en)
+  const [generationOpen, setGenerationOpen] = useState(false)
+  const [generating, setGenerating] = useState(false)
+  const [generationBand, setGenerationBand] = useState('A1.1')
+  const [generationCount, setGenerationCount] = useState(3)
+  const [generationTopic, setGenerationTopic] = useState('')
+  const [generatedDrafts, setGeneratedDrafts] = useState<Array<Question & { draftId: string }>>([])
+  const [editingDraftId, setEditingDraftId] = useState<string | null>(null)
   const qTypeLabel = (value: string) => {
     const type = Q_TYPES.find((item) => item.value === value)
     if (!type) return value
@@ -119,10 +128,10 @@ export default function PlacementTestTab() {
     try {
       const res = await fetch('/api/admin/placement-test/questions?testType=PLACEMENT')
       if (res.ok) {
-        const data = await res.json()
-        setQuestions(data.map((q: any) => ({
+        const data = await res.json() as ApiQuestion[]
+        setQuestions(data.map((q: ApiQuestion) => ({
           ...q,
-          options: q.options ? (typeof q.options === 'string' ? JSON.parse(q.options) : q.options) : []
+          options: q.options ? (typeof q.options === 'string' ? JSON.parse(q.options) as string[] : q.options) : []
         })))
       }
     } catch { toast.error(t('فشل تحميل الأسئلة', 'Failed to load questions')) }
@@ -173,12 +182,68 @@ export default function PlacementTestTab() {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       if (!res.ok) throw new Error()
       toast.success(isEditing ? t('تم تعديل السؤال ✓', 'Question updated ✓') : t('تم إضافة السؤال ✓', 'Question added ✓'))
+      if (editingDraftId) {
+        setGeneratedDrafts(drafts => drafts.filter(draft => draft.draftId !== editingDraftId))
+        setEditingDraftId(null)
+      }
       setShowForm(false)
       setIsEditing(null)
       setEditingQ(emptyQuestion())
-      fetchQuestions()
+      await fetchQuestions()
     } catch { toast.error(t('فشل حفظ السؤال', 'Failed to save question')) }
     finally { setSaving(false) }
+  }
+
+  async function handleGenerateQuestions() {
+    setGenerating(true)
+    try {
+      const response = await fetch('/api/admin/placement-test/questions/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          band: generationBand,
+          count: generationCount,
+          topic: generationTopic.trim(),
+        }),
+      })
+      const payload = await response.json().catch(() => null)
+      if (!response.ok || !Array.isArray(payload?.drafts)) {
+        throw new Error(typeof payload?.error === 'string' ? payload.error : t('تعذر توليد الأسئلة الآن.', 'Question generation is unavailable right now.'))
+      }
+      const drafts = payload.drafts.map((draft: Omit<Question, 'id'>, index: number) => ({
+        ...draft,
+        id: '',
+        draftId: `${Date.now()}-${index}-${Math.random().toString(36).slice(2)}`,
+      }))
+      setGeneratedDrafts(current => [...current, ...drafts])
+      setGenerationOpen(false)
+      toast.success(t('تم إنشاء مسودات للمراجعة', 'Draft questions generated for review'))
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('تعذر توليد الأسئلة الآن.', 'Question generation is unavailable right now.'))
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  function loadDraftIntoEditor(draft: Question & { draftId: string }) {
+    setEditingQ({
+      question: draft.question,
+      questionAr: draft.questionAr || '',
+      questionType: 'MCQ',
+      options: [...(draft.options || [])],
+      correctAnswer: draft.correctAnswer || '',
+      explanation: draft.explanation || '',
+      points: draft.points || 1,
+      level: draft.level,
+      band: draft.band,
+      testType: 'PLACEMENT',
+      category: draft.category || '',
+      order: 0,
+    })
+    setIsEditing(null)
+    setEditingDraftId(draft.draftId)
+    setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   async function handleDelete(id: string) {
@@ -196,6 +261,7 @@ export default function PlacementTestTab() {
   function startEdit(q: Question) {
     setEditingQ({ ...q, options: q.options?.length ? q.options : ['', '', '', ''] })
     setIsEditing(q.id)
+    setEditingDraftId(null)
     setShowForm(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -203,6 +269,7 @@ export default function PlacementTestTab() {
   function cancelForm() {
     setShowForm(false)
     setIsEditing(null)
+    setEditingDraftId(null)
     setEditingQ(emptyQuestion())
   }
 
@@ -284,7 +351,7 @@ export default function PlacementTestTab() {
           { key: 'results', label: t('نتائج الطلاب', 'Student results'), icon: Users },
           { key: 'settings', label: t('إعدادات الاختبار', 'Test settings'), icon: Settings },
         ].map(({ key, label, icon: Icon }) => (
-          <button key={key} onClick={() => setActiveView(key as any)}
+          <button key={key} onClick={() => setActiveView(key as 'bank' | 'results' | 'settings')}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
               activeView === key ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
             }`}>
@@ -465,14 +532,105 @@ export default function PlacementTestTab() {
             </div>
           )}
 
+          {generationOpen && (
+            <section className="space-y-4 border border-gray-200 bg-white p-4 sm:p-5" aria-label={t('توليد مسودات أسئلة', 'Generate question drafts')}>
+              <div>
+                <h3 className="text-sm font-bold text-gray-900">{t('توليد مسودات بالذكاء الاصطناعي', 'Generate AI question drafts')}</h3>
+                <p className="mt-1 text-xs leading-5 text-gray-500">
+                  {t('ستظهر الأسئلة للمراجعة فقط ولن تُحفظ في البنك حتى تراجعها وتضيفها يدويًا.', 'Questions appear as drafts only. They are not saved to the bank until you review and add them.')}
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-4">
+                <label className="text-xs font-semibold text-gray-600">
+                  {t('النطاق', 'Placement band')}
+                  <select value={generationBand} onChange={event => setGenerationBand(event.target.value)}
+                    className="mt-1 block w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800">
+                    {BANDS.map(band => <option key={band} value={band}>{band}</option>)}
+                  </select>
+                </label>
+                <label className="text-xs font-semibold text-gray-600">
+                  {t('عدد المسودات', 'Number of drafts')}
+                  <select value={generationCount} onChange={event => setGenerationCount(Number(event.target.value))}
+                    className="mt-1 block w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800">
+                    {[1, 2, 3, 4, 5].map(count => <option key={count} value={count}>{count}</option>)}
+                  </select>
+                </label>
+                <label className="text-xs font-semibold text-gray-600 sm:col-span-2">
+                  {t('الموضوع (اختياري)', 'Topic (optional)')}
+                  <input value={generationTopic} onChange={event => setGenerationTopic(event.target.value)}
+                    maxLength={120}
+                    className="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-800"
+                    placeholder={t('مثل: المضارع البسيط أو السفر', 'e.g. present simple or travel')} />
+                </label>
+              </div>
+              <div className="flex flex-wrap justify-end gap-2">
+                <button onClick={() => setGenerationOpen(false)} disabled={generating}
+                  className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-50">
+                  {t('إلغاء', 'Cancel')}
+                </button>
+                <button onClick={handleGenerateQuestions} disabled={generating}
+                  className="flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-60">
+                  <Zap className="h-4 w-4" />
+                  {generating ? t('جارٍ التوليد...', 'Generating…') : t('إنشاء مسودات', 'Generate drafts')}
+                </button>
+              </div>
+            </section>
+          )}
+
+          {generatedDrafts.length > 0 && (
+            <section className="space-y-3 border border-amber-200 bg-amber-50/50 p-4 sm:p-5" aria-label={t('مسودات الأسئلة المولدة', 'Generated question drafts')}>
+              <div>
+                <h3 className="text-sm font-bold text-gray-900">{t('مسودات تحتاج إلى مراجعتك', 'Drafts awaiting your review')} ({generatedDrafts.length})</h3>
+                <p className="mt-1 text-xs text-gray-600">{t('تحقق من السؤال والإجابة الصحيحة قبل إضافته إلى بنك الاختبار.', 'Check each question and its correct answer before adding it to the test bank.')}</p>
+              </div>
+              {generatedDrafts.map(draft => (
+                <article key={draft.draftId} className="space-y-3 border border-gray-200 bg-white p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{draft.question}</p>
+                      {draft.questionAr && <p className="mt-1 text-sm text-gray-600">{draft.questionAr}</p>}
+                    </div>
+                    <span className="shrink-0 border border-gray-200 px-2 py-1 text-xs font-semibold text-gray-600">{draft.band} · {draft.category}</span>
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {(draft.options || []).map((option, index) => (
+                      <div key={`${draft.draftId}-${index}`} className={`border px-3 py-2 text-sm ${option === draft.correctAnswer ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-gray-200 text-gray-700'}`}>
+                        <span className="me-2 font-semibold">{String.fromCharCode(65 + index)}.</span>{option}
+                        {option === draft.correctAnswer && <span className="ms-2 text-xs font-semibold">{t('الإجابة الصحيحة', 'Correct answer')}</span>}
+                      </div>
+                    ))}
+                  </div>
+                  {draft.explanation && <p className="text-xs leading-5 text-gray-600">{draft.explanation}</p>}
+                  <div className="flex justify-end gap-2">
+                    <button onClick={() => setGeneratedDrafts(current => current.filter(item => item.draftId !== draft.draftId))}
+                      className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50">
+                      {t('تجاهل', 'Discard')}
+                    </button>
+                    <button onClick={() => loadDraftIntoEditor(draft)}
+                      className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-800">
+                      {t('مراجعة وتعديل ثم إضافة', 'Review, edit, and add')}
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </section>
+          )}
+
           {/* Toolbar */}
           <div className="flex flex-col sm:flex-row gap-3">
             {!showForm && (
-              <button onClick={() => { setShowForm(true); setIsEditing(null); setEditingQ(emptyQuestion()) }}
-                className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-200 transition">
-                <Plus className="w-4 h-4" />
-              {t('إضافة سؤال جديد', 'Add a new question')}
-              </button>
+              <>
+                <button onClick={() => { setShowForm(true); setIsEditing(null); setEditingDraftId(null); setEditingQ(emptyQuestion()) }}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-200 transition">
+                  <Plus className="w-4 h-4" />
+                  {t('إضافة سؤال جديد', 'Add a new question')}
+                </button>
+                <button onClick={() => setGenerationOpen(open => !open)}
+                  className="flex items-center gap-2 px-4 py-2.5 border border-emerald-200 bg-white text-emerald-800 rounded-xl font-bold text-sm hover:bg-emerald-50 transition">
+                  <Zap className="w-4 h-4" />
+                  {t('توليد مسودات', 'Generate drafts')}
+                </button>
+              </>
             )}
             <div className="relative flex-1">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

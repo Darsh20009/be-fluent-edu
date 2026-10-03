@@ -20,3 +20,4 @@
 - [Delivery completeness](delivery-completeness.md) — the user expects complete student, teacher, admin and AI flows, not page-only or partially wired delivery.
 - [Admin assistant scope](admin-assistant-scope.md) — keep the new assistant ADMIN-only across people, learning, commerce, and communications, with confirmation before writes or sends.
 - [Placement audio storage](placement-audio-storage.md) — keep student speaking samples capped in MongoDB until an approved file-storage route is available; do not bypass package restrictions.
+- [مزوّد بنك أسئلة تحديد المستوى](placement-question-ai-provider.md) — OpenAI لتوليد أسئلة التحديد؛ لا تغيّر مسارات Thanarah الأخرى بلا موافقة.
