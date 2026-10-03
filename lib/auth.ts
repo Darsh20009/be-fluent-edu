@@ -6,6 +6,7 @@ import { phoneLookupCandidates } from './validation'
 import { normalizeRole } from './authorization'
 import { isAccountUsable, resolveAccountStatus } from './auth/status'
 import { verifyOtp, OtpServiceError } from './auth/otp-service'
+import { getOtpSignInErrorMessage } from './auth/otp-error-policy'
 import { recordAuditEvent } from './audit'
 
 function publicUser(user: {
@@ -107,7 +108,7 @@ export const authOptions: NextAuthOptions = {
               code: error.code,
               reason: error.diagnosticReason || 'unspecified',
             })
-            throw new Error('Invalid verification code')
+            throw new Error(getOtpSignInErrorMessage(intent, error))
           }
           throw error
         }

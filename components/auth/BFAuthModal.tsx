@@ -9,6 +9,7 @@ import { Check, Eye, EyeOff, LoaderCircle, LockKeyhole, MessageCircle, Phone, X 
 import BFPhoneField from '@/components/auth/BFPhoneField'
 import BrandLockup from '@/components/brand/BrandLockup'
 import { getCountryByIso, toAsciiDigits, toInternationalPhone } from '@/lib/phone-countries'
+import { shouldOfferRegistration } from '@/lib/auth/otp-error-policy'
 
 type EntryMode = 'login' | 'start'
 type AuthIntent = 'LOGIN' | 'REGISTER'
@@ -70,6 +71,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
   const [registrationEmail, setRegistrationEmail] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [statusMessage, setStatusMessage] = useState('')
   const [resendIn, setResendIn] = useState(0)
   const nameRef = useRef<HTMLInputElement>(null)
   const panelRef = useRef<HTMLElement>(null)
@@ -226,6 +228,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
 
     setBusy(true)
     setError('')
+    setStatusMessage('')
     try {
       const response = await fetch('/api/auth/otp/request', {
         method: 'POST',
@@ -287,6 +290,19 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
         redirect: false,
       })
       if (!result?.ok || result.error) {
+        if (shouldOfferRegistration(authIntent, result?.error)) {
+          setAuthIntent('REGISTER')
+          setView('register')
+          setCode('')
+          setPendingPhone('')
+          setResendIn(0)
+          setError('')
+          setStatusMessage(tr(
+            'تحققنا من رقمك، لكنه غير مرتبط بحساب بعد. أكمل البيانات لإنشاء حساب؛ سنرسل رمزًا جديدًا لتأكيد التسجيل.',
+            'Your phone is verified, but no account is associated with it yet. Complete the form to create one; we will send a new code to confirm registration.',
+          ))
+          return
+        }
         setError(tr('الرمز غير صحيح أو انتهت صلاحيته. اطلب رمزاً جديداً.', 'That code is invalid or expired. Request a new one.'))
         return
       }
@@ -390,6 +406,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
                   : tr('تابع دروسك وممارستك وخطوتك التالية.', 'Continue your classes, practice, and next learning step.')}
           </p>
 
+            {statusMessage && <p className="mt-5 border border-[#dce8df] bg-[#f5faf6] px-3 py-3 text-sm leading-6 text-[#365c46]" role="status">{statusMessage}</p>}
             {error && <p className="mt-5 border border-[#eed7d4] bg-[#fff8f6] px-3 py-3 text-sm leading-6 text-[#874039]" role="alert">{error}</p>}
 
             {view === 'phone' && (
@@ -610,7 +627,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
             {view === 'phone' && (
               <p className="mt-5 text-center text-xs leading-6 text-[#68746c]">
                 {tr('مستخدم جديد؟', 'New to Be Fluent?')}{' '}
-                <button type="button" onClick={() => { setAuthIntent('REGISTER'); setError(''); setView('register') }} className="font-semibold text-[#24714f] underline underline-offset-4">
+                <button type="button" onClick={() => { setAuthIntent('REGISTER'); setError(''); setStatusMessage(''); setView('register') }} className="font-semibold text-[#24714f] underline underline-offset-4">
                   {tr('ابدأ التسجيل', 'Start registration')}
                 </button>
               </p>
@@ -619,7 +636,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
             {view === 'register' && (
               <p className="mt-4 text-center text-xs leading-6 text-[#68746c]">
                 {tr('لديك حساب بالفعل؟', 'Already have an account?')}{' '}
-                <button type="button" disabled={busy} onClick={() => { setAuthIntent('LOGIN'); setError(''); setPassword(''); setConfirmPassword(''); setView('phone') }} className="font-semibold text-[#24714f] underline underline-offset-4">
+                <button type="button" disabled={busy} onClick={() => { setAuthIntent('LOGIN'); setError(''); setStatusMessage(''); setPassword(''); setConfirmPassword(''); setView('phone') }} className="font-semibold text-[#24714f] underline underline-offset-4">
                   {tr('تسجيل الدخول', 'Sign in')}
                 </button>
               </p>
