@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { canAttemptOtp, canResendOtp, createOtpChallenge, isOtpExpired, OTP_POLICY, verifyOtp } from '@/lib/auth/otp'
+import { canAttemptOtp, createOtpChallenge, isOtpExpired, OTP_POLICY, verifyOtp } from '@/lib/auth/otp'
 import { normalizePhone, phoneLookupCandidates, phoneSchema } from '@/lib/validation'
 import { canCreateEmployeeAccounts, hasPermission, roleHasPermission } from '@/lib/authorization'
 import { isAccountUsable, resolveAccountStatus } from '@/lib/auth/status'
@@ -29,14 +29,11 @@ test('hashes OTPs without retaining or accepting plaintext', () => {
   assert.equal(verifyOtp('000000', challenge.codeHash, 'test-secret'), false)
 })
 
-test('enforces OTP expiry, attempts, and resend cooldown', () => {
+test('enforces OTP expiry and per-challenge verification attempts', () => {
   const now = new Date('2026-09-20T00:00:00Z')
   const { challenge } = createOtpChallenge(now, 'test-secret')
   assert.equal(isOtpExpired(challenge.expiresAt, now), false)
   assert.equal(canAttemptOtp({ ...challenge, attempts: OTP_POLICY.maxAttempts }), false)
-  assert.equal(canResendOtp({ ...challenge, resendCount: 0 }, now, new Date(now.getTime() + 30_000)), false)
-  assert.equal(canResendOtp({ ...challenge, resendCount: 0 }, now, new Date(now.getTime() + 61_000)), true)
-  assert.equal(canResendOtp({ ...challenge, resendCount: OTP_POLICY.maxResends }, now, new Date(now.getTime() + 61_000)), false)
 })
 
 test('resolves account status and rejects suspended users', () => {

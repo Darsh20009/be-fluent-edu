@@ -8,10 +8,7 @@ export const OTP_POLICY = {
   digits: 6,
   expiresInSeconds: 5 * 60,
   maxAttempts: 5,
-  maxResends: 3,
-  resendCooldownSeconds: 60,
-  resendWindowSeconds: 10 * 60,
-  requestLimit: 5,
+  verificationRateLimitWindowSeconds: 10 * 60,
   verificationLimit: 10,
 } as const
 
@@ -19,7 +16,6 @@ export interface OtpChallenge {
   codeHash: string
   expiresAt: Date
   attempts: number
-  resendCount: number
 }
 
 function secretFromEnvironment(): string {
@@ -64,7 +60,6 @@ export function createOtpChallenge(
       codeHash: hashOtp(code, secret),
       expiresAt: new Date(now.getTime() + OTP_POLICY.expiresInSeconds * 1000),
       attempts: 0,
-      resendCount: 0,
     },
   }
 }
@@ -75,18 +70,4 @@ export function isOtpExpired(expiresAt: Date, now = new Date()): boolean {
 
 export function canAttemptOtp(challenge: OtpChallenge): boolean {
   return challenge.attempts < OTP_POLICY.maxAttempts
-}
-
-export function canResendOtp(
-  challenge: OtpChallenge,
-  requestedAt: Date,
-  now = new Date(),
-): boolean {
-  return (
-    challenge.resendCount < OTP_POLICY.maxResends &&
-    now.getTime() - requestedAt.getTime() >=
-      OTP_POLICY.resendCooldownSeconds * 1000 &&
-    now.getTime() - requestedAt.getTime() <=
-      OTP_POLICY.resendWindowSeconds * 1000
-  )
 }

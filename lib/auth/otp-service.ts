@@ -5,7 +5,6 @@ import { normalizePhone } from '@/lib/validation'
 import { recordAuditEvent } from '@/lib/audit'
 import {
   canAttemptOtp,
-  canResendOtp,
   createOtpChallenge,
   hashOtp,
   isOtpExpired,
@@ -188,48 +187,6 @@ export async function requestOtp(input: RequestOtpInput) {
   const identity = assertIdentity(input)
   const now = new Date()
 
-  if (identity.normalizedPhone) {
-    await consumeRateLimit(
-      'OTP_REQUEST_PHONE',
-      identity.normalizedPhone,
-      OTP_POLICY.requestLimit,
-      OTP_POLICY.resendWindowSeconds,
-      now,
-    )
-  }
-  if (input.ip) {
-    await consumeRateLimit(
-      'OTP_REQUEST_IP',
-      input.ip,
-      OTP_POLICY.requestLimit * 4,
-      OTP_POLICY.resendWindowSeconds,
-      now,
-    )
-  }
-
-  const previous = await prisma.authOtpChallenge.findFirst({
-    where: {
-      intent: input.intent,
-      ...(identity.normalizedPhone
-        ? { normalizedPhone: identity.normalizedPhone }
-        : { email: identity.email }),
-      ...buildOtpChallengeActiveStateWhere(),
-    },
-    orderBy: { createdAt: 'desc' },
-  })
-
-  if (previous) {
-    const previousChallenge = {
-      codeHash: previous.codeHash,
-      expiresAt: previous.expiresAt,
-      attempts: previous.attempts,
-      resendCount: previous.resendCount,
-    }
-    if (!canResendOtp(previousChallenge, previous.lastSentAt, now)) {
-      throw new OtpServiceError('RATE_LIMITED')
-    }
-  }
-
   const { challenge, code } = createOtpChallenge(now)
   const provider = input.provider || getOtpDeliveryProvider(input.channel)
   const created = await prisma.authOtpChallenge.create({
@@ -243,7 +200,6 @@ export async function requestOtp(input: RequestOtpInput) {
       expiresAt: challenge.expiresAt,
       attempts: 0,
       maxAttempts: OTP_POLICY.maxAttempts,
-      resendCount: previous ? previous.resendCount + 1 : 0,
       requestedAt: now,
       lastSentAt: now,
       requestIpHash: input.ip ? hashRateKey(input.ip) : null,
@@ -299,7 +255,7 @@ export async function requestOtp(input: RequestOtpInput) {
     challengeId: created.id,
     channel: input.channel,
     expiresAt: challenge.expiresAt,
-    resendAfterSeconds: OTP_POLICY.resendCooldownSeconds,
+    resendAfterSeconds: 0,
   }
 }
 
@@ -363,7 +319,7 @@ export async function verifyOtp(input: VerifyOtpInput) {
       'OTP_VERIFY_PHONE',
       identity.normalizedPhone,
       OTP_POLICY.verificationLimit,
-      OTP_POLICY.resendWindowSeconds,
+      OTP_POLICY.verificationRateLimitWindowSeconds,
       now,
     )
   }
@@ -372,7 +328,7 @@ export async function verifyOtp(input: VerifyOtpInput) {
       'OTP_VERIFY_IP',
       input.ip,
       OTP_POLICY.verificationLimit * 3,
-      OTP_POLICY.resendWindowSeconds,
+      OTP_POLICY.verificationRateLimitWindowSeconds,
       now,
     )
   }
@@ -427,7 +383,6 @@ export async function verifyOtp(input: VerifyOtpInput) {
     codeHash: challenge.codeHash,
     expiresAt: challenge.expiresAt,
     attempts: challenge.attempts,
-    resendCount: challenge.resendCount,
   })) {
     await prisma.authOtpChallenge.update({
       where: { id: challenge.id },
