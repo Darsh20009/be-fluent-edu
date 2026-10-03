@@ -12,6 +12,7 @@ import {
   whatsappAuthPersistence,
   type WhatsAppAuthPersistence,
 } from './persistence'
+import { suppressSensitiveSessionLogs } from './suppress-sensitive-session-logs'
 import { WHATSAPP_MIN_OUTGOING_INTERVAL_MS } from './index'
 
 export type WhatsAppProviderStatus =
@@ -60,6 +61,8 @@ const silentLogger = {
   error() {},
   child() { return this },
 } as never
+
+suppressSensitiveSessionLogs()
 
 function isStoredAuthState(value: unknown): value is StoredAuthState {
   if (!value || typeof value !== 'object') return false

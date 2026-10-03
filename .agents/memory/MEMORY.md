@@ -4,7 +4,7 @@
 - [Dependency audit tree mismatches](dependency-audit-tree-mismatches.md) — compare lockfile audits with the installed production tree; missing peer packages can return on clean install.
 - [Socket.IO WebSocket override](socketio-websocket-override.md) — keep the patched ws override until adapter ranges catch up; verify real loopback I/O because integration tests skip it.
 - [Brand lockup](brand-lockup.md) — Use editable “Be Fluent” text beside the provided mark, with a one-shot typewriter reveal in live UI.
-- [Baileys v7 ESM interop](baileys-v7-interop.md) — load runtime APIs with native dynamic import; the CJS test loader cannot require its ESM-only Rust bridge dependency.
+- [Baileys v7 runtime quirks](baileys-v7-interop.md) — use native ESM loading and filter libsignal console dumps, which can include session keys.
 - [Manager access boundaries](manager-access-boundaries.md) — keep MANAGER on a separate workspace and map only explicitly granted manager capabilities into admin API gates.
 - [إنشاء حسابات الموظفين](employee-account-creation-boundary.md) — يقتصر الإنشاء على ADMIN وTEACHER لحسابات TEACHER وSTAFF، دون منح المعلم صلاحيات.
 - [Subscription review boundary](admin-subscription-review-boundary.md) — keep actionable payment review separate from the broader commerce workspace until workflows reach parity.

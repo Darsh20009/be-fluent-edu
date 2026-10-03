@@ -159,6 +159,8 @@ async function consumeRateLimit(
 async function invalidatePreviousChallenges(
   identity: { normalizedPhone?: string; email?: string },
   intent: OtpIntent,
+  keepChallengeId: string,
+  createdBefore: Date,
 ) {
   const identityFilters = [
     identity.normalizedPhone ? { normalizedPhone: identity.normalizedPhone } : undefined,
@@ -172,6 +174,8 @@ async function invalidatePreviousChallenges(
       intent,
       consumedAt: null,
       invalidatedAt: null,
+      id: { not: keepChallengeId },
+      createdAt: { lt: createdBefore },
       OR: identityFilters,
     },
     data: { invalidatedAt: new Date() },
@@ -225,8 +229,6 @@ export async function requestOtp(input: RequestOtpInput) {
     }
   }
 
-  await invalidatePreviousChallenges(identity, input.intent)
-
   const { challenge, code } = createOtpChallenge(now)
   const provider = input.provider || getOtpDeliveryProvider(input.channel)
   const created = await prisma.authOtpChallenge.create({
@@ -279,6 +281,17 @@ export async function requestOtp(input: RequestOtpInput) {
       reason: deliveryReason,
     })
     throw new OtpServiceError('DELIVERY_UNAVAILABLE', undefined, deliveryReason)
+  }
+
+  try {
+    await invalidatePreviousChallenges(identity, input.intent, created.id, created.createdAt)
+  } catch {
+    // The delivered challenge remains verifiable by its id if cleanup of older
+    // challenges fails; do not report a delivery failure after sending the code.
+    console.warn('OTP previous challenge cleanup failed', {
+      channel: input.channel,
+      reason: 'supersession_failed',
+    })
   }
 
   return {
@@ -369,6 +382,33 @@ export async function verifyOtp(input: VerifyOtpInput) {
   })
 
   if (!challenge) {
+    const challengeById = input.challengeId
+      ? await prisma.authOtpChallenge.findUnique({
+          where: { id: input.challengeId },
+          select: {
+            intent: true,
+            normalizedPhone: true,
+            email: true,
+            consumedAt: true,
+            invalidatedAt: true,
+            expiresAt: true,
+          },
+        })
+      : null
+    const identityMatches = challengeById
+      ? identity.normalizedPhone
+        ? challengeById.normalizedPhone === identity.normalizedPhone
+        : challengeById.email === identity.email
+      : null
+    console.warn('OTP challenge lookup missed', {
+      challengeIdProvided: Boolean(input.challengeId),
+      challengeRecordFound: Boolean(challengeById),
+      intentMatches: challengeById ? challengeById.intent === input.intent : null,
+      identityMatches,
+      challengeConsumed: challengeById ? Boolean(challengeById.consumedAt) : null,
+      challengeInvalidated: challengeById ? Boolean(challengeById.invalidatedAt) : null,
+      challengeExpired: challengeById ? isOtpExpired(challengeById.expiresAt, now) : null,
+    })
     audit('AUTH_OTP_FAILED')
     throw new OtpServiceError('INVALID_CODE', undefined, 'no_active_challenge')
   }
