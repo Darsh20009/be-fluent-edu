@@ -6,6 +6,7 @@ const verifySchema = z
   .object({
     phone: z.string().trim().optional(),
     email: z.string().trim().email().optional(),
+    challengeId: z.string().uuid().optional(),
     code: z.string().regex(/^\d{6}$/),
     intent: z.enum(['LOGIN', 'REGISTER']).default('LOGIN'),
   })

@@ -38,6 +38,7 @@ export default function ForgotPasswordPage() {
   const [phoneInput, setPhoneInput] = useState('')
   const [emailInput, setEmailInput] = useState('')
   const [pendingIdentity, setPendingIdentity] = useState<PendingIdentity | null>(null)
+  const [pendingChallengeId, setPendingChallengeId] = useState('')
   const [code, setCode] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -83,7 +84,7 @@ export default function ForgotPasswordPage() {
       })
       const body: unknown = await response.json().catch(() => null)
       const result = body && typeof body === 'object'
-        ? body as { ok?: unknown; resendAfterSeconds?: unknown }
+        ? body as { ok?: unknown; challengeId?: unknown; resendAfterSeconds?: unknown }
         : null
       if (!response.ok || result?.ok !== true) {
         const reason = responseCode(body)
@@ -105,7 +106,12 @@ export default function ForgotPasswordPage() {
         return
       }
 
+      if (typeof result.challengeId !== 'string' || !result.challengeId) {
+        setError(t('تعذر تجهيز طلب الرمز. حاول إرسال رمز جديد.', 'We could not prepare the verification request. Please request a new code.'))
+        return
+      }
       setPendingIdentity(identity)
+      setPendingChallengeId(result.challengeId)
       setCode('')
       setResendIn(typeof result.resendAfterSeconds === 'number'
         ? Math.min(600, Math.max(0, result.resendAfterSeconds))
@@ -121,7 +127,7 @@ export default function ForgotPasswordPage() {
   const verifyCode = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError('')
-    if (!pendingIdentity || !/^\d{6}$/.test(code)) {
+    if (!pendingIdentity || !pendingChallengeId || !/^\d{6}$/.test(code)) {
       setError(t('أدخل رمز التحقق المكوّن من 6 أرقام.', 'Enter the 6-digit verification code.'))
       return
     }
@@ -131,11 +137,16 @@ export default function ForgotPasswordPage() {
       const result = await signIn('otp', {
         phone: pendingIdentity.phone,
         email: pendingIdentity.email,
+        challengeId: pendingChallengeId,
         code,
         intent: 'LOGIN',
         redirect: false,
       })
       if (!result?.ok || result.error) {
+        if (result?.error === 'OTP_CHALLENGE_NOT_ACTIVE' || result?.error === 'OTP_CHALLENGE_EXPIRED') {
+          setError(t('طلب هذا الرمز لم يعد نشطًا. أعد إرسال رمز واستخدم أحدث رسالة وصلتك.', 'This code request is no longer active. Request a new code and use the latest message.'))
+          return
+        }
         setError(t('الرمز غير صحيح أو انتهت صلاحيته. اطلب رمزاً جديداً.', 'That code is invalid or expired. Request a new one.'))
         return
       }

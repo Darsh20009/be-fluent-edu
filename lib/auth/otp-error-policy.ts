@@ -3,6 +3,22 @@ type OtpFailure = {
   diagnosticReason?: string
 }
 
+export function buildOtpChallengeWhere(
+  identity: { normalizedPhone?: string; email?: string },
+  intent: 'LOGIN' | 'REGISTER',
+  challengeId?: string,
+) {
+  return {
+    ...(challengeId ? { id: challengeId } : {}),
+    intent,
+    consumedAt: null,
+    invalidatedAt: null,
+    ...(identity.normalizedPhone
+      ? { normalizedPhone: identity.normalizedPhone }
+      : { email: identity.email }),
+  }
+}
+
 export function getOtpSignInErrorMessage(
   intent: 'LOGIN' | 'REGISTER',
   error: OtpFailure,
@@ -13,6 +29,13 @@ export function getOtpSignInErrorMessage(
     error.diagnosticReason === 'login_identity_unmatched'
   ) {
     return 'ACCOUNT_NOT_FOUND'
+  }
+
+  if (error.diagnosticReason === 'no_active_challenge') {
+    return 'OTP_CHALLENGE_NOT_ACTIVE'
+  }
+  if (error.diagnosticReason === 'expired_challenge') {
+    return 'OTP_CHALLENGE_EXPIRED'
   }
 
   return 'Invalid verification code'

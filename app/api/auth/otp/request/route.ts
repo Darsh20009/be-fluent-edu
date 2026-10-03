@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
       ok: true,
       message: 'If the identity can be verified, a verification code will be sent.',
       channel: result.channel,
+      challengeId: result.challengeId,
       expiresAt: result.expiresAt,
       resendAfterSeconds: result.resendAfterSeconds,
     })

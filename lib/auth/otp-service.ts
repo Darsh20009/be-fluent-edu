@@ -19,6 +19,7 @@ import {
 } from './providers'
 import { WhatsAppOtpDeliveryError } from '@/lib/whatsapp/otp-delivery'
 import { isAccountUsable } from './status'
+import { buildOtpChallengeWhere } from './otp-error-policy'
 
 export type OtpIntent = 'LOGIN' | 'REGISTER'
 
@@ -36,6 +37,7 @@ export interface RequestOtpInput {
 export interface VerifyOtpInput {
   phone?: string
   email?: string
+  challengeId?: string
   code: string
   intent: OtpIntent
   ip?: string
@@ -362,14 +364,7 @@ export async function verifyOtp(input: VerifyOtpInput) {
   }
 
   const challenge = await prisma.authOtpChallenge.findFirst({
-    where: {
-      intent: input.intent,
-      consumedAt: null,
-      invalidatedAt: null,
-      ...(identity.normalizedPhone
-        ? { normalizedPhone: identity.normalizedPhone }
-        : { email: identity.email }),
-    },
+    where: buildOtpChallengeWhere(identity, input.intent, input.challengeId),
     orderBy: { createdAt: 'desc' },
   })
 

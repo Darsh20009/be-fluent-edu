@@ -88,6 +88,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         phone: { label: 'Phone', type: 'text' },
         email: { label: 'Email', type: 'email' },
+        challengeId: { label: 'OTP challenge', type: 'text' },
         code: { label: 'Verification code', type: 'text' },
         intent: { label: 'Intent', type: 'text' },
         name: { label: 'Name', type: 'text' },
@@ -98,6 +99,7 @@ export const authOptions: NextAuthOptions = {
           const user = await verifyOtp({
             phone: credentials?.phone || undefined,
             email: credentials?.email || undefined,
+            challengeId: credentials?.challengeId ? String(credentials.challengeId) : undefined,
             code: String(credentials?.code || ''),
             intent,
           })

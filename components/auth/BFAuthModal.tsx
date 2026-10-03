@@ -62,6 +62,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
   const [countryIso, setCountryIso] = useState('EG')
   const [phoneInput, setPhoneInput] = useState('')
   const [pendingPhone, setPendingPhone] = useState('')
+  const [pendingChallengeId, setPendingChallengeId] = useState('')
   const [code, setCode] = useState('')
   const [emailOrPhone, setEmailOrPhone] = useState('')
   const [password, setPassword] = useState('')
@@ -246,6 +247,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
       const data = body && typeof body === 'object' ? body as {
         ok?: unknown
         channel?: unknown
+        challengeId?: unknown
         resendAfterSeconds?: unknown
         error?: { code?: unknown }
       } : null
@@ -255,7 +257,12 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
         return
       }
 
+      if (typeof data?.challengeId !== 'string' || !data.challengeId) {
+        setError(tr('تعذر تجهيز طلب الرمز. حاول إرسال رمز جديد.', 'We could not prepare the verification request. Please request a new code.'))
+        return
+      }
       setPendingPhone(normalizedPhone)
+      setPendingChallengeId(data.challengeId)
       setCode('')
       setResendIn(typeof data.resendAfterSeconds === 'number'
         ? Math.min(600, Math.max(0, data.resendAfterSeconds))
@@ -274,7 +281,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
       setError(tr('أدخل الرمز المكوّن من 6 أرقام.', 'Enter the 6-digit verification code.'))
       return
     }
-    if (!pendingPhone) {
+    if (!pendingPhone || !pendingChallengeId) {
       setView(authIntent === 'REGISTER' ? 'register' : 'phone')
       setError(tr('تحقق من رقم الهاتف ثم أعد المحاولة.', 'Check the phone number and try again.'))
       return
@@ -285,6 +292,7 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
     try {
       const result = await signIn('otp', {
         phone: pendingPhone,
+        challengeId: pendingChallengeId,
         code,
         intent: authIntent,
         redirect: false,
@@ -295,11 +303,19 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
           setView('register')
           setCode('')
           setPendingPhone('')
+          setPendingChallengeId('')
           setResendIn(0)
           setError('')
           setStatusMessage(tr(
             'تحققنا من رقمك، لكنه غير مرتبط بحساب بعد. أكمل البيانات لإنشاء حساب؛ سنرسل رمزًا جديدًا لتأكيد التسجيل.',
             'Your phone is verified, but no account is associated with it yet. Complete the form to create one; we will send a new code to confirm registration.',
+          ))
+          return
+        }
+        if (result?.error === 'OTP_CHALLENGE_NOT_ACTIVE' || result?.error === 'OTP_CHALLENGE_EXPIRED') {
+          setError(tr(
+            'طلب هذا الرمز لم يعد نشطًا. أعد إرسال رمز واستخدم أحدث رسالة وصلتك.',
+            'This code request is no longer active. Request a new code and use the latest message.',
           ))
           return
         }
