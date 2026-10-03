@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { randomBytes } from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { normalizePhone } from '@/lib/validation'
+import { hashPlacementTicket } from '@/lib/placement-ticket'
 import { phase9DatabaseGuard } from '@/lib/phase9/engine'
 import { persistSavedStudentGoals } from '@/lib/phase9/pipeline'
 
@@ -12,6 +14,8 @@ const registerSchema = z.object({
   password: z.string().min(6),
   phone: z.string().min(10).optional(),
   age: z.number().min(5).max(100),
+  nationality: z.string().trim().min(2).max(100),
+  gender: z.enum(['FEMALE', 'MALE', 'PREFER_NOT_TO_SAY']),
   goal: z.string().min(1),
   preferredTime: z.string().min(1),
   packageId: z.string().min(1),
@@ -68,6 +72,7 @@ export async function POST(request: Request) {
     const uniqueEmail =
       validatedData.email?.trim().toLowerCase() ||
       `${normalizedPhone?.replace(/\D/g, '')}@phone.befluent.com`
+    const placementAccessToken = randomBytes(32).toString('base64url')
 
     const user = await prisma.$transaction(async (tx) => {
       const created = await tx.user.create({
@@ -83,6 +88,8 @@ export async function POST(request: Request) {
           StudentProfile: {
             create: {
               age: validatedData.age,
+              nationality: validatedData.nationality,
+              gender: validatedData.gender,
               goal: validatedData.goal,
               preferredTime: validatedData.preferredTime,
               packageId: validatedData.packageId,
@@ -104,6 +111,13 @@ export async function POST(request: Request) {
         },
       })
       await persistSavedStudentGoals(tx, created.id)
+      await tx.placementTestTicket.create({
+        data: {
+          userId: created.id,
+          tokenHash: hashPlacementTicket(placementAccessToken),
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
+      })
       return created
     })
 
@@ -121,7 +135,7 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       message: 'Registration successful. Your account is pending activation.',
       user: {
         id: user.id,
@@ -130,6 +144,14 @@ export async function POST(request: Request) {
         isActive: user.isActive,
       },
     })
+    response.cookies.set('bf-placement-ticket', placementAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/api',
+      maxAge: 24 * 60 * 60,
+    })
+    return response
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

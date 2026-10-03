@@ -19,3 +19,4 @@
 - [Documentation screenshot privacy](documentation-screenshot-privacy.md) — use real captures with synthetic accounts or redacted data; admin-only guides do not protect public image files.
 - [Delivery completeness](delivery-completeness.md) — the user expects complete student, teacher, admin and AI flows, not page-only or partially wired delivery.
 - [Admin assistant scope](admin-assistant-scope.md) — keep the new assistant ADMIN-only across people, learning, commerce, and communications, with confirmation before writes or sends.
+- [Placement audio storage](placement-audio-storage.md) — keep student speaking samples capped in MongoDB until an approved file-storage route is available; do not bypass package restrictions.

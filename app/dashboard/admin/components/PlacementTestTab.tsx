@@ -10,9 +10,10 @@ import {
 import { toast } from 'react-hot-toast'
 import { useTheme } from '@/lib/contexts/ThemeContext'
 import { localeText, localeDirection } from '@/lib/locale'
+import PlacementSpeakingQueue from './PlacementSpeakingQueue'
 
 /* ─── Types ───────────────────────────────────────────────── */
-type Level = 'A1' | 'A2' | 'B1' | 'B2' | 'C1'
+type Level = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'
 type QType = 'MCQ' | 'TRUE_FALSE' | 'FILL_BLANK' | 'WRITTEN'
 
 interface Question {
@@ -25,6 +26,7 @@ interface Question {
   explanation?: string
   points: number
   level: Level
+  band?: string
   testType: string
   category?: string
   order: number
@@ -41,7 +43,8 @@ interface TestResult {
   answers?: any[]
 }
 
-const LEVELS: Level[] = ['A1', 'A2', 'B1', 'B2', 'C1']
+const LEVELS: Level[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+const BANDS = LEVELS.flatMap(level => [1, 2, 3, 4].map(index => `${level}.${index}`))
 const Q_TYPES: { value: QType; label: string }[] = [
   { value: 'MCQ',        label: 'اختيار متعدد (MCQ)' },
   { value: 'TRUE_FALSE', label: 'صح أم خطأ' },
@@ -55,6 +58,7 @@ const LEVEL_COLORS: Record<string, string> = {
   B1: 'bg-yellow-100 text-yellow-700 border-yellow-200',
   B2: 'bg-green-100 text-green-700 border-green-200',
   C1: 'bg-blue-100 text-blue-700 border-blue-200',
+  C2: 'bg-indigo-100 text-indigo-700 border-indigo-200',
 }
 
 const LEVEL_BG: Record<string, string> = {
@@ -63,12 +67,13 @@ const LEVEL_BG: Record<string, string> = {
   B1: 'from-yellow-500 to-amber-500',
   B2: 'from-green-500 to-emerald-600',
   C1: 'from-blue-500 to-indigo-600',
+  C2: 'from-indigo-600 to-violet-700',
 }
 
 const emptyQuestion = (): Partial<Question> => ({
   question: '', questionAr: '', questionType: 'MCQ',
   options: ['', '', '', ''], correctAnswer: '',
-  explanation: '', points: 1, level: 'A1',
+  explanation: '', points: 1, level: 'A1', band: 'A1.1',
   testType: 'PLACEMENT', category: '', order: 0,
 })
 
@@ -135,8 +140,9 @@ export default function PlacementTestTab() {
   const stats = {
     total: questions.length,
     byLevel: LEVELS.reduce((acc, l) => ({ ...acc, [l]: questions.filter(q => q.level === l).length }), {} as Record<string, number>),
+    byBand: BANDS.reduce((acc, band) => ({ ...acc, [band]: questions.filter(q => q.band === band).length }), {} as Record<string, number>),
     results: results.length,
-    advanced: results.filter(r => ['B1','B2','C1'].includes(r.level)).length,
+    advanced: results.filter(r => ['B1','B2','C1','C2'].includes(r.level)).length,
     beginner: results.filter(r => ['A1','A2'].includes(r.level)).length,
   }
 
@@ -212,6 +218,7 @@ export default function PlacementTestTab() {
   /* ────────────────────────────────────────────────────────────── */
   return (
     <div className="space-y-6" dir={localeDirection(language)}>
+      <PlacementSpeakingQueue />
       {/* ── Header ─────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -258,6 +265,17 @@ export default function PlacementTestTab() {
           <p className="text-xs text-gray-400 mt-1">{t('مستوى A1 أو A2', 'Level A1 or A2')}</p>
         </div>
       </div>
+      <section className="border border-gray-200 bg-white p-4">
+        <h3 className="text-sm font-semibold text-gray-800">{t('عدد الأسئلة في كل نطاق', 'Questions in each placement band')}</h3>
+        <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6 lg:grid-cols-12">
+          {BANDS.map(band => (
+            <div key={band} className="flex items-center justify-between border border-gray-200 px-2 py-1.5 text-xs">
+              <span className="font-medium text-gray-600">{band}</span>
+              <span className="font-semibold text-gray-900">{stats.byBand[band]}</span>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* ── View Tabs ──────────────────────────────────────────── */}
       <div className="flex gap-1 bg-gray-100 p-1 rounded-2xl w-fit">
@@ -312,9 +330,21 @@ export default function PlacementTestTab() {
                 <div className="grid sm:grid-cols-4 gap-4">
                   <div>
                     <label className="text-xs font-bold text-gray-500 block mb-1.5">{t('المستوى *', 'Level *')}</label>
-                    <select value={editingQ.level || 'A1'} onChange={e => setEditingQ(q=>({...q,level:e.target.value as Level}))}
+                    <select value={editingQ.level || 'A1'} onChange={e => setEditingQ(q=>({...q,level:e.target.value as Level,band:`${e.target.value}.1`}))}
                       className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none bg-white">
                       {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 block mb-1.5">{t('النطاق الفرعي', 'Placement band')}</label>
+                    <select
+                      value={editingQ.band || `${editingQ.level || 'A1'}.1`}
+                      onChange={e => setEditingQ(q => ({ ...q, band: e.target.value }))}
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-400 outline-none bg-white"
+                    >
+                      {BANDS.filter(band => band.startsWith(`${editingQ.level || 'A1'}.`)).map(band => (
+                        <option key={band} value={band}>{band}</option>
+                      ))}
                     </select>
                   </div>
                   <div>
@@ -787,19 +817,23 @@ function TestSettingsPanel() {
         </div>
       </div>
 
-      {/* Level thresholds info */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+      {/* Placement band map */}
+      <div className="border border-gray-200 bg-white p-6">
         <h4 className="font-black text-gray-900 mb-4 flex items-center gap-2">
           <Award className="w-5 h-5 text-amber-500" />
-          {t('نظام تحديد المستوى', 'Placement level scale')}
+          {t('نطاقات المستوى في بنك الأسئلة', 'Placement bands in the question bank')}
         </h4>
+        <p className="mb-4 text-sm leading-6 text-gray-600">
+          {t('يتدرج الاختبار بين 24 نطاقاً فرعياً بناءً على إجابات الطالب. لا تعتمد النتيجة على حدود نسبة ثابتة، وتُراجع توصية التحدث إدارياً.', 'The test adapts across 24 bands based on the student’s answers. Results do not use fixed percentage thresholds, and speaking recommendations are reviewed by an administrator.')}
+        </p>
         <div className="space-y-2">
           {[
-            { level: 'A1', range: '0% - 20%', desc: t('مبتدئ تماماً', 'Beginner'), color: 'from-red-500 to-rose-600' },
-            { level: 'A2', range: '21% - 40%', desc: t('مبتدئ متقدم', 'Elementary'), color: 'from-orange-500 to-amber-600' },
-            { level: 'B1', range: '41% - 60%', desc: t('متوسط', 'Intermediate'), color: 'from-yellow-500 to-amber-500' },
-            { level: 'B2', range: '61% - 80%', desc: t('متوسط متقدم', 'Upper-intermediate'), color: 'from-green-500 to-emerald-600' },
-            { level: 'C1', range: '81% - 100%', desc: t('متقدم', 'Advanced'), color: 'from-blue-500 to-indigo-600' },
+            { level: 'A1', range: 'A1.1–A1.4', desc: t('مبتدئ', 'Beginner'), color: 'from-red-500 to-rose-600' },
+            { level: 'A2', range: 'A2.1–A2.4', desc: t('مبتدئ متقدم', 'Elementary'), color: 'from-orange-500 to-amber-600' },
+            { level: 'B1', range: 'B1.1–B1.4', desc: t('متوسط', 'Intermediate'), color: 'from-yellow-500 to-amber-500' },
+            { level: 'B2', range: 'B2.1–B2.4', desc: t('متوسط متقدم', 'Upper-intermediate'), color: 'from-green-500 to-emerald-600' },
+            { level: 'C1', range: 'C1.1–C1.4', desc: t('متقدم', 'Advanced'), color: 'from-blue-500 to-indigo-600' },
+            { level: 'C2', range: 'C2.1–C2.4', desc: t('إتقان', 'Proficient'), color: 'from-indigo-600 to-violet-700' },
           ].map(({ level, range, desc, color }) => (
             <div key={level} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
               <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} text-white flex items-center justify-center text-sm font-black`}>

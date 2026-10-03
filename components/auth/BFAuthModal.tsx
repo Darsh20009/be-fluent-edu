@@ -129,15 +129,21 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
   if (!open) return null
 
   const onboardingDestination = () => {
+    const params = new URLSearchParams()
+    let next: string | null = null
     try {
       const packageId = new URL(registrationHref, 'https://befluent.invalid').searchParams.get('packageId')
       if (packageId && /^[\w-]{1,100}$/.test(packageId)) {
-        return `/onboarding?packageId=${encodeURIComponent(packageId)}`
+        next = `/dashboard/student/checkout?packageId=${encodeURIComponent(packageId)}`
       }
     } catch {
-      // Continue to profile setup without an optional package selection.
+      // Use the safe return path below when the registration link is malformed.
     }
-    return '/onboarding'
+    if (!next && returnTo.startsWith('/') && !returnTo.startsWith('//')) next = returnTo
+    params.set('placement', 'true')
+    if (next) params.set('next', next)
+    const query = params.toString()
+    return query ? `/onboarding?${query}` : '/onboarding'
   }
 
   const finishSignIn = () => {
@@ -176,9 +182,9 @@ export default function BFAuthModal({ open, entryMode, returnTo, registrationHre
       if (embedded) {
         onClose()
         try {
-          window.top?.postMessage({ type: 'LOGIN_SUCCESS' }, '*')
+          window.top?.postMessage({ type: 'LOGIN_SUCCESS', redirectTo: onboardingDestination() }, '*')
         } catch {
-          window.parent.postMessage({ type: 'LOGIN_SUCCESS' }, '*')
+          window.parent.postMessage({ type: 'LOGIN_SUCCESS', redirectTo: onboardingDestination() }, '*')
         }
       } else if (onComplete) {
         onComplete(onboardingDestination())

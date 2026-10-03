@@ -25,8 +25,10 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<1 | 2>(1)
   const [age, setAge] = useState('')
   const [gender, setGender] = useState<Gender | ''>('')
+  const [nationality, setNationality] = useState('')
   const [goal, setGoal] = useState('')
   const [packageId, setPackageId] = useState('')
+  const [nextPath, setNextPath] = useState('')
   const [ready, setReady] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -34,6 +36,8 @@ export default function OnboardingPage() {
   useEffect(() => {
     const currentPackageId = new URLSearchParams(window.location.search).get('packageId') || ''
     setPackageId(currentPackageId)
+    const requestedNext = new URLSearchParams(window.location.search).get('next') || ''
+    setNextPath(requestedNext.startsWith('/') && !requestedNext.startsWith('//') ? requestedNext : '')
 
     let active = true
     fetch('/api/student/profile', { cache: 'no-store' })
@@ -54,6 +58,7 @@ export default function OnboardingPage() {
         const profile = user?.StudentProfile
         if (typeof profile?.age === 'number') setAge(String(profile.age))
         if (['FEMALE', 'MALE', 'PREFER_NOT_TO_SAY'].includes(profile?.gender)) setGender(profile.gender)
+        if (typeof profile?.nationality === 'string') setNationality(profile.nationality)
         if (typeof profile?.goal === 'string') setGoal(profile.goal)
         setReady(true)
       })
@@ -67,11 +72,15 @@ export default function OnboardingPage() {
   }, [router, isArabic])
 
   const ageValue = Number(age)
-  const canContinue = Number.isInteger(ageValue) && ageValue >= 5 && ageValue <= 100 && Boolean(gender)
+  const canContinue = Number.isInteger(ageValue)
+    && ageValue >= 5
+    && ageValue <= 100
+    && Boolean(gender)
+    && nationality.trim().length >= 2
 
   const saveProfile = async (includeGoal: boolean) => {
     if (!canContinue) {
-      setError(tr('أدخل عمرك واختر إجابة للجنس للمتابعة.', 'Enter your age and choose a gender option to continue.'))
+      setError(tr('أدخل عمرك وجنسيتك واختر إجابة للجنس للمتابعة.', 'Enter your age and nationality, then choose a gender option to continue.'))
       return
     }
     setBusy(true)
@@ -83,6 +92,7 @@ export default function OnboardingPage() {
         body: JSON.stringify({
           age: ageValue,
           gender,
+          nationality: nationality.trim(),
           ...(includeGoal && goal ? { goal } : {}),
         }),
       })
@@ -92,9 +102,11 @@ export default function OnboardingPage() {
           : tr('تعذر حفظ ملفك الآن. أعد المحاولة.', 'We could not save your profile. Please try again.'))
         return
       }
-      const destination = packageId
+      const checkoutPath = packageId
         ? `/dashboard/student/checkout?packageId=${encodeURIComponent(packageId)}`
-        : '/dashboard'
+        : ''
+      const destinationAfterPlacement = nextPath || checkoutPath || '/dashboard'
+      const destination = `/placement-test?next=${encodeURIComponent(destinationAfterPlacement)}`
       router.push(destination)
       router.refresh()
     } catch {
@@ -150,6 +162,23 @@ export default function OnboardingPage() {
                 value={age}
                 onChange={(event) => setAge(event.target.value)}
                 placeholder="18"
+                disabled={!ready || busy}
+                className="min-h-12 w-full border border-[#dce4dc] px-3 text-sm outline-none focus:border-[#24714f] focus:ring-2 focus:ring-[#24714f]/15 disabled:bg-[#f5f7f3]"
+              />
+            </div>
+
+            <div className="mt-5">
+              <label htmlFor="onboarding-nationality" className="mb-2 block text-sm font-semibold text-[#34443a]">
+                {tr('الجنسية', 'Nationality')}
+              </label>
+              <input
+                id="onboarding-nationality"
+                type="text"
+                autoComplete="country-name"
+                maxLength={100}
+                value={nationality}
+                onChange={(event) => setNationality(event.target.value)}
+                placeholder={tr('اكتب جنسيتك', 'Enter your nationality')}
                 disabled={!ready || busy}
                 className="min-h-12 w-full border border-[#dce4dc] px-3 text-sm outline-none focus:border-[#24714f] focus:ring-2 focus:ring-[#24714f]/15 disabled:bg-[#f5f7f3]"
               />

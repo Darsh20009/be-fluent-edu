@@ -1,177 +1,357 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
-import { createThanarahCompletion, parseThanarahJson, ThanarahError } from '@/lib/thanarah';
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+import { prisma } from '@/lib/prisma'
+import { resolvePlacementAccess } from '@/lib/placement-access'
+import {
+  PLACEMENT_BANDS,
+  PLACEMENT_TEST_LENGTH,
+  bandRank,
+  determinePlacementBand,
+  levelForBand,
+  nextAdaptiveBand,
+} from '@/lib/placement-bands'
 
-const SYSTEM_PROMPT = `You are an English level assessment specialist. Your job is to generate adaptive multiple-choice questions to determine a student's English proficiency level (A1, A2, B1, B2, or C1).
+export const runtime = 'nodejs'
 
-Rules:
-- Generate ONE question at a time in JSON format
-- Questions must be multiple choice with exactly 4 options
-- Start at A2 level, then adapt based on performance
-- If the student answers correctly, increase difficulty; if wrong, decrease
-- Mix grammar, vocabulary, and reading comprehension
-- Questions must be clear and unambiguous
-- ALWAYS respond with valid JSON only, no extra text
+const requestSchema = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('start') }),
+  z.object({
+    action: z.literal('answer'),
+    attemptId: z.string().min(1).max(100),
+    questionId: z.string().min(1).max(100),
+    answer: z.string().min(1).max(500),
+  }),
+])
 
-Response format for a question:
-{
-  "type": "question",
-  "id": "q<number>",
-  "text": "The question in English",
-  "options": ["Option A", "Option B", "Option C", "Option D"],
-  "correct": "The correct option text",
-  "level": "A1|A2|B1|B2|C1",
-  "category": "grammar|vocabulary|reading"
+type SavedAnswer = {
+  questionId: string
+  answer: string
+  correct: boolean
+  band: string
 }
 
-Response format for final result (after 10 questions):
-{
-  "type": "result",
-  "level": "A1|A2|B1|B2|C1",
-  "score": <number of correct answers>,
-  "total": 10,
-  "percentage": <percentage>
-}`;
+type AttemptDetails = {
+  version: 1
+  currentQuestionId: string
+  currentBand: string
+  questionIds: string[]
+  answers: SavedAnswer[]
+}
 
-export async function POST(req: NextRequest) {
+function readAttemptDetails(value: string | null): AttemptDetails | null {
+  if (!value) return null
   try {
-    const session = await getServerSession(authOptions);
+    const details = JSON.parse(value) as Partial<AttemptDetails>
+    if (
+      details.version !== 1
+      || typeof details.currentQuestionId !== 'string'
+      || typeof details.currentBand !== 'string'
+      || !Array.isArray(details.questionIds)
+      || !Array.isArray(details.answers)
+    ) return null
+    return details as AttemptDetails
+  } catch {
+    return null
+  }
+}
 
-    const body = await req.json();
-    const { action, history = [], isCorrect } = body;
+function parseOptions(value: string | null): string[] | null {
+  if (!value) return null
+  try {
+    const options = JSON.parse(value)
+    if (
+      !Array.isArray(options)
+      || options.length !== 4
+      || !options.every((option) => typeof option === 'string' && option.trim())
+    ) return null
+    return options
+  } catch {
+    return null
+  }
+}
 
-    if (action === 'start') {
-      const messages = [
-        { role: 'system' as const, content: SYSTEM_PROMPT },
-        { role: 'user' as const, content: 'Start the assessment. Generate question 1 of 10 at A2 level.' }
-      ];
+function publicQuestion(question: {
+  id: string
+  question: string
+  options: string | null
+  level: string
+  band: string
+  category: string | null
+}) {
+  return {
+    id: question.id,
+    text: question.question,
+    options: parseOptions(question.options) || [],
+    level: question.level,
+    band: question.band,
+    category: question.category?.toLocaleLowerCase() || 'grammar',
+  }
+}
 
-      const raw = await createThanarahCompletion(messages, { temperature: 0.4, maxTokens: 800 });
-      const question = parseThanarahJson(raw);
+async function pickQuestion(band: string, excludeIds: string[]) {
+  const sortedBands = [...PLACEMENT_BANDS].sort((left, right) =>
+    Math.abs(bandRank(left) - bandRank(band)) - Math.abs(bandRank(right) - bandRank(band)),
+  )
 
-      return NextResponse.json({ success: true, question });
+  for (const candidateBand of sortedBands) {
+    const question = await prisma.placementQuestion.findMany({
+      where: {
+        testType: 'PLACEMENT',
+        questionType: 'MCQ',
+        band: candidateBand,
+        correctAnswer: { not: null },
+        options: { not: null },
+        ...(excludeIds.length ? { id: { notIn: excludeIds } } : {}),
+      },
+      select: {
+        id: true,
+        question: true,
+        options: true,
+        correctAnswer: true,
+        level: true,
+        band: true,
+        category: true,
+      },
+      orderBy: { order: 'asc' },
+    })
+    const validQuestions = question.filter((item) =>
+      typeof item.band === 'string'
+      && parseOptions(item.options) !== null
+      && typeof item.correctAnswer === 'string'
+      && parseOptions(item.options)!.some((option) => option.trim() === item.correctAnswer!.trim()),
+    )
+    if (validQuestions.length) {
+      const selected = validQuestions[Math.floor(Math.random() * validQuestions.length)]
+      return { ...selected, band: candidateBand }
+    }
+  }
+  return null
+}
+
+async function loadRecommendations(levelCode: string) {
+  const level = await prisma.level.findUnique({
+    where: { code: levelCode },
+    select: { id: true },
+  })
+  if (!level) return []
+
+  const packages = await prisma.package.findMany({
+    where: { isActive: true, levelId: level.id },
+    select: {
+      id: true,
+      title: true,
+      titleAr: true,
+      price: true,
+      currency: true,
+      lessonsCount: true,
+      lessonsPerWeek: true,
+      durationDays: true,
+      subscriptionType: true,
+    },
+    orderBy: { price: 'asc' },
+    take: 4,
+  })
+  return packages
+}
+
+export async function POST(request: NextRequest) {
+  const placementAccess = await resolvePlacementAccess(request)
+  if (placementAccess.response) return placementAccess.response
+  if (!placementAccess.userId) return NextResponse.json({ error: 'Sign in to continue.' }, { status: 401 })
+  const studentId = placementAccess.userId
+
+  let body: z.infer<typeof requestSchema>
+  try {
+    body = requestSchema.parse(await request.json())
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: 'Invalid placement-test request.' }, { status: 400 })
+    }
+    return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 })
+  }
+
+  try {
+    const profile = await prisma.studentProfile.findUnique({
+      where: { userId: studentId },
+      select: { age: true, gender: true, nationality: true, levelInitial: true },
+    })
+    if (
+      !profile
+      || !Number.isInteger(profile.age)
+      || (profile.age ?? 0) < 5
+      || (profile.age ?? 101) > 100
+      || !['FEMALE', 'MALE', 'PREFER_NOT_TO_SAY'].includes(profile.gender || '')
+      || (profile.nationality || '').trim().length < 2
+    ) {
+      return NextResponse.json({ error: 'Complete your student profile before taking the placement test.' }, { status: 409 })
     }
 
-    if (action === 'next') {
-      const questionNum = history.length + 1;
-
-      if (questionNum > 10) {
-        return NextResponse.json({ error: 'Test already complete' }, { status: 400 });
-      }
-
-      const historyMessages = history.map((h: { question: string; answer: string; correct: boolean; level: string }, i: number) => [
-        {
-          role: 'assistant' as const,
-          content: JSON.stringify({ type: 'question', text: h.question, level: h.level })
+    if (body.action === 'start') {
+      const bankCount = await prisma.placementQuestion.count({
+        where: {
+          testType: 'PLACEMENT',
+          questionType: 'MCQ',
+          band: { not: null },
+          correctAnswer: { not: null },
+          options: { not: null },
         },
-        {
-          role: 'user' as const,
-          content: `Question ${i + 1}: Student answered "${h.answer}". ${h.correct ? 'CORRECT' : 'INCORRECT'}.`
-        }
-      ]).flat();
-
-      const nextInstruction = questionNum === 10
-        ? `Generate the final question (question ${questionNum} of 10). After this, prepare to give the result.`
-        : `Generate question ${questionNum} of 10. Adapt difficulty based on performance so far. ${isCorrect ? 'Student got last question RIGHT - increase difficulty slightly.' : 'Student got last question WRONG - decrease difficulty slightly.'}`;
-
-      const messages = [
-        { role: 'system' as const, content: SYSTEM_PROMPT },
-        ...historyMessages,
-        { role: 'user' as const, content: nextInstruction }
-      ];
-
-      const raw = await createThanarahCompletion(messages, { temperature: 0.4, maxTokens: 800 });
-      const question = parseThanarahJson(raw);
-
-      return NextResponse.json({ success: true, question });
-    }
-
-    if (action === 'finish') {
-      const { answers } = body;
-      const correctCount = answers.filter((a: { correct: boolean }) => a.correct).length;
-      const percentage = (correctCount / answers.length) * 100;
-
-      let level = 'A1';
-      if (percentage >= 90) level = 'C1';
-      else if (percentage >= 75) level = 'B2';
-      else if (percentage >= 60) level = 'B1';
-      else if (percentage >= 40) level = 'A2';
-
-      const historyMessages = answers.map((h: { question: string; answer: string; correct: boolean; level: string }) => [
-        { role: 'assistant' as const, content: JSON.stringify({ type: 'question', text: h.question, level: h.level }) },
-        { role: 'user' as const, content: `Student answered "${h.answer}". ${h.correct ? 'CORRECT' : 'INCORRECT'}.` }
-      ]).flat();
-
-      const messages = [
-        { role: 'system' as const, content: SYSTEM_PROMPT },
-        ...historyMessages,
-        { role: 'user' as const, content: 'All 10 questions done. Return the final result JSON now.' }
-      ];
-
-      const raw = await createThanarahCompletion(messages, { temperature: 0.2, maxTokens: 400 });
-
-      let aiResult;
-      try {
-        aiResult = parseThanarahJson<{ level?: string }>(raw);
-      } catch {
-        aiResult = null;
+      })
+      if (bankCount < PLACEMENT_TEST_LENGTH) {
+        return NextResponse.json({
+          error: 'The placement question bank is not ready. Ask an administrator to complete bank setup.',
+        }, { status: 503 })
       }
 
-      const finalLevel = aiResult?.level || level;
-
-      if (session?.user?.id) {
-        try {
-          await prisma.placementTestAttempt.create({
-            data: {
-              studentId: session.user.id,
-              testType: 'PLACEMENT',
-              score: correctCount,
-              percentage,
-              levelResult: finalLevel,
-              details: JSON.stringify(answers),
-              completedAt: new Date()
-            }
-          });
-
-          const existingProfile = await prisma.studentProfile.findUnique({
-            where: { userId: session.user.id },
-            select: { levelInitial: true }
-          });
-
-          await prisma.studentProfile.update({
-            where: { userId: session.user.id },
-            data: {
-              levelCurrent: finalLevel,
-              levelInitial: existingProfile?.levelInitial || finalLevel,
-              placementTestScore: correctCount,
-              placementTestPercentage: Math.round(percentage)
-            }
-          });
-        } catch {
-          console.error('Placement test result could not be saved');
-        }
+      const firstBand = 'A2.2'
+      const question = await pickQuestion(firstBand, [])
+      if (!question) {
+        return NextResponse.json({ error: 'No valid placement questions are available.' }, { status: 503 })
       }
-
+      const attempt = await prisma.placementTestAttempt.create({
+        data: {
+          studentId,
+          testType: 'PLACEMENT',
+          score: 0,
+          percentage: 0,
+          details: JSON.stringify({
+            version: 1,
+            currentQuestionId: question.id,
+            currentBand: question.band,
+            questionIds: [question.id],
+            answers: [],
+          } satisfies AttemptDetails),
+        },
+      })
       return NextResponse.json({
         success: true,
-        level: finalLevel,
-        score: correctCount,
-        total: answers.length,
-        percentage: Math.round(percentage)
-      });
+        attemptId: attempt.id,
+        question: publicQuestion(question),
+        questionNumber: 1,
+        total: PLACEMENT_TEST_LENGTH,
+      })
     }
 
-    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
-  } catch (error) {
-    if (error instanceof ThanarahError && error.code === 'MISSING_API_KEY') {
-      return NextResponse.json({ error: 'AI service not configured' }, { status: 503 });
+    const attempt = await prisma.placementTestAttempt.findFirst({
+      where: {
+        id: body.attemptId,
+        studentId,
+        testType: 'PLACEMENT',
+      },
+    })
+    if (!attempt || attempt.completedAt) {
+      return NextResponse.json({ error: 'This placement attempt is unavailable or already complete.' }, { status: 409 })
     }
-    console.error(
-      'AI placement test request failed',
-      error instanceof ThanarahError ? { code: error.code, status: error.status } : undefined,
-    );
-    return NextResponse.json({ error: 'AI placement test failed' }, { status: 502 });
+    const details = readAttemptDetails(attempt.details)
+    if (!details || details.currentQuestionId !== body.questionId) {
+      return NextResponse.json({ error: 'The question does not match the active attempt.' }, { status: 409 })
+    }
+    const question = await prisma.placementQuestion.findFirst({
+      where: {
+        id: body.questionId,
+        testType: 'PLACEMENT',
+        questionType: 'MCQ',
+      },
+      select: { id: true, question: true, options: true, correctAnswer: true, level: true, band: true, category: true },
+    })
+    const options = parseOptions(question?.options || null)
+    if (!question || !options || !question.correctAnswer || !question.band) {
+      return NextResponse.json({ error: 'The active question is no longer available.' }, { status: 409 })
+    }
+    const selectedAnswer = body.answer.trim()
+    if (!options.some((option) => option === selectedAnswer)) {
+      return NextResponse.json({ error: 'Choose one of the listed answers.' }, { status: 400 })
+    }
+
+    const correct = selectedAnswer === question.correctAnswer.trim()
+    const answers: SavedAnswer[] = [
+      ...details.answers,
+      { questionId: question.id, answer: selectedAnswer, correct, band: question.band },
+    ]
+    const askedIds = [...details.questionIds]
+    const isComplete = answers.length === PLACEMENT_TEST_LENGTH
+
+    if (!isComplete) {
+      const nextBand = nextAdaptiveBand(question.band, correct)
+      const nextQuestion = await pickQuestion(nextBand, askedIds)
+      if (!nextQuestion) {
+        return NextResponse.json({ error: 'There are not enough unused questions to finish this test.' }, { status: 503 })
+      }
+      await prisma.placementTestAttempt.update({
+        where: { id: attempt.id },
+        data: {
+          score: answers.filter((answer) => answer.correct).length,
+          percentage: answers.filter((answer) => answer.correct).length / PLACEMENT_TEST_LENGTH * 100,
+          details: JSON.stringify({
+            version: 1,
+            currentQuestionId: nextQuestion.id,
+            currentBand: nextQuestion.band,
+            questionIds: [...askedIds, nextQuestion.id],
+            answers,
+          } satisfies AttemptDetails),
+        },
+      })
+      return NextResponse.json({
+        success: true,
+        question: publicQuestion(nextQuestion),
+        questionNumber: answers.length + 1,
+        total: PLACEMENT_TEST_LENGTH,
+        lastAnswerCorrect: correct,
+      })
+    }
+
+    const score = answers.filter((answer) => answer.correct).length
+    const percentage = Math.round(score / PLACEMENT_TEST_LENGTH * 100)
+    const resultBand = determinePlacementBand(answers)
+    const resultLevel = levelForBand(resultBand) || 'A1'
+    const level = await prisma.level.findUnique({ where: { code: resultLevel }, select: { id: true } })
+
+    await prisma.$transaction(async (tx) => {
+      await tx.placementTestAttempt.update({
+        where: { id: attempt.id },
+        data: {
+          score,
+          percentage,
+          levelResult: resultLevel,
+          details: JSON.stringify({
+            version: 1,
+            questionIds: askedIds,
+            answers,
+            resultBand,
+          }),
+          completedAt: new Date(),
+        },
+      })
+      await tx.studentProfile.upsert({
+        where: { userId: studentId },
+        create: {
+          userId: studentId,
+          levelInitial: profile.levelInitial || resultLevel,
+          targetLevel: resultLevel,
+          recommendedLevelId: level?.id || null,
+          placementTestScore: score,
+          placementTestPercentage: percentage,
+        },
+        update: {
+          targetLevel: resultLevel,
+          recommendedLevelId: level?.id || null,
+          placementTestScore: score,
+          placementTestPercentage: percentage,
+        },
+      })
+    })
+
+    const recommendedPackages = await loadRecommendations(resultLevel)
+    return NextResponse.json({
+      success: true,
+      level: resultLevel,
+      band: resultBand,
+      score,
+      total: PLACEMENT_TEST_LENGTH,
+      percentage,
+      recommendedPackages,
+    })
+  } catch (error) {
+    console.error('Saved-bank placement test failed', error instanceof Error ? error.message : 'Unknown error')
+    return NextResponse.json({ error: 'The placement test could not be saved. Please try again.' }, { status: 500 })
   }
 }

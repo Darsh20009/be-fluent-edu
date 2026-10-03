@@ -36,7 +36,7 @@ export async function PATCH(request: NextRequest) {
   for (const key of ['name', 'email', 'profilePhoto'] as const) if (body[key] !== undefined) userData[key] = body[key]
   if (body.phone !== undefined) userData.phone = body.phone ? normalizePhone(body.phone) : null
   const profileData: Record<string, unknown> = {}
-  for (const key of ['age', 'gender', 'goal'] as const) if (body[key] !== undefined) profileData[key] = body[key]
+  for (const key of ['age', 'gender', 'nationality', 'goal'] as const) if (body[key] !== undefined) profileData[key] = body[key]
   if (body.goal !== undefined) {
     const updated = await prisma.$transaction(async (tx) => {
       const user = Object.keys(userData).length

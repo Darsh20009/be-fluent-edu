@@ -13,6 +13,7 @@ export const profilePatchSchema = z.object({
 
 export const studentProfilePatchSchema = profilePatchSchema.extend({
   gender: z.enum(['FEMALE', 'MALE', 'PREFER_NOT_TO_SAY']).nullable().optional(),
+  nationality: z.string().trim().min(2).max(100).nullable().optional(),
 })
 
 export const goalsSchema = z.object({

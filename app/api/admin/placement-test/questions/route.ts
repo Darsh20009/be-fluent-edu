@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isNextResponse, requireAdmin } from '@/lib/auth-helpers';
+import { PLACEMENT_BANDS } from '@/lib/placement-bands';
 
 export async function GET(request: Request) {
   try {
@@ -27,9 +28,12 @@ export async function POST(request: Request) {
     const {
       question, questionAr, questionType = 'MCQ',
       options, correctAnswer, mediaUrl, explanation,
-      points = 1, level, testType = 'PLACEMENT', category, order = 0
+      points = 1, level, band, testType = 'PLACEMENT', category, order = 0
     } = body;
 
+    if (testType === 'PLACEMENT' && !PLACEMENT_BANDS.includes(band)) {
+      return NextResponse.json({ error: 'Choose a valid CEFR placement band.' }, { status: 400 });
+    }
     const count = await prisma.placementQuestion.count({ where: { testType } });
 
     const q = await prisma.placementQuestion.create({
@@ -43,7 +47,8 @@ export async function POST(request: Request) {
         explanation: explanation || null,
         points,
         order: order || count,
-        level: level || 'A1',
+        level: level || (typeof band === 'string' ? band.split('.')[0] : 'A1'),
+        band: band || null,
         testType,
         category: category || null
       }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isNextResponse, requireAdmin } from '@/lib/auth-helpers';
+import { PLACEMENT_BANDS } from '@/lib/placement-bands';
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -8,6 +9,11 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     if (isNextResponse(session)) return session;
     const { id } = await params;
     const data = await req.json();
+    const band = data.band || (data.level ? `${data.level}.1` : null);
+    const testType = data.testType || 'PLACEMENT';
+    if (testType === 'PLACEMENT' && (!band || !PLACEMENT_BANDS.includes(band))) {
+      return NextResponse.json({ error: 'Choose a valid CEFR placement band.' }, { status: 400 });
+    }
     const question = await prisma.placementQuestion.update({
       where: { id },
       data: {
@@ -21,7 +27,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         points: data.points || 1,
         order: data.order ?? 0,
         level: data.level,
-        testType: data.testType,
+        band,
+        testType,
         category: data.category || null
       }
     });

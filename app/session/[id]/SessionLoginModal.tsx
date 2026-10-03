@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { useTheme } from '@/lib/contexts/ThemeContext'
 import { localeText } from '@/lib/locale'
 
@@ -11,15 +12,23 @@ interface SessionLoginModalProps {
 
 export default function SessionLoginModal({ onLoginSuccess, sessionId }: SessionLoginModalProps) {
   const { language } = useTheme()
+  const router = useRouter()
   const title = localeText(language, 'تسجيل الدخول', 'Sign in')
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      if (event.source !== iframeRef.current?.contentWindow) return
       console.log('Received message:', event.data)
       
       // Check for login success message from iframe
       if (event.data?.type === 'LOGIN_SUCCESS') {
+        const redirectTo = event.data?.redirectTo
+        if (typeof redirectTo === 'string' && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
+          router.push(redirectTo)
+          router.refresh()
+          return
+        }
         console.log('✅ Login successful from iframe, calling onLoginSuccess...')
         onLoginSuccess()
       }
@@ -29,7 +38,7 @@ export default function SessionLoginModal({ onLoginSuccess, sessionId }: Session
     window.addEventListener('message', handleMessage)
     
     return () => window.removeEventListener('message', handleMessage)
-  }, [onLoginSuccess])
+  }, [onLoginSuccess, router])
 
   return (
     <div className="fixed inset-0 bg-[#18211d]/70 flex items-center justify-center z-50 backdrop-blur-sm p-4" dir={language === 'ar' ? 'rtl' : 'ltr'}>

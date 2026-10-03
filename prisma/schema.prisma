@@ -135,11 +135,14 @@ model StudentProfile {
   userId                  String                       @unique
   age                     Int?
   gender                  String?
+  nationality             String?
   levelInitial            String?
   levelCurrent            String?
   targetLevel             String?
   goal                    String?
   preferredTime           String?
+  availabilityMonth       String?
+  availabilityJson        String?
   placementTestScore      Int?
   placementTestPercentage Int?
   packageId               String?
@@ -281,6 +284,8 @@ model User {
   Gamification                            UserGamification?
   certificates                            Certificate[]                   @relation("UserCertificates")
   PlacementTestAttempt                    PlacementTestAttempt[]
+  placementTestTickets                    PlacementTestTicket[]
+  placementSpeakingReviews                 PlacementSpeakingReview[]
   TestAttempt                             TestAttempt[]
   normalizedPhone                         String?
   status                                  String                          @default("PENDING")
@@ -774,6 +779,7 @@ model VoiceRecording {
   studentId    String
   title        String // عنوان التسجيل
   audioData    String // Base64 encoded audio data
+  mimeType     String?
   duration     Int? // مدة التسجيل بالثواني
   promptText   String? // النص المطلوب قراءته
   promptTextAr String? // النص بالعربي
@@ -796,10 +802,13 @@ model PlacementQuestion {
   points        Int      @default(1)
   order         Int      @default(0)
   level         String   @default("A1")
+  band          String?
   testType      String   @default("PLACEMENT")
   category      String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
+
+  @@index([testType, level, band])
 }
 
 model TestSettings {
@@ -835,6 +844,38 @@ model PlacementTestAttempt {
   startedAt   DateTime  @default(now())
   completedAt DateTime?
   User        User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model PlacementTestTicket {
+  id        String    @id @default(uuid()) @map("_id")
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model PlacementSpeakingReview {
+  id          String   @id @default(uuid()) @map("_id")
+  studentId   String
+  attemptId   String
+  recordingId String?
+  mode        String
+  status      String   @default("PENDING")
+  reviewNotes String?
+  reviewerId  String?
+  reviewedAt  DateTime?
+  meetingAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  student     User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([studentId, createdAt])
+  @@unique([attemptId])
 }
 
 // نظام المحادثة النصية - Text Conversation System

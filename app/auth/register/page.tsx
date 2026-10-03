@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -72,6 +71,8 @@ export default function RegisterPage() {
     confirmPassword: '',
     phone: '',
     age: '',
+    nationality: '',
+    gender: '',
     goal: '',
     preferredTime: '',
     packageId: '',
@@ -138,6 +139,21 @@ export default function RegisterPage() {
         }
         if (formData.password !== formData.confirmPassword) {
           setError(tr('كلمات المرور غير متطابقة', 'Passwords do not match'))
+          return false
+        }
+        return true
+
+      case 'details':
+        if (!Number.isInteger(Number(formData.age)) || Number(formData.age) < 5 || Number(formData.age) > 100) {
+          setError(tr('أدخل عمراً بين 5 و100 سنة.', 'Enter an age between 5 and 100.'))
+          return false
+        }
+        if (formData.nationality.trim().length < 2) {
+          setError(tr('أدخل جنسيتك للمتابعة.', 'Enter your nationality to continue.'))
+          return false
+        }
+        if (!['FEMALE', 'MALE', 'PREFER_NOT_TO_SAY'].includes(formData.gender)) {
+          setError(tr('اختر إجابة للجنس للمتابعة.', 'Choose a gender option to continue.'))
           return false
         }
         return true
@@ -225,6 +241,8 @@ export default function RegisterPage() {
         password: formData.password,
         phone: formData.phone.replace(/\s/g, '') || undefined,
         age: parseInt(formData.age),
+        nationality: formData.nationality.trim(),
+        gender: formData.gender,
         goal: formData.goal.trim(),
         preferredTime: formData.preferredTime,
         packageId: formData.packageId,
@@ -243,18 +261,7 @@ export default function RegisterPage() {
         throw new Error(data.error || 'Registration failed')
       }
 
-      const emailOrPhone = formData.email.trim().toLowerCase() || formData.phone.replace(/\s/g, '')
-      const result = await signIn('credentials', {
-        emailOrPhone,
-        password: formData.password,
-        redirect: false,
-      })
-
-      if (result?.ok) {
-        router.push('/placement-test?fromRegistration=true')
-      } else {
-        setCurrentStep('result')
-      }
+      router.push('/placement-test?fromRegistration=true')
     } catch (err: any) {
       const apiMessage = typeof err?.message === 'string' ? err.message : ''
       const knownApiErrors: Record<string, [string, string]> = {
@@ -448,6 +455,36 @@ export default function RegisterPage() {
               min="5"
               max="100"
             />
+
+            <Input
+              type="text"
+              label={tr('الجنسية', 'Nationality')}
+              placeholder={tr('اكتب جنسيتك', 'Enter your nationality')}
+              required
+              value={formData.nationality}
+              onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
+              inputSize="md"
+              maxLength={100}
+              autoComplete="country-name"
+            />
+
+            <div>
+              <label htmlFor="register-gender" className="mb-2 block text-sm font-medium text-gray-700">
+                {tr('الجنس', 'Gender')} *
+              </label>
+              <select
+                id="register-gender"
+                required
+                value={formData.gender}
+                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                className="min-h-12 w-full rounded-xl border border-gray-300 bg-white px-4 text-sm outline-none focus:border-[#10B981] focus:ring-2 focus:ring-[#10B981]/20"
+              >
+                <option value="">{tr('اختر إجابة', 'Choose an option')}</option>
+                <option value="FEMALE">{tr('أنثى', 'Female')}</option>
+                <option value="MALE">{tr('ذكر', 'Male')}</option>
+                <option value="PREFER_NOT_TO_SAY">{tr('أفضل عدم الإفصاح', 'Prefer not to say')}</option>
+              </select>
+            </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

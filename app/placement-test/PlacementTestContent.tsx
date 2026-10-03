@@ -1,351 +1,602 @@
-'use client';
+'use client'
 
-import React, { useState, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { CheckCircle, Clock, Trophy, ArrowLeft, Loader2, ChevronLeft } from 'lucide-react';
-import { useTheme } from '@/lib/contexts/ThemeContext';
-import { localeText } from '@/lib/locale';
-import LanguageToggle from '@/components/LanguageToggle';
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import { CalendarDays, Check, ChevronLeft, ChevronRight, Clock3, LoaderCircle, Mic, Square } from 'lucide-react'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+import { localeText } from '@/lib/locale'
+import LanguageToggle from '@/components/LanguageToggle'
+import BrandLockup from '@/components/brand/BrandLockup'
 
-const LEVEL_INFO: Record<string, { label: string; labelEn: string; color: string; bg: string; border: string; desc: string; descEn: string }> = {
-  A1: { label: 'مبتدئ', labelEn: 'Beginner', desc: 'أنت في البداية — وهذا رائع! سنبني معك أساساً قوياً خطوة بخطوة.', descEn: 'You are at the beginning—and that is great! We will build a strong foundation step by step.', color: 'text-[#1e2b29]', bg: 'bg-[#f4f6f0]', border: 'border-[#dbe3dc]' },
-  A2: { label: 'مبتدئ متقدم', labelEn: 'Elementary', desc: 'لديك قاعدة جيدة وستتطور بسرعة مع منهجنا المصمم لمستواك.', descEn: 'You have a good foundation and will progress quickly with our tailored program.', color: 'text-[#147050]', bg: 'bg-[#edf6ef]', border: 'border-[#b8d4c5]' },
-  B1: { label: 'متوسط', labelEn: 'Intermediate', desc: 'مستواك جيد جداً! يمكنك التواصل في مواقف كثيرة وستصل للطلاقة قريباً.', descEn: 'You are doing very well! You can communicate in many situations and are on your way to fluency.', color: 'text-[#147050]', bg: 'bg-[#edf6ef]', border: 'border-[#b8d4c5]' },
-  B2: { label: 'متوسط متقدم', labelEn: 'Upper intermediate', desc: 'مستواك متقدم ومميز. أنت تتواصل بثقة وستصل للاحترافية قريباً.', descEn: 'You are an advanced learner and communicate confidently. Keep going toward mastery.', color: 'text-[#147050]', bg: 'bg-[#edf6ef]', border: 'border-[#b8d4c5]' },
-  C1: { label: 'متقدم', labelEn: 'Advanced', desc: 'مستواك ممتاز! أنت قادر على التعبير بطلاقة في معظم المواقف.', descEn: 'Excellent work! You can express yourself fluently in most situations.', color: 'text-[#1e2b29]', bg: 'bg-[#f4f6f0]', border: 'border-[#dbe3dc]' },
-};
+const TOTAL = 10
+const SPEAKING_PROMPT = 'I want to improve my English because it will help me reach my goals.'
+const MAX_RECORDING_BYTES = 700 * 1024
 
-interface AnswerRecord {
-  question: string;
-  answer: string;
-  correct: boolean;
-  level: string;
+const LEVEL_INFO: Record<string, { label: string; labelEn: string; description: string; descriptionEn: string }> = {
+  A1: { label: 'مبتدئ', labelEn: 'Beginner', description: 'سنبدأ بالعبارات اليومية وأساسيات اللغة.', descriptionEn: 'Start with everyday phrases and the foundations of English.' },
+  A2: { label: 'مبتدئ متقدم', labelEn: 'Elementary', description: 'ابنِ على أساسك وتدرّب على مواقف الحياة اليومية.', descriptionEn: 'Build on your foundation and practise everyday situations.' },
+  B1: { label: 'متوسط', labelEn: 'Intermediate', description: 'طوّر تواصلك في الدراسة والعمل والسفر.', descriptionEn: 'Develop your communication for study, work, and travel.' },
+  B2: { label: 'متوسط متقدم', labelEn: 'Upper intermediate', description: 'حسّن طلاقتك ودقّتك في موضوعات متنوعة.', descriptionEn: 'Improve fluency and accuracy across a wider range of topics.' },
+  C1: { label: 'متقدم', labelEn: 'Advanced', description: 'صقل الطلاقة وفهم اللغة في السياقات الدقيقة.', descriptionEn: 'Refine fluency and understand English in nuanced contexts.' },
+  C2: { label: 'إتقان', labelEn: 'Proficient', description: 'حافظ على مستوى متقدم ووسّع استخدامك المتخصص للغة.', descriptionEn: 'Maintain a high level and extend your specialised use of English.' },
 }
 
-interface Question {
-  id: string;
-  text: string;
-  options: string[];
-  correct: string;
-  level: string;
-  category: string;
+const PACKAGE_FORMAT_LABELS: Record<string, { ar: string; en: string }> = {
+  GROUP: { ar: 'مجموعة', en: 'Group' },
+  DUO: { ar: 'ثنائي', en: 'Duo' },
+  PRIVATE: { ar: 'فردي', en: 'Individual' },
+  SMALL_GROUP: { ar: 'مجموعة صغيرة', en: 'Small group' },
+}
+
+type Question = {
+  id: string
+  text: string
+  options: string[]
+  level: string
+  band: string
+  category: string
+}
+
+type RecommendedPackage = {
+  id: string
+  title: string
+  titleAr: string
+  price: number
+  currency: string | null
+  lessonsCount: number
+  lessonsPerWeek: number | null
+  durationDays: number
+  subscriptionType: string | null
+}
+
+type PlacementResult = {
+  level: string
+  band: string
+  score: number
+  total: number
+  percentage: number
+  recommendedPackages: RecommendedPackage[]
+}
+
+type SpeakingReview = {
+  id: string
+  mode: 'RECORDING' | 'MEETING'
+  status: string
+}
+
+async function readResponse(response: Response) {
+  try {
+    return await response.json()
+  } catch {
+    return {}
+  }
+}
+
+function fileToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = () => reject(new Error('Could not read the recording.'))
+    reader.onload = () => {
+      const dataUrl = typeof reader.result === 'string' ? reader.result : ''
+      const comma = dataUrl.indexOf(',')
+      if (comma < 0) reject(new Error('Could not prepare the recording.'))
+      else resolve(dataUrl.slice(comma + 1))
+    }
+    reader.readAsDataURL(blob)
+  })
 }
 
 export default function PlacementTestContent() {
-  const { language } = useTheme();
-  const t = (ar: string, en: string) => localeText(language, ar, en);
-  const [phase, setPhase] = useState<'intro' | 'testing' | 'loading' | 'result'>('intro');
-  const [question, setQuestion] = useState<Question | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
-  const [answers, setAnswers] = useState<AnswerRecord[]>([]);
-  const [history, setHistory] = useState<AnswerRecord[]>([]);
-  const [result, setResult] = useState<{ level: string; score: number; total: number; percentage: number } | null>(null);
-  const [questionNum, setQuestionNum] = useState(0);
-  const [loadingNext, setLoadingNext] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
+  const { language } = useTheme()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const isArabic = language === 'ar'
+  const t = (ar: string, en: string) => localeText(language, ar, en)
+  const fromRegistration = searchParams.get('fromRegistration') === 'true'
+  const requestedNext = searchParams.get('next') || ''
+  const nextDestination = requestedNext.startsWith('/') && !requestedNext.startsWith('//') ? requestedNext : ''
+  const [phase, setPhase] = useState<'intro' | 'loading' | 'testing' | 'speaking' | 'result'>('intro')
+  const [question, setQuestion] = useState<Question | null>(null)
+  const [questionNumber, setQuestionNumber] = useState(0)
+  const [attemptId, setAttemptId] = useState('')
+  const [selected, setSelected] = useState('')
+  const [result, setResult] = useState<PlacementResult | null>(null)
+  const [review, setReview] = useState<SpeakingReview | null>(null)
+  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null)
+  const [recordingUrl, setRecordingUrl] = useState('')
+  const [recording, setRecording] = useState(false)
+  const [recordingDuration, setRecordingDuration] = useState(0)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const recorderRef = useRef<MediaRecorder | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+  const chunksRef = useRef<BlobPart[]>([])
+  const startedAtRef = useRef(0)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const fromRegistration = searchParams.get('fromRegistration') === 'true';
+  useEffect(() => {
+    if (!recordedBlob) {
+      setRecordingUrl('')
+      return
+    }
+    const url = URL.createObjectURL(recordedBlob)
+    setRecordingUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [recordedBlob])
 
-  const TOTAL = 10;
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    if (recorderRef.current?.state === 'recording') recorderRef.current.stop()
+    streamRef.current?.getTracks().forEach((track) => track.stop())
+  }, [])
 
   const startTest = useCallback(async () => {
-    setPhase('loading');
+    setError('')
+    setPhase('loading')
     try {
-      const res = await fetch('/api/ai/placement-test', {
+      const response = await fetch('/api/ai/placement-test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'start' }),
-      });
-      const data = await res.json();
-      if (data.success && data.question) {
-        setQuestion(data.question);
-        setQuestionNum(1);
-        setPhase('testing');
-      } else {
-        setPhase('intro');
-        alert(t('فشل تحميل الاختبار، حاول مرة أخرى.', 'Could not load the test. Please try again.'));
+      })
+      const data = await readResponse(response)
+      if (!response.ok || !data.success || !data.question || !data.attemptId) {
+        throw new Error(data.error || t('تعذر تحميل الاختبار. حاول مرة أخرى.', 'Could not load the test. Please try again.'))
       }
-    } catch {
-      setPhase('intro');
-      alert(t('تعذر الاتصال بالخادم، حاول مرة أخرى.', 'Could not connect to the server. Please try again.'));
+      setAttemptId(data.attemptId)
+      setQuestion(data.question as Question)
+      setQuestionNumber(1)
+      setSelected('')
+      setPhase('testing')
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : t('تعذر الاتصال بالخادم.', 'Could not connect to the server.'))
+      setPhase('intro')
     }
-  }, [language]);
+  }, [t])
 
-  const confirmAnswer = useCallback(async () => {
-    if (!selected || !question || confirmed) return;
-    setConfirmed(true);
-    setLoadingNext(true);
-
-    const isCorrect = selected === question.correct;
-    const newRecord: AnswerRecord = {
-      question: question.text,
-      answer: selected,
-      correct: isCorrect,
-      level: question.level,
-    };
-
-    const newAnswers = [...answers, newRecord];
-    const newHistory = [...history, newRecord];
-    setAnswers(newAnswers);
-    setHistory(newHistory);
-
-    if (questionNum >= TOTAL) {
-      try {
-        const res = await fetch('/api/ai/placement-test', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'finish', answers: newAnswers }),
-        });
-        const data = await res.json();
-        if (data.success) {
-          setResult(data);
-          setPhase('result');
-        }
-      } catch {
-        alert(t('حدث خطأ أثناء حفظ النتيجة.', 'An error occurred while saving your result.'));
-      }
-      setLoadingNext(false);
-      setConfirmed(false);
-      return;
-    }
-
+  const submitAnswer = useCallback(async () => {
+    if (!selected || !question || !attemptId || busy) return
+    setBusy(true)
+    setError('')
     try {
-      const res = await fetch('/api/ai/placement-test', {
+      const response = await fetch('/api/ai/placement-test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'next',
-          history: newHistory,
-          isCorrect,
+          action: 'answer',
+          attemptId,
+          questionId: question.id,
+          answer: selected,
         }),
-      });
-      const data = await res.json();
-      if (data.success && data.question) {
-        setQuestion(data.question);
-        setQuestionNum(prev => prev + 1);
-        setSelected(null);
+      })
+      const data = await readResponse(response)
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || t('تعذر حفظ إجابتك. حاول مرة أخرى.', 'Could not save your answer. Please retry.'))
       }
-    } catch {
-      alert(t('خطأ في تحميل السؤال التالي.', 'There was an error loading the next question.'));
+      if (data.level) {
+        setResult(data as PlacementResult)
+        setQuestion(null)
+        setPhase('speaking')
+      } else if (data.question) {
+        setQuestion(data.question as Question)
+        setQuestionNumber(data.questionNumber)
+        setSelected('')
+      } else {
+        throw new Error(t('لم يصل السؤال التالي. حاول مرة أخرى.', 'The next question was not returned. Please retry.'))
+      }
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : t('تعذر الاتصال بالخادم.', 'Could not connect to the server.'))
+    } finally {
+      setBusy(false)
     }
+  }, [attemptId, busy, question, selected, t])
 
-    setLoadingNext(false);
-    setConfirmed(false);
-  }, [selected, question, confirmed, answers, history, questionNum, language]);
-
-  if (phase === 'intro') {
-    return (
-        <div className="min-h-[100dvh] bg-[#f4f6f0] flex items-center justify-center p-4" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-        <div className="w-full max-w-lg border border-[#dbe3dc] bg-[#fffefa] p-8 text-center sm:p-12">
-          <div className="mb-4 flex justify-end"><LanguageToggle /></div>
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center bg-[#147050] text-xl font-bold text-white">
-            BF
-          </div>
-          <h1 className="text-3xl font-black text-gray-900 mb-3">{t('اختبار تحديد المستوى', 'Placement test')}</h1>
-          <p className="text-gray-500 text-lg mb-8 leading-relaxed">
-            {t(`${TOTAL} أسئلة بسيطة لنعرف مستواك في الإنجليزية ونضع لك خطة مثالية`, `${TOTAL} quick questions to assess your English and create a learning plan.`)}
-          </p>
-          <div className="grid grid-cols-3 gap-4 mb-8 text-center">
-            <div className="border border-[#e0e6df] bg-[#f6f8f3] p-4">
-              <div className="text-sm font-bold text-gray-700">{t('١٠ دقائق', '10 minutes')}</div>
-              <div className="text-xs text-gray-400">{t('مدة الاختبار', 'Test duration')}</div>
-            </div>
-            <div className="border border-[#e0e6df] bg-[#f6f8f3] p-4">
-              <div className="text-sm font-bold text-gray-700">{t(`${TOTAL} أسئلة`, `${TOTAL} questions`)}</div>
-              <div className="text-xs text-gray-400">{t('اختيار من متعدد', 'Multiple choice')}</div>
-            </div>
-            <div className="border border-[#e0e6df] bg-[#f6f8f3] p-4">
-              <div className="text-sm font-bold text-gray-700">{t('فوري', 'Instant')}</div>
-              <div className="text-xs text-gray-400">{t('ظهور النتيجة', 'Results')}</div>
-            </div>
-          </div>
-          <button
-            onClick={startTest}
-            className="mb-4 w-full bg-[#147050] py-4 text-xl font-bold text-white transition-colors hover:bg-[#0e5940]"
-          >
-            {t('ابدأ الاختبار الآن', 'Start the test')}
-          </button>
-          <Link href="/" className="block text-gray-400 text-sm hover:text-gray-600 transition">
-            {t('العودة للرئيسية', 'Back to home')}
-          </Link>
-        </div>
-      </div>
-    );
+  const stopRecording = () => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = null
+    if (recorderRef.current?.state === 'recording') recorderRef.current.stop()
   }
+
+  const startRecording = async () => {
+    setError('')
+    setRecordedBlob(null)
+    setRecordingDuration(0)
+    try {
+      if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+        throw new Error(t('تسجيل الصوت غير مدعوم في هذا المتصفح.', 'Audio recording is not supported in this browser.'))
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      streamRef.current = stream
+      chunksRef.current = []
+      const supportedType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4']
+        .find((type) => MediaRecorder.isTypeSupported(type))
+      const recorder = supportedType
+        ? new MediaRecorder(stream, { mimeType: supportedType })
+        : new MediaRecorder(stream)
+      recorderRef.current = recorder
+      startedAtRef.current = Date.now()
+      recorder.ondataavailable = (event) => {
+        if (event.data.size) chunksRef.current.push(event.data)
+      }
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' })
+        stream.getTracks().forEach((track) => track.stop())
+        streamRef.current = null
+        setRecording(false)
+        setRecordingDuration(Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000)))
+        if (blob.size > MAX_RECORDING_BYTES) {
+          setError(t('التسجيل أكبر من الحد المسموح. أعده لمدة أقصر.', 'The recording is too large. Please make a shorter recording.'))
+          setRecordedBlob(null)
+        } else if (blob.size) {
+          setRecordedBlob(blob)
+        }
+      }
+      recorder.start()
+      setRecording(true)
+      timerRef.current = setTimeout(stopRecording, 45_000)
+    } catch (caught) {
+      streamRef.current?.getTracks().forEach((track) => track.stop())
+      streamRef.current = null
+      setRecording(false)
+      setError(caught instanceof Error
+        ? caught.message
+        : t('لم نتمكن من استخدام الميكروفون. تحقق من الإذن وحاول مرة أخرى.', 'Microphone access failed. Check your permission and retry.'))
+    }
+  }
+
+  const submitSpeaking = async (mode: 'RECORDING' | 'MEETING') => {
+    if (!attemptId || busy || (mode === 'RECORDING' && !recordedBlob)) return
+    setBusy(true)
+    setError('')
+    try {
+      const body = mode === 'MEETING'
+        ? { mode, attemptId }
+        : {
+            mode,
+            attemptId,
+            audioBase64: await fileToBase64(recordedBlob!),
+            mimeType: recordedBlob!.type || 'audio/webm',
+            duration: recordingDuration,
+            promptText: SPEAKING_PROMPT,
+          }
+      const response = await fetch('/api/student/placement-speaking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const data = await readResponse(response)
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || t('تعذر إرسال طلبك. حاول مرة أخرى.', 'Could not submit your response. Please retry.'))
+      }
+      setReview(data.review as SpeakingReview)
+      setPhase('result')
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : t('تعذر الاتصال بالخادم.', 'Could not connect to the server.'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const startAgain = () => {
+    setAttemptId('')
+    setQuestion(null)
+    setResult(null)
+    setReview(null)
+    setRecordedBlob(null)
+    setQuestionNumber(0)
+    setError('')
+    setPhase('intro')
+  }
+
+  const direction = isArabic ? 'rtl' : 'ltr'
 
   if (phase === 'loading') {
     return (
-      <div className="min-h-[100dvh] bg-[#f4f6f0] flex items-center justify-center" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+      <main className="grid min-h-dvh place-items-center bg-[#f5f7f3] px-5" dir={direction}>
         <div className="text-center">
-          <div className="mb-4 flex justify-center"><LanguageToggle /></div>
-          <div className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-6" />
-          <p className="text-gray-600 font-medium text-lg">{t('جاري تحضير اختبارك...', 'Preparing your test...')}</p>
-          <p className="text-gray-400 text-sm mt-2">{t('لحظة من فضلك', 'One moment, please')}</p>
+          <LoaderCircle className="mx-auto mb-4 animate-spin text-[#24714f]" size={32} aria-hidden="true" />
+          <p className="text-sm text-[#526157]">{t('جارٍ تجهيز اختبارك…', 'Preparing your placement test…')}</p>
         </div>
-      </div>
-    );
+      </main>
+    )
   }
 
-  if (phase === 'result' && result) {
-    const info = LEVEL_INFO[result.level] || LEVEL_INFO['A1'];
+  if (phase === 'intro') {
     return (
-      <div className="min-h-[100dvh] bg-[#f4f6f0] flex items-center justify-center p-4" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-        <div className="w-full max-w-lg border border-[#dbe3dc] bg-[#fffefa] p-8 text-center sm:p-12">
-          <div className="mb-4 flex justify-end"><LanguageToggle /></div>
-          <div className="mb-4 font-mono text-4xl font-black text-[#147050]">{result.level}</div>
-          <h1 className="text-3xl font-black text-gray-900 mb-2">{t('تم تحديد مستواك!', 'Your level has been assessed!')}</h1>
-          <p className="text-gray-500 mb-8">{t('إليك نتيجة اختبارك', 'Here are your test results')}</p>
-
-          <div className={`${info.bg} ${info.border} border-2 rounded-2xl p-6 mb-6`}>
-            <div className={`text-5xl font-black ${info.color} mb-1`}>{result.level}</div>
-            <div className={`text-xl font-bold ${info.color} mb-3`}>{language === 'ar' ? info.label : info.labelEn}</div>
-            <p className="text-gray-600 text-sm leading-relaxed">{language === 'ar' ? info.desc : info.descEn}</p>
+      <main className="grid min-h-dvh place-items-center bg-[#f5f7f3] px-4 py-8 sm:px-6" dir={direction}>
+        <section className="w-full max-w-xl border border-[#dce4dc] bg-white p-6 sm:p-9">
+          <div className="mb-7 flex items-center justify-between gap-4">
+            <BrandLockup size="sm" />
+            <LanguageToggle />
           </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="bg-gray-50 rounded-2xl p-4">
-              <div className="text-xs text-gray-400 mb-1">{t('الإجابات الصحيحة', 'Correct answers')}</div>
-              <div className="text-3xl font-black text-gray-900">{result.score}<span className="text-lg text-gray-400">/{result.total}</span></div>
+          <p className="text-xs font-semibold tracking-[0.12em] text-[#718077]">{t('تقييم قصير لمستواك', 'A SHORT CHECK OF YOUR ENGLISH')}</p>
+          <h1 className="mt-3 text-2xl font-semibold text-[#202a25] sm:text-3xl">{t('اختبار تحديد المستوى', 'Placement test')}</h1>
+          <p className="mt-3 text-sm leading-7 text-[#5e6b62]">
+            {t('أجب عن 10 أسئلة تتدرج حسب إجاباتك. بعدها سجّل جملة قصيرة أو اطلب موعداً لمراجعة التحدث.', 'Answer 10 questions that adapt to your responses. Then record a short sentence or request a speaking review meeting.')}
+          </p>
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="border border-[#e3e9e3] bg-[#f8faf7] p-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-[#34443a]"><Check size={16} aria-hidden="true" />{t('10 أسئلة', '10 questions')}</div>
+              <p className="mt-1 text-xs leading-5 text-[#69766e]">{t('اختيار من متعدد بمستوى متدرج', 'Adaptive multiple-choice questions')}</p>
             </div>
-            <div className="bg-gray-50 rounded-2xl p-4">
-              <div className="text-xs text-gray-400 mb-1">{t('نسبة النجاح', 'Score')}</div>
-              <div className="text-3xl font-black text-emerald-600">{result.percentage}%</div>
+            <div className="border border-[#e3e9e3] bg-[#f8faf7] p-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-[#34443a]"><Clock3 size={16} aria-hidden="true" />{t('نحو 10 دقائق', 'About 10 minutes')}</div>
+              <p className="mt-1 text-xs leading-5 text-[#69766e]">{t('النتيجة مع اقتراحات مناسبة', 'Result with matching package suggestions')}</p>
             </div>
           </div>
-
-          {fromRegistration && (
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 text-right">
-              <div className="flex items-start gap-3">
-                <Clock className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-bold text-amber-800 text-sm mb-1">{t('حسابك قيد المراجعة', 'Your account is under review')}</p>
-                  <p className="text-amber-700 text-xs leading-relaxed">
-                    {t('سيتم تفعيل حسابك خلال 24 ساعة بعد مراجعة إيصال الدفع. سنتواصل معك عبر واتساب أو البريد الإلكتروني.', 'Your account will be activated within 24 hours after your payment receipt is reviewed. We will contact you by WhatsApp or email.')}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="flex flex-col gap-3">
-            {fromRegistration ? (
-              <Link
-                href="/auth/login"
-                className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"
-              >
-                <CheckCircle className="w-5 h-5" />
-                {t('تسجيل الدخول عند التفعيل', 'Sign in once activated')}
-              </Link>
-            ) : (
-              <button
-                onClick={() => router.push('/dashboard/student')}
-                className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                {t('الذهاب للوحة التحكم', 'Go to dashboard')}
-              </button>
-            )}
-            <Link href="/" className="w-full bg-gray-100 text-gray-600 py-3 rounded-2xl font-medium hover:bg-gray-200 transition text-center">
-              {t('الرئيسية', 'Home')}
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
+          {error && <p className="mt-5 border border-[#ead2cf] bg-[#fff8f6] px-3 py-3 text-sm leading-6 text-[#874039]" role="alert">{error}</p>}
+          <button
+            type="button"
+            onClick={() => void startTest()}
+            className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 bg-[#24714f] px-5 text-sm font-semibold text-white hover:bg-[#1d5f42]"
+          >
+            {t('ابدأ الاختبار', 'Start the test')}
+            {isArabic ? <ChevronLeft size={17} aria-hidden="true" /> : <ChevronRight size={17} aria-hidden="true" />}
+          </button>
+          <Link href="/" className="mt-4 block text-center text-sm text-[#69766e] underline underline-offset-4">
+            {t('العودة للرئيسية', 'Back to home')}
+          </Link>
+        </section>
+      </main>
+    )
   }
 
   if (phase === 'testing' && question) {
-    const progress = (questionNum / TOTAL) * 100;
+    const progress = Math.round(questionNumber / TOTAL * 100)
+    const category = question.category === 'reading'
+      ? t('فهم المقروء', 'Reading')
+      : question.category === 'vocabulary'
+        ? t('المفردات', 'Vocabulary')
+        : t('القواعد', 'Grammar')
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex items-center justify-center p-4" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-        <div className="w-full max-w-2xl">
-          <div className="flex items-center justify-between mb-4">
+      <main className="min-h-dvh bg-[#f5f7f3] px-4 py-6 sm:grid sm:place-items-center sm:px-6" dir={direction}>
+        <section className="mx-auto w-full max-w-2xl">
+          <div className="mb-5 flex items-center justify-between gap-3">
             <LanguageToggle />
-            <div className="text-sm font-bold text-gray-500">
-              {t('السؤال', 'Question')} <span className="text-emerald-600 font-black">{questionNum}</span> {t('من', 'of')} {TOTAL}
-            </div>
-            <div className="text-xs text-gray-400 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100">
-              {question.level}
-            </div>
+            <span className="text-sm font-medium text-[#59665e]">
+              {t(`السؤال ${questionNumber} من ${TOTAL}`, `Question ${questionNumber} of ${TOTAL}`)}
+            </span>
+            <span className="border border-[#dce4dc] bg-white px-3 py-2 text-xs font-semibold text-[#34443a]">{question.band}</span>
           </div>
-
-          <div className="h-2 bg-gray-200 rounded-full mb-6 overflow-hidden">
-            <div
-              className="h-full bg-emerald-500 rounded-full transition-all duration-700"
-              style={{ width: `${progress}%` }}
-            />
+          <div className="mb-5 h-1.5 bg-[#e5ebe4]" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
+            <div className="h-full bg-[#24714f] transition-[width]" style={{ width: `${progress}%` }} />
           </div>
-
-          <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-            <div className="p-8">
-              <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-4">
-                {question.category === 'grammar' ? t('قواعد اللغة', 'Grammar') : question.category === 'vocabulary' ? t('المفردات', 'Vocabulary') : t('الفهم والقراءة', 'Reading comprehension')}
-              </p>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-relaxed mb-8">
-                {question.text}
-              </h2>
-
-              <div className="grid gap-3">
-                {question.options.map((option, idx) => {
-                  const letters = ['أ', 'ب', 'ج', 'د'];
-                  const isSelected = selected === option;
+          <div className="border border-[#dce4dc] bg-white">
+            <div className="p-5 sm:p-8">
+              <p className="text-xs font-semibold text-[#24714f]">{category}</p>
+              <h1 className="mt-3 text-xl font-semibold leading-8 text-[#202a25] sm:text-2xl">{question.text}</h1>
+              <div className="mt-6 grid gap-2.5">
+                {question.options.map((option, index) => {
+                  const active = selected === option
                   return (
                     <button
-                      key={idx}
-                      onClick={() => !confirmed && setSelected(option)}
-                      disabled={confirmed}
-                      className={`flex items-center gap-4 p-4 rounded-2xl border-2 text-right transition-all duration-150 ${
-                        isSelected
-                          ? 'border-emerald-500 bg-emerald-50 shadow-md'
-                          : 'border-gray-100 bg-gray-50 hover:border-emerald-200 hover:bg-emerald-50/40'
-                      } ${confirmed ? 'cursor-default' : 'cursor-pointer'}`}
+                      key={`${question.id}-${index}`}
+                      type="button"
+                      aria-pressed={active}
+                      disabled={busy}
+                      onClick={() => setSelected(option)}
+                      className={`flex min-h-12 items-center gap-3 border px-3 text-start text-sm transition-colors ${
+                        active ? 'border-[#24714f] bg-[#f0f6f1] font-semibold text-[#1d5f42]' : 'border-[#dce4dc] text-[#44534a] hover:bg-[#f8faf7]'
+                      }`}
                     >
-                      <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-black transition-all ${
-                        isSelected ? 'bg-emerald-500 text-white' : 'bg-gray-200 text-gray-500'
-                      }`}>
-                    {language === 'ar' ? letters[idx] : ['A', 'B', 'C', 'D'][idx]}
+                      <span className={`grid h-7 w-7 shrink-0 place-items-center border text-xs font-semibold ${active ? 'border-[#24714f] bg-[#24714f] text-white' : 'border-[#cbd5cc] text-[#65716a]'}`}>
+                        {isArabic ? ['أ', 'ب', 'ج', 'د'][index] : ['A', 'B', 'C', 'D'][index]}
                       </span>
-                      <span className={`font-medium text-base ${isSelected ? 'text-emerald-800 font-bold' : 'text-gray-700'}`}>
-                        {option}
-                      </span>
+                      <span>{option}</span>
                     </button>
-                  );
+                  )
                 })}
               </div>
+              {error && <p className="mt-4 border border-[#ead2cf] bg-[#fff8f6] px-3 py-3 text-sm leading-6 text-[#874039]" role="alert">{error}</p>}
             </div>
-
-            <div className="px-8 pb-8">
+            <div className="border-t border-[#e6ebe5] p-5 sm:px-8">
               <button
-                onClick={confirmAnswer}
-                disabled={!selected || loadingNext || confirmed}
-                className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold text-lg hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-100 flex items-center justify-center gap-2"
+                type="button"
+                disabled={!selected || busy}
+                onClick={() => void submitAnswer()}
+                className="inline-flex min-h-12 w-full items-center justify-center gap-2 bg-[#24714f] px-5 text-sm font-semibold text-white hover:bg-[#1d5f42] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loadingNext ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    {t('جاري المعالجة...', 'Processing...')}
-                  </>
-                ) : questionNum === TOTAL ? (
-                  <>
-                    <Trophy className="w-5 h-5" />
-                    {t('إنهاء الاختبار', 'Finish test')}
-                  </>
-                ) : (
-                  <>
-                    {t('السؤال التالي', 'Next question')}
-                    <ChevronLeft className="w-5 h-5" />
-                  </>
-                )}
+                {busy ? <LoaderCircle size={17} className="animate-spin" aria-hidden="true" /> : null}
+                {questionNumber === TOTAL ? t('إرسال الإجابة والإنهاء', 'Submit and finish') : t('السؤال التالي', 'Next question')}
+                {isArabic ? <ChevronLeft size={17} aria-hidden="true" /> : <ChevronRight size={17} aria-hidden="true" />}
               </button>
             </div>
           </div>
-        </div>
-      </div>
-    );
+        </section>
+      </main>
+    )
   }
 
-  return null;
+  if (phase === 'speaking' && result) {
+    const prompt = isArabic
+      ? 'أريد تحسين لغتي الإنجليزية لأنها ستساعدني على تحقيق أهدافي.'
+      : SPEAKING_PROMPT
+    return (
+      <main className="min-h-dvh bg-[#f5f7f3] px-4 py-8 sm:grid sm:place-items-center sm:px-6" dir={direction}>
+        <section className="mx-auto w-full max-w-xl border border-[#dce4dc] bg-white p-5 sm:p-8">
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <BrandLockup size="sm" />
+            <LanguageToggle />
+          </div>
+          <p className="text-xs font-semibold text-[#24714f]">{t('الخطوة الأخيرة', 'FINAL STEP')}</p>
+          <h1 className="mt-2 text-2xl font-semibold text-[#202a25]">{t('أرسل عينة تحدث أو اطلب اجتماعاً', 'Share a speaking sample or request a meeting')}</h1>
+          <p className="mt-2 text-sm leading-6 text-[#5e6b62]">
+            {t('يراجع فريق القبول إجابتك الصوتية لتأكيد التوصية. يمكنك بدلاً من ذلك طلب موعد لتقييم تحدث مباشر.', 'Our team reviews your spoken response to confirm the recommendation. You can request a live speaking assessment instead.')}
+          </p>
+          <div className="mt-5 border border-[#dce4dc] bg-[#f8faf7] p-4">
+            <p className="text-xs font-semibold text-[#68746c]">{t('اقرأ هذه الجملة بصوت واضح', 'Read this sentence aloud')}</p>
+            <p className="mt-2 text-base font-medium leading-7 text-[#27352d]">{prompt}</p>
+          </div>
+
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            {!recording ? (
+              <button
+                type="button"
+                onClick={() => void startRecording()}
+                disabled={busy}
+                className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 border border-[#24714f] px-4 text-sm font-semibold text-[#1d5f42] hover:bg-[#f0f6f1] disabled:opacity-50"
+              >
+                <Mic size={17} aria-hidden="true" />
+                {recordedBlob ? t('إعادة التسجيل', 'Record again') : t('بدء التسجيل', 'Start recording')}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={stopRecording}
+                className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 bg-[#9b453b] px-4 text-sm font-semibold text-white hover:bg-[#853a32]"
+              >
+                <Square size={15} aria-hidden="true" />
+                {t(`إيقاف التسجيل (${recordingDuration || 0}ث)`, `Stop recording (${recordingDuration || 0}s)`)}
+              </button>
+            )}
+            <button
+              type="button"
+              disabled={busy || recording}
+              onClick={() => void submitSpeaking('MEETING')}
+              className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 border border-[#dce4dc] px-4 text-sm font-semibold text-[#44534a] hover:bg-[#f8faf7] disabled:opacity-50"
+            >
+              <CalendarDays size={17} aria-hidden="true" />
+              {t('طلب موعد تقييم', 'Request a meeting')}
+            </button>
+          </div>
+          {recordingUrl && (
+            <div className="mt-4 border border-[#e3e9e3] p-3">
+              <audio controls src={recordingUrl} className="w-full" aria-label={t('معاينة التسجيل', 'Recording preview')} />
+              <p className="mt-2 text-xs text-[#68746c]">{t(`مدة التسجيل ${recordingDuration} ثانية`, `Recording duration: ${recordingDuration} seconds`)}</p>
+            </div>
+          )}
+          {error && <p className="mt-4 border border-[#ead2cf] bg-[#fff8f6] px-3 py-3 text-sm leading-6 text-[#874039]" role="alert">{error}</p>}
+          <button
+            type="button"
+            disabled={!recordedBlob || busy || recording}
+            onClick={() => void submitSpeaking('RECORDING')}
+            className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 bg-[#24714f] px-5 text-sm font-semibold text-white hover:bg-[#1d5f42] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {busy ? <LoaderCircle size={17} className="animate-spin" aria-hidden="true" /> : <Mic size={17} aria-hidden="true" />}
+            {t('إرسال التسجيل للمراجعة', 'Send recording for review')}
+          </button>
+        </section>
+      </main>
+    )
+  }
+
+  if (phase === 'result' && result) {
+    const info = LEVEL_INFO[result.level] || LEVEL_INFO.A1
+    return (
+      <main className="min-h-dvh bg-[#f5f7f3] px-4 py-8 sm:grid sm:place-items-center sm:px-6" dir={direction}>
+        <section className="mx-auto w-full max-w-2xl border border-[#dce4dc] bg-white p-5 sm:p-8">
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <BrandLockup size="sm" />
+            <LanguageToggle />
+          </div>
+          <div className="border-b border-[#e5ebe4] pb-6 text-center">
+            <p className="text-xs font-semibold text-[#24714f]">{t('نتيجة تقييمك', 'YOUR PLACEMENT RESULT')}</p>
+            <div className="mt-2 text-4xl font-bold text-[#174c3c]">{result.band}</div>
+            <h1 className="mt-2 text-2xl font-semibold text-[#202a25]">
+              {t(info.label, info.labelEn)} · {result.level}
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-[#5e6b62]">{t(info.description, info.descriptionEn)}</p>
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className="border border-[#e3e9e3] bg-[#f8faf7] p-4 text-center">
+              <p className="text-xs text-[#68746c]">{t('الإجابات الصحيحة', 'Correct answers')}</p>
+              <p className="mt-1 text-2xl font-semibold text-[#202a25]">{result.score}/{result.total}</p>
+            </div>
+            <div className="border border-[#e3e9e3] bg-[#f8faf7] p-4 text-center">
+              <p className="text-xs text-[#68746c]">{t('النتيجة', 'Score')}</p>
+              <p className="mt-1 text-2xl font-semibold text-[#202a25]">{result.percentage}%</p>
+            </div>
+          </div>
+
+          <div className="mt-7">
+            <h2 className="text-lg font-semibold text-[#202a25]">{t('اقتراحات تناسب مستواك', 'Suggestions for your level')}</h2>
+            {result.recommendedPackages?.length ? (
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {result.recommendedPackages.map((item) => (
+                  <article key={item.id} className="border border-[#dce4dc] p-4">
+                    <h3 className="font-semibold text-[#27352d]">{isArabic ? item.titleAr : item.title}</h3>
+                    <p className="mt-2 text-sm text-[#5e6b62]">
+                      {t(`${item.lessonsCount} درس`, `${item.lessonsCount} lessons`)}
+                      {item.lessonsPerWeek ? ` · ${t(`${item.lessonsPerWeek} أسبوعياً`, `${item.lessonsPerWeek} per week`)}` : ''}
+                    </p>
+                    {item.subscriptionType && PACKAGE_FORMAT_LABELS[item.subscriptionType] && (
+                      <p className="mt-1 text-xs text-[#68746c]">
+                        {t('نوع الدراسة', 'Lesson format')}: {t(PACKAGE_FORMAT_LABELS[item.subscriptionType].ar, PACKAGE_FORMAT_LABELS[item.subscriptionType].en)}
+                      </p>
+                    )}
+                    <p className="mt-2 text-sm font-semibold text-[#24714f]">
+                      {item.price} {item.currency || 'SAR'}
+                    </p>
+                    <Link
+                      href={`/dashboard/student/checkout?packageId=${encodeURIComponent(item.id)}`}
+                      className="mt-3 inline-flex min-h-10 items-center justify-center border border-[#24714f] px-3 text-sm font-semibold text-[#1d5f42] hover:bg-[#f0f6f1]"
+                    >
+                      {t('عرض الباقة', 'View package')}
+                    </Link>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-3 border border-[#e3e9e3] bg-[#f8faf7] p-4 text-sm leading-6 text-[#5e6b62]">
+                {t('سيعرض فريق القبول الباقات المناسبة بعد مراجعة نتيجة التحدث.', 'The admissions team will share suitable packages after reviewing your speaking response.')}
+              </p>
+            )}
+          </div>
+
+          <div className="mt-6 border border-[#dce4dc] bg-[#f8faf7] p-4">
+            <p className="font-semibold text-[#27352d]">{t('استجابة التحدث', 'Speaking response')}</p>
+            <p className="mt-1 text-sm leading-6 text-[#5e6b62]">
+              {review?.mode === 'MEETING'
+                ? t('تم إرسال طلب موعد تقييم التحدث لفريق القبول.', 'Your speaking assessment meeting request was sent to admissions.')
+                : t('تم إرسال تسجيلك الصوتي للمراجعة من فريق القبول.', 'Your recording was sent to admissions for review.')}
+            </p>
+            {review?.status && <p className="mt-2 text-xs text-[#68746c]">{t('حالة الطلب', 'Request status')}: {review.status}</p>}
+          </div>
+
+          {fromRegistration ? (
+            <div className="mt-6 border border-[#e3e9e3] p-4 text-sm leading-6 text-[#59665e]">
+              {t('تم استلام تسجيلك. يراجع فريق القبول بيانات التسجيل وإيصال الدفع قبل تفعيل الحساب.', 'Your test is complete. Admissions will review your registration and payment receipt before activating your account.')}
+            </div>
+          ) : null}
+
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+            {nextDestination ? (
+              <button
+                type="button"
+                onClick={() => router.push(nextDestination)}
+                className="min-h-12 flex-1 bg-[#24714f] px-4 text-sm font-semibold text-white hover:bg-[#1d5f42]"
+              >
+                {t('متابعة', 'Continue')}
+              </button>
+            ) : fromRegistration ? (
+              <Link href="/auth/login" className="inline-flex min-h-12 flex-1 items-center justify-center bg-[#24714f] px-4 text-sm font-semibold text-white hover:bg-[#1d5f42]">
+                {t('تسجيل الدخول بعد التفعيل', 'Sign in after activation')}
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => router.push('/dashboard/student')}
+                className="min-h-12 flex-1 bg-[#24714f] px-4 text-sm font-semibold text-white hover:bg-[#1d5f42]"
+              >
+                {t('لوحة الطالب', 'Student dashboard')}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={startAgain}
+              className="min-h-12 border border-[#dce4dc] px-4 text-sm font-semibold text-[#44534a] hover:bg-[#f8faf7]"
+            >
+              {t('إعادة الاختبار', 'Retake test')}
+            </button>
+            <Link href="/" className="inline-flex min-h-12 items-center justify-center px-4 text-sm text-[#68746c] underline underline-offset-4">
+              {t('الرئيسية', 'Home')}
+            </Link>
+          </div>
+        </section>
+      </main>
+    )
+  }
+
+  return null
 }
