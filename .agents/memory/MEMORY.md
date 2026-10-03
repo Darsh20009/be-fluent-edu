@@ -13,6 +13,7 @@
 - [Persistent login sessions](persistent-login-sessions.md) — keep active Be Fluent sessions across home navigation and return users directly to their role dashboard.
 - [OTP password recovery boundary](otp-password-recovery-boundary.md) — after OTP login, update only the authenticated user's password; never trust a client-supplied user ID.
 - [MongoDB optional OTP state fields](mongodb-optional-otp-state-fields.md) — active challenge queries must match nullable timestamps stored as either null or unset.
+- [Unlimited OTP delivery requests](unlimited-otp-delivery-requests.md) — do not impose app-side count or cooldown limits on requesting or resending OTPs.
 - [Learning operations and notifications](learning-operations-notifications.md) — pace WhatsApp events by account, keep group matches pending admin approval, and calculate net profit from received income and entered costs.
 - [SSR locale bootstrap](ssr-locale-bootstrap.md) — read the locale cookie in the root layout so document direction and the first client render agree.
 - [Documentation screenshot privacy](documentation-screenshot-privacy.md) — use real captures with synthetic accounts or redacted data; admin-only guides do not protect public image files.
